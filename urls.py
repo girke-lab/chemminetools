@@ -16,3 +16,4 @@ urlpatterns = patterns('',
 )
 # test comment
 # another test comment
+# comment added from web page
