@@ -12,6 +12,7 @@
 
     <!-- Le styles -->
     {% bootstrap_stylesheet_tag %}
+    <link href="/static/admin/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
 	{% render_block "css" %}
     <style type="text/css">
       body {
@@ -25,7 +26,7 @@
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <script src="/static/admin/html5.js"></script>
     <![endif]-->
   </head>
 
@@ -38,7 +39,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </a>
-          <a class="brand" href="/">Chemmine Tools</a>
+          <a class="brand" href="/"><font color="E00000">Chemmine Tools</font></a>
           <div class="nav-collapse collapse">
             <p class="navbar-text pull-right">
               Logged in as Guest 
@@ -93,6 +94,9 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 {% render_block "js" %}
+    <script src="/static/admin/jquery.js"></script>
+    <script src="/static/admin/bootstrap/js/bootstrap.js"></script>
+    <script src="/static/admin/bootstrap/js/bootstrap.min.js"></script>
   </body>
 </html>
 
