@@ -1,0 +1,6 @@
+chemminetools/settings.py
+*.pyc
+*~
+*.swp
+chemminetools/settings.py.devel
+chemminetools/settings.py.production
