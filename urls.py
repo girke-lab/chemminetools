@@ -2,6 +2,10 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 
+# enable cron
+import django_cron
+django_cron.autodiscover()
+
 admin.autodiscover()
 
 urlpatterns = patterns('',

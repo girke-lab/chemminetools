@@ -16,6 +16,8 @@ pip
 django-cms 
 south 
 django-appmedia 
+django-guest (http://code.google.com/p/django-guest/)
+django-cron (http://code.google.com/p/django-cron/)
 
 License:
 (C) 2013 Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
