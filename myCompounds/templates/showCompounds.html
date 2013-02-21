@@ -1,6 +1,21 @@
 {% extends "base.html" %}
 {% load cms_tags %}
 
+{% block js_content %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('.deleteRowButton').click(DeleteRow);
+		$("[data-toggle=tooltip]").tooltip();
+	});
+
+	function DeleteRow()
+	{
+		var compound_id = $(this).parents('tr').first().attr("id");
+		$.get("/compounds/" + compound_id + "/delete");
+		$(this).parents('tr').first().remove();
+	}
+</script>
+{% endblock %} 
 
 {% block base_content %}
 <div class="row-fluid"> 
@@ -23,15 +38,20 @@
 	<th>Options</th>
 	<tbody>
 	{% for compound in matches %}
-		<tr>
+		<tr id="{{compound.id}}">
 		<th><a href="/compounds/{{compound.id}}">{{compound.cid}}</a></th>
 		<th>{{compound.name}}</th>
 		<th>{{compound.smiles}}</th>
-		<th><a href="#" data-toggle="tooltip" placement="top" title="delete this compound"><i class="icon-trash"></i></a></th>
+		<th><a href="" class="deleteRowButton" data-toggle="tooltip" placement="top" title="delete this compound"><i class="icon-trash"></i></a>
+		<a href="" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
+		<a href="" class="editRowButton" data-toggle="tooltip" placement="top" title="edit compound details"><i class="icon-pencil"></i></a>
+		</th>
 		</tr>
 	{% endfor %}
 	</tbody>
 	</table>
+{% else %}
+<p>No compounds uploaded.</p>
 {% endif %}
 </div>
 

@@ -33,6 +33,9 @@ def compound_detail(request, id, resource):
 			mymol = pybel.readstring("smi", str(smiles))
 			png = mymol.write(format='png')
 			return HttpResponse(png, mimetype='image/png') 
+		elif resource == 'delete':
+			compound.delete()
+			return HttpResponse("deleted", mimetype='text/plain')
 
 	return render_to_response('compound.html', dict(
 		compound=compound,
