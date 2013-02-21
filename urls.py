@@ -10,9 +10,9 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^', include('cms.urls')),
     (r'^compounds/', include('compounddb.urls')),
-    (r'^myCompounds/', include('myCompounds.urls')),
+    (r'^my[Cc]ompounds/', include('myCompounds.urls')),
+    url(r'^', include('cms.urls')),
 )
 
 if settings.DEBUG:

@@ -16,7 +16,7 @@ def uploadCompound(request, *args, **kargs):
     # perform query for existing myCompounds
     page, matches = getMyCompounds(request)
     if request.method == 'GET':
-        return render_to_response('submitCompound.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
+        return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
     else:
 		sdf = None
 		name = None
@@ -141,9 +141,12 @@ def uploadCompound(request, *args, **kargs):
 
 def getMyCompounds(request):
 	page = int(request.GET.get('p', '1'))
+	username = request.user.username
 	matches = []
-	pure_query, matches = search('library: myCompounds', page, request)
-	if len(matches[0][1]) == 0:
+	# pure_query, matches = search('library: myCompounds', page, request)
+	base_queryset = Compound.objects
+	matches = base_queryset.filter(username=username) 
+	if len(matches) == 0:
 		matches = None
 	return page, matches
 
@@ -223,16 +226,15 @@ def getInChI(sdf):
 		raise InputError
 	return obConversion.WriteString(mol)
 
-def deleteMyCompounds(username=None, cids=None):
-    if username:
-        library = get_library_by_name('myCompounds')
-        compoundsToDelete = Compound.objects.filter(library=library)
-        compoundsToDelete = compoundsToDelete.filter(username=username)
-        if cids:
-            for cid in cids:
-                Compound.objects.filter(cid=cid).delete()
-        else:
-        	compoundsToDelete.delete()
+def deleteMyCompounds(request, cids=None):
+	username = request.user.username 
+	compoundsToDelete = Compound.objects
+	compoundsToDelete = compoundsToDelete.filter(username=username)
+	if cids:
+	    for cid in cids:
+		Compound.objects.filter(cid=cid).delete()
+	else:
+		compoundsToDelete.delete()
         	
 def addToWorkbench(username, cids):
     library = get_library_by_name('myCompounds')

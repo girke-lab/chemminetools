@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+
+{% block base_content %}
+<div class="row-fluid"> 
+<div class="span12">
+<h2>My Compounds</h2>
+</div>
+</div><!--/row--> 
+
+<div class="row-fluid">
+
+
+<div class="span12">
+{% if matches %}
+	<table class="table table-striped">
+	<thead>
+	<tr>
+	<th>CID</th>
+	<th>Name</th>
+	<th>Smiles</th>
+	<th>Options</th>
+	<tbody>
+	{% for compound in matches %}
+		<tr>
+		<th><a href="/compounds/{{compound.id}}">{{compound.cid}}</a></th>
+		<th>{{compound.name}}</th>
+		<th>{{compound.smiles}}</th>
+		<th><a href="#" data-toggle="tooltip" placement="top" title="delete this compound"><i class="icon-trash"></i></a></th>
+		</tr>
+	{% endfor %}
+	</tbody>
+	</table>
+{% endif %}
+</div>
+
+
+</div><!--/row-->
+{% endblock %}
