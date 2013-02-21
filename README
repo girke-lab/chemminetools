@@ -7,6 +7,9 @@ Python 2.7.3
 postgresql 9.1.7 
 
 Python libraries:
+python-pylibmc
+python-openbabel
+ZSI
 psycopg2
 skimage
 django-reversion

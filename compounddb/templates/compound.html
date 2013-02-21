@@ -1,175 +1,56 @@
-{% extends 'base.html' %}
-{% load i18n %}
-{% block title %}
-<title>{{ site_title }} - {{libname}} {{compound.cid}}</title>
-{% endblock %}
-{% block content %}
-<h1 id="compound-name"><span id="library-name">{{libname}}</span><span id="compound-cid">{{compound.cid}}</span></h1>
+{% extends "base.html" %}
+{% load cms_tags %}
 
-<div id="left-panel">
-<div id="drawing"> <img src="{{RENDERER_URL}}smiles;{{smiles.split|first}}" width="280" height="280" /> </div>
+{% block base_content %}
+<div class="row-fluid"> 
+<div class="span12">
+<h2>Compound {{compound.name}}</h2>
+</div>
+</div><!--/row--> 
 
-<div id="structure-panel">
-<ul>
-<li><a href="#smiles">SMILES</a></li>
-<li><a href="#inchi">Inchi</a></li>
-<li><a href="#sdf">SDF</a></li>
-<li><a href="#jmol">3D</a></li>
-</ul>
+<div class="row-fluid">
 
-<div id="sdf"> <textarea cols="80" rows="24" readonly="readonly">{{sdf}}</textarea> </div>
-<div id="smiles"> <pre>{{smiles}}</pre> </div>
-<div id="inchi"> <pre>{{inchi}}</pre> </div>
-<div id="jmol"> <pre>To be implemented TODO</pre> </div>
+
+<div class="span5">
+	<img class="img-rounded" src="/compounds/{{compound.id}}/png"/>
 </div>
 
-<form style="display:inline-block">
-<select id="download-actions">
-<option value="">Download...</option>
-<option value="png">Drawing</option>
-<option value="sdf">SDF</option>
-<option value="smiles">SMILES</option>
-<option value="inchi">Inchi</option>
-<option value="property">Properties</option>
-</select>
-</form>
-<a style="float:none;display:inline-block" class="button" title="search structurally similar compounds" href="{% url structure-search %}?smiles={{smiles.split|first}}">Search</a>
-<table class="compound-basic-info">
-<tbody>
-<tr class="lib"><th>Library</th><td>{{libname}}</td></tr>
-<tr class="cid"><th>ID</th><td>{{compound.cid}}</td></tr>
-<tr class="name"><th>Name</th><td>{{compound.name}}</td></tr>
-<tr class="formula"><th>Formula</th><td>{{compound.formula}}</td></tr>
-<tr class="weight"><th>Molecular Weight</th><td>{{compound.weight|floatformat:3}}</td></tr>
-</tbody>
-</table>
+<div class="span4">
+	<table class="table table-striped">
+	<tbody>
+	<tr class="cid"><th>ID</th><td>{{compound.cid}}</td></tr>
+	<tr class="name"><th>Name</th><td>{{compound.name}}</td></tr>
+	<tr class="formula"><th>Formula</th><td>{{compound.formula}}</td></tr>
+	<tr class="weight"><th>Molecular Weight</th><td>{{compound.weight|floatformat:3}}</td></tr>
+	</tbody>
+	</table>
+</div><!--/span-->
+</div><!--/row-->
 
-<form action="." method="post" accept-charset="utf-8">
-<button class="submit" name="addWorkbench" type="submit">Add to tools workbench</button>
-</form>
-<br/>
+<div class="row-fluid">
 
-<form><input id="plate-ctrl" type="checkbox"/><label>Show UCR plate information</label></form>
-<div class="plate" style="display:none">
-{% if not plates%}
-No plate information is available.
-{% else %}
-<table>
-<thead><tr><th>Format</th><td>Plate</td><td>Well</td></tr></thead>
-<tbody>
-{% for plate in plates%}
-<tr><th>{{plate.format}}</th> <td>{{plate.plate}}</td><td>{{plate.well}}</td></tr>
-{% endfor %}
-</tbody>
-</table>
-{% endif %}
-</div>
+<div class="span5">
+	<ul class="nav nav-tabs" id="myTab">
+	  <li class="active"><a href="#smiles" data-toggle="tab">SMILES</a></li>
+	  <li><a href="#sdf" data-toggle="tab">SDF</a></li>
+	  <li><a href="#inchi" data-toggle="tab">InChI</a></li>
+	</ul>
+	 
+	<div class="tab-content">
+	  <div class="tab-pane active" id="smiles"><textarea class="field span12" rows="6" readonly="readonly">{{smiles}}</textarea></div>
+	  <div class="tab-pane" id="sdf"><textarea class="field span12" rows="24" readonly="readonly">{{sdf}}</textarea></div>
+	  <div class="tab-pane" id="inchi"><textarea class="field span12" rows="6" readonly="readonly">{{inchi}}i</textarea></div>
+	</div>
+	 
+</div><!--/span-->
 
-</div> <!-- left panel -->
+<div class="span4">
+<h2>Downloads</h2>
+<p><a class="btn" href="/compounds/{{compound.id}}/smiles">SMILES »</a></p>
+<p><a class="btn" href="/compounds/{{compound.id}}/sdf">SDF »</a></p>
+<p><a class="btn" href="/compounds/{{compound.id}}/inchi">InChI »</a></p>
+<p><a class="btn" href="/compounds/{{compound.id}}/png">PNG (image) »</a></p>
+</div><!--/span-->
 
-<div id="right-panel">
-
-<div class="annotation-block" id="extra-annotation">
-<div class="annotation-block-title">
-Physicochemical Properties
-</div>
-<div class="annotation-block-content">
-{% for j in joelib_properties_head %}
-<div class="annotation-pair">
-<abbr class="annotation-name" title="{{j.0}}">{{j.1.0}}</abbr>
-<span class="annotation-value">{{j.1.1}}</span>
-</div>
-{% endfor %}
-{% for j in joelib_properties_tail %}
-<div class="annotation-pair extension">
-<abbr class="annotation-name" title="{{j.0}}">{{j.1.0}}</abbr>
-<span class="annotation-value">{{j.1.1}}</span>
-</div>
-{% endfor %}
-{% if joelib_properties_tail %}<div  class="show-more"><a href="#">show {{joelib_properties_tail|length}} more...</a></div>{% endif %}
-</div>
-</div>
-
-<div class="annotation-block" id="sdf-annotation">
-<div class="annotation-block-title">
-Sample Information
-</div>
-<div class="annotation-block-content">
-{% for annotation in annotations_head %}
-<div class="annotation-pair">
-<span class="annotation-name">{{annotation.0}}</span>
-<span class="annotation-value">{{annotation.1}}</span>
-</div>
-{% endfor %}
-{% for annotation in annotations_tail %}
-<div class="annotation-pair extension">
-<span class="annotation-name">{{annotation.0}}</span>
-<span class="annotation-value">{{annotation.1}}</span>
-</div>
-{% endfor %}
-{% if annotations_tail %}<div class="show-more"><a href="#">show {{annotations_tail|length}} more...</a></div>{% endif %}
-</div>
-</div>
-
-</div> <!-- right-panel -->
-
-<div id="relevant-screens">
-<h2>Relevant Screens</h2>
-{% if screens %}
-<table>
-<thead>
-<tr>
-<td>Screen ID</td>
-<td>Screen Name</td>
-<td>Compound Activity</td>
-</tr>
-</thead>
-<tbody>
-{% for info in screens %}
-<tr>
-<td><a href="{% url screen-detail info.0.id %}?c={{compound.id}}">{{info.0.id}}</a></td>
-<td>{{info.0.name}}</td>
-<td>{{info.1}}</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
-{% else %}
-<p>No relevant screens found for this compound</p>
-{% endif %}
-</div>
-
-<script type="text/javascript">
-$(document).ready(function() {
-	$("#structure-panel").tabs({collapsible:true, selected:-1});
-	$(".breadcrumbs .active").html(
-	"<a href=\"{% url library_content libname %}\">{{libname}}</a>  &rarr;  {{compound.cid}}"
-	);
-	$("#download-actions").change(function() {
-		var v = $(this).get(0).value;
-		if (v) 
-			window.location = v;
-		return false;
-	});
-	$(".show-more").click(function() {
-		$(this).hide();
-		$(this).parent().find('.extension').fadeIn("slow").css('display', 'table-row');
-		return false;
-	});
-	$("#plate-ctrl").click(function() {
-		if ($.cookie("show-ucr-plate") == 1) {
-			$.cookie("show-ucr-plate", 0, {expires:365});
-			$(".plate").slideUp("slow");
-		} else {
-			$.cookie("show-ucr-plate", 1, {expires:365});
-			$(".plate").slideDown("slow");
-		}
-	});
-	if ($.cookie("show-ucr-plate") == 1) {
-		$("#plate-ctrl").attr("checked", "checked");
-		$(".plate").show();
-	}
-	mpmetrics.track("view compounds", {'library': '{{libname}}'});
-});
-</script>
+</div><!--/row-->
 {% endblock %}

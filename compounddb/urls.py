@@ -1,9 +1,8 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls.defaults import *
+from views import compound_detail
 
 urlpatterns = patterns('',
-	# url(r'^compounds/(?P<cid>[a-zA-Z0-9 _-]+)/png',
-	# 	compounddb.views.compound_image', name='compound_image'),
-	url(r'^compounds/(?P<cid>[a-zA-Z0-9 _-]+)/$',
+	url(r'^(?P<id>\d+)/?(?P<resource>\w*)$',
 		'compounddb.views.compound_detail', name='compound_detail'),
 	# url(r'^_ajax$',
 	#	'compounddb.views.ajax', name='ajax'),

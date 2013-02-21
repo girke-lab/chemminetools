@@ -152,7 +152,7 @@ def _update_single_compound(moldata, sdf, library, nameky, idkey):
 	s.save()
 	sdfid = s.id
 
-def insert_single_compound(moldata, sdf, library, namekey, idkey, username=''):
+def insert_single_compound(moldata, sdf, namekey, idkey, username=''):
 	""" insert single compound into database """
 
 	cid = moldata[idkey]
@@ -170,7 +170,7 @@ def insert_single_compound(moldata, sdf, library, namekey, idkey, username=''):
 					username=username )
 					#sdf_file=s)
 	c.save()
-	c.library.add(library)
+	# c.library.add(library)
 	c_id = c.id
 	root.warning("  -->new compound inserted: c_id=%s, cid=%s" % (c_id, cid))
 
@@ -180,14 +180,14 @@ def insert_single_compound(moldata, sdf, library, namekey, idkey, username=''):
 	sdfid = s.id
 
 	# annotation
-	a_ids = []
-	for name, value in moldata.items():
-		if name in (namekey, idkey):
-			continue
-		a = Annotation(name=name, value=value, compound=c)
-		a.save()
-		aid = a.id
-		a_ids.append(aid)
+	# a_ids = []
+	# for name, value in moldata.items():
+	#	if name in (namekey, idkey):
+	#		continue
+	#	a = Annotation(name=name, value=value, compound=c)
+	#	a.save()
+	#	aid = a.id
+	#	a_ids.append(aid)
 
 	return False
 

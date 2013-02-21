@@ -148,7 +148,6 @@ def getMyCompounds(request):
 	return page, matches
 
 def addMyCompounds(sdf, username, name=None, compid=None, smiles=None):
-	library = get_library_by_name('myCompounds')
 	sdffile = u''
 	namekey = 'PUBCHEM_IUPAC_NAME'
 	idkey = 'PUBCHEM_COMPOUND_CID'
@@ -182,10 +181,10 @@ def addMyCompounds(sdf, username, name=None, compid=None, smiles=None):
 			# verify that compound id doesn't already exist, if it does append "_2" tail
 			while True:
 				try:
-					idsearch = Compound.objects.get(cid__iexact=moldata[idkey].strip(), library=library)
+					idsearch = Compound.objects.get(cid__iexact=moldata[idkey].strip(), username=username)
 				except:
 				    # search will call an exception IF the compound doesn't already exist
-					insert_single_compound(moldata, sdffile, library, namekey, idkey, username)
+					insert_single_compound(moldata, sdffile, namekey, idkey, username)
 					break
 				else:
 					moldata[idkey] = moldata[idkey] + '_2'
