@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("[data-toggle=tooltip]").tooltip();
+	});
+</script>
+{% endblock %} 
+
+{% block base_content %}
+<div class="row-fluid"> 
+<div class="span12">
+<h2>Add Compounds</h2>
+</div>
+</div><!--/row--> 
+
+<div class="row-fluid">
+<div class="span12">
+<ul class="nav nav-tabs">
+  <li class="active"><a href="#smiles" data-toggle="tab">Smiles Input</a></li>
+  <li><a href="#draw" data-toggle="tab">Structural Drawing</a></li>
+  <li><a href="#sdfinput" data-toggle="tab">SDF Input</a></li>
+  <li><a href="#sdfupload" data-toggle="tab">SDF Upload</a></li>
+  <li><a href="#pubchem" data-toggle="tab">PubChem Import</a></li>
+</ul>
+
+<div class="tab-content">
+<div class="tab-pane active" id="smiles">
+<form class="form-horizontal">
+<fieldset>
+<div class="control-group">
+	<label class="control-label" for="name">Name:</label>
+	<div class="controls">
+		<input id="name" type="text" name="name" value="{{post_data.name}}" size="60"/><br/>
+	</div>
+</div>
+<div class="control-group"> 
+	<label class="control-label" for="id">ID:</label>
+	<div class="controls">
+		<input id="id" type="text" name="id" value="{{post_data.id}}" size="60"/><br/>
+	</div>
+</div>
+<div class="control-group">
+	<label class="control-label" for="smiles">SMILES:</label>
+	<div class="controls">
+		<input id="smiles" type="text" name="smiles" value="{{post_data.smiles}}" size="60"/><br/>
+	</div>
+</div>
+<div class="control-group">
+	<div class="controls">
+		<button class="btn btn-primary" type="submit">Upload</button>
+	</div>
+</div> 
+</fieldset>
+</div>
+<div class="tab-pane" id="draw">
+draw
+</div>
+<div class="tab-pane" id="sdfinput">
+	<p>
+	Please copy and paste your SDF below.
+	</p>
+	<form action="." method="post" accept-charset="utf-8">
+	<label for="sdf_box">SDF Content:</label><br/>
+	<textarea id="sdf_box" name="sdf" cols="80" rows="12">{{post_data.sdf}}</textarea><br/>
+	<button class="submit" type="submit">Upload</button>
+	</form>
+</div>
+<div class="tab-pane" id="sdfupload">
+sdfup
+</div>
+<div class="tab-pane" id="pubchem">
+pubchem
+</div>
+
+</div>
+
+
+</div><!--/row-->
+{% endblock %}

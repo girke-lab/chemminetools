@@ -12,12 +12,19 @@ import openbabel
 import re
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, InputError, sdf_to_smiles
 
-def uploadCompound(request, *args, **kargs):
+def showCompounds(request, *args, **kargs):
     # perform query for existing myCompounds
     page, matches = getMyCompounds(request)
     if request.method == 'GET':
         return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
+
+def uploadCompound(request, *args, **kargs):
+    # perform query for existing myCompounds
+    page, matches = getMyCompounds(request)
+    if request.method == 'GET':
+		return render_to_response('addCompounds.html', dict(), context_instance=RequestContext(request))
     else:
+		raise Http404
 		sdf = None
 		name = None
 		compid = None
@@ -124,7 +131,7 @@ def uploadCompound(request, *args, **kargs):
 				sdf = None
 		    
 		if not sdf:
-			return render_to_response('submitCompound.html', dict(
+			return render_to_response('addCompounds.html', dict(
 				input_mode=input_mode,
 				post_data=request.POST,
 				p=page,
@@ -136,7 +143,7 @@ def uploadCompound(request, *args, **kargs):
         # re-perform query to get newly added compounds
 		page, matches = getMyCompounds(request)
 
-		return render_to_response('submitCompound.html', dict(p=page, matches=matches,),
+		return render_to_response('addCompounds.html', dict(p=page, matches=matches,),
 			context_instance=RequestContext(request))
 
 def getMyCompounds(request):
@@ -169,11 +176,11 @@ def addMyCompounds(sdf, username, name=None, compid=None, smiles=None):
 				if name and name != '':
 					moldata[namekey] = name
 				else:
-					moldata[namekey] = 'random' + str(random.randint(10000000, 90000000))
+					moldata[namekey] = 'unspecified'
 				if compid and compid != '':
 					moldata[idkey] = compid
 				else:
-					moldata[idkey] = 'random' + str(random.randint(10000000, 90000000))
+					moldata[idkey] = 'unspecified'
 				moldata['formula'] = getFormula(sdffile)
 				moldata['weight'] = getMW(sdffile)
 				moldata['inchi'] = getInChI(sdffile)
@@ -182,15 +189,7 @@ def addMyCompounds(sdf, username, name=None, compid=None, smiles=None):
 				else:
 					moldata['smiles'] = sdf_to_smiles(sdffile)
 			# verify that compound id doesn't already exist, if it does append "_2" tail
-			while True:
-				try:
-					idsearch = Compound.objects.get(cid__iexact=moldata[idkey].strip(), username=username)
-				except:
-				    # search will call an exception IF the compound doesn't already exist
-					insert_single_compound(moldata, sdffile, namekey, idkey, username)
-					break
-				else:
-					moldata[idkey] = moldata[idkey] + '_2'
+			insert_single_compound(moldata, sdffile, namekey, idkey, username)
 			sdffile = u''
 			
 def getMW(sdf):
