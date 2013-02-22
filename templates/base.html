@@ -60,11 +60,25 @@
             <ul class="nav nav-list">
               <li class="nav-header">Workbench</li>
               <li><a href="/myCompounds">My Compounds</a></li>
-              <li><a href="/myCompounds/addCompounds">Add Compounds</a></li>
+              <li><a href="/myCompounds/addCompounds/">Add Compounds</a></li>
             </ul>
           </div><!--/.well -->
         </div><!--/span-->
         <div class="span9">
+
+{% if messages %}
+    {% for message in messages %}
+	<div class="row-fluid">
+	<div class="span12">
+	<div class="alert alert-block fade in">
+	<button type="button" class="close" data-dismiss="alert">&times;</button>
+	<p {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+	</div>
+	</div>
+	</div>
+    {% endfor %}
+{% endif %}
+
 	{% placeholder base_content %}
       {% block base_content %}{% endblock %}
         </div><!--/span-->
@@ -86,6 +100,11 @@
     <script src="/static/admin/bootstrap/js/bootstrap.js"></script>
     <script src="/static/admin/bootstrap/js/bootstrap.min.js"></script>
     {% block js_content %}{% endblock %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		$(".alert").alert()
+	});
+</script>
   </body>
 </html>
 

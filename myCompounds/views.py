@@ -7,63 +7,32 @@ from compounddb import first_mol, InvalidInputError
 from compounddb.tools import parse_annotation, insert_single_compound
 from compounddb.models import Compound
 from myCompounds.DownloadCIDs import DownloadCIDs
+from django.contrib import messages
 import random
 import openbabel
 import re
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, InputError, sdf_to_smiles
 
-def showCompounds(request, *args, **kargs):
+def showCompounds(request, resource):
     # perform query for existing myCompounds
     page, matches = getMyCompounds(request)
-    if request.method == 'GET':
-        return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
+    if resource:
+	if resource == 'deleteAll':
+		deleteMyCompounds(request)
+		matches = None
+		messages.error(request, 'All Compounds Deleted!')
+    return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
 def uploadCompound(request, *args, **kargs):
     # perform query for existing myCompounds
     page, matches = getMyCompounds(request)
     if request.method == 'GET':
-		return render_to_response('addCompounds.html', dict(), context_instance=RequestContext(request))
+		return render_to_response('addCompounds.html', context_instance=RequestContext(request))
     else:
-		raise Http404
 		sdf = None
 		name = None
 		compid = None
 		smiles = None
-		if 'deleteSelected' in request.POST:
-		    input_mode = 'view'
-		    cids = request.POST.getlist(u'array')
-		    if cids:
-		        deleteMyCompounds(request.user.username, cids)
-		        request.user.message_set.create(message=
-		            "Selected Compounds Deleted!"
-					)
-				# re-perform query to get non-deleted list
-		        page, matches = getMyCompounds(request)
-		    else:
-		        request.user.message_set.create(message=
-		            "No Compounds Selected for Deletion!"
-					)
-		if 'sendTools' in request.POST:
-		    input_mode = 'view'
-		    cids = request.POST.getlist(u'array')
-		    if cids:
-		        addToWorkbench(request.user.username, cids)
-		        request.user.message_set.create(message=
-		            "Selected Compounds sent to Tools!"
-					)
-				# re-perform query to get non-deleted list
-		        page, matches = getMyCompounds(request)
-		    else:
-		        request.user.message_set.create(message=
-		            "No Compounds Selected!"
-					)
-		if 'deleteAll' in request.POST:
-		    input_mode = 'view'
-		    deleteMyCompounds(request.user.username)
-		    matches = None
-		    request.user.message_set.create(message=
-					"All Compounds Deleted!"
-					)
 		if 'smiles' in request.POST:
 			input_mode = 'smiles-input'
 			try:
@@ -72,9 +41,7 @@ def uploadCompound(request, *args, **kargs):
 				name = str(request.POST['name'])
 				compid = str(request.POST['id'])
 			except InputError:
-				request.user.message_set.create(message=
-					"Invalid SMILES string!"
-				)
+				messages.error(request, 'Error: Invalid SMILES string!')
 				sdf = None
 		elif 'sdf' in request.FILES:
 			input_mode = 'sdf-upload'
@@ -84,9 +51,7 @@ def uploadCompound(request, *args, **kargs):
 				sdf = request.FILES['sdf']
 				sdf = sdf.read()
 			except (InputError, InvalidInputError):
-				request.user.message_set.create(message=
-					"Invalid SDF!"
-				)
+				messages.error(request, 'Invalid SDF!')
 				sdf = None
 		elif 'sdf' in request.POST:
 			if 'draw' in request.POST:
@@ -98,12 +63,10 @@ def uploadCompound(request, *args, **kargs):
 				try:
 					# sdf = batch_sdf_to_sdf(sdf)
 					# sdf = first_mol(request.POST['sdf'])
-					# sdf = sdf_to_sdf(sdf)
-					sdf = request.POST['sdf'] + '$$$$' # add data checks here
+					sdf = sdf_to_sdf(sdf)
+					# sdf = request.POST['sdf'] + '$$$$' # add data checks here
 				except (InputError, InvalidInputError):
-					request.user.message_set.create(message=
-						"Invalid SDF!"
-					)
+					messages.error(request, 'Invalid SDF!')
 					sdf = None
 			else:
 				input_mode = 'sdf-input'
@@ -122,12 +85,10 @@ def uploadCompound(request, *args, **kargs):
 			try:
 				sdf = DownloadCIDs(filteredCIDs)
 			except:
-				request.user.message_set.create(message=
-                       			 "Invalid CIDs or no response from PubChem!"
-					)
+				messages.error(request, 'Invalid CIDs or no response from PubChem!')
 				sdf = None
 		    else:
-				request.user.message_set.create(message="Error: No valid CIDs entered!")
+				messages.error(request, 'Error: No valid CIDs entered!')
 				sdf = None
 		    
 		if not sdf:
@@ -138,13 +99,10 @@ def uploadCompound(request, *args, **kargs):
 				matches=matches,
 				),
 				context_instance=RequestContext(request))
-		# if input_mode == 'pubchem':
-		addMyCompounds(sdf, request.user.username,name,compid, smiles)
-        # re-perform query to get newly added compounds
+		counter = addMyCompounds(sdf, request.user.username,name,compid, smiles)
+		messages.success(request, 'Success: ' + str(counter) + ' compound(s) added to database.')
 		page, matches = getMyCompounds(request)
-
-		return render_to_response('addCompounds.html', dict(p=page, matches=matches,),
-			context_instance=RequestContext(request))
+    		return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
 def getMyCompounds(request):
 	page = int(request.GET.get('p', '1'))
@@ -159,6 +117,7 @@ def getMyCompounds(request):
 
 def addMyCompounds(sdf, username, name=None, compid=None, smiles=None):
 	sdffile = u''
+	counter = 0
 	namekey = 'PUBCHEM_IUPAC_NAME'
 	idkey = 'PUBCHEM_COMPOUND_CID'
 	# assert False, sdf
@@ -188,9 +147,10 @@ def addMyCompounds(sdf, username, name=None, compid=None, smiles=None):
 					moldata['smiles'] = smiles
 				else:
 					moldata['smiles'] = sdf_to_smiles(sdffile)
-			# verify that compound id doesn't already exist, if it does append "_2" tail
 			insert_single_compound(moldata, sdffile, namekey, idkey, username)
+			counter += 1
 			sdffile = u''
+	return counter
 			
 def getMW(sdf):
 	if isinstance(sdf, unicode):

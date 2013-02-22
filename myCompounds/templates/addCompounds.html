@@ -5,6 +5,18 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		$("[data-toggle=tooltip]").tooltip();
+
+		mol = $("#drawform").get(0).sdf.value + "";
+		mol = mol.replace(/\n/g, '|');
+	});
+
+	$("#drawform").submit(function() {
+		$(this).get(0).sdf.value = document.applet.molFile();
+		if(!document.applet.smiles().replace(' ', '').length()) {
+			alert("You need to draw a query structure.");
+			return false;
+		}
+		return true;
 	});
 </script>
 {% endblock %} 
@@ -28,7 +40,8 @@
 
 <div class="tab-content">
 <div class="tab-pane active" id="smiles">
-<form class="form-horizontal">
+<form class="form-horizontal" action="." method="post" accept-charset="utf-8">
+{% csrf_token %}
 <fieldset>
 <div class="control-group">
 	<label class="control-label" for="name">Name:</label>
@@ -54,25 +67,58 @@
 	</div>
 </div> 
 </fieldset>
+</form>
 </div>
 <div class="tab-pane" id="draw">
-draw
+        <p>
+        Please draw a structure below and click "Upload".
+        </p>
+        <applet code="JME.class" name="applet" archive="/static/JME.jar" width="300" height="300">
+          Please enable Java and JavaScript on your machine.
+        </applet>
+        <form id="drawform" action="." method="post" accept-charset="utf-8">
+	{% csrf_token %}
+        <label for="name">Name:</label>
+        <input id="name" type="text" name="name" value="{{post_data.name}}" size="60"/><br/>
+        <label for="id">ID:</label>
+        <input id="id" type="text" name="id" value="{{post_data.id}}" size="60"/><br/>
+        <input type="hidden" name="sdf" value="{{post_data.sdf}}"/><br/>
+        <input type="hidden" name="draw" value="1"/>
+        <button class="btn btn-primary" type="submit">Upload</button>
+        </form>
 </div>
 <div class="tab-pane" id="sdfinput">
 	<p>
 	Please copy and paste your SDF below.
 	</p>
 	<form action="." method="post" accept-charset="utf-8">
+	{% csrf_token %}
 	<label for="sdf_box">SDF Content:</label><br/>
 	<textarea id="sdf_box" name="sdf" cols="80" rows="12">{{post_data.sdf}}</textarea><br/>
-	<button class="submit" type="submit">Upload</button>
+	<button class="btn btn-primary" type="submit">Upload</button>
 	</form>
 </div>
 <div class="tab-pane" id="sdfupload">
-sdfup
+<p>
+Please upload an SDF below.
+</p>
+<form action="." method="post" enctype="multipart/form-data">
+{% csrf_token %}
+<label for="sdf_file">SDF File:</label>
+<input id="sdf_file" name="sdf" type="file"/>
+<button class="btn btn-primary" type="submit">Upload</button>
+</form>
 </div>
 <div class="tab-pane" id="pubchem">
-pubchem
+        <p>
+        Please copy and paste your PubChem CIDs below (one per line).
+        </p>
+        <form action="." method="post" accept-charset="utf-8">
+	{% csrf_token %}
+        <label for="pubchem">CIDs:</label><br/>
+        <textarea id="pubchem" name="pubchem" cols="80" rows="12"></textarea><br/>
+        <button class="btn btn-primary" type="submit">Upload</button>
+        </form>
 </div>
 
 </div>

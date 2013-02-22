@@ -3,5 +3,5 @@ from views import *
 
 urlpatterns = patterns('',
 	url(r'^addCompounds/?$', uploadCompound),
-	url(r'',  showCompounds),
+	url(r'^(?P<resource>\w*)$',  showCompounds),
 )

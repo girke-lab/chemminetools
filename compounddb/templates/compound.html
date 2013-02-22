@@ -4,21 +4,21 @@
 {% block base_content %}
 <div class="row-fluid"> 
 <div class="span12">
-<h2>Compound '{{compound.name}}'</h2>
+<h2>Compound '{{compound.cid}}'</h2>
 </div>
 </div><!--/row--> 
 
 <div class="row-fluid">
 
 
-<div class="span8">
+<div class="span7">
 	<img class="img-rounded" src="/compounds/{{compound.id}}/png"/>
 </div>
 
-<div class="span4">
+<div class="span5">
 	<table class="table table-striped">
 	<tbody>
-	<tr class="cid"><th>ID</th><td>{{compound.cid}}</td></tr>
+	<tr class="cid"><th>CID</th><td>{{compound.cid}}</td></tr>
 	<tr class="name"><th>Name</th><td>{{compound.name}}</td></tr>
 	<tr class="formula"><th>Formula</th><td>{{compound.formula}}</td></tr>
 	<tr class="weight"><th>Molecular Weight</th><td>{{compound.weight|floatformat:3}}</td></tr>
@@ -29,7 +29,7 @@
 
 <div class="row-fluid">
 
-<div class="span8">
+<div class="span7">
 	<ul class="nav nav-tabs" id="myTab">
 	  <li class="active"><a href="#smiles" data-toggle="tab">SMILES</a></li>
 	  <li><a href="#sdf" data-toggle="tab">SDF</a></li>
@@ -44,7 +44,7 @@
 	 
 </div><!--/span-->
 
-<div class="span4">
+<div class="span5">
 <h2>Downloads</h2>
 <p><a class="btn" href="/compounds/{{compound.id}}/smiles">SMILES »</a></p>
 <p><a class="btn" href="/compounds/{{compound.id}}/sdf">SDF »</a></p>
