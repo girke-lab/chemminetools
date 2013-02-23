@@ -3,9 +3,31 @@
 
 {% block js_content %}
 <script type="text/javascript">
+	var structures_loaded = false;
 	$(document).ready(function() {
 		$('.icon-trash').click(DeleteRow);
 		$("[data-toggle=tooltip]").tooltip();
+
+	$("#loadstructures").click(function () {
+		if (!structures_loaded) {
+			$(this).html('Hide Structures');
+			var buf = $(this).text();
+			$(".compoundImage").show();
+			$(".compoundImageTitle").show();
+			$(".compoundImage").each(function() {
+				$(this).html('<img width="150" class="img-rounded" src="/compounds/'+ $(this).attr('id')  + '/png"/>');
+			});
+			structures_loaded = true;
+		} else {
+			$(this).html('Show Structures');
+			structures_loaded = false;
+			$(".compoundImage").hide();
+			$(".compoundImageTitle").hide();
+			$(".compoundImage").each(function() {
+				$(this).html('');
+			});
+		}
+	});
 	});
 
 	function DeleteRow()
@@ -28,7 +50,7 @@
 	<div class="span12">
 		<div class="btn-group">
 		  <a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
-		  <button class="btn">Show Structures</button>
+		  <button id="loadstructures" class="btn">Show Structures</button>
 		  <button class="btn">Download SDF</button>
 		  <button class="btn">Download Smiles</button>
 		</div>
@@ -45,6 +67,7 @@
 	<tr>
 	<th>CID</th>
 	<th>Name</th>
+	<th style="display:none" class="compoundImageTitle">Structure</th>
 	<th>Smiles</th>
 	<th>Options</th>
 	<tbody>
@@ -52,6 +75,7 @@
 		<tr id="{{compound.id}}">
 		<th><a href="/compounds/{{compound.id}}">{{compound.cid}}</a></th>
 		<th>{{compound.name}}</th>
+		<th style="display:none" class="compoundImage" id="{{compound.id}}">  </th>
 		<th>{{compound.smiles}}</th>
 		<th><i data-toggle="tooltip" placement="top" title="delete this compound" class="icon-trash"></i>
 		<a href="#" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
