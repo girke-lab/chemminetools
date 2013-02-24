@@ -4,3 +4,4 @@ chemminetools/settings.py
 *.swp
 chemminetools/settings.py.devel
 chemminetools/settings.py.production
+working/*
