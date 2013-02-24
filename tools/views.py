@@ -92,9 +92,11 @@ def view_job(request, job_id):
 	if result.ready():
 		finalResult = result.result
 		finalResult = re.sub(".*/", "", finalResult, count=0)
+		job_filename = finalResult
 		finalResult = '/working/' + finalResult
 		return render_to_response('view_job.html', dict(
 			title = "Clustering Results",
+			job_filename = job_filename,
 			result = finalResult,
 		),
 		context_instance=RequestContext(request))

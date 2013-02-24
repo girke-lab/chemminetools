@@ -1,12 +1,12 @@
 #!/usr/bin/env Rscript
-# requires: ChemmineR,R.utils,stats,grDevices
-# use: ./apcluster.R < input.sdf > output.pdf
+# requires: ChemmineR,R.utils,stats
+# use: ./apcluster.R --outfile=output.dnd < input.sdf
 
 library(ChemmineR)
-# library(R.utils)
+library(R.utils)
 
 # parse command line arguments
-# outfile = commandArgs(asValues=TRUE)$outfile
+outfile = commandArgs(asValues=TRUE)$outfile
 
 # read in sdf from standard i/o
 f <- file("stdin")
@@ -23,7 +23,14 @@ unlink(myTempFile)
 
 # Hierarchical Clustering with hclust 
 hc <- hclust(as.dist(distmat), method="single")
-hc[["labels"]] <- cid(apset) # Assign correct item labels
-pdf(file="|cat") # output to standard output
-plot(as.dendrogram(hc), edgePar=list(col=4, lwd=2), horiz=T) # Plots hierarchical clustering tree.
-dev.off()
+
+# fix labels
+labels <- datablocktag(sdfInput, tag="PUBCHEM_IUPAC_NAME")
+labels[is.na(labels)] <- cid(apset)[is.na(labels)]
+hc[["labels"]] <- labels # Assign correct item labels
+
+d <- as.dendrogram(hc)
+save(list=c("d"), file=outfile)
+
+# make symbolic link for treeviewer to find
+system(paste("ln -s ", outfile, " ", outfile, ".dnd", sep=""))

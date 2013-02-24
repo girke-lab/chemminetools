@@ -317,7 +317,9 @@ def index(session, ref, mode="", subl=None, subh=None, dref=None,
 	# processing PDF
 	info("PDF at %s" % pdffile)
 	if mode == '':
-		w, h, pdffile = increase_width(pdffile)
+		# w, h, pdffile = increase_width(pdffile)
+		w = 720
+		h = 720
 	elif mode == 'sp':
 		w,h = pdf_size(pdffile)
 	# a session for this <ref> can have multiple images, for example, one for
@@ -326,7 +328,9 @@ def index(session, ref, mode="", subl=None, subh=None, dref=None,
 	img_ref = md5.md5(pdffile).hexdigest()
 	session[img_ref] = pdffile
 	if mode == '':
-		leaves, tree = process_pdf(pdffile, compounds)
+		# leaves, tree = process_pdf(pdffile, compounds)
+		leaves = []
+		tree = []
 	elif mode == 'sp':
 		leaves = process_plot(pdffile, coordfile, compounds)
 		tree = []

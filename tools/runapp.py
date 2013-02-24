@@ -11,8 +11,8 @@ def add(x, y):
 
 @task()
 def launch(appname, commandOptions, input):
-	outputFile = outputPath + '/random' + str(random.randint(10000000, 90000000))
-	command = projectDir + '/tools/tool_scripts/' + appname + ' > ' + outputFile
+	outputFile = outputPath + '/' + str(random.randint(10000000, 90000000))
+	command = projectDir + '/tools/tool_scripts/' + appname + ' --outfile=' + outputFile
 	runningTask = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE)
 	runningTask.stdin.write(input)
 	runningTask.stdin.close()
