@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block base_content %}
+<div class="row-fluid">
+	<div class="span12">
+		<h2>{{ title|default:"Input Form" }}</h2>
+	</div>
+</div><!--/row-->
+
+<div class="row-fluid">
+	<div class="span12">
+		<form action="." method="post">{% csrf_token %}
+		{{ form.as_p }}
+		<input class="btn btn-primary" type="submit" value="Submit" />
+		</form>
+	</div>
+</div><!--/row-->
+{% endblock %}

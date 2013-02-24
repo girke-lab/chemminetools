@@ -12,6 +12,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     (r'^compounds/', include('compounddb.urls')),
     (r'^my[Cc]ompounds/', include('myCompounds.urls')),
+    (r'^tools/', include('tools.urls')),
     url(r'^', include('cms.urls')),
 )
 
