@@ -1,11 +1,11 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from compounddb import first_mol, InvalidInputError
 # from compounddb.search import search
 # from compounddb.views import get_library_by_name
 from compounddb.tools import parse_annotation, insert_single_compound
-from compounddb.models import Compound
+from compounddb.models import Compound, SDFFile
 from myCompounds.DownloadCIDs import DownloadCIDs
 from django.contrib import messages
 import random
@@ -103,6 +103,19 @@ def uploadCompound(request, *args, **kargs):
 		messages.success(request, 'Success: ' + str(counter) + ' compound(s) added to database.')
 		page, matches = getMyCompounds(request)
     		return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
+
+def downloadSDF(request):
+	username = request.user.username
+	sdf = makeSDF(username)
+	return HttpResponse(sdf, mimetype='text/plain')
+
+def makeSDF(username):
+	base_queryset = Compound.objects
+	compoundList = base_queryset.filter(username=username)
+	sdf = u''
+	for compound in compoundList:
+		sdf = sdf + compound.sdffile_set.all()[0].sdffile + '\n'	
+	return sdf 
 
 def getMyCompounds(request):
 	page = int(request.GET.get('p', '1'))

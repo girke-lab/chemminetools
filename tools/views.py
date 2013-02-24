@@ -5,6 +5,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.forms import ModelForm
 from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
+from myCompounds.views import makeSDF
 from runapp import launch
 from models import *
 
@@ -58,8 +59,7 @@ def launch_job(request):
 		else:
 			raise Http404
 
-		sdf = open('/home/tbackman/example_db.sdf', 'r')
-		sdf = sdf.read()
+		sdf = makeSDF(username)
 		result = launch.delay(application.script, "", sdf)
 		newJob = Job(
 			username=username,
