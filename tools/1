@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block base_content %}
+<div class="row-fluid">
+	<div class="span12">
+		<h2>{{ title|default:"Job Result" }}</h2>
+	</div>
+</div><!--/row-->
+
+<div class="row-fluid">
+	<div class="span12">
+		Download result: <a href="{{ result }}">download</a>
+	</div>
+</div><!--/row-->
+{% endblock %}

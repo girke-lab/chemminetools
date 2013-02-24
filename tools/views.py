@@ -1,5 +1,6 @@
+import re
 from django.contrib.auth.decorators import user_passes_test
-from django.shortcuts import render_to_response
+from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.forms import ModelForm
@@ -71,7 +72,7 @@ def launch_job(request):
 		)
 		newJob.save()
 		messages.success(request, 'Success: job launched.')
-		return render_to_response('genericForm.html', context_instance=RequestContext(request))
+		return redirect(view_job, job_id=newJob.id)
 	else:
 		form = jobForm()
 		return render_to_response('genericForm.html', dict(
@@ -80,3 +81,25 @@ def launch_job(request):
 		),
 		context_instance=RequestContext(request)) 
 
+@guest_allowed
+def view_job(request, job_id):
+	username = request.user.username
+	try:
+		job = Job.objects.get(id__iexact=job_id, username=username)
+	except Job.DoesNotExist:
+		raise Http404
+	result = launch.AsyncResult(job.task_id)
+	if result.ready():
+		finalResult = result.result
+		finalResult = re.sub(".*/", "", finalResult, count=0)
+		finalResult = '/working/' + finalResult
+		return render_to_response('view_job.html', dict(
+			title = "Clustering Results",
+			result = finalResult,
+		),
+		context_instance=RequestContext(request))
+	else:
+		return render_to_response('wait.html', dict(
+			title = "Job Running",
+		),
+		context_instance=RequestContext(request))
