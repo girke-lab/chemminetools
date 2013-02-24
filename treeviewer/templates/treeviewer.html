@@ -1,0 +1,138 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+    <title>Tree Viewer</title>
+    <script src="/static/admin/bootstrap/js/bootstrap.js"></script>
+    <script src="/static/admin/bootstrap/js/bootstrap.min.js"></script>
+	{% if error %}
+	<body class="container"><div class="error">{{error}}</div></body>
+	{% else %}
+    <script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAIYchc7n3AwzmzGTneM1B6RQbJtsUrPs8rvkFHiX0lmiHV0N4UBTetKkB1iOs_VunoK0tsg78a7TfGA" type="text/javascript"></script>
+	<script type="text/javascript" src="/static/admin/jquery.js"></script>
+    <script type="text/javascript">
+            jQuery(document).ready(function() {
+                    jQuery("#map").css("height", window.innerHeight).css("width", window.innerWidth-490);
+                    load();
+            });
+    </script>
+    <script src="/static/admin/markermanager.js"></script>
+    <script type="text/javascript">
+        var mode = "{{mode}}";
+        var pdf_width = {{pdfsize.0}};
+        var pdf_height = {{pdfsize.1}};
+        var pdffile = "{{img_ref}}";
+        var maxr = {{max_resolution}};
+        var minr = {{min_resolution}};
+        var compounds = {{leaves|safe}};
+        var tree = {{tree|safe}};
+        var tile_height = {{tile_height}};
+        var tile_width = {{tile_width}};
+        var marker_zoom = {{marker_zoom}} + 1;
+        var app_path = "";
+        var request_path = "{{request.path}}";
+        var ref = "{{ref}}";
+        jQuery(document).ready(function() {
+          jQuery("#menuctrl").click(function() {
+            jQuery("#navigation").toggle();
+          });
+        });
+    </script>
+    <script type="text/javascript" src="/static/admin/tile.js"></script>
+    <style type="text/css">
+        div.button {text-align:center }
+        #infocontainer, #uploadform {position:absolute; right:0; width:300px; background-color:#eee; border:1px solid #ccc; z-index:2}
+	#info {max-height:70%; overflow:auto}
+        #uploadform {background:none; border:none; width:800px}
+        #uploadform > div {-webkit-box-shadow: -3px 3px 10px #ccc; -moz-box-shadow: 0 0 3px #000; background-color:rgb(222,228,234); position:fixed; top: 100px; margin: auto; z-index:2; padding:10px; border:1px solid rgba(65,106,160,.5); width: 500px}
+        #uploadform h2 {color: rgb(65,106,160); margin: 20px 0; font-size: 2em;
+        }
+        #uploadform p{
+        	color: rgba(90,90,90,0.7); line-height: 1.2em; margin: 10px 0;
+        }
+        #map {border:1px solid #666; }
+        #content{margin:0 2.5% 0 2.5%; width:95%}
+        #navigation {display:none; position:absolute; top:150px; z-index:5}
+        #menuctrl {display:block; width:160px; padding:3px; text-align:center; text-decoration:none; border:1px solid #33f; background-color:#ccf; margin:10px}
+        #ctrl {display:block; float:right; width:180px; text-align:left; -webkit-box-shadow: -3px 3px 10px #ccc; -moz-box-shadow: -3px -3px 3px #000; background-color:rgb(222,228,234); position:relative; top: 20px; font-size:.9em; z-index:2; padding:10px; border:1px solid rgba(65,106,160,.5)}
+        #ctrl div {
+        	border-bottom: 1px dotted rgba(65,106,160,0.3); margin: 10px 0;
+        }
+        #ctrl button {
+        	float: right;
+        }
+        .infowin ul li, #infocontainer ul li {list-style:none}
+        #closeform {float:right; width:50px; display:block}
+        #ctrlctrl {display:block; width:15px; height: 15px; float:right; text-align:center; text-decoration:none; border:1px solid rgba(65,106,160,0.5)}
+        hr {color:#f0f0f0; width:80%; margin-left:10%}
+    </style>
+  </head>
+  <body onunload="GUnload()">
+    <div id="ctrl" class="container">
+        <a href="#" id="ctrlctrl"><span>_</span><span style="display:none">&#x25A1;</span></a>
+        <div id="markerctrl" class="on"><label>Markers are <span id="markerstatus">on at zoom level <span id="mlevel">3</span> and above</span>.</label><button>disable markers</button><div style="clear:both;border:0"></div></div>
+	<div><button id="listcompounds">List All Compounds</button><div style="clear:both;border:0"></div></div>
+		{% if drefname %}
+        <div>
+            <form><label>Plot with data <i><a target="_blank" href="data/{{dref}}">{{drefname}}</a></i>{% ifequal mode "sp" %}<span>'s column</span></label>
+                <select name="col">
+                	{% for column in columns %}
+                    <option {% ifequal column cur_column %}selected="selected"{%endifequal%}>{{column}}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" name="ref" value="{{ref}}"/>
+                <input type="hidden" name="dref" value="{{dref}}"/>
+                <input type="hidden" name="mode" value="{{mode}}"/>
+                <input type="submit" value="Reload"/>
+           	{%endifequal%}</form>
+            <button id="treeonly">Show {%ifequal mode "sp"%}Plot{%else%}Tree{%endifequal%} Only</button>
+            <button class="showform">Use Other Data</button>
+        	<div style="clear:both;border:0"></div>
+        </div>
+        {% else %}
+		<div>
+			<label>Heatmap can be included in the plot by providing data table in tab-delimited format.</label>
+			<button class="showform">Upload Table</button>
+			<div style="clear:both;border:0"></div>
+		</div>
+		{% endif %}
+	<div><button id="downloadpng">Download At This Resolution</button><div style="clear:both;border:0"></div></div>
+    </div>
+    <div id="infocontainer" style="display:none"> <div id="info" ></div>
+        <div class="button"><button id="closeinfo" class="button">close</button></div>
+    </div>
+    <div id="uploadform" style="display:none">
+        <div>
+            <button id="closeform">close</button>
+            {% if drefs %}
+            <form method="get" action="">
+                <h2>Use Existing Data</h2>
+                <select name="dref">
+                	{% for key,value in drefs.items %}
+                    <option {%ifequal dref value%}selected="selected"{%endifequal%} value="{{key}}">{{value}}</option>
+                    {% endfor %}
+                </select>
+                <input type="hidden" name="ref" value="{{ref}}"/>
+                <input type="hidden" name="mode" value="{{mode}}"/>
+                <input type="submit" value="Submit"/>
+            </form>
+            {% endif %}
+            <form method="post" action="data/"  enctype="multipart/form-data">
+                <h2>Upload Data File</h2>
+                <p>In the data file, in tab-delimited format, the first row must contain the column names, and the first column must be the names of the compounds consistent with the names in the plot.</p>
+                <table>
+                <tr>
+                    <td><label for="name">Friendly Name:</label></td>
+                    <td><input type="text" name="name"/></td>
+                </tr><tr>
+                <td><label for="file">Data File:</label></td>
+                <td><input type="file" name="data"/></td>
+                </tr></table>
+                <input type="hidden" name="ref" value="{{ref}}"/>
+                <input type="hidden" name="mode" value="{{mode}}"/>
+                <input type="submit" name="submit" value="Submit"/>
+            </form>
+        </div>
+    </div>
+    <div style="width:90%; padding:0 5% 0 15%" id="map"></div>
+  </body>
+  {% endif %}
+</html>
