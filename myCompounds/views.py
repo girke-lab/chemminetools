@@ -13,6 +13,7 @@ import openbabel
 import re
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, InputError, sdf_to_smiles
 
+@guest_allowed
 def showCompounds(request, resource):
     # perform query for existing myCompounds
     page, matches = getMyCompounds(request)
@@ -30,6 +31,7 @@ def showCompounds(request, resource):
 		return HttpResponse(sdf, mimetype='text/plain')
     return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
+@guest_allowed
 def uploadCompound(request, *args, **kargs):
     # perform query for existing myCompounds
     page, matches = getMyCompounds(request)
