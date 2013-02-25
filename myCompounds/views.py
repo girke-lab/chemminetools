@@ -16,11 +16,18 @@ from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, InputError, sdf_
 def showCompounds(request, resource):
     # perform query for existing myCompounds
     page, matches = getMyCompounds(request)
+    username = request.user.username
     if resource:
 	if resource == 'deleteAll':
 		deleteMyCompounds(request)
 		matches = None
 		messages.error(request, 'All Compounds Deleted!')
+	if resource == 'downloadSMILES':
+		smiles = makeSMILES(username)
+		return HttpResponse(smiles, mimetype='text/plain')
+	if resource == 'downloadSDF':
+		sdf = makeSDF(username)
+		return HttpResponse(sdf, mimetype='text/plain')
     return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
 def uploadCompound(request, *args, **kargs):
@@ -104,18 +111,21 @@ def uploadCompound(request, *args, **kargs):
 		page, matches = getMyCompounds(request)
     		return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
-def downloadSDF(request):
-	username = request.user.username
-	sdf = makeSDF(username)
-	return HttpResponse(sdf, mimetype='text/plain')
-
 def makeSDF(username):
 	base_queryset = Compound.objects
 	compoundList = base_queryset.filter(username=username)
 	sdf = u''
 	for compound in compoundList:
-		sdf = sdf + compound.sdffile_set.all()[0].sdffile + '\n'	
+		sdf = sdf + compound.sdffile_set.all()[0].sdffile.rstrip() + '\n'	
 	return sdf 
+
+def makeSMILES(username):
+	base_queryset = Compound.objects
+	compoundList = base_queryset.filter(username=username)
+	smiles = u''
+	for compound in compoundList:
+		smiles = smiles + compound.smiles.rstrip() + '\n'
+	return smiles
 
 def getMyCompounds(request):
 	page = int(request.GET.get('p', '1'))

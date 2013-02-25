@@ -51,8 +51,8 @@
 		<div class="btn-group">
 		  <a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
 		  <button id="loadstructures" class="btn">Show Structures</button>
-		  <a href="/myCompounds/downloadSDF/"><button class="btn">Download SDF</button></a>
-		  <button class="btn">Download Smiles</button>
+		  <a href="/myCompounds/downloadSDF"><button class="btn">Download SDF</button></a>
+		  <a href="/myCompounds/downloadSMILES"><button class="btn">Download Smiles</button></a>
 		</div>
 	</div> 
 </div><!--/row-->
@@ -78,8 +78,8 @@
 		<th style="display:none" class="compoundImage" id="{{compound.id}}">  </th>
 		<th>{{compound.smiles}}</th>
 		<th><i data-toggle="tooltip" placement="top" title="delete this compound" class="icon-trash"></i>
-		<a href="#" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
-		<a href="#" class="editRowButton" data-toggle="tooltip" placement="top" title="edit compound details"><i class="icon-pencil"></i></a>
+		<a href="/search/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
+		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="edit compound details"><i class="icon-pencil"></i></a>
 		</th>
 		</tr>
 	{% endfor %}
