@@ -76,19 +76,24 @@ def launch_job(request):
 	else:
 		form = jobForm()
 		return render_to_response('genericForm.html', dict(
-			title='Start Job',
+			title='Launch Clustering Job',
 			form = form,
 		),
 		context_instance=RequestContext(request)) 
 
 @guest_allowed
-def view_job(request, job_id):
+def view_job(request, job_id, resource):
 	username = request.user.username
 	try:
 		job = Job.objects.get(id__iexact=job_id, username=username)
 	except Job.DoesNotExist:
 		raise Http404
 	result = launch.AsyncResult(job.task_id)
+	if resource:
+		if resource == 'delete':
+			job.delete()
+			result.forget()
+			return HttpResponse("deleted", mimetype='text/plain')
 	if result.ready():
 		finalResult = result.result
 		finalResult = re.sub(".*/", "", finalResult, count=0)
@@ -105,3 +110,10 @@ def view_job(request, job_id):
 			title = "Job Running",
 		),
 		context_instance=RequestContext(request))
+
+@guest_allowed
+def list_jobs(request):
+	username = request.user.username
+	base_queryset = Job.objects
+	matches = base_queryset.filter(username=username).order_by('-start_time')
+	return render_to_response('list_jobs.html', dict(matches=matches,), context_instance=RequestContext(request))

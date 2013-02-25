@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('.icon-trash').click(DeleteRow);
+		$("[data-toggle=tooltip]").tooltip();
+	});
+
+function DeleteRow()
+{
+	var id = $(this).parents('tr').first().attr("id");
+	$.get("/tools/view_job/" + id + "/delete");
+	$(this).parents('tr').first().remove();
+}
+</script>
+{% endblock %} 
+
+{% block base_content %}
+<div class="row-fluid"> 
+<div class="span12">
+<h2>My Jobs</h2>
+</div>
+</div><!--/row--> 
+
+<div class="row-fluid">
+
+
+<div class="span12">
+{% if matches %}
+	<table class="table table-striped">
+	<thead>
+	<tr>
+	<th>Application</th>
+	<th>Start time</th>
+	<th>Status</th>
+	<th>Options</th>
+	<tbody>
+	{% for job in matches %}
+		<tr id="{{job.id}}">
+		<th><a href="/tools/view_job/{{job.id}}">{{job.application}}</a></th>
+		<th>{{job.start_time}}</th>
+		<th>Finished</th>
+		<th><i data-toggle="tooltip" placement="top" title="delete this job" class="icon-trash"></i>
+		</th>
+		</tr>
+	{% endfor %}
+	</tbody>
+	</table>
+{% else %}
+<p>No jobs submitted.</p>
+{% endif %}
+</div>
+
+
+</div><!--/row-->
+<div class="row-fluid">
+	<div class="span12">
+		<div class="pagination pagination-centered">
+		<ul>
+		<li><a href="#">&laquo;</a></li>
+		<li><a href="#">1</a></li>
+		<li><a href="#">&raquo;</a></li>
+		</ul>
+		</div>
+	</div> 
+</div><!--/row-->
+{% endblock %}
