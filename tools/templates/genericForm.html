@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 {% load cms_tags %}
 
+{% block js_content %}
+<script type="text/javascript">
+
+	$(document).ready(function() {
+		$("#id_application").click(function () {
+			$("#hiddenOptions").show()
+		});
+	});
+
+
+</script>
+{% endblock %}
+
 {% block base_content %}
 <div class="row-fluid">
 	<div class="span12">
@@ -16,4 +29,29 @@
 		</form>
 	</div>
 </div><!--/row-->
+
+<div style="display:none" id="hiddenOptions" class="row-fluid">
+	<p>
+	<b>Hierarchical clustering</b> builds agglomeratively a hierarchy of clusters based on pairwise compound similarities defined using the Atom Pair descriptors and Tanimoto coefficiency. Based on how the distance or similarity between two clusters are defined, several <i>linkage</i> methods are defined. For more
+details on this clustering method, please see the theory section of
+the <a href="/help/" target="_parent">online tutorial.</a></p>
+	<p> The result will be presented as a dendrogram.</p>
+	<form action="/ChemMineToolsV2/work/clusterstart" method="post">
+		<input type="hidden" name="opt" value="ap" />
+		<label for="linkage">Choose the linkage method:</label>
+		<select id="linkage" name="linkage">
+			<option value="s" label="single linkage">
+				single linkage
+			</option>
+			<option value="a" label="average linkage">
+				average linkage
+			</option>
+			<option value="c" label="complete linkage">
+				complete linkage
+			</option>
+		</select>
+		<br />
+	</form>
+</div>
+
 {% endblock %}

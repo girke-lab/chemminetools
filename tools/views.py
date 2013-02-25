@@ -1,4 +1,5 @@
 import re
+import os
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
@@ -72,7 +73,7 @@ def launch_job(request):
 		)
 		newJob.save()
 		messages.success(request, 'Success: job launched.')
-		return redirect(view_job, job_id=newJob.id)
+		return redirect(view_job, job_id=newJob.id, resource='')
 	else:
 		form = jobForm()
 		return render_to_response('genericForm.html', dict(
@@ -91,6 +92,8 @@ def view_job(request, job_id, resource):
 	result = launch.AsyncResult(job.task_id)
 	if resource:
 		if resource == 'delete':
+			if os.path.isfile(result.result):
+				os.remove(result.result)
 			job.delete()
 			result.forget()
 			return HttpResponse("deleted", mimetype='text/plain')

@@ -5,8 +5,18 @@ This repository represents the codebase for the new Django based rewrite of Chem
 Software dependencies:
 Python 2.7.3 
 postgresql 9.1.7 
+R 2.15.1
+memcached 1.4.13
+rabbit-mq-server
+ghostscript
+
+R libraries:
+ChemmineR
+Rutils
 
 Python libraries:
+simplejson
+django-celery
 python-pylibmc
 python-openbabel
 ZSI
