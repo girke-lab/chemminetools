@@ -13,7 +13,6 @@ urlpatterns = patterns('',
     (r'^compounds/', include('compounddb.urls')),
     (r'^my[Cc]ompounds/', include('myCompounds.urls')),
     (r'^tools/', include('tools.urls')),
-    (r'^tree/', include('treeviewer.urls')),
     url(r'^', include('cms.urls')),
 )
 
