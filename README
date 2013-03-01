@@ -13,6 +13,8 @@ ghostscript
 R libraries:
 ChemmineR
 Rutils
+ctc
+rjson
 
 Python libraries:
 simplejson

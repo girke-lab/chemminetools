@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 {% load cms_tags %}
 
+{% block js_content %}
+    <!--[if lt IE 9]><script type="text/javascript" src="/static/admin/flashcanvas.js"></script><![endif]-->
+
+    <script type="text/javascript" src="/static/admin/canvasXpress.min.js"></script>
+
+<script>
+var showPlot = function () {
+{% autoescape off %}
+	{{ plotJSON }}
+{% endautoescape %}
+}
+
+$(document).ready(function() {
+	showPlot();
+});
+</script>
+
+{% endblock %}
+
 {% block base_content %}
 <div class="row-fluid">
 	<div class="span12">
@@ -10,11 +29,7 @@
 
 <div class="row-fluid">
 	<div class="span12">
-		<p>
-		<a class="btn" href="/tree/{{ job_filename }}/?mode=">Show in Treeviewer  »</a>
-		</p><p>
-		Download result: <a href="{{ result }}">download</a>
-		</p>
+	<canvas id="canvas" width="613" height="613"></canvas>
 	</div>
 </div><!--/row-->
 {% endblock %}

@@ -102,10 +102,14 @@ def view_job(request, job_id, resource):
 		finalResult = re.sub(".*/", "", finalResult, count=0)
 		job_filename = finalResult
 		finalResult = '/working/' + finalResult
+		f = open(result.result, 'r')
+		plotJSON = f.read()
+		f.close()
 		return render_to_response('view_job.html', dict(
 			title = "Clustering Results",
 			job_filename = job_filename,
 			result = finalResult,
+			plotJSON = plotJSON,
 		),
 		context_instance=RequestContext(request))
 	else:

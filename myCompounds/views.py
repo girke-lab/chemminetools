@@ -1,4 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
+from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from compounddb import first_mol, InvalidInputError
