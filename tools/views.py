@@ -92,8 +92,9 @@ def view_job(request, job_id, resource):
 	result = launch.AsyncResult(job.task_id)
 	if resource:
 		if resource == 'delete':
-			if os.path.isfile(result.result):
-				os.remove(result.result)
+			if isinstance(result.result, str):
+				if os.path.isfile(result.result):
+					os.remove(result.result)
 			job.delete()
 			result.forget()
 			return HttpResponse("deleted", mimetype='text/plain')
