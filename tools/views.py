@@ -139,15 +139,7 @@ def view_job(request, job_id, resource):
 		raise Http404
 	if resource:
 		if resource == 'delete':
-			if isinstance(job.output, str):
-				if os.path.isfile(job.output):
-					os.remove(job.output)
-			try:
-				result = launch.AsyncResult(job.task_id)
-				result.forget()
-			except:
-				pass
-			job.delete()
+			deleteJob(username, job.id)
 			return HttpResponse("deleted", mimetype='text/plain')
 	if job.status == Job.FINISHED:
 		finalResult = job.output 

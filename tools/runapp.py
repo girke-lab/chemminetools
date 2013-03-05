@@ -1,6 +1,6 @@
+import os
 from celery import task
 from tempfile import NamedTemporaryFile
-from os import unlink
 from django.conf import settings
 import subprocess
 import random
@@ -64,3 +64,16 @@ def updateJob(username, job_id):
 			result.forget()
 			job.save()
 	return job
+
+def deleteJob(username, job_id):
+	job = updateJob(username, job_id)
+	if isinstance(job.output, unicode):
+		if os.path.isfile(job.output):
+			os.remove(job.output)
+	try:
+		result = launch.AsyncResult(job.task_id)
+		result.forget()
+	except:
+		pass
+	job.delete()
+	return True

@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # requires: ChemmineR,R.utils,ctc,rjson
-# use: ./apcluster.R --outfile=output.json < input.sdf
+# use: ./apcluster.R --outfile=output.json --linkage=single < input.sdf
 
 library(ChemmineR)
 library(R.utils)
