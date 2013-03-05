@@ -107,7 +107,8 @@ def launch_job(request):
 				questionObject = ApplicationOptions.objects.get(application=application, name=question) 
 				answerObject = ApplicationOptionsList.objects.get(category=questionObject, name=answer)
 				commandOptions = commandOptions + " --" + questionObject.realName + "=" + answerObject.realName 
-				optionsList = optionsList + questionObject.name + ": " + answerObject.name + " "
+				optionsList = optionsList + questionObject.name + ": " + answerObject.name + ", "
+		optionsList = re.sub(",\s$", "", optionsList, count=0)
 		sdf = makeSDF(username)
 		result = launch.delay(application.script, commandOptions, sdf)
 		newJob = Job(
@@ -160,6 +161,7 @@ def view_job(request, job_id, resource):
 			title = "Clustering Results",
 			job_filename = job_filename,
 			result = finalResult,
+			job = job,
 			plotJSON = plotJSON,
 		),
 		context_instance=RequestContext(request))

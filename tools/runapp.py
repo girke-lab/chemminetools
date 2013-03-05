@@ -48,6 +48,7 @@ def getJobList(username):
 
 
 def updateJob(username, job_id):
+	# checks if a job is done, updates it's status, and then returns it
 	try:
 		job = Job.objects.get(id=job_id, username=username)
 	except:

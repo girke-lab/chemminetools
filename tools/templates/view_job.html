@@ -29,6 +29,23 @@ $(document).ready(function() {
 
 <div class="row-fluid">
 	<div class="span12">
+	<table class="table table-bordered table-hover">
+	<tbody>
+	<tr>
+		<td><b>Application</b></td>
+		<td>{{ job.application }}</td>
+	</tr>
+	<tr>
+		<td><b>Options</b></td>
+		<td>{{ job.options }}</td>
+	</tr>
+	</tbody>
+	</table>
+	</div>
+</div><!--/row-->
+
+<div class="row-fluid">
+	<div class="span12">
 	<canvas id="canvas" width="613" height="613"></canvas>
 	</div>
 </div><!--/row-->
