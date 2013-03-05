@@ -8,7 +8,7 @@ from django.forms import ModelForm
 from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
 from myCompounds.views import makeSDF
-from tools.runapp import launch, getAppForm 
+from tools.runapp import * 
 from models import *
 from simplejson import dumps
 
@@ -25,7 +25,7 @@ class ApplicationOptionsForm(ModelForm):
 	class Meta:
 		model = ApplicationOptions
 
-class ApplicationOptionsList(ModelForm):
+class ApplicationOptionsListForm(ModelForm):
 	class Meta:
 		model = ApplicationOptionsList
 
@@ -40,7 +40,7 @@ def manage_application(request, chooseForm):
 			form = ApplicationOptionsForm(request.POST)
 		else:
 			title = 'Add Option Value'
-			form = ApplicationOptionsList(request.POST)
+			form = ApplicationOptionsListForm(request.POST)
 		if form.is_valid(): # All validation rules pass
 		    # Process the data in form.cleaned_data
 			form.save()
@@ -66,7 +66,7 @@ def manage_application(request, chooseForm):
 			title = 'Add Option Type'
 		else:
 			title = 'Add Option Value'
-			form = ApplicationOptionsList()
+			form = ApplicationOptionsListForm()
 		return render_to_response('genericForm.html', dict(
 			title=title,
 			form=form,
@@ -100,18 +100,20 @@ def launch_job(request):
 		else:
 			raise Http404
 		commandOptions = u''
+		optionsList = u''
 		for question in form.cleaned_data.keys():
 			if question != 'application':
 				answer = str(form.cleaned_data[question])
 				questionObject = ApplicationOptions.objects.get(application=application, name=question) 
-				# answerObject = ApplicationOptionsList.objects.get(category=questionObject, name=answer)
-				commandOptions = commandOptions + " --" + questionObject.realName + "=" + answer
+				answerObject = ApplicationOptionsList.objects.get(category=questionObject, name=answer)
+				commandOptions = commandOptions + " --" + questionObject.realName + "=" + answerObject.realName 
+				optionsList = optionsList + questionObject.name + ": " + answerObject.name + " "
 		sdf = makeSDF(username)
 		result = launch.delay(application.script, commandOptions, sdf)
 		newJob = Job(
 			username=username,
 			application=application,
-			options='',
+			options=optionsList,
 			input='myCompounds sdf',
 			output='',
 			task_id=result.id,
@@ -131,24 +133,27 @@ def launch_job(request):
 def view_job(request, job_id, resource):
 	username = request.user.username
 	try:
-		job = Job.objects.get(id__iexact=job_id, username=username)
+		job = updateJob(username, job_id)
 	except Job.DoesNotExist:
 		raise Http404
-	result = launch.AsyncResult(job.task_id)
 	if resource:
 		if resource == 'delete':
-			if isinstance(result.result, str):
-				if os.path.isfile(result.result):
-					os.remove(result.result)
+			if isinstance(job.output, str):
+				if os.path.isfile(job.output):
+					os.remove(job.output)
+			try:
+				result = launch.AsyncResult(job.task_id)
+				result.forget()
+			except:
+				pass
 			job.delete()
-			result.forget()
 			return HttpResponse("deleted", mimetype='text/plain')
-	if result.ready():
-		finalResult = result.result
+	if job.status == Job.FINISHED:
+		finalResult = job.output 
 		finalResult = re.sub(".*/", "", finalResult, count=0)
 		job_filename = finalResult
 		finalResult = '/working/' + finalResult
-		f = open(result.result, 'r')
+		f = open(job.output, 'r')
 		plotJSON = f.read()
 		f.close()
 		return render_to_response('view_job.html', dict(
@@ -158,15 +163,19 @@ def view_job(request, job_id, resource):
 			plotJSON = plotJSON,
 		),
 		context_instance=RequestContext(request))
-	else:
+	elif job.status == Job.RUNNING:
 		return render_to_response('wait.html', dict(
 			title = "Job Running",
+		),
+		context_instance=RequestContext(request))
+	elif job.status == Job.FAILED:
+		return render_to_response('view_job.html', dict(
+			title = "Error: Job Failed",
 		),
 		context_instance=RequestContext(request))
 
 @guest_allowed
 def list_jobs(request):
 	username = request.user.username
-	base_queryset = Job.objects
-	matches = base_queryset.filter(username=username).order_by('-start_time')
+	matches = getJobList(username)
 	return render_to_response('list_jobs.html', dict(matches=matches,), context_instance=RequestContext(request))
