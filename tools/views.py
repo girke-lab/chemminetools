@@ -158,7 +158,7 @@ def view_job(request, job_id, resource):
 		plotJSON = f.read()
 		f.close()
 		return render_to_response('view_job.html', dict(
-			title = "Clustering Results",
+			title = str(job.application) + " Results",
 			job_filename = job_filename,
 			result = finalResult,
 			job = job,
