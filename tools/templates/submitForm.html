@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+<script type="text/javascript">
+
+	$(document).ready(function() {
+		$("#id_application").change(function () {
+			getDynamicForm();
+		});
+	});
+	
+	function getDynamicForm() {
+		selectedApp = document.getElementById("id_application")[document.getElementById("id_application").selectedIndex].value;
+		$.ajax({
+		    type: 'GET',
+		    url: '.',
+		    dataType: 'json',
+		    success: function(data) {form = data.form, desc=data.desc},
+		    data: { currentApp: selectedApp },
+		    async: false
+		});
+		if(form == "ERROR"){
+			$("#hiddenOptions").hide();
+			$('#description').html('');
+		} else {
+			$('#formContent').html(form);	
+			$('#description').html(desc);
+			$("#hiddenOptions").show();
+		}
+	}	
+</script>
+{% endblock %}
+
+{% block base_content %}
+<div class="row-fluid">
+	<div class="span12">
+		<h2>{{ title|default:"Input Form" }}</h2>
+	</div>
+</div><!--/row-->
+
+<div class="row-fluid">
+	<div class="span12">
+		<form action="." method="post">{% csrf_token %}
+		{{ form.as_p }}
+		</form>
+	</div>
+</div><!--/row-->	
+
+<div class="row-fluid">
+	<div class="span12" id="description">
+	</div>
+</div><!--/row-->
+
+<div class="row-fluid">
+	<div class="span12" style="display:none" id="hiddenOptions">
+		<form action="." method="post">{% csrf_token %}
+		<div id="formContent">
+		</div>
+		<input class="btn btn-primary" type="submit" value="Submit"/>
+		</form>
+	</div>
+</div><!--/row-->
+
+{% endblock %}

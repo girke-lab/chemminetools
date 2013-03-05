@@ -9,6 +9,7 @@ library(rjson)
 
 # parse command line arguments
 outfile = commandArgs(asValues=TRUE)$outfile
+linkage = commandArgs(asValues=TRUE)$linkage
 
 # read in sdf from standard i/o
 f <- file("stdin")
@@ -24,7 +25,7 @@ load(myTempFile)
 unlink(myTempFile)
 
 # Hierarchical Clustering with hclust 
-hc <- hclust(as.dist(distmat), method="single")
+hc <- hclust(as.dist(distmat), method=linkage)
 
 # create newick dendrogram
 hc[["labels"]] <- cid(apset)

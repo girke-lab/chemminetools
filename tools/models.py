@@ -1,13 +1,28 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
-
 class Application(models.Model):
 	name = models.CharField(max_length=250, unique=True)
 	script = models.CharField(max_length=250, unique=True)
 	input_type = models.CharField(max_length=250)
 	output_type = models.CharField(max_length=250)
+	description = models.TextField()
+
+	def __unicode__(self):
+		return self.name
+
+class ApplicationOptions(models.Model):
+	name = models.CharField(max_length=255)
+	realName = models.CharField(max_length=255)
+	application = models.ForeignKey(Application)
+
+	def __unicode__(self):
+		return self.application.name + "_" + self.name
+
+class ApplicationOptionsList(models.Model):
+	category = models.ForeignKey(ApplicationOptions)
+	name = models.CharField(max_length=255)
+	realName = models.CharField(max_length=255)
 
 	def __unicode__(self):
 		return self.name
@@ -30,3 +45,4 @@ class Job(models.Model):
 
 	def __unicode__(self):
 		return self.application.name
+

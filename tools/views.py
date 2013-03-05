@@ -8,8 +8,9 @@ from django.forms import ModelForm
 from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
 from myCompounds.views import makeSDF
-from runapp import launch
+from tools.runapp import launch, getAppForm 
 from models import *
+from simplejson import dumps
 
 class applicationForm(ModelForm):
 	class Meta:
@@ -20,16 +21,32 @@ class jobForm(ModelForm):
 		model = Job
 		fields = ('application',)
 
+class ApplicationOptionsForm(ModelForm):
+	class Meta:
+		model = ApplicationOptions
+
+class ApplicationOptionsList(ModelForm):
+	class Meta:
+		model = ApplicationOptionsList
+
 @user_passes_test(lambda u: u.is_superuser)
-def manage_application(request):
+def manage_application(request, chooseForm):
 	if request.method == 'POST': # If the form has been submitted...
-		form = applicationForm(request.POST) # A form bound to the POST data
+		if chooseForm == 'applicationForm':
+			form = applicationForm(request.POST) # A form bound to the POST data
+			title = 'Add Application'
+		elif chooseForm == 'ApplicationOptionsForm':
+			title = 'Add Option Type'
+			form = ApplicationOptionsForm(request.POST)
+		else:
+			title = 'Add Option Value'
+			form = ApplicationOptionsList(request.POST)
 		if form.is_valid(): # All validation rules pass
 		    # Process the data in form.cleaned_data
 			form.save()
 			messages.success(request, 'Success: application added.')				
 			return render_to_response('genericForm.html', dict(
-				title='Add Application',
+				title=title,
 				form=form,
 			),
 			context_instance=RequestContext(request)) 
@@ -41,9 +58,17 @@ def manage_application(request):
 			),
 			context_instance=RequestContext(request)) 
 	else:
-		form = applicationForm() # An unbound form
+		if chooseForm == 'applicationForm':
+			form = applicationForm()
+			title = 'Add Application'
+		elif chooseForm == 'ApplicationOptionsForm':
+			form = ApplicationOptionsForm()
+			title = 'Add Option Type'
+		else:
+			title = 'Add Option Value'
+			form = ApplicationOptionsList()
 		return render_to_response('genericForm.html', dict(
-			title='Add Application',
+			title=title,
 			form=form,
 		),
 		context_instance=RequestContext(request))
@@ -51,18 +76,38 @@ def manage_application(request):
 @guest_allowed
 def launch_job(request):
 	username = request.user.username
+	if request.is_ajax():
+		# for ajax requests, return HTML form for each app
+		currentApp = request.GET['currentApp']
+		try:
+			application = Application.objects.get(id=currentApp)
+			AppFormSet = getAppForm(application.id)	
+			form = AppFormSet()
+			form = str(form)		
+			response = dict(form=form, desc=application.description)
+		except:
+			response = dict(form="ERROR")
+		return HttpResponse(dumps(response),'text/json')
 	if request.method == 'POST':
-		form = jobForm(request.POST)
+		appForm = getAppForm(1)
+		form = appForm(request.POST)
 		if form.is_valid():
 			try:
-				application = Application.objects.get(id__iexact=form['application'].value())
+				appid = int(form.cleaned_data['application'])
+				application = Application.objects.get(id=str(appid))
 			except Application.DoesNotExist:
 				raise Http404
 		else:
 			raise Http404
-
+		commandOptions = u''
+		for question in form.cleaned_data.keys():
+			if question != 'application':
+				answer = str(form.cleaned_data[question])
+				questionObject = ApplicationOptions.objects.get(application=application, name=question) 
+				# answerObject = ApplicationOptionsList.objects.get(category=questionObject, name=answer)
+				commandOptions = commandOptions + " --" + questionObject.realName + "=" + answer
 		sdf = makeSDF(username)
-		result = launch.delay(application.script, "", sdf)
+		result = launch.delay(application.script, commandOptions, sdf)
 		newJob = Job(
 			username=username,
 			application=application,
@@ -76,7 +121,7 @@ def launch_job(request):
 		return redirect(view_job, job_id=newJob.id, resource='')
 	else:
 		form = jobForm()
-		return render_to_response('genericForm.html', dict(
+		return render_to_response('submitForm.html', dict(
 			title='Launch Clustering Job',
 			form = form,
 		),
