@@ -19,6 +19,7 @@ ctc
 rjson
 
 Python libraries:
+PyYAML
 simplejson
 django-celery
 python-pylibmc

@@ -74,3 +74,19 @@ def deleteJob(username, job_id):
 		pass
 	job.delete()
 	return True
+
+def deleteApp(name):
+	try:
+		app = Application.objects.get(name=name)
+	except:
+		return False
+	jobs = Job.objects.filter(application=app)
+	for job in jobs:
+		deleteJob(job.username, job.id)
+	options = ApplicationOptions.objects.filter(application=app)
+	for option in options:
+		values = ApplicationOptionsList.objects.filter(category=option)
+		values.delete()	
+	options.delete()
+	app.delete()
+	return True

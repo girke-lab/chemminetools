@@ -1,8 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class ApplicationCategories(models.Model):
+	name = models.CharField(max_length=250, unique=True)
+
+	def __unicode__(self):
+		return self.name
+
 class Application(models.Model):
 	name = models.CharField(max_length=250, unique=True)
+	category = models.ForeignKey(ApplicationCategories)
 	script = models.CharField(max_length=250, unique=True)
 	input_type = models.CharField(max_length=250)
 	output_type = models.CharField(max_length=250)

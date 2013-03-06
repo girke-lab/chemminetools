@@ -1,0 +1,21 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+name: Hierarchical Clustering 
+category: Clustering
+script: apcluster.R
+input_type: chemical/x-mdl-sdfile
+output_type: application/json.canvasxpress
+description: <p><b>Hierarchical clustering</b> builds agglomeratively a hierarchy of clusters based on pairwise compound similarities defined using the Atom Pair descriptors and Tanimoto coefficiency. Based on how the distance or similarity between two clusters are defined, several <i>linkage</i> methods are defined. For more details on this clustering method, please see the theory section of the <a href="/help">online tutorial.</a></p><p> The result will be presented as a dendrogram.</p> 
+
+ApplicationOptions:
+     Linkage Method: # this name will show up online
+          realName: linkage # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [single, single]
+               - [average, average]
+               - [complete, complete]     
+     Show Properties:
+          realName: properties
+          options:
+               - [fileInput, text/properties.table] # this is a 'magic' tag which provides files of this type as input
