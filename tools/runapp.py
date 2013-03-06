@@ -30,11 +30,8 @@ def getAppForm(application_id):
 	application = Application.objects.get(id=application_id)
 	for option in ApplicationOptions.objects.filter(application=application):
 		fields[option.name] = ModelChoiceField(queryset=ApplicationOptionsList.objects.filter(category=option).order_by('id'), empty_label=None)		
-	if fields == {}:
-		return False
-	else:
-		fields['application'] = IntegerField(initial=application.id,widget=HiddenInput())
-		return type('%sForm' % str(application.name), (Form,), fields)
+	fields['application'] = IntegerField(initial=application.id,widget=HiddenInput())
+	return type('%sForm' % str(application.name), (Form,), fields)
 
 def getJobList(username):
 	# get all running jobs and update those that need updating

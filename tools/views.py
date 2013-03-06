@@ -161,9 +161,12 @@ def view_job(request, job_id, resource):
 			),
 			context_instance=RequestContext(request))
 		elif(job.application.output_type == 'text/properties.table'):
-			raise Http404
+			f = open(job.output, 'r')
+			textfile = f.read()
+			f.close()
+			return HttpResponse(textfile, mimetype='text/plain')
 		else:
-			raise Http404
+			raise HttpResponse('unknown mimetype ' + job.application.output_type, mimetype='text/plain') 
 	elif job.status == Job.RUNNING:
 		return render_to_response('wait.html', dict(
 			title = "Job Running",
