@@ -9,6 +9,8 @@ R 2.15.1
 memcached 1.4.13
 rabbit-mq-server
 ghostscript
+jre1.7.0_17 installed in /opt/jre
+JOELib2-alpha-20070303 installed in /opt/JOELib2-alpha-20070303
 
 R libraries:
 ChemmineR

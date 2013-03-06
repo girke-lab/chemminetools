@@ -470,11 +470,7 @@ def gen_joelib_property(sdf):
 	os.close(f)
 
 	# convert
-	cmd = """JAVA_HOME=%s/support/jre1.6.0_06/ JOELIB2=%s/support/JOELib2-alpha-20070303/ %s/support/JOELib2-alpha-20070303/moleculeConversion.sh +d +h -iSDF -osdf "%s" "%s" > /dev/null""" % (cur_dir, cur_dir, cur_dir, t.name, out)
-	if os.uname()[1] == 'chemmineweb': 
-		cmd = """JAVA_HOME=/usr/lib/jvm/java-6-sun JOELIB2=%s/support/JOELib2-alpha-20070303/ %s/support/JOELib2-alpha-20070303/moleculeConversion.sh +d +h -iSDF -osdf "%s" "%s" > /dev/null""" % (cur_dir, cur_dir, t.name, out)
-	elif os.uname()[1] == 'biocluster': 
-		cmd = """JAVA_HOME=/usr/lib/jvm/java-1.5.0-sun-1.5.0.14/ JOELIB2=%s/support/JOELib2-alpha-20070303/ %s/support/JOELib2-alpha-20070303/moleculeConversion.sh +d +h -iSDF -osdf "%s" "%s" > /dev/null""" % (cur_dir, cur_dir, t.name, out)
+	cmd = """JAVA_HOME=/opt/jre/ JOELIB2=/opt/JOELib2-alpha-20070303/ /opt/JOELib2-alpha-20070303/moleculeConversion.sh +d +h -iSDF -osdf "%s" "%s" > /dev/null""" % (t.name, out)
 	root.warning("  -->   running:%s" % cmd)
 	if os.system(cmd) != 0:
 		os.unlink(out)

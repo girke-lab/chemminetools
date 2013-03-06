@@ -34,3 +34,11 @@ class SDFFile(models.Model):
 
         def __unicode__(self):
                 return "%s" % self.id
+
+class Property(models.Model):
+	name = models.CharField(max_length=256)
+	value = models.FloatField()
+	compound = models.ForeignKey(Compound, editable=False)
+
+	def __unicode__(self):
+		return "%s" % self.name

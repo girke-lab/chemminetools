@@ -89,16 +89,17 @@ def launch_job(request):
 			response = dict(form="ERROR")
 		return HttpResponse(dumps(response),'text/json')
 	if request.method == 'POST':
-		appForm = getAppForm(1)
+		appForm = getAppForm(request.POST['application'])
 		form = appForm(request.POST)
 		if form.is_valid():
 			try:
 				appid = int(form.cleaned_data['application'])
 				application = Application.objects.get(id=str(appid))
 			except Application.DoesNotExist:
-				raise Http404
+				return HttpResponse("Application does not exist", mimetype='text/plain')	
 		else:
-			raise Http404
+			return None
+			return HttpResponse('invalid form', mimetype='text/plain')
 		commandOptions = u''
 		optionsList = u''
 		for question in form.cleaned_data.keys():
@@ -143,20 +144,26 @@ def view_job(request, job_id, resource):
 			return HttpResponse("deleted", mimetype='text/plain')
 	if job.status == Job.FINISHED:
 		finalResult = job.output 
-		finalResult = re.sub(".*/", "", finalResult, count=0)
-		job_filename = finalResult
-		finalResult = '/working/' + finalResult
-		f = open(job.output, 'r')
-		plotJSON = f.read()
-		f.close()
-		return render_to_response('view_job.html', dict(
-			title = str(job.application) + " Results",
-			job_filename = job_filename,
-			result = finalResult,
-			job = job,
-			plotJSON = plotJSON,
-		),
-		context_instance=RequestContext(request))
+		# select correct viewer here based on output type
+		if(job.application.output_type == 'application/json.canvasxpress'):	
+			finalResult = re.sub(".*/", "", finalResult, count=0)
+			job_filename = finalResult
+			finalResult = '/working/' + finalResult
+			f = open(job.output, 'r')
+			plotJSON = f.read()
+			f.close()
+			return render_to_response('view_job.html', dict(
+				title = str(job.application) + " Results",
+				job_filename = job_filename,
+				result = finalResult,
+				job = job,
+				plotJSON = plotJSON,
+			),
+			context_instance=RequestContext(request))
+		elif(job.application.output_type == 'text/properties.table'):
+			raise Http404
+		else:
+			raise Http404
 	elif job.status == Job.RUNNING:
 		return render_to_response('wait.html', dict(
 			title = "Job Running",
@@ -164,7 +171,8 @@ def view_job(request, job_id, resource):
 		context_instance=RequestContext(request))
 	elif job.status == Job.FAILED:
 		return render_to_response('view_job.html', dict(
-			title = "Error: Job Failed",
+			title = "Error: " + str(job.application) + " Job Failed",
+			job = job,
 		),
 		context_instance=RequestContext(request))
 
