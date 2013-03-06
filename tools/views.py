@@ -122,7 +122,7 @@ def launch_job(request):
 		)
 		newJob.save()
 		messages.success(request, 'Success: job launched.')
-		return redirect(view_job, job_id=newJob.id, resource='')
+		return redirect(view_job, job_id=newJob.id, resource=None, filename=None)
 	else:
 		form = jobForm()
 		return render_to_response('submitForm.html', dict(
@@ -132,7 +132,7 @@ def launch_job(request):
 		context_instance=RequestContext(request)) 
 
 @guest_allowed
-def view_job(request, job_id, resource):
+def view_job(request, job_id, resource, filename):
 	username = request.user.username
 	try:
 		job = updateJob(username, job_id)
@@ -142,19 +142,22 @@ def view_job(request, job_id, resource):
 		if resource == 'delete':
 			deleteJob(username, job.id)
 			return HttpResponse("deleted", mimetype='text/plain')
+		if resource == 'download':
+			f = open(job.output, 'r')
+			result = f.read()
+			f.close()
+			return HttpResponse(result, mimetype=job.application.output_type)
 	if job.status == Job.FINISHED:
 		finalResult = job.output 
+		finalResult = re.sub(".*/", "", finalResult, count=0)
+		finalResult = '/working/' + finalResult
 		# select correct viewer here based on output type
 		if(job.application.output_type == 'application/json.canvasxpress'):	
-			finalResult = re.sub(".*/", "", finalResult, count=0)
-			job_filename = finalResult
-			finalResult = '/working/' + finalResult
 			f = open(job.output, 'r')
 			plotJSON = f.read()
 			f.close()
 			return render_to_response('view_job.html', dict(
 				title = str(job.application) + " Results",
-				job_filename = job_filename,
 				result = finalResult,
 				job = job,
 				plotJSON = plotJSON,
@@ -162,9 +165,18 @@ def view_job(request, job_id, resource):
 			context_instance=RequestContext(request))
 		elif(job.application.output_type == 'text/properties.table'):
 			f = open(job.output, 'r')
-			textfile = f.read()
+			textfile = f.read().rstrip()
 			f.close()
-			return HttpResponse(textfile, mimetype='text/plain')
+			csv = []
+			for line in textfile.split('\n'):
+				csv.append(line.rstrip().split(','))
+			return render_to_response('view_csv.html', dict(
+				title = str(job.application) + " Results",
+				result = finalResult,
+				job = job,
+				csv = csv,
+			),
+			context_instance=RequestContext(request))
 		else:
 			raise HttpResponse('unknown mimetype ' + job.application.output_type, mimetype='text/plain') 
 	elif job.status == Job.RUNNING:

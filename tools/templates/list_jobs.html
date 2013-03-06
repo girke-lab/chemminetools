@@ -36,10 +36,12 @@ function DeleteRow()
 	<th>Start time</th>
 	<th>Status</th>
 	<th>Options</th>
+	</tr>
+	</thead>
 	<tbody>
 	{% for job in matches %}
 		<tr id="{{job.id}}">
-		<th><a href="/tools/view_job/{{job.id}}">{{job.application}}</a></th>
+		<th><a href="/tools/view_job/{{job.id}}/">{{job.application}}</a></th>
 		<th>{{job.start_time}}</th>
 		<th>{% if job.status == 0 %}Running<img src="/static/images/spinner.gif"/>{% endif %}{% if job.status == 1 %}Finished{% endif %}{% if job.status == 2 %}Failed{% endif %}</th>
 		<th>{% if job.status != 0 %}<i data-toggle="tooltip" placement="top" title="delete this job" class="icon-trash"></i>{% endif %}
