@@ -16,11 +16,6 @@ class applicationForm(ModelForm):
 	class Meta:
 		model = Application
 
-class jobForm(ModelForm):
-	class Meta:
-		model = Job
-		fields = ('application',)
-
 class ApplicationOptionsForm(ModelForm):
 	class Meta:
 		model = ApplicationOptions
@@ -74,7 +69,7 @@ def manage_application(request, chooseForm):
 		context_instance=RequestContext(request))
 
 @guest_allowed
-def launch_job(request):
+def launch_job(request, category=None):
 	username = request.user.username
 	if request.is_ajax():
 		# for ajax requests, return HTML form for each app
@@ -122,11 +117,23 @@ def launch_job(request):
 		)
 		newJob.save()
 		messages.success(request, 'Success: job launched.')
-		return redirect(view_job, job_id=newJob.id, resource=None, filename=None)
+		return redirect(view_job, job_id=newJob.id, resource='', filename='')
 	else:
-		form = jobForm()
+		if category:
+			try:
+				category = ApplicationCategories.objects.get(name=category)
+				title = "Launch " + category.name + " Job"
+				apps = Application.objects.filter(category=category)
+			except:
+				raise Http404	
+		else:
+			title = "Launch Job"
+			apps = Application.objects.filter()
+		fields = {}
+		fields['application'] = ModelChoiceField(queryset=apps, empty_label="")
+		form = type('%sForm' % 'choose application', (Form,), fields)
 		return render_to_response('submitForm.html', dict(
-			title='Launch Clustering Job',
+			title=title,
 			form = form,
 		),
 		context_instance=RequestContext(request)) 
