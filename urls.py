@@ -13,6 +13,8 @@ urlpatterns = patterns('',
     (r'^compounds/', include('compounddb.urls')),
     (r'^my[Cc]ompounds/', include('myCompounds.urls')),
     (r'^tools/', include('tools.urls')),
+    (r'^search/pug/', include('pugsearch.urls')),
+    (r'^search/', include('eis.urls')),
     (r'^similarity/', include('similarityworkbench.urls')),
     url(r'^', include('cms.urls')),
 )

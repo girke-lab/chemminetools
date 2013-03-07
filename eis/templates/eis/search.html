@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+{% load cms_tags %}
+
+{% block base_content %}
+<h1> Ultra-Fast PubChem Structural Similarity Search</h1>
+<!--<div class="error">We are in the process of moving to a new building and many of our servers are affected. As a result, EI's search function is not usable. The cluster viewing function is not affected. If you want to use the search function, please check back later. We apologize for any inconvenience caused.</div>-->
+<p>Input your query structure using one of the following four options, and click either 'Search' button to initiate the similarity search against the PubChem Compound database.</p>
+<p><b>EI Search</b> is significantly faster than <b>PubChem fingerprint</b> search but may exclude compounds only recently added to PubChem.</p>
+<div style="height:40px"><a class="highlighted button" id="loadexample">Load an example query</a></div>
+<div style="clear:both; height:1em"></div>
+
+
+
+
+
+<script type="text/javascript">
+function do_example(){
+  $("#tab-menu").tabs('select', 0);
+  $("#smiles").get(0).value = 'CC(=O)OC1=CC=CC=C1C(=O)O';
+  $(".examplehelp").fadeIn(1000);
+  $("#loadexample").fadeOut(500);
+}
+
+$(document).ready(function() {
+$("#loadexample").click(function() {
+do_example();
+return false;
+});
+$("#smiles").after("<span class=\"red examplehelp\" style=\"position:relative;left:100px;display:none\" ><br/>&uarr;<br/>example SMILES string inserted<br/><span>");
+$("#smilesearchbtn").after("<span style=\"display:none\" class=\"red examplehelp\">&larr;Click this button to start search<br/><span>");
+
+var here = document.location.toString();
+if (here.match('#')) {
+  var anchor = here.split('#')[1];
+  if (anchor == 'example')
+    $("#loadexample").hide().click();
+}
+});
+</script>
+
+{% ifequal mode "form" %}
+<ul id="tab-menu">
+	<li><a href="#smiles-input">SMILES Input</a></li>
+	<li><a href="#draw">Structural Drawing</a></li>
+	<li><a href="#sdf-input">SDF Input</a></li>
+	<li><a href="#sdf-upload">SDF Upload</a></li>
+</ul>
+<div id="smiles-input">
+<p>
+Please type or copy and paste your single-molecule SMILES below, and click "Search". 
+</p>
+<form action="{% url compound_search %}" method="post" accept-charset="utf-8">
+	<label for="smiles">SMILES:</label>
+	<input id="smiles" type="text" name="smiles" size="60" value="{{ smi  }}"/><br/>
+	<input type="reset" value="Clear" />
+	<input type="submit" id="smilesearchbtn" value="EI Search" />
+	<input type="submit" name="pug" value="PubChem Fingerprint" />
+<br/>
+<label>Similarity Cutoff (PubChem Fingerprint only):</label>
+<b>0.</b><select name="cutoff">
+<option value="95">95</option>
+<option value="90">90</option>
+<option value="91">91</option>
+<option value="92">92</option>
+<option value="93">93</option>
+<option value="94">94</option>
+<option value="95">95</option>
+<option value="96">96</option>
+<option value="97">97</option>
+<option value="98">98</option>
+<option value="99">99</option>
+</select>
+
+</form>
+</div>
+<div id="draw">
+<p>
+Please draw a structure below and click "Search".
+</p>
+<applet code="JME.class" name="applet" archive="{{MEDIA_URL}}JME.jar" width="300" height="300">
+      Please enable Java and JavaScript on your machine.
+</applet>
+<form id="drawform" action="{% url compound_search %}" method="post" accept-charset="utf-8">
+	<input type="hidden" name="sdf"/><br/>
+	<input type="submit" value="EI Search" />
+	<input type="submit" name="pug" value="PubChem Fingerprint" />
+<br/>
+<label>Similarity Cutoff (PubChem Fingerprint only):</label>
+<b>0.</b>
+<select name="cutoff">
+<option value="95">95</option>
+<option value="90">90</option>
+<option value="91">91</option>
+<option value="92">92</option>
+<option value="93">93</option>
+<option value="94">94</option>
+<option value="95">95</option>
+<option value="96">96</option>
+<option value="97">97</option>
+<option value="98">98</option>
+<option value="99">99</option>
+</select>
+</form>
+</div>
+<div id="sdf-input">
+<p>
+Please copy and paste your single-molecule SDF below. If multiple compounds are supplied, only the first one will be used.
+</p>
+<form action="{% url compound_search %}" method="post" accept-charset="utf-8">
+	<label for="sdf_box">SDF Content:</label><br/>
+	<textarea id="sdf_box" name="sdf" cols="80" rows="12"></textarea><br/>
+	<input type="submit" value="EI Search" />
+	<input type="submit" name="pug" value="PubChem Fingerprint" />
+<br/>
+<label>Similarity Cutoff (PubChem Fingerprint only):</label>
+<b>0.</b>
+<select name="cutoff">
+<option value="95">95</option>
+<option value="90">90</option>
+<option value="91">91</option>
+<option value="92">92</option>
+<option value="93">93</option>
+<option value="94">94</option>
+<option value="95">95</option>
+<option value="96">96</option>
+<option value="97">97</option>
+<option value="98">98</option>
+<option value="99">99</option>
+</select>
+</form>
+</div>
+<div id="sdf-upload">
+<p>
+Please upload a single-molecule SDF below. If multiple compounds are found in the SDF, only the first one will be used.
+</p>
+<form action="{% url compound_search %}" method="post" enctype="multipart/form-data">
+	<label for="sdf_file">SDF File:</label>
+	<input id="sdf_file" name="sdf" type="file"/>
+	<input type="submit" value="EI Search" />
+	<input type="submit" name="pug" value="PubChem Fingerprint" />
+<br/>
+<label>Similarity Cutoff (PubChem Fingerprint only):</label>
+<b>0.</b>
+<select name="cutoff">
+<option value="95">95</option>
+<option value="90">90</option>
+<option value="91">91</option>
+<option value="92">92</option>
+<option value="93">93</option>
+<option value="94">94</option>
+<option value="95">95</option>
+<option value="96">96</option>
+<option value="97">97</option>
+<option value="98">98</option>
+<option value="99">99</option>
+</select>
+</form>
+</div>
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#tab-menu").tabs();
+	$("#drawform").submit(function() {
+		$(this).get(0).sdf.value = document.applet.molFile();
+		if(!document.applet.smiles().replace(' ', '').length()) {
+			alert("You need to draw a query structure.");
+			return false;
+		}
+		return true;
+	});
+});
+</script>
+{% endifequal %}
+
+{% endblock %}

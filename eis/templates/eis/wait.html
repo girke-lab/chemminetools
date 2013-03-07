@@ -1,0 +1,33 @@
+{% extends 'cms/base.html' %}
+{% load i18n %}
+{% block title %}
+<title>Compound Search</title>
+<noscript>
+<meta http-equiv="refresh" content="1;{% url search_result sid %}"/>
+</noscript>
+{% endblock %}
+
+{% block cms_content %}
+{% endblock %}
+{% block content %}
+<script type="text/javascript">
+function read()
+{
+        $.getJSON("{% url search_result sid %}?ajax", function(data) {
+        if (data.status == 'wait')
+                window.setTimeout(read, 1000);
+        else if (data.status == 'ok') {
+		window.location = "{% url search_result sid %}";
+        } else
+                alert(data.status);
+        });
+}
+
+$(document).ready(function() {
+        read();
+});
+
+</script>
+<h1> Loading result for the following query <img src="{{MEDIA_URL}}icons/ajax-loader.gif"/ id="wait"> </h1>
+<img src="http://chemmine.ucr.edu/renderer/{{sid}}"/>
+{% endblock %}
