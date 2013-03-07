@@ -185,7 +185,8 @@ def view_job(request, job_id, resource, filename):
 			),
 			context_instance=RequestContext(request))
 		else:
-			raise HttpResponse('unknown mimetype ' + job.application.output_type, mimetype='text/plain') 
+			# if mimetype is unknown, just send the file to the user
+			return redirect(view_job, job_id=job.id, resource='download', filename='output')	
 	elif job.status == Job.RUNNING:
 		return render_to_response('wait.html', dict(
 			title = "Job Running",

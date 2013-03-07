@@ -43,6 +43,7 @@ def main():
 				newValue.save()
 	except:
 		pass
+	print "Registered application " + newApp.name + "\n"
 	return True
 
 if __name__ == "__main__":

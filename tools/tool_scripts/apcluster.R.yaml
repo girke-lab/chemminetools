@@ -1,6 +1,7 @@
 %YAML 1.2
 ---
 # this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
 name: Hierarchical Clustering 
 category: Clustering
 script: apcluster.R
