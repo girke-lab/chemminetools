@@ -19,9 +19,8 @@ class compoundForm(ModelForm):
 @cache_page(60 * 120)
 @vary_on_cookie         # hide private compounds from other users 
 def render_image(request, id):
-	username = request.user.username
 	try:
-		compound = Compound.objects.get(id__iexact=id, username=username)
+		compound = Compound.objects.get(id__iexact=id, user=request.user)
 	except Compound.DoesNotExist:
 		raise Http404
 	smiles = compound.smiles
@@ -31,9 +30,8 @@ def render_image(request, id):
 
 @guest_allowed
 def compound_detail(request, id, resource):
-	username = request.user.username
 	try:
-		compound = Compound.objects.get(id__iexact=id, username=username)
+		compound = Compound.objects.get(id__iexact=id, user=request.user)
 	except Compound.DoesNotExist:
 		raise Http404
 

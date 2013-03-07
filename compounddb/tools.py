@@ -152,7 +152,7 @@ def _update_single_compound(moldata, sdf, library, nameky, idkey):
 	s.save()
 	sdfid = s.id
 
-def insert_single_compound(moldata, sdf, namekey, idkey, username=''):
+def insert_single_compound(moldata, sdf, namekey, idkey, user):
 	""" insert single compound into database """
 
 	cid = moldata[idkey]
@@ -167,7 +167,7 @@ def insert_single_compound(moldata, sdf, namekey, idkey, username=''):
 					weight=moldata['weight'],
 					inchi=moldata['inchi'],
 					smiles=moldata['smiles'],
-					username=username )
+					user=user )
 					#sdf_file=s)
 	c.save()
 	# c.library.add(library)

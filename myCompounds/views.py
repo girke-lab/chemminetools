@@ -18,17 +18,16 @@ from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, InputError, sdf_
 def showCompounds(request, resource):
     # perform query for existing myCompounds
     page, matches = getMyCompounds(request)
-    username = request.user.username
     if resource:
 	if resource == 'deleteAll':
 		deleteMyCompounds(request)
 		matches = None
 		messages.error(request, 'All Compounds Deleted!')
 	if resource == 'downloadSMILES':
-		smiles = makeSMILES(username)
+		smiles = makeSMILES(request.user)
 		return HttpResponse(smiles, mimetype='text/plain')
 	if resource == 'downloadSDF':
-		sdf = makeSDF(username)
+		sdf = makeSDF(request.user)
 		return HttpResponse(sdf, mimetype='text/plain')
     return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
@@ -109,22 +108,20 @@ def uploadCompound(request, *args, **kargs):
 				matches=matches,
 				),
 				context_instance=RequestContext(request))
-		counter = addMyCompounds(sdf, request.user.username,name,compid, smiles)
+		counter = addMyCompounds(sdf, request.user,name,compid, smiles)
 		messages.success(request, 'Success: ' + str(counter) + ' compound(s) added to database.')
 		page, matches = getMyCompounds(request)
     		return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
-def makeSDF(username):
-	base_queryset = Compound.objects
-	compoundList = base_queryset.filter(username=username)
+def makeSDF(user):
+	compoundList = Compound.objects.filter(user=user)
 	sdf = u''
 	for compound in compoundList:
 		sdf = sdf + compound.sdffile_set.all()[0].sdffile.rstrip() + '\n'	
 	return sdf 
 
-def makeSMILES(username):
-	base_queryset = Compound.objects
-	compoundList = base_queryset.filter(username=username)
+def makeSMILES(user):
+	compoundList = Compound.objects.filter(user=user)
 	smiles = u''
 	for compound in compoundList:
 		smiles = smiles + compound.smiles.rstrip() + '\n'
@@ -132,16 +129,14 @@ def makeSMILES(username):
 
 def getMyCompounds(request):
 	page = int(request.GET.get('p', '1'))
-	username = request.user.username
 	matches = []
 	# pure_query, matches = search('library: myCompounds', page, request)
-	base_queryset = Compound.objects
-	matches = base_queryset.filter(username=username) 
+	matches = Compound.objects.filter(user=request.user) 
 	if len(matches) == 0:
 		matches = None
 	return page, matches
 
-def addMyCompounds(sdf, username, name=None, compid=None, smiles=None):
+def addMyCompounds(sdf, user, name=None, compid=None, smiles=None):
 	sdffile = u''
 	counter = 0
 	namekey = 'PUBCHEM_IUPAC_NAME'
@@ -173,7 +168,7 @@ def addMyCompounds(sdf, username, name=None, compid=None, smiles=None):
 					moldata['smiles'] = smiles
 				else:
 					moldata['smiles'] = sdf_to_smiles(sdffile)
-			insert_single_compound(moldata, sdffile, namekey, idkey, username)
+			insert_single_compound(moldata, sdffile, namekey, idkey, user)
 			counter += 1
 			sdffile = u''
 	return counter
@@ -212,17 +207,15 @@ def getInChI(sdf):
 	return obConversion.WriteString(mol)
 
 def deleteMyCompounds(request, cids=None):
-	username = request.user.username 
-	compoundsToDelete = Compound.objects
-	compoundsToDelete = compoundsToDelete.filter(username=username)
+	compoundsToDelete = Compound.objects.filter(user=request.user)
 	if cids:
 	    for cid in cids:
 		Compound.objects.filter(cid=cid).delete()
 	else:
 		compoundsToDelete.delete()
         	
-def addToWorkbench(username, cids):
+def addToWorkbench(user, cids):
     library = get_library_by_name('myCompounds')
     for cid in cids:
-        compound = WorkbenchCompounds(compound = Compound.objects.get(cid__iexact=cid, library=library), username = username)
+        compound = WorkbenchCompounds(compound = Compound.objects.get(cid__iexact=cid, library=library), user = user)
         compound.save()

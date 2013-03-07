@@ -70,13 +70,12 @@ def manage_application(request, chooseForm):
 
 @guest_allowed
 def launch_job(request, category=None):
-	username = request.user.username
 	if request.is_ajax():
 		# for ajax requests, return HTML form for each app
 		currentApp = request.GET['currentApp']
 		try:
 			application = Application.objects.get(id=currentApp)
-			AppFormSet = getAppForm(application.id, username)	
+			AppFormSet = getAppForm(application.id, request.user)	
 			form = AppFormSet()
 			form = str(form)		
 			response = dict(form=form, desc=application.description)
@@ -84,7 +83,7 @@ def launch_job(request, category=None):
 			response = dict(form="ERROR")
 		return HttpResponse(dumps(response),'text/json')
 	if request.method == 'POST':
-		appForm = getAppForm(request.POST['application'], username)
+		appForm = getAppForm(request.POST['application'], request.user)
 		form = appForm(request.POST)
 		if form.is_valid():
 			try:
@@ -114,10 +113,10 @@ def launch_job(request, category=None):
 				commandOptions = commandOptions + " --" + questionObject.realName + "=" + option 
 				optionsList = optionsList + questionObject.name + ": " + optionName + ", "
 		optionsList = re.sub(",\s$", "", optionsList, count=0)
-		sdf = makeSDF(username)
+		sdf = makeSDF(request.user)
 		result = launch.delay(application.script, commandOptions, sdf)
 		newJob = Job(
-			username=username,
+			user=request.user,
 			application=application,
 			options=optionsList,
 			input='myCompounds sdf',
@@ -149,14 +148,13 @@ def launch_job(request, category=None):
 
 @guest_allowed
 def view_job(request, job_id, resource, filename):
-	username = request.user.username
 	try:
-		job = updateJob(username, job_id)
+		job = updateJob(request.user, job_id)
 	except Job.DoesNotExist:
 		raise Http404
 	if resource:
 		if resource == 'delete':
-			deleteJob(username, job.id)
+			deleteJob(request.user, job.id)
 			return HttpResponse("deleted", mimetype='text/plain')
 		if resource == 'download':
 			f = open(job.output, 'r')
@@ -210,6 +208,5 @@ def view_job(request, job_id, resource, filename):
 
 @guest_allowed
 def list_jobs(request):
-	username = request.user.username
-	matches = getJobList(username)
+	matches = getJobList(request.user)
 	return render_to_response('list_jobs.html', dict(matches=matches,), context_instance=RequestContext(request))

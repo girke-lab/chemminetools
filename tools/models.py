@@ -1,6 +1,8 @@
+import os
 from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
+from runapp import launch
 DATETIME_FORMAT = settings.DATETIME_FORMAT
 
 class ApplicationCategories(models.Model):
@@ -43,7 +45,7 @@ class Job(models.Model):
 		(FINISHED, 'Finished'),
 		(FAILED, 'Failed'),
 	)
-	username = models.CharField(max_length=30, default='', blank=True)
+	user = models.ForeignKey(User, db_index=True)
 	application = models.ForeignKey(Application)
 	start_time = models.DateTimeField(auto_now_add=True)
 	status = models.SmallIntegerField(default=RUNNING, choices=STATUS_CHOICES)
@@ -51,6 +53,17 @@ class Job(models.Model):
 	input = models.CharField(max_length=1000)
 	output = models.CharField(max_length=1000)
 	task_id = models.CharField(max_length=255)
+
+	def delete(self, *args, **kwargs):
+		if isinstance(self.output, unicode):
+			if os.path.isfile(self.output):
+				os.remove(self.output)
+		try:
+			result = launch.AsyncResult(self.task_id)
+			result.forget()
+		except:
+			pass
+		super(Job, self).delete()
 
 	def __unicode__(self):
 		return self.application.name + " " + self.start_time.strftime(DATETIME_FORMAT)

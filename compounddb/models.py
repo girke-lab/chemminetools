@@ -8,37 +8,14 @@ class Compound(models.Model):
         weight = models.DecimalField(max_digits=10, decimal_places=2)
         inchi = models.TextField()
         smiles = models.CharField(max_length=1024)
-        username = models.CharField(max_length=30, default='', blank=True)
-
-        class Meta:
-                #ordering = ['id']
-                #get_latest_by = 'pub_date'
-                pass
+	user = models.ForeignKey(User, db_index=True)
 
         def __unicode__(self):
                 return "%s_%s" % (self.id, self.cid)
-
-        @models.permalink
-        def get_absolute_url(self):
-                return ('compound_detail', (),
-                        dict( library=self.library,
-                                        cid=self.header.cid ) )
 
 class SDFFile(models.Model):
         sdffile = models.TextField()
         compound = models.ForeignKey(Compound)
 
-        class Meta:
-                #ordering = ['id']
-                pass
-
         def __unicode__(self):
                 return "%s" % self.id
-
-class Property(models.Model):
-	name = models.CharField(max_length=256)
-	value = models.FloatField()
-	compound = models.ForeignKey(Compound, editable=False)
-
-	def __unicode__(self):
-		return "%s" % self.name

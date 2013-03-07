@@ -25,34 +25,34 @@ def launch(appname, commandOptions, input):
 	else:
 		return outputFileName 
 
-def getAppForm(application_id, username):
+def getAppForm(application_id, user):
 	fields = {}
 	application = Application.objects.get(id=application_id)
 	for option in ApplicationOptions.objects.filter(application=application).order_by('id'):
 		try:
 			value = ApplicationOptionsList.objects.get(name='fileInput', category=option)
-			getJobList(username)
-			fields[option.name] = ModelChoiceField(queryset=Job.objects.filter(application__output_type=value.realName, username=username, status=Job.FINISHED).order_by('-id'), empty_label="None", required=False)	
+			getJobList(user)
+			fields[option.name] = ModelChoiceField(queryset=Job.objects.filter(application__output_type=value.realName, user=user, status=Job.FINISHED).order_by('-id'), empty_label="None", required=False)	
 		except:
 			fields[option.name] = ModelChoiceField(queryset=ApplicationOptionsList.objects.filter(category=option).order_by('id'), empty_label=None)		
 	fields['application'] = IntegerField(initial=application.id,widget=HiddenInput())
 	return type('%sForm' % str(application.name), (Form,), fields)
 
-def getJobList(username):
+def getJobList(user):
 	# get all running jobs and update those that need updating
 	try:
-		runningJobs = Job.objects.filter(username=username, status=Job.RUNNING)
+		runningJobs = Job.objects.filter(user=user, status=Job.RUNNING)
 		for job in runningJobs:
-			updateJob(username,job.id)
+			updateJob(user,job.id)
 	except:
 		return False
-	return Job.objects.filter(username=username).order_by('-start_time')
+	return Job.objects.filter(user=user).order_by('-start_time')
 
 
-def updateJob(username, job_id):
+def updateJob(user, job_id):
 	# checks if a job is done, updates it's status, and then returns it
 	try:
-		job = Job.objects.get(id=job_id, username=username)
+		job = Job.objects.get(id=job_id, user=user)
 	except:
 		return False
 	if job.status == Job.RUNNING:
@@ -67,16 +67,8 @@ def updateJob(username, job_id):
 			job.save()
 	return job
 
-def deleteJob(username, job_id):
-	job = updateJob(username, job_id)
-	if isinstance(job.output, unicode):
-		if os.path.isfile(job.output):
-			os.remove(job.output)
-	try:
-		result = launch.AsyncResult(job.task_id)
-		result.forget()
-	except:
-		pass
+def deleteJob(user, job_id):
+	job = updateJob(user, job_id)
 	job.delete()
 	return True
 
@@ -85,13 +77,5 @@ def deleteApp(name):
 		app = Application.objects.get(name=name)
 	except:
 		return False
-	jobs = Job.objects.filter(application=app)
-	for job in jobs:
-		deleteJob(job.username, job.id)
-	options = ApplicationOptions.objects.filter(application=app)
-	for option in options:
-		values = ApplicationOptionsList.objects.filter(category=option)
-		values.delete()	
-	options.delete()
 	app.delete()
 	return True
