@@ -77,7 +77,7 @@ def mcs(sdf1, sdf2):
 			sim_min='%.4f' % sim_min,
 			sim_max='%.4f' % sim_max,
 			sim_tanimoto='%.4f' % sim_tanimoto,
-			img='http://chemmine.ucr.edu/renderer/smiles;' + s,
+			img='/similarity/renderer/' + s,
 			md5=md5(mcs).hexdigest(),
 			title=title,
 			smiles=mcs)

@@ -5,9 +5,22 @@ from simplejson import dumps
 from sdftools.moleculeformats import batch_smiles_to_smiles, batch_sdf_to_smiles
 from similarityworkbench import funcs
 from myCompounds.views import getMyCompounds
+from guest.decorators import guest_allowed, login_required
+from django.views.decorators.cache import cache_page
+import pybel
 
 import os
 from django.conf import settings
+
+@guest_allowed
+@cache_page(60 * 120)
+def renderer(request, smiles):
+	try:
+		mymol = pybel.readstring("smi", str(smiles))
+		png = mymol.write(format='png')
+		return HttpResponse(png, mimetype='image/png')
+	except:
+		raise Http404
 
 def get_workbench_compounds(request):
 	ret = []
@@ -31,10 +44,11 @@ def add_compounds(smiles):
 		except:
 			s = c
 			name = 'Unnamed:' + md5id[:5]
-		img = 'http://chemmine.ucr.edu/renderer/smiles;' + s
+		img = '/similarity/renderer/' + s
 		ret.append(dict(img=img, md5=md5id, title=name, smiles=c))
 	return ret
 
+@guest_allowed
 def ui(request):
 	if request.method == 'GET':
 		# on GET, show the UI page
