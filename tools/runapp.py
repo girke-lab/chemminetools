@@ -25,11 +25,16 @@ def launch(appname, commandOptions, input):
 	else:
 		return outputFileName 
 
-def getAppForm(application_id):
+def getAppForm(application_id, username):
 	fields = {}
 	application = Application.objects.get(id=application_id)
-	for option in ApplicationOptions.objects.filter(application=application):
-		fields[option.name] = ModelChoiceField(queryset=ApplicationOptionsList.objects.filter(category=option).order_by('id'), empty_label=None)		
+	for option in ApplicationOptions.objects.filter(application=application).order_by('id'):
+		try:
+			value = ApplicationOptionsList.objects.get(name='fileInput', category=option)
+			getJobList(username)
+			fields[option.name] = ModelChoiceField(queryset=Job.objects.filter(application__output_type=value.realName, username=username, status=Job.FINISHED).order_by('-id'), empty_label="None", required=False)	
+		except:
+			fields[option.name] = ModelChoiceField(queryset=ApplicationOptionsList.objects.filter(category=option).order_by('id'), empty_label=None)		
 	fields['application'] = IntegerField(initial=application.id,widget=HiddenInput())
 	return type('%sForm' % str(application.name), (Form,), fields)
 

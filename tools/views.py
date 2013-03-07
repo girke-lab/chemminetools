@@ -76,7 +76,7 @@ def launch_job(request, category=None):
 		currentApp = request.GET['currentApp']
 		try:
 			application = Application.objects.get(id=currentApp)
-			AppFormSet = getAppForm(application.id)	
+			AppFormSet = getAppForm(application.id, username)	
 			form = AppFormSet()
 			form = str(form)		
 			response = dict(form=form, desc=application.description)
@@ -84,7 +84,7 @@ def launch_job(request, category=None):
 			response = dict(form="ERROR")
 		return HttpResponse(dumps(response),'text/json')
 	if request.method == 'POST':
-		appForm = getAppForm(request.POST['application'])
+		appForm = getAppForm(request.POST['application'], username)
 		form = appForm(request.POST)
 		if form.is_valid():
 			try:
@@ -93,17 +93,26 @@ def launch_job(request, category=None):
 			except Application.DoesNotExist:
 				return HttpResponse("Application does not exist", mimetype='text/plain')	
 		else:
-			return None
 			return HttpResponse('invalid form', mimetype='text/plain')
 		commandOptions = u''
 		optionsList = u''
 		for question in form.cleaned_data.keys():
 			if question != 'application':
-				answer = str(form.cleaned_data[question])
 				questionObject = ApplicationOptions.objects.get(application=application, name=question) 
-				answerObject = ApplicationOptionsList.objects.get(category=questionObject, name=answer)
-				commandOptions = commandOptions + " --" + questionObject.realName + "=" + answerObject.realName 
-				optionsList = optionsList + questionObject.name + ": " + answerObject.name + ", "
+				try:
+					job = form.cleaned_data[question]
+					option = job.output
+					optionName = str(job) 
+				except:
+					try:
+						answerObject = form.cleaned_data[question]
+						optionName = answerObject.name
+						option = answerObject.realName
+					except:
+						option = 'None'
+						optionName = 'None'
+				commandOptions = commandOptions + " --" + questionObject.realName + "=" + option 
+				optionsList = optionsList + questionObject.name + ": " + optionName + ", "
 		optionsList = re.sub(",\s$", "", optionsList, count=0)
 		sdf = makeSDF(username)
 		result = launch.delay(application.script, commandOptions, sdf)

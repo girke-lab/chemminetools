@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
+DATETIME_FORMAT = settings.DATETIME_FORMAT
 
 class ApplicationCategories(models.Model):
 	name = models.CharField(max_length=250, unique=True)
@@ -51,5 +53,5 @@ class Job(models.Model):
 	task_id = models.CharField(max_length=255)
 
 	def __unicode__(self):
-		return self.application.name
+		return self.application.name + " " + self.start_time.strftime(DATETIME_FORMAT)
 
