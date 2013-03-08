@@ -97,6 +97,6 @@ def deleteOrphanJobs():
 		jobs = Job.objects.filter(user__isnull=True)
 		for job in jobs:
 			deleteJob(job.user, job.id)
+		return True
 	except:
-		pass
-	return True
+		return False
