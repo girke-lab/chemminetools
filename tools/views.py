@@ -120,10 +120,10 @@ def launch_job(request, category=None):
 			options=optionsList,
 			input='myCompounds sdf',
 			output='',
-			task_id=result.id,
+			task_id='',
 		)
 		newJob.save()
-		result = launch.delay(application.script, commandOptions, sdf, job.id)
+		result = launch.delay(application.script, commandOptions, sdf, newJob.id)
 		newJob.task_id = result.id
 		newJob.save()
 		messages.success(request, 'Success: job launched.')
