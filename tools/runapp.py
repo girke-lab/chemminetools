@@ -11,10 +11,8 @@ outputPath = settings.TOOLS_RESULTS
 projectDir = settings.PROJECT_DIR
 
 @task()
-def launch(appname, commandOptions, input):
-	outputFile = NamedTemporaryFile(dir=outputPath, delete=True)
-	outputFileName = outputFile.name
-	outputFile.close()
+def launch(appname, commandOptions, input, job_id):
+	outputFileName = outputPath + "/job_" + str(job_id)
 	command = projectDir + '/tools/tool_scripts/' + appname + ' --outfile=' + outputFileName + " " + commandOptions
 	print("Running: " + command + "\n")
 	runningTask = subprocess.Popen(command, shell=True, stdin=subprocess.PIPE)

@@ -114,7 +114,6 @@ def launch_job(request, category=None):
 				optionsList = optionsList + questionObject.name + ": " + optionName + ", "
 		optionsList = re.sub(",\s$", "", optionsList, count=0)
 		sdf = makeSDF(request.user)
-		result = launch.delay(application.script, commandOptions, sdf)
 		newJob = Job(
 			user=request.user,
 			application=application,
@@ -123,6 +122,9 @@ def launch_job(request, category=None):
 			output='',
 			task_id=result.id,
 		)
+		newJob.save()
+		result = launch.delay(application.script, commandOptions, sdf, job.id)
+		newJob.task_id = result.id
 		newJob.save()
 		messages.success(request, 'Success: job launched.')
 		return redirect(view_job, job_id=newJob.id, resource='', filename='')
