@@ -4,7 +4,6 @@
 {% block js_content %}
 <script type="text/javascript">
 function do_example(){
-  $("#tab-menu").tabs('select', 0);
   $("#smiles").get(0).value = 'CC(=O)OC1=CC=CC=C1C(=O)O';
   $(".examplehelp").fadeIn(1000);
   $("#loadexample").fadeOut(500);
@@ -29,7 +28,6 @@ if (here.match('#')) {
 
 <script type="text/javascript">
 $(document).ready(function() {
-	$("#tab-menu").tabs();
 	$("#drawform").submit(function() {
 		$(this).get(0).sdf.value = document.applet.molFile();
 		if(!document.applet.smiles().replace(' ', '').length()) {
@@ -61,7 +59,7 @@ $(document).ready(function() {
 <div class="span12">
 {% ifequal mode "form" %}
 <ul class="nav nav-tabs">
-	<li><a href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
+	<li class="active"><a href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
 	<li><a href="#draw" data-toggle="tab">Structural Drawing</a></li>
 	<li><a href="#sdf-input" data-toggle="tab">SDF Input</a></li>
 	<li><a href="#sdf-upload" data-toggle="tab">SDF Upload</a></li>
@@ -75,6 +73,7 @@ Please type or copy and paste your single-molecule SMILES below, and click "Sear
 <button class="btn" type="button" id="loadexample">Load an example query</button>
 </p>
 <form action="{% url compound_search %}" method="post" accept-charset="utf-8">
+{% csrf_token %}
 	<label for="smiles">SMILES:</label>
 	<input id="smiles" type="text" name="smiles" size="60" value="{{ smi  }}"/><br/>
 	<input type="reset" value="Clear" />
@@ -102,10 +101,11 @@ Please type or copy and paste your single-molecule SMILES below, and click "Sear
 <p>
 Please draw a structure below and click "Search".
 </p>
-<applet code="JME.class" name="applet" archive="{{MEDIA_URL}}JME.jar" width="300" height="300">
+<applet code="JME.class" name="applet" archive="/static/JME.jar" width="300" height="300">
       Please enable Java and JavaScript on your machine.
 </applet>
 <form id="drawform" action="{% url compound_search %}" method="post" accept-charset="utf-8">
+{% csrf_token %}
 	<input type="hidden" name="sdf"/><br/>
 	<input type="submit" value="EI Search" />
 	<input type="submit" name="pug" value="PubChem Fingerprint" />
@@ -132,6 +132,7 @@ Please draw a structure below and click "Search".
 Please copy and paste your single-molecule SDF below. If multiple compounds are supplied, only the first one will be used.
 </p>
 <form action="{% url compound_search %}" method="post" accept-charset="utf-8">
+{% csrf_token %}
 	<label for="sdf_box">SDF Content:</label><br/>
 	<textarea id="sdf_box" name="sdf" cols="80" rows="12"></textarea><br/>
 	<input type="submit" value="EI Search" />
@@ -159,6 +160,7 @@ Please copy and paste your single-molecule SDF below. If multiple compounds are 
 Please upload a single-molecule SDF below. If multiple compounds are found in the SDF, only the first one will be used.
 </p>
 <form action="{% url compound_search %}" method="post" enctype="multipart/form-data">
+{% csrf_token %}
 	<label for="sdf_file">SDF File:</label>
 	<input id="sdf_file" name="sdf" type="file"/>
 	<input type="submit" value="EI Search" />

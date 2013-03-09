@@ -29,7 +29,7 @@ def search(request, sid):
         request.session.save()
         return HttpResponseRedirect(reverse('compound_search'))
     dir = os.path.join(settings.WORK_DIR, sid)
-    query = os.path.join(dir, settings.QUERY_SDF)
+    query = os.path.join(dir, 'query.sdf')
     if not os.path.exists(query):
         raise Http404, 'no such job: %s' % sid
     try:

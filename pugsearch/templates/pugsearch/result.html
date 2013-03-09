@@ -1,14 +1,37 @@
-{% extends 'cms/base.html' %}
-{% load i18n %}
-{% block title %}
-<title>Compound Search Result</title>
-{% endblock %}
-{% block extrahead %}
-<script type="text/javascript" src="{{MEDIA_URL}}result.js"></script>
-<script type="text/javascript" src="{{MEDIA_URL}}jquery.simplemodal.js"></script>
-{% endblock %}
+{% extends 'base.html' %}
+{% load cms_tags %}
 
-{% block content %}
+{% block js_content %}
+<script type="text/javascript">
+var structures_loaded = false;
+
+$(document).ready(function() {
+	$("#loadstructures").click(function () {
+		if (!structures_loaded) {
+			$(this).html('Hide Structures');
+			var buf = $(this).text();
+			$(".compoundImageTitle").show();
+			$(".compoundImage").show();
+			$(".compoundImage").each(function() {
+				$(this).html('<img width="100" class="img-rounded" src="http://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid='+ $(this).attr('id') + '"/>');
+			});
+			structures_loaded = true;
+		} else {
+			$(this).html('Show Structures');
+			structures_loaded = false;
+			$(".compoundImage").hide();
+			$(".compoundImageTitle").hide();
+			$(".compoundImage").each(function() {
+				$(this).html('');
+			});
+		}
+	});
+});	
+		
+</script>
+{% endblock %}
+{% block base_content %}
+
 {% ifequal mode "perm_failure" %}
 	<div class="notice">I am sorry, but your query has timed out. You may try refresh this page manually later to see whether it will finally be processed. </div>
 {% endifequal %}
@@ -16,43 +39,45 @@
 	<div class="notice">I am sorry, but your query cannot be processed. The error message is: {{error}} </div>
 	<div><b>tip:</b> Sometimes, going back and resubmiting the query can rescue a failure case.</div>
 {% endifequal %}
+
 {% ifequal mode "ready" %}
-<div id="query">
+<div class="row-fluid">
+<div class="span12">
 <h2> Query Structure </h2>
-<div><img width="200" src="/renderer/{{sid}}"/></div>
+<img width="200" src="/similarity/renderer/ccccc"/>
 </div>
-<div id="hits">
+</div><!--/row-->
+
+<div class="row-fluid">
+<div class="span12">
 <h2>Hits</h2>
-<div>
-<a class="highlighted button" href="{% url download_search_result sid,"webtools"%}#webtools">Send to Workbench</a>
-<a class="highlighted button" href="{% url download_search_result sid,"sdf"%}">Download SDF</a>
-<a class="highlighted button" href="{% url download_search_result sid,"smiles"%}">Download SMILES</a>
-<a class="highlighted button" href="{{e_url}}">View in PubChem Entrez</a>
-<form id="pugform" method="post" action="{% url pug_search sid %}">
-<p>
-You can verify the results in this page by performing the same query using PubChem structure search function.<br/>
-</p>
-<span>
-<label>Similarity Cutoff:</label>
-<b>0.</b>
-<input type="text" name="cutoff" maxlength="2" size="2"/><br/>
-<input type="submit" value="Verify in PubChem"/>
-<div style="" class="simplemodal-close"><a href="#">Cancel</a></div>
-</span>
-</form>
-<div style="clear:both">
-<form id="structureloadctrl">
-<input type="checkbox" id="loadstructures"/><label>Show Compound Structures</label>
-</form>
-</div></div>
-<table class="compounds" width="100%">
+<div class="btn-group">
+<a href="{% url download_search_result sid,"webtools"%}#webtools"><button type="button" class="btn btn-primary">Send to Workbench</button></a>
+<a href="{% url download_search_result sid,"sdf"%}"><button type="button" class="btn">Download SDF</button></a>
+<a href="{% url download_search_result sid,"smiles"%}"><button type="button" class="btn">Download SMILES</button></a>
+<button id="loadstructures" class="btn">Show Structures</button>
+</div>
+
+<table class="table table-striped table-bordered compounds">
+<thead>
+<tr>
+<th style="display:none" class="compoundImageTitle">Structure</th>
+<th>CID</th>
+<th>More Info</th>
+<tr>
+</thead>
+<tbody>
 {% for compound in compounds %}
 	<tr class="compound">
-		<td width="20%" style="display:none" class="image" id="cid-{{compound.0}}">  </td>
-		<td width="80%" class="summary"><span class="cid">CID {{compound.0}}</span> [<a href="{{extra_dict.COMPOUND_SUMMARY_URL}}{{compound.0}}">PubChem Link</a>]</td>
+		<td style="display:none" class="compoundImage" id="{{compound.0}}">  </td>
+		<td>{{compound.0}}</td>
+		<td><a href="http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid={{compound.0}}">PubChem Link</a></td>
 	</tr>
 {% endfor %}
+</tbody>
 </table>
+
+</div>
 </div>
 {% endifequal %}
 {% endblock %}

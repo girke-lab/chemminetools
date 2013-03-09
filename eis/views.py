@@ -6,6 +6,7 @@ from hashlib import md5
 import os
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.contrib import messages
 import socket
 from stat import ST_MTIME, S_IRWXU, S_IRWXG
 from sdftools.moleculeformats import smiles_to_sdf, InputError
@@ -37,10 +38,7 @@ def search(request):
 			try:
 				sdf = smiles_to_sdf(str(request.POST['smiles']))
 			except InputError:
-				if not 'session_msg' in request.session:
-					request.session['session_msg'] = []
-				request.session['session_msg'].append("Invalid SMILES string!")
-				request.session.save()
+				messages.error(request,"Error: Invalid SMILES string!")
 				return HttpResponseRedirect(reverse('compound_search'))
 		elif 'sdf' in request.FILES:
 			sdf = first_mol(request.FILES['sdf'])
@@ -69,9 +67,9 @@ def search(request):
 			f = file(query_sdf, 'w')
 			f.write(sdf)
 			f.close()
-			s_ = sdf2png('file://' + os.path.join(dir, 'query.sdf'),
-					local=True)
-			assert s == s_
+			# s_ = sdf2png('file://' + os.path.join(dir, 'query.sdf'),
+			#			local=True)
+			# assert s == s_
 
 			# remove status file if none exists (note this could yield race condition)
 			filename = os.path.join(dir, 'status')
@@ -86,10 +84,7 @@ def search(request):
 				try:
 					return pug_search(request,s)
 				except:
-				        if not 'session_msg' in request.session:
-                                        	request.session['session_msg'] = []
-                                	request.session['session_msg'].append("No hits!")
-                                	request.session.save()
+                                	messages.error(request,"No hits!")
 					return HttpResponseRedirect(reverse('compound_search'))
 
 			# submit to server
@@ -101,10 +96,7 @@ def search(request):
 				assert hello == 'OK\n'
 				sock.send(dir + '\n')
 			except:
-				if not 'session_msg' in request.session:
-					request.session['session_msg'] = []
-				request.session['session_msg'].append("Query server not reachable!")
-				request.session.save()
+				messages.error(request,"Query server not reachable!")
 				return HttpResponseRedirect(reverse('compound_search'))
 				
 			return HttpResponseRedirect(reverse('search_wait', kwargs=dict(sid=s)))
@@ -120,12 +112,9 @@ def wait(request, sid):
 def session_check(f):
 	def func(request, sid, *args, **kargs):
 		dir = os.path.join(settings.WORK_DIR, sid)
-		query = os.path.join(dir, settings.QUERY_SDF)
+		query = os.path.join(dir, 'query.sdf')
 		if not os.path.exists(dir):
-			if not 'session_msg' in request.session:
-				request.session['session_msg'] = []
-			request.session['session_msg'].append("No such job found. Please try again.")
-			request.session.save()
+			messages.error(request,"No such job found. Please try again.")
 			return HttpResponseRedirect(reverse('compound_search'))
 
 		status_fp = os.path.join(dir, 'status')
