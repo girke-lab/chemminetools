@@ -20,31 +20,42 @@ apt-get install -y python-pylibmc
 apt-get install -y libxml2-dev
 apt-get install -y openjdk-7-jre
 apt-get install -y libreadline5
+apt-get install -y r-base-core
+apt-get install -y subversion
+apt-get install -y apache2
+apt-get install -y libapache2-mod-wsgi
+apt-get install -y memcached
 
 pip install django-bootstrap-toolkit
 pip install django-cms south
 pip install django-appmedia
-pip install django-cron
 pip install ZSI
 pip install django-celery
 pip install simplejson
 pip install ghostscript
+pip install pyyaml
 
-# pull down project
-su tbackman
+# exit now if a bash script, the rest should be run interactively 
+exit 0
+
+# create a user for chemmine tools, and su to that user
 cd /srv
+cd ~
 git clone git@github.com:TylerBackman/chemminetools.git
 
-# copy config file
-scp biocluster.ucr.edu:/home_girkelab/tbackman/Projects/chemminetools/settings.py.devel .
-ln -s settings.py.devel settings.py
-# made changes to get it running
+# as root move to /srv
+mv chemminetools /srv
 
-# create postgresql database
+# rename config file
+mv /srv/chemminetools/chemminetools/settings_sample.py /srv/chemminetools/chemminetools/settings.py 
+# made changes to get it running: add in database settings and secret key
+
+# create postgresql database as postgres user
 su postgres
 createuser -U postgres chemminetools -P
 createdb -E utf8 -O chemminetools chemminetools -T template0
 
+# as root
 # manually install packages in /usr/local/lib/python2.7/dist-packages:
 svn checkout http://django-guest.googlecode.com/svn/trunk/ django-guest-read-only
 svn checkout http://django-cron.googlecode.com/svn/trunk/ django-cron-read-only
@@ -52,13 +63,92 @@ mv django-guest-read-only/guest /usr/local/lib/python2.7/dist-packages/
 mv django-guest-read-only/gyroid_utils /usr/local/lib/python2.7/dist-packages/
 mv django-cron-read-only/django_cron /usr/local/lib/python2.7/dist-packages/
 
+# unset LC_ALL
+export LC_ALL=
+
 # add sql commands to blank database
+cd /srv/chemminetools
 python manage.py syncdb
 python manage.py migrate
 
-# exit if you're running this as a bash script
-exit 0
+# install R packages
+R
+source("http://bioconductor.org/biocLite.R")
+biocLite()
+biocLite(c("ChemmineR", "ctc", "rjson"))
+install.packages("R.utils")
 
+# create working directory and set permissions
+mkdir /srv/chemminetools/working
+sudo chown www-data /srv/chemminetools/working
+
+# register all applications in database
+cd /srv/chemminetools/tools/tool_scripts
+./loader.py -i <appname>.yaml
+
+# setup Apache: 
+# add to /etc/apache2/mods-available/wsgi.conf:
+    Alias /static/ /srv/chemminetools/static/
+    WSGIScriptAlias / /srv/chemminetools/chemminetools/wsgi.py
+    <Location />
+        Order Allow,Deny
+        Allow from all
+    </Location>
+    <Location /admin>
+        Order Deny,Allow
+        Deny from all
+        Allow from .ucr.edu
+    </Location>
+
+# add apache module
+sudo a2enmod wsgi
+
+# daemonize celery
+cd /etc/init.d
+wget https://raw.github.com/celery/celery/3.0/extra/generic-init.d/celeryd
+chmod ugo+x celeryd
+sudo update-rc.d celeryd defaults
+mkdir /var/log/celery
+chown www-data /var/log/celery
+mkdir /var/run/celery
+chown www-data /var/run/celery
+
+# put the following in /etc/default/celeryd:
+###############################################
+CELERYD_NODES="w1"
+
+# Where to chdir at start.
+CELERYD_CHDIR="/srv/chemminetools"
+
+# How to call "manage.py celeryd_multi"
+CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"
+
+# How to call "manage.py celeryctl"
+CELERYCTL="$CELERYD_CHDIR/manage.py celeryctl"
+
+# Extra arguments to celeryd
+CELERYD_OPTS="--time-limit=172800 --concurrency=4"
+
+# %n will be replaced with the nodename.
+CELERYD_LOG_FILE="/var/log/celery/%n.log"
+CELERYD_PID_FILE="/var/run/celery/%n.pid"
+CELERY_CREATE_DIRS=1
+
+# Workers should run as an unprivileged user.
+CELERYD_USER="www-data"
+CELERYD_GROUP="www-data"
+
+# Name of the projects settings module.
+export DJANGO_SETTINGS_MODULE="chemminetools.settings"
+############################################################
+
+# to get joelib working:
+# -install java jre1.7.0_17 in /opt/jre
+# - install JOELib2-alpha-20070303 in /opt/JOELib2-alpha-20070303
+
+# log into /admin and add users and static content
+
+### OPTIONAL FOR DEV SITE: ###
 # launch test page on local port
 python manage.py runserver 8020
 
