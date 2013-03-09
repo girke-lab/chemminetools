@@ -14,6 +14,9 @@ framework.
 
 """
 import os
+import sys
+sys.path.append('/srv')
+sys.path.append('/srv/chemminetools')
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chemminetools.settings")
 
