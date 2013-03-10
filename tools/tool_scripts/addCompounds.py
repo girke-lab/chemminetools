@@ -3,7 +3,6 @@
 import sys
 sys.path.append('/srv/chemminetools')
 sys.path.append('/srv/chemminetools/sdftools')	# allow tools.py to be imported
-import os
 
 from django.core.management import setup_environ
 import chemminetools.settings
@@ -11,11 +10,7 @@ import argparse
 setup_environ(chemminetools.settings)
 
 from django.contrib.auth.models import User
-
-from compounddb import tools
-from compounddb.sdfiterator import sdf_iter
-from csv import writer
-from cStringIO import StringIO
+from myCompounds.views import addMyCompounds
 
 parser = argparse.ArgumentParser(description='Add new compounds to a users workbench')
 parser.add_argument('-f','--format', help='input format smiles, sdf, or pubchem', required=True)
@@ -26,13 +21,25 @@ args = vars(parser.parse_args())
 def main():
 	# check if user account exists
 	try:
-		user = User.objects.get(id=user)	
+		user = User.objects.get(id=args['user'])	
 	except:
-		return False
+		raise
 
-		
-	sdf = sys.stdin.read()
-	output = app_processor(sdf)
+	input = sys.stdin.read()
+
+	if args['format'] == 'sdf':
+		pass		
+	elif args['format'] == 'smiles':
+		pass
+	elif args['format'] == 'pubchem':
+		pass
+	else:
+		raise Exception('unknown input format')
+
+	counter = addMyCompounds(sdf, user, name, compid, smiles)
+	
+	output = "Success: Added " + str(counter) + " compounds to database."
+
 	f = open(args['outfile'], 'w')
 	f.write(output)
 	f.close()
