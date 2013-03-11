@@ -70,6 +70,7 @@ export LC_ALL=
 cd /srv/chemminetools
 python manage.py syncdb
 python manage.py migrate
+python manage.py collectstatic
 
 # install R packages
 R
@@ -88,7 +89,7 @@ cd /srv/chemminetools/tools/tool_scripts
 
 # setup Apache: 
 # add to /etc/apache2/mods-available/wsgi.conf:
-    Alias /static/ /srv/chemminetools/static/
+    Alias /static/ /srv/chemminetools/static_production/
     WSGIScriptAlias / /srv/chemminetools/chemminetools/wsgi.py
     <Location />
         Order Allow,Deny
