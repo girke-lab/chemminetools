@@ -1,0 +1,22 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: Upload Compounds 
+category: Internal 
+script: addCompounds.py 
+input_type: chemical/x-mdl-sdfile
+output_type: text/compound-quantitity 
+description: This tool adds new compounds to the workbench.
+
+ApplicationOptions:
+     User ID: # this name will show up online
+          realName: user # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [0, 0]
+     Input Format:
+          realName: format 
+          options:
+               - [Smiles, smiles]
+               - [SDF, sdf]
+               - [CID, cid]
