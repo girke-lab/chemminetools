@@ -70,17 +70,19 @@
 	<th style="display:none" class="compoundImageTitle">Structure</th>
 	<th>Smiles</th>
 	<th>Options</th>
+	</tr>
+	</thead>
 	<tbody>
 	{% for compound in matches %}
 		<tr id="{{compound.id}}">
-		<th><a href="/compounds/{{compound.id}}">{{compound.cid}}</a></th>
-		<th>{{compound.name}}</th>
-		<th style="display:none" class="compoundImage" id="{{compound.id}}">  </th>
-		<th>{{compound.smiles}}</th>
-		<th><i data-toggle="tooltip" placement="top" title="delete this compound" class="icon-trash"></i>
+		<td><a href="/compounds/{{compound.id}}">{{compound.cid}}</a></td>
+		<td>{{compound.name}}</td>
+		<td style="display:none" class="compoundImage" id="{{compound.id}}">  </td>
+		<td>{{compound.smiles}}</td>
+		<td><i data-toggle="tooltip" placement="top" title="delete this compound" class="icon-trash"></i>
 		<a href="/search/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
 		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="edit compound details"><i class="icon-pencil"></i></a>
-		</th>
+		</td>
 		</tr>
 	{% endfor %}
 	</tbody>
