@@ -171,6 +171,7 @@ def addMyCompounds(sdf, user):
 				if re.search("^unspecified_", moldata['id']):
 					sdffile = moldata['id'] + sdffile
 				counter += 1
+				linecounter = 0
 				if counter > MAX_COMPOUND_LIMIT:
 					message = "ERROR: upload exceeds " + str(MAX_COMPOUND_LIMIT) + " compounds."
 					raise Exception
