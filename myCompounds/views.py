@@ -33,8 +33,9 @@ def showCompounds(request, resource):
 	if resource == 'downloadSDF':
 		sdf = makeSDF(request.user)
 		return HttpResponse(sdf, mimetype='text/plain')
-    for match in matches:
-	match.smiles = re.match(r"^(\S+)", match.smiles).group(1) 
+    if matches:
+        for match in matches:
+	    match.smiles = re.match(r"^(\S+)", match.smiles).group(1) 
     return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
 @guest_allowed
