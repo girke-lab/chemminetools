@@ -1,4 +1,5 @@
 from django.http import HttpResponse, HttpResponseRedirect
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
 from django.shortcuts import redirect, render_to_response
@@ -137,13 +138,23 @@ def makeSMILES(user):
 	return smiles
 
 def getMyCompounds(request):
-	page = int(request.GET.get('p', '1'))
-	matches = []
-	# pure_query, matches = search('library: myCompounds', page, request)
+	page = request.GET.get('page')
+	result = []
 	matches = Compound.objects.filter(user=request.user) 
-	if len(matches) == 0:
-		matches = None
-	return page, matches
+	paginator = Paginator(matches, 100)
+
+	try:
+		result = paginator.page(page)
+	except PageNotAnInteger:
+		# If page is not an integer, deliver first page.
+		result = paginator.page(1)
+	except EmptyPage:
+		# If page is out of range (e.g. 9999), deliver last page of results.
+		result = paginator.page(paginator.num_pages)
+
+	if len(result) == 0:
+		result = None
+	return paginator, result
 
 def addMyCompounds(sdf, user):
 	sdffile = u''

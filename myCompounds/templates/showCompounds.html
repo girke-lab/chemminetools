@@ -98,9 +98,11 @@
 	<div class="span12">
 		<div class="pagination pagination-centered">
 		<ul>
-		<li><a href="#">&laquo;</a></li>
-		<li><a href="#">1</a></li>
-		<li><a href="#">&raquo;</a></li>
+		<li{% if not matches.has_previous %} class="disabled"{% endif %}><a href="?page={{matches.previous_page_number}}">Previous</a></li>
+		{% for page in p.page_range %}
+		<li{% if matches.number == page %} class="active"{% endif %}><a href="?page={{page}}">{{page}}</a></li>
+		{% endfor %}
+		<li{% if not matches.has_next %} class="disabled"{% endif %}><a href="?page={{matches.next_page_number}}">Next</a></li>
 		</ul>
 		</div>
 	</div> 
