@@ -23,7 +23,7 @@ def render_image(request, id):
 		compound = Compound.objects.get(id__iexact=id, user=request.user)
 	except Compound.DoesNotExist:
 		raise Http404
-	if compound.weight > 500:
+	if compound.weight > 2000:
 		raise Http404
 	smiles = compound.smiles
 	mymol = pybel.readstring("smi", str(smiles))

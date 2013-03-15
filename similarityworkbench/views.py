@@ -16,6 +16,7 @@ from django.conf import settings
 @cache_page(60 * 120)
 def renderer(request, smiles):
 	try:
+		smiles = re.match(r"^(\S{1,2000})", str(smiles)).group(1)
 		mymol = pybel.readstring("smi", str(smiles))
 		png = mymol.write(format='png')
 		return HttpResponse(png, mimetype='image/png')
