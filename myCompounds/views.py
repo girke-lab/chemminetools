@@ -159,7 +159,7 @@ def addMyCompounds(sdf, user):
 			if linecounter > MAX_SDF_LENGTH:
 				message = "ERROR: an input sdf exceeds " + str(MAX_SDF_LENGTH) + " lines."
 				raise Exception
-			# line = unicode(line, 'latin1')
+			line = unicode(line, 'utf-8')
 			sdffile += line
 			sdffile += '\n'
 			if line.startswith("$$$$"):
