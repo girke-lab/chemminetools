@@ -152,14 +152,18 @@ def addMyCompounds(sdf, user):
 	namekey = 'PUBCHEM_IUPAC_NAME'
 	message = 'ERROR: bad input data.'
 	added_ids = []
-	try:
+	# try:
+	if 1 == 1:
 		sdf = sdf.split("\n")
 		for line in sdf:
 			linecounter += 1
 			if linecounter > MAX_SDF_LENGTH:
 				message = "ERROR: an input sdf exceeds " + str(MAX_SDF_LENGTH) + " lines."
 				raise Exception
-			line = unicode(line, 'utf-8')
+			try:
+				line = unicode(line, 'utf-8')
+			except:
+				pass
 			sdffile += line
 			sdffile += '\n'
 			if line.startswith("$$$$"):
@@ -175,15 +179,25 @@ def addMyCompounds(sdf, user):
 				if counter > MAX_COMPOUND_LIMIT:
 					message = "ERROR: upload exceeds " + str(MAX_COMPOUND_LIMIT) + " compounds."
 					raise Exception
-				added_ids.append(insert_single_compound(moldata, sdffile, namekey, 'id', user))
+				try:
+					newid = insert_single_compound(moldata, sdffile, namekey, 'id', user)
+				except:
+					message = "ERROR: Database error, possibly excessively large compound?"
+					raise Exception
+				added_ids.append(newid)
 				sdffile = u''
 		if counter > 0:
 			return "Success: Added " + str(counter) + " compounds."
 		else:
 			return "ERROR: No valid input found."
+	try:
+		pass
 	except:
 		for id in added_ids:
-			Compound.objects.get(id=id).delete()	
+			try:
+				Compound.objects.get(id=id).delete()	
+			except:
+				pass
 		return message	
 			
 def getMW(sdf):

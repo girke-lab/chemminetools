@@ -4,10 +4,10 @@ from django.contrib.auth.models import User
 class Compound(models.Model):
         cid = models.CharField(max_length=256)
         name = models.CharField(max_length=256)
-        formula = models.CharField(max_length=256)
+        formula = models.CharField(max_length=1024)
         weight = models.DecimalField(max_digits=10, decimal_places=2)
         inchi = models.TextField()
-        smiles = models.CharField(max_length=1024)
+        smiles = models.TextField() 
 	user = models.ForeignKey(User, db_index=True)
 
 	class Meta:
