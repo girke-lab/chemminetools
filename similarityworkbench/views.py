@@ -29,7 +29,7 @@ def get_workbench_compounds(request):
 	for compound in compounds:
 		md5id = md5(compound.cid).hexdigest()
 		img = "/compounds/" + str(compound.id) + "/png"	
-		ret.append(dict(img=img, md5=md5id, title=compound.name, smiles=compound.smiles))
+		ret.append(dict(img=img, md5=md5id, title=compound.cid, smiles=compound.smiles))
 	return ret
 
 def add_compounds(smiles):

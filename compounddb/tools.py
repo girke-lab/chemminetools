@@ -9,6 +9,8 @@ import os
 import codecs
 import md5
 import compounddb.sdfiterator
+import string
+import random
 
 cur_dir = os.path.dirname(__file__)
 
@@ -32,51 +34,43 @@ def get_sdf_tags(sdf):
 		tagdict[name.strip()] = value.strip()
 	return tagdict
 
-def parse_annotation(sdf, namekey, idkey):
+def parse_annotation(sdf, namekey):
 	""" parse annotation from SDF file """
 
 	# parse the sdf tags
 	moldata = get_sdf_tags(sdf)
-	moldata[idkey] = moldata[idkey].replace(' ', '-')
 
 	# --- inchi
 	inchiconv.SetInAndOutFormats("sdf", "Inchi")
 	mol = openbabel.OBMol()
-	if '(noMol)' not in moldata[idkey]:
-		res = inchiconv.ReadString(mol, codecs.encode(sdf, 'utf-8'))
-		if mol.Empty():
-			root.warning("  -->  ERROR on sdf")
-			raise Exception
+	res = inchiconv.ReadString(mol, codecs.encode(sdf, 'utf-8'))
+	if mol.Empty():
+		root.warning("  -->  ERROR on sdf")
+		raise Exception
 
 	# standard data generated
 	# --- inchi/formula/weight
 	moldata['inchi'] = inchiconv.WriteString(mol).strip()
 	moldata['formula'] = mol.GetFormula()
+	moldata['id'] = mol.GetTitle()
+	if moldata['id'] == '':
+		moldata['id'] = "unspecified_" + ''.join(random.sample(string.digits,6)) 
 	mol.AddHydrogens()
 	moldata['weight'] = str(mol.GetMolWt())
 
 	# if the name is not in sdf:
-	if namekey == '__NA__':
-		moldata[namekey] = ''
+	if not moldata.has_key(namekey):
+		moldata[namekey] = '' 
 	
 	# smiles
 	inchiconv.SetInAndOutFormats("sdf", "smi")
 	mol = openbabel.OBMol()
-	if '(noMol)' not in moldata[idkey]:
-		res = inchiconv.ReadString(mol, codecs.encode(sdf, 'utf-8'))
-		moldata['smiles'] = inchiconv.WriteString(mol).strip()
-	else:
-		moldata['smiles'] = ''
-
-	# check if necessary keys are present: the name and key
-	if not moldata.has_key(idkey):
-		print "compound data error: the idkey is not found"
+	res = inchiconv.ReadString(mol, codecs.encode(sdf, 'utf-8'))
+	if mol.Empty():
+		root.warning("  -->  ERROR on sdf")
 		raise Exception
-	if not moldata.has_key(namekey):
-		# print "warning: no name key"
-		moldata[namekey] = ""
+	moldata['smiles'] = inchiconv.WriteString(mol).strip()
 
-	# do any necessary fixes for tags
 	return moldata
 
 ############################
@@ -107,7 +101,6 @@ def insert_single_compound(moldata, sdf, namekey, idkey, user):
 					user=user )
 					#sdf_file=s)
 	c.save()
-	# c.library.add(library)
 	c_id = c.id
 	root.warning("  -->new compound inserted: c_id=%s, cid=%s" % (c_id, cid))
 
@@ -116,17 +109,7 @@ def insert_single_compound(moldata, sdf, namekey, idkey, user):
 	s.save()
 	sdfid = s.id
 
-	# annotation
-	# a_ids = []
-	# for name, value in moldata.items():
-	#	if name in (namekey, idkey):
-	#		continue
-	#	a = Annotation(name=name, value=value, compound=c)
-	#	a.save()
-	#	aid = a.id
-	#	a_ids.append(aid)
-
-	return False
+	return c.id 
 
 #####################################
 # Physical Chemical Property - JOELib

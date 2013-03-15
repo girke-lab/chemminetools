@@ -10,6 +10,9 @@ class Compound(models.Model):
         smiles = models.CharField(max_length=1024)
 	user = models.ForeignKey(User, db_index=True)
 
+	class Meta:
+		ordering = ["id"]
+
         def __unicode__(self):
                 return "%s_%s" % (self.id, self.cid)
 

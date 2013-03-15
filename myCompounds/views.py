@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import redirect, render_to_response
 from compounddb import first_mol, InvalidInputError
 # from compounddb.search import search
 # from compounddb.views import get_library_by_name
@@ -13,6 +13,10 @@ import random
 import openbabel
 import re
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, InputError, sdf_to_smiles
+from django.conf import settings
+
+MAX_COMPOUND_LIMIT = settings.MAX_COMPOUND_LIMIT
+MAX_SDF_LENGTH = settings.MAX_SDF_LENGTH
 
 @guest_allowed
 def showCompounds(request, resource):
@@ -29,14 +33,14 @@ def showCompounds(request, resource):
 	if resource == 'downloadSDF':
 		sdf = makeSDF(request.user)
 		return HttpResponse(sdf, mimetype='text/plain')
+    for match in matches:
+	match.smiles = re.match(r"^(\S+)", match.smiles).group(1) 
     return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
 
 @guest_allowed
 def uploadCompound(request, *args, **kargs):
-    # perform query for existing myCompounds
-    page, matches = getMyCompounds(request)
     if request.method == 'GET':
-		return render_to_response('addCompounds.html', context_instance=RequestContext(request))
+		return render_to_response('addCompounds.html', dict(input_mode='smiles-input'), context_instance=RequestContext(request))
     else:
 		sdf = None
 		name = None
@@ -44,19 +48,18 @@ def uploadCompound(request, *args, **kargs):
 		smiles = None
 		if 'smiles' in request.POST:
 			input_mode = 'smiles-input'
+			sdf = u''
 			try:
-				sdf = smiles_to_sdf(str(request.POST['smiles']))
-				smiles = str(request.POST['smiles'])
-				name = str(request.POST['name'])
-				compid = str(request.POST['id'])
-			except InputError:
+				smiles = request.POST['smiles'].split("\n")
+				for line in smiles:
+					if re.match(r"^\S+", line):
+						sdf = sdf + smiles_to_sdf(str(line))
+			except:
 				messages.error(request, 'Error: Invalid SMILES string!')
 				sdf = None
 		elif 'sdf' in request.FILES:
 			input_mode = 'sdf-upload'
 			try:
-				# sdf = first_mol(request.FILES['sdf'])
-				# sdf = sdf_to_sdf(sdf)
 				sdf = request.FILES['sdf']
 				sdf = sdf.read()
 			except (InputError, InvalidInputError):
@@ -66,20 +69,21 @@ def uploadCompound(request, *args, **kargs):
 			if 'draw' in request.POST:
 				input_mode = 'draw'
 				sdf = request.POST['sdf'] + '$$$$'
-				name = str(request.POST['name'])
 				compid = str(request.POST['id'])
-				# assert False, 'ok'
+				compid = re.match(r"^(\S{0,20})", compid).group(1)
 				try:
-					# sdf = batch_sdf_to_sdf(sdf)
-					# sdf = first_mol(request.POST['sdf'])
-					sdf = sdf_to_sdf(sdf)
-					# sdf = request.POST['sdf'] + '$$$$' # add data checks here
-				except (InputError, InvalidInputError):
-					messages.error(request, 'Invalid SDF!')
+					smiles = sdf_to_smiles(sdf)
+					smiles = re.match(r"^(\S+)", smiles).group(1)	
+					smiles = smiles + " " + compid 
+					sdf = smiles_to_sdf(smiles)
+				except:
+					messages.error(request, 'Invalid drawing!')
 					sdf = None
 			else:
 				input_mode = 'sdf-input'
 				sdf = request.POST['sdf']
+				if not sdf:
+					messages.error(request, 'No input found!')
 		elif 'pubchem' in request.POST:
 		    cids = request.POST['pubchem']
 		    cids = cids.split()
@@ -104,14 +108,18 @@ def uploadCompound(request, *args, **kargs):
 			return render_to_response('addCompounds.html', dict(
 				input_mode=input_mode,
 				post_data=request.POST,
-				p=page,
-				matches=matches,
 				),
 				context_instance=RequestContext(request))
-		counter = addMyCompounds(sdf, request.user,name,compid, smiles)
-		messages.success(request, 'Success: ' + str(counter) + ' compound(s) added to database.')
-		page, matches = getMyCompounds(request)
-    		return render_to_response('showCompounds.html', dict(p=page, matches=matches,), context_instance=RequestContext(request))    
+		message = addMyCompounds(sdf, request.user)
+		if re.search(r"^ERROR:", message):
+			messages.error(request, message)
+			return render_to_response('addCompounds.html', dict(
+				input_mode=input_mode,
+				post_data=request.POST,
+				),
+				context_instance=RequestContext(request))
+		messages.success(request, message)
+		return redirect(showCompounds, resource='')
 
 def makeSDF(user):
 	compoundList = Compound.objects.filter(user=user)
@@ -136,42 +144,45 @@ def getMyCompounds(request):
 		matches = None
 	return page, matches
 
-def addMyCompounds(sdf, user, name=None, compid=None, smiles=None):
+def addMyCompounds(sdf, user):
 	sdffile = u''
 	counter = 0
+	linecounter = 0
 	namekey = 'PUBCHEM_IUPAC_NAME'
-	idkey = 'PUBCHEM_COMPOUND_CID'
-	# assert False, sdf
-	sdf = sdf.split("\n")
-	for line in sdf:
-		# line = unicode(line, 'latin1')
-		sdffile += line
-		sdffile += '\n'
-		if line.startswith("$$$$"):
-			try: 
-				moldata = parse_annotation(sdffile, namekey, idkey)			
-			except (KeyError):
-				moldata = {}
-				random.seed()
-				if name and name != '':
-					moldata[namekey] = name
-				else:
-					moldata[namekey] = 'unspecified'
-				if compid and compid != '':
-					moldata[idkey] = compid
-				else:
-					moldata[idkey] = 'unspecified'
-				moldata['formula'] = getFormula(sdffile)
-				moldata['weight'] = getMW(sdffile)
-				moldata['inchi'] = getInChI(sdffile)
-				if smiles and smiles != '':
-					moldata['smiles'] = smiles
-				else:
-					moldata['smiles'] = sdf_to_smiles(sdffile)
-			insert_single_compound(moldata, sdffile, namekey, idkey, user)
-			counter += 1
-			sdffile = u''
-	return counter
+	message = 'ERROR: bad input data.'
+	added_ids = []
+	try:
+		sdf = sdf.split("\n")
+		for line in sdf:
+			linecounter += 1
+			if linecounter > MAX_SDF_LENGTH:
+				message = "ERROR: an input sdf exceeds " + str(MAX_SDF_LENGTH) + " lines."
+				raise Exception
+			# line = unicode(line, 'latin1')
+			sdffile += line
+			sdffile += '\n'
+			if line.startswith("$$$$"):
+				try: 
+					moldata = parse_annotation(sdffile, namekey)			
+				except:
+					message = "ERROR: invalid input format."	
+					raise Exception
+				if re.search("^unspecified_", moldata['id']):
+					sdffile = moldata['id'] + sdffile
+				counter += 1
+				if counter > MAX_COMPOUND_LIMIT:
+					message = "ERROR: upload exceeds " + str(MAX_COMPOUND_LIMIT) + " compounds."
+					raise Exception
+				added_ids.append(insert_single_compound(moldata, sdffile, namekey, 'id', user))
+				sdffile = u''
+		if counter > 0:
+			return "Success: Added " + str(counter) + " compounds."
+		else:
+			return "ERROR: No valid input found."
+	except:
+		for id in added_ids:
+			Compound.objects.get(id=id).delete()	
+		return message	
 			
 def getMW(sdf):
 	if isinstance(sdf, unicode):
