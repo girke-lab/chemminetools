@@ -180,3 +180,5 @@ ASSEI_SERVER = '127.0.0.1', 50008
 QUERY_TIMEOUT = 60
 
 PUBCHEM_DOWNLOADER = '/srv/ChemMineTools/ei/support/pubchemdl.py'
+MAX_COMPOUND_LIMIT = 10000 # compounds allowed per upload
+MAX_SDF_LENGTH = 10000 # lines per SDF allowed
