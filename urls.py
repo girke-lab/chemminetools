@@ -16,6 +16,7 @@ urlpatterns = patterns('',
     (r'^search/pug/', include('pugsearch.urls')),
     (r'^search/', include('eis.urls')),
     (r'^similarity/', include('similarityworkbench.urls')),
+    url(r'^status/(?P<s>[0-9a-f]+)/', 'eis.views.read', name='ajaxread'),
     url(r'^', include('cms.urls')),
 )
 

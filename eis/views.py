@@ -16,11 +16,26 @@ from subprocess import Popen
 import sys
 from copy import copy
 from pugsearch.views import search as pug_search
+from simplejson import dumps
 # try:
 # 	from renderer import do_post as sdf2png
 # except:
 # 	sys.path.append('/srv/renderer/bin')
 #	from renderer import do_post as sdf2png
+
+def read(request, s):
+        fp = os.path.join(settings.WORK_DIR, s) + '.j'
+        if not os.path.exists(fp):
+                msg = {'status': 'wait'}
+        else:
+                f = file(fp)
+                c = f.read()
+                f.close()
+                if not c:
+                        msg = {'status': 'wait'}
+                else:
+                        msg = {'status': 'ok', 'content': c}
+        return HttpResponse(dumps(msg), mimetype="text/plain")
 
 
 def search(request):

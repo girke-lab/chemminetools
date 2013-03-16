@@ -52,7 +52,7 @@
 	<form action="." method="post" accept-charset="utf-8">
 	<fieldset>
 	{% csrf_token %}
-		<label for="str_input">Enter smiles entry:</label><br />
+		<label for="smiles">Enter smiles entry:</label><br />
 		<textarea rows="10" class="field span12" id="smiles" name="smiles">{{post_data.smiles}}</textarea><br />
 		<div class="btn-group">
 			<button class="btn btn-primary" type="submit">Submit</button>
