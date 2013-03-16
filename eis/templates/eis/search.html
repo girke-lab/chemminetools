@@ -6,7 +6,6 @@
 function do_example(){
   $("#smiles").get(0).value = 'CC(=O)OC1=CC=CC=C1C(=O)O';
   $(".examplehelp").fadeIn(1000);
-  $("#loadexample").fadeOut(500);
 }
 
 $(document).ready(function() {
@@ -15,7 +14,6 @@ do_example();
 return false;
 });
 $("#smiles").after("<span class=\"red examplehelp\" style=\"position:relative;left:100px;display:none\" ><br/>&uarr;<br/>example SMILES string inserted<br/><span>");
-$("#smilesearchbtn").after("<span style=\"display:none\" class=\"red examplehelp\">&larr;Click this button to start search<br/><span>");
 
 var here = document.location.toString();
 if (here.match('#')) {
@@ -50,8 +48,7 @@ $(document).ready(function() {
 
 <div class="row-fluid">
 <div class="span12">
-<p>Input your query structure using one of the following four options, and click either 'Search' button to initiate the similarity search against the PubChem Compound database.</p>
-<p><b>EI Search</b> is significantly faster than <b>PubChem fingerprint</b> search but may exclude compounds only recently added to PubChem.</p>
+<p>Input your query structure using one of the following four options, and click the 'Search' button to initiate a similarity search against the PubChem Compound database.</p>
 </div>
 </div><!--/row-->
 
@@ -66,21 +63,11 @@ $(document).ready(function() {
 </ul>
 <div class="tab-content">
 <div class="tab-pane active" id="smiles-input">
-<p>
-Please type or copy and paste your single-molecule SMILES below, and click "Search". 
-</p>
-<p>
-<button class="btn" type="button" id="loadexample">Load an example query</button>
-</p>
 <form action="{% url compound_search %}" method="post" accept-charset="utf-8">
 {% csrf_token %}
 	<label for="smiles">SMILES:</label>
 	<input id="smiles" type="text" name="smiles" size="60" value="{{ smi  }}"/><br/>
-	<input type="reset" value="Clear" />
-	<input type="submit" id="smilesearchbtn" value="EI Search" />
-	<input type="submit" name="pug" value="PubChem Fingerprint" />
-<br/>
-<label>Similarity Cutoff (PubChem Fingerprint only):</label>
+<label for="cutoff">Similarity Cutoff:</label>
 <b>0.</b><select name="cutoff">
 <option value="95">95</option>
 <option value="90">90</option>
@@ -94,6 +81,14 @@ Please type or copy and paste your single-molecule SMILES below, and click "Sear
 <option value="98">98</option>
 <option value="99">99</option>
 </select>
+<p>
+<div class="btn-group">
+	<button class="btn btn-primary" type="submit" name="pug">Search</button>
+	<button class="btn" id="loadexample">Load an example query</button>
+	<button class="btn" type="reset">Clear entry field</button>
+</div>
+</p>
+<br/>
 
 </form>
 </div>
