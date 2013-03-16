@@ -8,6 +8,7 @@ from myCompounds.views import getMyCompounds
 from guest.decorators import guest_allowed, login_required
 from django.views.decorators.cache import cache_page
 import pybel
+import re
 
 import os
 from django.conf import settings
