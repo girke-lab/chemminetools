@@ -4,20 +4,23 @@
 {% block js_content %}
 <script type="text/javascript">
 function update_timer() {
-	var t = parseInt(jQuery("#timer").text()) - 1;
-	if (t == 0) {
-		jQuery("#timer").text("now");
-		jQuery("#in").text("");
-		jQuery("#seconds").text("");
+	$.ajax({
+	    type: 'GET',
+	    url: '.',
+	    dataType: 'json',
+	    success: function(data) {status = data.status, desc=data.desc},
+	    data: { },
+	    async: false
+	});
+	if(status == "DONE"){
 		window.location.reload();
 	} else {
-		jQuery("#timer").text(t);
-		setTimeout('update_timer()', 1000);
+		setTimeout('update_timer()', 5000);
 	}
 }
 
 jQuery(document).ready(function() {
-	setTimeout('update_timer()', 1000);
+	setTimeout('update_timer()', 5000);
 });
 </script>
 
@@ -26,18 +29,15 @@ jQuery(document).ready(function() {
 {% block base_content %}
 <div class="row-fluid">
 	<div class="span12">
-		<h2>{{ title|default:"Job Result" }}</h2>
+		{% autoescape off %}<h2>{{ title|default:"Job Result" }}</h2>{% endautoescape %}
 	</div>
 </div><!--/row-->
 
 <div class="row-fluid">
 	<div class="span12">
-		Results not finished<br />
-		status: running<br />
-		This page will be automatically refreshed <span id="in">in</span> <span id="timer">5</span><span id="seconds"> seconds</span>.
-		<br /><br />
-		Please bookmark this page if you would like to browse away from the page, and check 
-		your results later.
+		This page will automatically reload when the job is finished.
+		<br/><br/>
+		If you would like to browse away from this page, you can access your results later from the 'Past Jobs' link located in the left navigation menu.
 	</div>
 </div><!--/row-->
 {% endblock %}

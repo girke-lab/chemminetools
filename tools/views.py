@@ -7,7 +7,8 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.forms import ModelForm
 from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
-from myCompounds.views import makeSDF
+from myCompounds.views import makeSDF, uploadCompound
+from compounddb.models import Compound
 from tools.runapp import * 
 from models import *
 from simplejson import dumps
@@ -132,6 +133,13 @@ def launch_job(request, category=None):
 		if category:
 			try:
 				category = ApplicationCategories.objects.get(name=category)
+				compoundCount = Compound.objects.filter(user=request.user).count()
+				if category.name == 'Clustering' and compoundCount < 3:
+					messages.info(request, 'Notice: you must have at least 3 compounds to perform clustering. Please use this form to add more compounds and then click "Cluster" again.')
+					return redirect(uploadCompound)
+				if category.name == 'Properties' and compoundCount < 1:
+					messages.info(request, 'Notice: you must have at least one compound to compute properties. Please use this form to add compounds and then click "Properties" again.')
+					return redirect(uploadCompound)
 				title = "Launch " + category.name + " Job"
 				apps = Application.objects.filter(category=category)
 			except:
@@ -163,6 +171,12 @@ def view_job(request, job_id, resource, filename):
 			result = f.read()
 			f.close()
 			return HttpResponse(result, mimetype=job.application.output_type)
+	if request.is_ajax():
+		if job.status == Job.RUNNING:
+			response = dict(status="RUNNING")
+		else:
+			response = dict(status="DONE")
+		return HttpResponse(dumps(response),'text/json')
 	if job.status == Job.FINISHED:
 		finalResult = job.output 
 		finalResult = re.sub(".*/", "", finalResult, count=0)
@@ -198,7 +212,7 @@ def view_job(request, job_id, resource, filename):
 			return redirect(view_job, job_id=job.id, resource='download', filename='output')	
 	elif job.status == Job.RUNNING:
 		return render_to_response('wait.html', dict(
-			title = "Job Running",
+			title = 'Job Running <img src="/static/images/spinner.gif"/>',
 		),
 		context_instance=RequestContext(request))
 	elif job.status == Job.FAILED:
