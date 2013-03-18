@@ -35,6 +35,7 @@
 		var compound_id = $(this).parents('tr').first().attr("id");
 		$.get("/compounds/" + compound_id + "/delete");
 		$(this).parents('tr').first().remove();
+		$("#counter").text(parseInt($("#counter").text()) - 1)
 	}
 </script>
 {% endblock %} 
@@ -46,10 +47,32 @@
 </div>
 </div><!--/row--> 
 
+<!-- Modal -->
+<div id="deleteModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Are you sure?</h3>
+  </div>
+  <div class="modal-body">
+    <p>Are you sure you want to delete all of your compounds?</p>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">No</button>
+<a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
+  </div>
+</div>
+
 <div class="row-fluid">
 	<div class="span12">
+		{% if matches %}
+			<table border="0">
+			<tr>
+			<td id="counter">{{p.count}}</td><td> compounds total</td>
+			</tr>
+			</table>
+		{% endif %}
 		<div class="btn-group">
-		  <a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
+		  <a href="#deleteModal" role="button" class="btn btn-danger" data-toggle="modal">Delete All</a>
 		  <button id="loadstructures" class="btn">Show Structures</button>
 		  <a href="/myCompounds/downloadSDF"><button class="btn">Download SDF</button></a>
 		  <a href="/myCompounds/downloadSMILES"><button class="btn">Download Smiles</button></a>

@@ -58,12 +58,21 @@ def search(request):
 				messages.error(request,"Error: Invalid SMILES string!")
 				return HttpResponseRedirect(reverse('compound_search'))
 		elif 'sdf' in request.FILES:
-			sdf = first_mol(request.FILES['sdf'])
+			try:
+				sdf = first_mol(request.FILES['sdf'])
+			except:
+				messages.error(request,"Error: Invalid input data!")
+				return HttpResponseRedirect(reverse('compound_search'))
 		elif 'sdf' in request.POST:
-			sdf = request.POST['sdf']
-			sdf = first_mol(request.POST['sdf'])
+			try:
+				sdf = request.POST['sdf']
+				sdf = first_mol(request.POST['sdf'])
+			except:
+				messages.error(request,"Error: Invalid input data!")
+				return HttpResponseRedirect(reverse('compound_search'))
 		else:
-			sdf = ''
+			messages.error(request,"Error: Invalid input data!")
+			return HttpResponseRedirect(reverse('compound_search'))
 		# dos2unix, and remove 2nd line (fpcdb complains JME editor SDF)
 		sdf = sdf.split('\r\n')
 		sdf = '\n'.join(sdf)
