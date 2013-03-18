@@ -18,7 +18,7 @@ class compoundForm(ModelForm):
 @guest_allowed
 @cache_page(60 * 120)
 @vary_on_cookie         # hide private compounds from other users 
-def render_image(request, id):
+def render_image(request, id, filename):
 	try:
 		compound = Compound.objects.get(id__iexact=id, user=request.user)
 	except Compound.DoesNotExist:
@@ -31,7 +31,7 @@ def render_image(request, id):
 	return HttpResponse(png, mimetype='image/png') 
 
 @guest_allowed
-def compound_detail(request, id, resource):
+def compound_detail(request, id, resource, filename):
 	try:
 		compound = Compound.objects.get(id__iexact=id, user=request.user)
 	except Compound.DoesNotExist:

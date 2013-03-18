@@ -15,6 +15,7 @@ from tempfile import mkstemp
 from subprocess import Popen
 import sys
 from copy import copy
+from guest.decorators import guest_allowed, login_required
 from pugsearch.views import search as pug_search
 from simplejson import dumps
 # try:
@@ -23,6 +24,7 @@ from simplejson import dumps
 # 	sys.path.append('/srv/renderer/bin')
 #	from renderer import do_post as sdf2png
 
+@guest_allowed
 def read(request, s):
         fp = os.path.join(settings.WORK_DIR, s) + '.j'
         if not os.path.exists(fp):
@@ -37,7 +39,7 @@ def read(request, s):
                         msg = {'status': 'ok', 'content': c}
         return HttpResponse(dumps(msg), mimetype="text/plain")
 
-
+@guest_allowed
 def search(request):
 	if request.method == 'GET':
 		smi = ''
@@ -116,7 +118,7 @@ def search(request):
 				
 			return HttpResponseRedirect(reverse('search_wait', kwargs=dict(sid=s)))
 
-
+@guest_allowed
 def wait(request, sid):
 	return render_to_response(
 		'eis/wait.html',
@@ -169,6 +171,7 @@ def session_check(f):
 			return f(request, sid, *args, **kargs)
 	return func
 	
+@guest_allowed
 @session_check
 def result(request, sid):
 	dir = os.path.join(settings.WORK_DIR, sid)
@@ -194,6 +197,7 @@ def result(request, sid):
 		context_instance=RequestContext(request)
 	)
 
+@guest_allowed
 @session_check
 def download(request, sid, format):
 	dir = os.path.join(settings.WORK_DIR, sid)

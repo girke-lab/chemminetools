@@ -76,12 +76,12 @@
 {% if messages %}
     {% for message in messages %}
 	<div class="row-fluid">
-	<div class="span12">
-	<div class="alert alert-block fade in">
-	<button type="button" class="close" data-dismiss="alert">&times;</button>
-	<p {% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
-	</div>
-	</div>
+		<div class="span12">
+			<div class="alert alert-block fade in {{ message.tags }}">
+				<button type="button" class="close" data-dismiss="alert">&times;</button>
+				{{ message }}
+			</div>
+		</div>
 	</div>
     {% endfor %}
 {% endif %}

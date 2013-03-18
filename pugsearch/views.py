@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 from pugsearch.PUG_services import *
 from time import sleep, time
 from django.conf import settings
@@ -9,27 +10,32 @@ from django.shortcuts import render_to_response
 import logging
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
+from guest.decorators import guest_allowed, login_required
+from django.contrib import messages
+from pybel import readfile
 
 loc = PUGLocator()
 port = loc.getPUGSoap()
 
+@guest_allowed
 def search(request, sid):
     try:
         cutoff = int(request.POST['cutoff'])
     except:
-        if not 'session_msg' in request.session:
-        	request.session['session_msg'] = []
-        request.session['session_msg'].append("Invalid cutoff!")
-        request.session.save()
+	messages.error(request, 'Invalid cutoff!')
         return HttpResponseRedirect(reverse('compound_search'))
     if (cutoff < 90) or (cutoff > 99):
-	if not 'session_msg' in request.session:
-                request.session['session_msg'] = []
-        request.session['session_msg'].append("Cutoff must be between .90 and .99")
-        request.session.save()
+	messages.error(request, 'Cutoff must be between .90 and .99')
         return HttpResponseRedirect(reverse('compound_search'))
     dir = os.path.join(settings.WORK_DIR, sid)
     query = os.path.join(dir, 'query.sdf')
+    try:
+	# generate smiles for renderer
+	mol = readfile("sdf", query).next()	
+	smiles = mol.write(format='smi')
+	smiles = re.match(r"^(\S+)", smiles).group(1)
+    except:
+	smiles = u''	
     if not os.path.exists(query):
         raise Http404, 'no such job: %s' % sid
     try:
@@ -96,10 +102,7 @@ def search(request, sid):
             f.close()
 
         else:   # status indicates error
-        	if not 'session_msg' in request.session:
-                	request.session['session_msg'] = []
-        	request.session['session_msg'].append("No hits! Please try the EI search, or select a lower cutoff.")
-        	request.session.save()
+		messages.error(request, 'No hits! Please try another query, or select a lower cutoff.')
         	return HttpResponseRedirect(reverse('compound_search'))
 	
 		# commented out, don't let users see these TERRIBLE error messages
@@ -152,7 +155,7 @@ def search(request, sid):
     compounds = [(i,None,None,None,None) for i in id_list]
     return render_to_response(
         'pugsearch/result.html',
-        dict(mode='ready', sid=sid, compounds=compounds, elapse=elapse,
+        dict(mode='ready', smiles=smiles, sid=sid, compounds=compounds, elapse=elapse,
             eis_time=0, e_url=url),
         context_instance=RequestContext(request)
         )
