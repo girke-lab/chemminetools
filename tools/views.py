@@ -122,8 +122,11 @@ def launch_job(request, category=None):
 			input = makeSDF(request.user)
 		elif application.input_type == 'upload':
 			input = request.FILES['File Upload'].read()	
+			if not isinstance(input, unicode):
+				input = unicode(input, 'utf-8')
+			input = input.encode('ascii', 'ignore')
 		else:
-			input = u''
+			input = ''
 		newJob = Job(
 			user=request.user,
 			application=application,
