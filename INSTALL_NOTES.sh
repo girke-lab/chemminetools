@@ -149,6 +149,9 @@ export DJANGO_SETTINGS_MODULE="chemminetools.settings"
 
 # log into /admin and add users and static content
 
+# collect static files:
+./manage.py collectstatic
+
 ### OPTIONAL FOR DEV SITE: ###
 # launch test page on local port
 python manage.py runserver 8020

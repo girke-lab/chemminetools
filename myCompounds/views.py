@@ -163,18 +163,16 @@ def addMyCompounds(sdf, user):
 	namekey = 'PUBCHEM_IUPAC_NAME'
 	message = 'ERROR: bad input data.'
 	added_ids = []
-	# try:
-	if 1 == 1:
+	try:
+		if not isinstance(sdf, unicode):
+			sdf = unicode(sdf, 'utf-8')
+		sdf = sdf.encode('ascii', 'ignore')
 		sdf = sdf.split("\n")
 		for line in sdf:
 			linecounter += 1
 			if linecounter > MAX_SDF_LENGTH:
 				message = "ERROR: an input sdf exceeds " + str(MAX_SDF_LENGTH) + " lines."
 				raise Exception
-			try:
-				line = unicode(line, 'utf-8')
-			except:
-				pass
 			sdffile += line
 			sdffile += '\n'
 			if line.startswith("$$$$"):
@@ -201,8 +199,6 @@ def addMyCompounds(sdf, user):
 			return "Success: Added " + str(counter) + " compounds."
 		else:
 			return "ERROR: No valid input found."
-	try:
-		pass
 	except:
 		for id in added_ids:
 			try:
