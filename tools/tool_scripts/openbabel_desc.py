@@ -11,13 +11,15 @@ parser = argparse.ArgumentParser(description='Compute openbabel properties and r
 parser.add_argument('-o','--outfile', help='output file', required=True)
 args = vars(parser.parse_args())
 
+properties = ['abonds', 'atoms', 'bonds', 'dbonds', 'HBA1', 'HBA2', 'HBD', 'logP', 'MR', 'MW', 'nF', 'sbonds', 'tbonds', 'TPSA']
+
 def main(): 
 	fa = sys.stdin.read()
 	fa = fa.rstrip()
 	of = open(args['outfile'], 'w')
 	of.write('cid,')
 	labels = ''
-	for i in pybel.descs:
+	for i in properties:
 		labels = labels + i + ','
 	labels = re.match(r"^(.*),",labels).group(1)
 	of.write(labels + '\n')
@@ -31,7 +33,7 @@ def main():
 		mol.addh()
 		mol.make3D()
 		desc = mol.calcdesc()
-		for thisdesc in pybel.descs:
+		for thisdesc in properties:
 			info = info + str(desc[thisdesc]) + ','	
 		info = re.match(r"^(.*),",info).group(1)
 		of.write(myid.strip()+','+info+'\n')
