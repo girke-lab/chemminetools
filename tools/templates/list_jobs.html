@@ -1,18 +1,34 @@
 {% extends "base.html" %}
 {% load cms_tags %}
 
+{% block extra_headers %}
+<link rel="stylesheet" type="text/css" href="/static/admin/dt_bootstrap/dataTables.bootstrap.css">
+{% endblock %}
+
 {% block js_content %}
+<script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
 <script type="text/javascript">
+	var oTable;
 	$(document).ready(function() {
 		$('.icon-trash').click(DeleteRow);
 		$("[data-toggle=tooltip]").tooltip();
+		oTable = $('#jobTable').dataTable( {
+			"bSort": false,
+			"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>"
+		} );
 	});
 
 function DeleteRow()
 {
 	var id = $(this).parents('tr').first().attr("id");
 	$.get("/tools/view_job/" + id + "/delete");
-	$(this).parents('tr').first().remove();
+	if (oTable){
+		nTr = $(this).closest("tr").get(0); 
+		oTable.fnDeleteRow( oTable.fnGetPosition( nTr ) ) ;
+	} else {
+		$(this).parents('tr').first().remove();
+	}
 }
 </script>
 {% endblock %} 
@@ -29,7 +45,7 @@ function DeleteRow()
 
 <div class="span12">
 {% if matches %}
-	<table class="table table-striped">
+	<table id="jobTable" class="table table-striped">
 	<thead>
 	<tr>
 	<th>Application</th>
@@ -56,16 +72,5 @@ function DeleteRow()
 </div>
 
 
-</div><!--/row-->
-<div class="row-fluid">
-	<div class="span12">
-		<div class="pagination pagination-centered">
-		<ul>
-		<li><a href="#">&laquo;</a></li>
-		<li><a href="#">1</a></li>
-		<li><a href="#">&raquo;</a></li>
-		</ul>
-		</div>
-	</div> 
 </div><!--/row-->
 {% endblock %}

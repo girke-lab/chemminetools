@@ -1,6 +1,25 @@
 {% extends "base.html" %}
 {% load cms_tags %}
 
+{% block extra_headers %}
+<link rel="stylesheet" type="text/css" href="/static/admin/dt_bootstrap/dataTables.bootstrap.css">
+{% endblock %}
+
+{% block js_content %}
+<script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#example').dataTable( {
+		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"sScrollX": "100%",
+		"bScrollCollapse": true
+         } );
+} );
+</script>
+
+{% endblock %}
+
 {% block base_content %}
 <div class="row-fluid">
 	<div class="span12">
@@ -23,7 +42,7 @@
 	</tr>
 	<tr>
 		<th>Results</th>
-		<td><a class="btn" href="download/joelib{{job.id}}.csv">Download CSV »</a></td>
+		<td><a class="btn" href="download/table{{job.id}}.csv">Download CSV »</a></td>
 	</tr>
 	<tr>
 		<th>Next Steps</th>
@@ -38,7 +57,7 @@
 <div class="row-fluid">
 	<div class="span12">
 	{% if csv %}
-	<table class="table table-striped table-bordered table-condensed">
+	<table class="table table-condensed table-striped table-bordered span12" id="example">
 	{% for row in csv %}
 		{% if forloop.first %}
 			<thead>
@@ -63,4 +82,6 @@
 	{% endif %}
 	</div>
 </div><!--/row-->
+
+
 {% endblock %}
