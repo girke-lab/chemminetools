@@ -6,4 +6,4 @@ category: Properties
 script: joelib.py 
 input_type: chemical/x-mdl-sdfile
 output_type: text/properties.table 
-description: Computes physicochemical descriptors for compounds in workbench using the <a href="http://sourceforge.net/projects/joelib/">JOELib2 software library</a>.
+description: Computes physicochemical descriptors for compounds in workbench using the <a href="http://sourceforge.net/projects/joelib/">JOELib software library</a>.

@@ -1,0 +1,9 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+name: OpenBabel Descriptors 
+category: Properties 
+script: openbabel_desc.py 
+input_type: chemical/x-mdl-sdfile
+output_type: text/properties.table 
+description: Computes physicochemical descriptors for compounds in workbench using the <a href="http://openbabel.org">Open Babel software library</a>.

@@ -93,6 +93,8 @@ def main():
 		myid = mol.title
 		smi = mol.write(format='smi')
 		sdf = pybel.readstring('smi', smi)
+		sdf.addh()
+		sdf.make3D()
 		sdf = sdf.write(format='sdf')
 		sdfTemp = tempfile.NamedTemporaryFile(suffix='.sdf', delete=False)	
 		sdfTemp.write(sdf)
