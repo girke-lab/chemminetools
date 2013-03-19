@@ -54,7 +54,7 @@
 
 <div class="row-fluid">
 	<div class="span12" style="display:none" id="hiddenOptions">
-		<form action="." method="post">{% csrf_token %}
+		<form action="." method="post" enctype="multipart/form-data">{% csrf_token %}
 		<div id="formContent">
 		</div>
 		<input class="btn btn-primary" type="submit" value="Submit"/>

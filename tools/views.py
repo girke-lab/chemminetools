@@ -85,19 +85,21 @@ def launch_job(request, category=None):
 		return HttpResponse(dumps(response),'text/json')
 	if request.method == 'POST':
 		appForm = getAppForm(request.POST['application'], request.user)
-		form = appForm(request.POST)
+		form = appForm(request.POST, request.FILES)
 		if form.is_valid():
 			try:
 				appid = int(form.cleaned_data['application'])
 				application = Application.objects.get(id=str(appid))
 			except Application.DoesNotExist:
-				return HttpResponse("Application does not exist", mimetype='text/plain')	
+				messages.error(request, 'Application does not exist')
+				return redirect(launch_job, category=category)
 		else:
-			return HttpResponse('invalid form', mimetype='text/plain')
+			messages.error(request, str(form.errors))
+			return redirect(launch_job, category=category)
 		commandOptions = u''
 		optionsList = u''
 		for question in form.cleaned_data.keys():
-			if question != 'application':
+			if question != 'application' and question != 'File Upload':
 				questionObject = ApplicationOptions.objects.get(application=application, name=question) 
 				try:
 					job = form.cleaned_data[question]
@@ -114,7 +116,14 @@ def launch_job(request, category=None):
 				commandOptions = commandOptions + " --" + questionObject.realName + "=" + option 
 				optionsList = optionsList + questionObject.name + ": " + optionName + ", "
 		optionsList = re.sub(",\s$", "", optionsList, count=0)
-		sdf = makeSDF(request.user)
+
+		# setup input
+		if application.input_type == 'chemical/x-mdl-sdfile':
+			input = makeSDF(request.user)
+		elif application.input_type == 'upload':
+			input = request.FILES['File Upload'].read()	
+		else:
+			input = u''
 		newJob = Job(
 			user=request.user,
 			application=application,
@@ -124,7 +133,7 @@ def launch_job(request, category=None):
 			task_id='',
 		)
 		newJob.save()
-		result = launch.delay(application.script, commandOptions, sdf, newJob.id)
+		result = launch.delay(application.script, commandOptions, input, newJob.id)
 		newJob.task_id = result.id
 		newJob.save()
 		messages.success(request, 'Success: job launched.')

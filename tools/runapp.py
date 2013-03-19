@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 import subprocess
 import random
-from django.forms import Form, ModelChoiceField, IntegerField, HiddenInput 
+from django.forms import Form, FileField, ModelChoiceField, IntegerField, HiddenInput 
 from models import *
 outputPath = settings.TOOLS_RESULTS
 projectDir = settings.PROJECT_DIR
@@ -27,6 +27,8 @@ def launch(appname, commandOptions, input, job_id):
 def getAppForm(application_id, user):
 	fields = {}
 	application = Application.objects.get(id=application_id)
+	if application.input_type == 'upload':
+		fields['File Upload'] = FileField()
 	for option in ApplicationOptions.objects.filter(application=application).order_by('id'):
 		try:
 			value = ApplicationOptionsList.objects.get(name='fileInput', category=option)

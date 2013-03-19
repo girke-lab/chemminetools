@@ -1,0 +1,10 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: Upload CSV Data 
+category: Upload 
+script: uploadCSV.R 
+input_type: upload 
+output_type: text/properties.table 
+description: <p><b>Upload CSV Data</b> This uploads data to annotate the compounds in your workbench. These data can then be used for clustering. Upload format must be comma seperated (csv) and contain a compound CID at the beginning of each row, which matches the CID of a compound loaded in your workbench.
