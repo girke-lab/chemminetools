@@ -109,10 +109,6 @@ cd /etc/init.d
 wget https://raw.github.com/celery/celery/3.0/extra/generic-init.d/celeryd
 chmod ugo+x celeryd
 sudo update-rc.d celeryd defaults
-mkdir /var/log/celery
-chown www-data /var/log/celery
-mkdir /var/run/celery
-chown www-data /var/run/celery
 
 # put the following in /etc/default/celeryd:
 ###############################################
