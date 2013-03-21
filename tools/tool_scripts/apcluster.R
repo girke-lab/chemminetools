@@ -85,7 +85,9 @@ if(dim(plotdata)[2] > 5){
 } else {
      width <- "$(\"canvas\").parent().width()"
 }
-fontscale <- as.character(0.5 + length(sdfInput)/55 )
+
+
+fontscale <- as.character(0.5 + max(length(sdfInput), dim(plotdata)[2])/55 )
 
 # add configuration parameters and output to file
 config <- paste("{\"graphType\": \"Heatmap\",\"useFlashIE\": true,\"showVarDendrogram\": false,\"showSmpDendrogram\": true,\"varLabelRotate\": 45,\"varHighlightColor\": \"rgb(0,255,0)\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\",\"dendrogramColor\": \"rgb(0,0,0)\",\"autoAdjust\": true, \"toolbarPermanent\": true, \"smpLabelScaleFontFactor\": ", fontscale, ", \"varLabelScaleFontFactor\": ", fontscale, "}", sep="")
