@@ -47,6 +47,12 @@ if(properties != "None"){
      plotdata <- as.data.frame(scale(plotdata))
      plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
      key <- "Column Z-score"
+     if(dim(plotdata)[1] < 1){
+          stop()
+     }
+     if(dim(plotdata)[2] < 1){
+          stop()
+     }
 } else if(heatmap == "distance"){
      plotdata <- as.data.frame(distmat)
      varids <- cids    
