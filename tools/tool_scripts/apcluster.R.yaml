@@ -16,6 +16,11 @@ ApplicationOptions:
                - [single, single]
                - [average, average]
                - [complete, complete]     
+     Heatmap: # this name will show up online
+          realName: heatmap # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [molecular weight, MW]
+               - [distance matrix, distance]
      Physiochemical Properties Heatmap:
           realName: properties
           options:
