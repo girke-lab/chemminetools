@@ -1,11 +1,14 @@
-# Harness for developing R web tools
+# Harness for developing R javascript web tools
 
 # run before to setup input
 library(ChemmineR)
 debug_mode <- TRUE
-outfile <- "out.json"
 linkage <- "average"
+heatmap <- "MW"
 sdfInput <- read.SDFset("sampleSDF.sdf")
+# sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")
+sdfInput <- sdfInput[1:30]
+properties <- "sampleSDF.csv"
 
 # run code
 source("../apcluster.R")
