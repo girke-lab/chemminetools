@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Chemmine Tools</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le styles -->
+    <link rel="stylesheet" href="../../../static/admin/bootstrap/css/bootstrap.css">
+    <link href="../../../static/admin/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+	
+
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+      .sidebar-nav {
+        padding: 9px 0;
+      }
+    </style>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="/static/admin/html5.js"></script>
+    <![endif]-->
+
+    
+
+  </head>
+
+  <body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container-fluid">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/"><font color="E00000">Chemmine Tools</font></a>
+          <div class="nav-collapse collapse">
+            <p class="navbar-text pull-right">
+              Logged in as Guest 
+            </p>
+            <ul class="nav">
+		
+
+<li class="sibling">
+	<a href="/mycompounds/">Workbench</a>
+	
+</li>
+
+<li class="selected">
+	<a href="/tools/">Tools</a>
+	
+</li>
+
+<li class="sibling">
+	<a href="/search/">Search</a>
+	
+</li>
+
+<li class="sibling">
+	<a href="/help/">Help</a>
+	
+</li>
+
+<li class="sibling">
+	<a href="/downloads/">Downloads</a>
+	
+</li>
+
+
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="row-fluid">
+        <div class="span3">
+          <div class="well sidebar-nav">
+            <ul class="nav nav-list">
+              <li class="nav-header">Workbench</li>
+              <li><a href="/myCompounds">My Compounds</a></li>
+              <li><a href="/myCompounds/addCompounds/">Add Compounds</a></li>
+              <li class="nav-header">Tools</li>
+	      <li><a href="/tools/list_jobs/">Past Jobs</a></li>
+	      <li><a href="/tools/launch_job/Upload/">Upload Numeric Data</a></li>
+              <li><a href="/tools/launch_job/Clustering/">Cluster</a></li>
+              <li><a href="/tools/launch_job/Properties/">Physicochemical Properties</a></li>
+              <li><a href="/similarity/">Similarity Workbench</a></li>
+              <li class="nav-header">Search</li>
+              <li><a href="/search">Fingerprint Search</a></li>
+            </ul>
+          </div><!--/.well -->
+        </div><!--/span-->
+        <div class="span9">
+
+
+
+	
+      
+<div class="row-fluid">
+	<div class="span12">
+		<h2>Hierarchical Clustering Results</h2>
+	</div>
+</div><!--/row-->
+
+
+<div class="row-fluid">
+	<div class="span12">
+	<table class="table table-bordered table-hover">
+	<tbody>
+	<tr>
+		<th>Job Start Time</th>
+		<td>March 20, 2013, 12:40 a.m.</td>
+	</tr>
+	<tr>
+		<th>Options</th>
+		<td>Linkage Method: single, Physiochemical Properties Heatmap: None</td>
+	</tr>
+	</tbody>
+	</table>
+	</div>
+</div><!--/row-->
+
+
+<div class="row-fluid">
+	<div class="span12">
+	<canvas id="canvas" width="613" height="613"></canvas>
+	</div>
+</div><!--/row-->
+
+        </div><!--/span-->
+      </div><!--/row-->
+
+      <hr>
+
+      <footer>
+        <p>&copy; 2013 Tyler Backman, Yiqun Cao, and Thomas Girke</p>
+      </footer>
+
+    </div><!--/.fluid-container-->
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+
+    <script src="../../../static/admin/jquery.js"></script>
+    <script src="../../../static/admin/bootstrap/js/bootstrap.min.js"></script>
+    
+    <!--[if lt IE 9]><script type="text/javascript" src="../../../static/admin/flashcanvas.js"></script><![endif]-->
+
+    <script type="text/javascript" src="../../../static/admin/canvasXpress.min.js"></script>
+
+<script>
+var showPlot = function () {
+
+	PLACEHOLDER
+
+
+}
+
+$(document).ready(function() {
+	showPlot();
+});
+</script>
+
+
+<script type="text/javascript">
+	$(document).ready(function() {
+		$(".alert").alert()
+	});
+</script>
+  </body>
+</html>
+

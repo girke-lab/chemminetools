@@ -6,3 +6,4 @@ chemminetools/settings.py.devel
 chemminetools/settings.py.production
 working/*
 static_production/*
+tools/tool_scripts/R_testHarness/testResult.html
