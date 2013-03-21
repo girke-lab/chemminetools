@@ -1,9 +1,8 @@
-# Harness for developing R web tools
+# Harness for developing R javascript web tools
 
 # run before to setup input
 library(ChemmineR)
 debug_mode <- TRUE
-outfile <- "out.json"
 linkage <- "average"
 sdfInput <- read.SDFset("sampleSDF.sdf")
 

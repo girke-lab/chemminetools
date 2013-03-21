@@ -48,7 +48,7 @@ data <- toJSON(data, method="C")
 data <- gsub("^(.*)\"key_tag\"(.*)$", "\\1[\"Distance\"]\\2", data)
 
 # add configuration parameters and output to file
-config <- "{\"graphType\": \"Heatmap\",\"useFlashIE\": true,\"showVarDendrogram\": false,\"showSmpDendrogram\": true,\"varLabelRotate\": 45,\"varHighlightColor\": \"rgb(0,255,0)\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\",\"indicatorWidth\": 3,\"dendrogramColor\": \"rgb(0,0,0)\",\"dendrogramSpace\": 20}"
+config <- "{\"graphType\": \"Heatmap\",\"useFlashIE\": true,\"showVarDendrogram\": false,\"showSmpDendrogram\": true,\"varLabelRotate\": 45,\"varHighlightColor\": \"rgb(0,255,0)\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\",\"indicatorWidth\": 3,\"dendrogramColor\": \"rgb(0,0,0)\",\"dendrogramSpace\": 20,\"autoAdjust\": true}"
 output <- paste("new CanvasXpress(\"canvas\",\n", data, ",\n", config, "\n)")
 if(! exists("debug_mode")){
      writeLines(output, outfile)
