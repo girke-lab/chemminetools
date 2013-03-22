@@ -4,13 +4,11 @@
 
 library(ChemmineR)
 library(R.utils)
-library(ctc)
-library(rjson)
 
 if(! exists("debug_mode")){
      # parse command line arguments
      outfile = commandArgs(asValues=TRUE)$outfile
-     cutoff = commandArgs(asValues=TRUE)$cutoff
+     cutoff = as.numeric(commandArgs(asValues=TRUE)$cutoff)
 
      # read in sdf from standard i/o
      f <- file("stdin")
