@@ -52,9 +52,6 @@ data <- toJSON(data, method="C")
 
 # fix JSON object w/ regexes
 data <- gsub("^(.*)\"key_tag\"(.*)$", paste("\\1[\"",key,"\"]\\2", sep=""), data)
-if (length(varids) < 2){
-     data <- gsub("(\"y\":\\{\"vars\":)(\".+?\")", "\\1[\\2]", data)
-}
 
 # compute optimal dimensions of output
 height <- 600
