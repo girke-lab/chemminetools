@@ -21,6 +21,10 @@ if(! exists("debug_mode")){
      close(f)
 }
 
+# clean up input:
+sdfInput <- sdfInput[validSDF(sdfInput)]
+sdfInput <- sdfInput[! duplicated(sdfid(sdfInput))]
+
 # parse ids
 cids <- sdfid(sdfInput)
 
@@ -41,6 +45,7 @@ newick <- hc2Newick(hc)
 # plot heatmap
 if(properties != "None"){
      propData <- read.csv(properties)
+     propData <- propData[! duplicated(propData[,1]),]
      matchingCidPositions <- match(propData[,1], cids)
      matchingCidPositions <- matchingCidPositions[! is.na(matchingCidPositions)]
      matchingCids <- cids[matchingCidPositions]
@@ -82,13 +87,11 @@ if (length(varids) < 2){
 
 # compute optimal dimensions of output
 height <- as.character(length(sdfInput)*20 + 600)
-if(dim(plotdata)[2] > 38){
+if ((dim(plotdata)[2] > 38) || (length(sdfInput) > 70)){
      width <- as.character(600+dim(plotdata)[2]*20)
 } else {
      width <- "$(\"canvas\").parent().width()"
 }
-width <- "$(\"canvas\").parent().width()"
-
 
 fontscale <- as.character(0.5 + max(length(sdfInput), dim(plotdata)[2])/55 )
 
