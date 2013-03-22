@@ -1,0 +1,21 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: Multidimensional Scaling (MDS) 
+category: Clustering
+script: multidimensionalscaling.R
+input_type: chemical/x-mdl-sdfile
+output_type: application/json.canvasxpress 
+description: <p><b>Multidimensional Scaling</b> embeds compounds into a 2-Dimensional plane such that the distances between points in the plane can preserve the dis-similairties between compounds. For more details on this clustering method, please see the theory section of the <a href="/help">online tutorial.</a></p>
+
+ApplicationOptions:
+     Similarity Cutoff: # this name will show up online
+          realName: cutoff # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [0.4, 0.4]
+               - [0.5, 0.5]
+               - [0.6, 0.6]
+               - [0.7, 0.7]
+               - [0.8, 0.8]
+               - [0.9, 0.9]
