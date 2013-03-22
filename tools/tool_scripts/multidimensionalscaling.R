@@ -40,6 +40,7 @@ coords <- coords[match(cids, rownames(coords)),]
 # setup plotting vars
 plotdata <- coords[,1:2]
 clusters <- as.numeric(coords[,3])
+key <- "clusters"
 
 # create JSON object of results 
 plotdata <- as.data.frame(t(plotdata))
