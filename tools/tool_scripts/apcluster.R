@@ -42,6 +42,7 @@ newick <- hc2Newick(hc)
 if(properties != "None"){
      propData <- read.csv(properties)
      matchingCidPositions <- match(propData[,1], cids)
+     matchingCidPositions <- matchingCidPositions[! is.na(matchingCidPositions)]
      matchingCids <- cids[matchingCidPositions]
      cids <- c(matchingCids, cids[! cids %in% matchingCids])
      plotdata <- propData[propData[,1] %in% cids,2:ncol(propData)]
