@@ -41,7 +41,11 @@ newick <- hc2Newick(hc)
 # plot heatmap
 if(properties != "None"){
      propData <- read.csv(properties)
-     plotdata <- propData[match(propData[,1], cids),2:ncol(propData)]
+     matchingCidPositions <- match(propData[,1], cids)
+     matchingCidPositions <- matchingCidPositions[! is.na(matchingCidPositions)]
+     matchingCids <- cids[matchingCidPositions]
+     cids <- c(matchingCids, cids[! cids %in% matchingCids])
+     plotdata <- propData[propData[,1] %in% cids,2:ncol(propData)]
      varids <- colnames(plotdata)
      plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
      plotdata <- as.data.frame(scale(plotdata))
@@ -83,7 +87,9 @@ if(dim(plotdata)[2] > 5){
 } else {
      width <- "$(\"canvas\").parent().width()"
 }
-fontscale <- as.character(0.5 + length(sdfInput)/55 )
+
+
+fontscale <- as.character(0.5 + max(length(sdfInput), dim(plotdata)[2])/55 )
 
 # add configuration parameters and output to file
 config <- paste("{\"graphType\": \"Heatmap\",\"useFlashIE\": true,\"showVarDendrogram\": false,\"showSmpDendrogram\": true,\"varLabelRotate\": 45,\"varHighlightColor\": \"rgb(0,255,0)\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\",\"dendrogramColor\": \"rgb(0,0,0)\",\"autoAdjust\": true, \"toolbarPermanent\": true, \"smpLabelScaleFontFactor\": ", fontscale, ", \"varLabelScaleFontFactor\": ", fontscale, "}", sep="")
