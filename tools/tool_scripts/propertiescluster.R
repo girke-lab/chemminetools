@@ -35,8 +35,8 @@ propData <- read.csv(properties)
 propData <- propData[! duplicated(propData[,1]),]
 matchingCidPositions <- match(propData[,1], cids)
 matchingCidPositions <- matchingCidPositions[! is.na(matchingCidPositions)]
-matchingCids <- cids[matchingCidPositions]
-cids <- c(matchingCids, cids[! cids %in% matchingCids])
+cids <- cids[matchingCidPositions]
+sdfInput <- sdfInput[sdfid(sdfInput) %in% cids]
 plotdata <- propData[propData[,1] %in% cids,2:ncol(propData)]
 varids <- colnames(plotdata)
 plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
