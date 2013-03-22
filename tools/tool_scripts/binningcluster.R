@@ -31,5 +31,5 @@ apset <- sdf2ap(sdfInput)
 clusters <- cmp.cluster(apset, cutoff = cutoff)
 
 if(! exists("debug_mode")){
-     write.csv(clusters, outfile)
+     write.table(clusters, outfile, quote=FALSE, sep=",", row.names=FALSE, col.names=TRUE)
 }
