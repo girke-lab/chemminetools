@@ -21,7 +21,7 @@ ApplicationOptions:
           options: # format: [web name, command line value]
                - [molecular weight, MW]
                - [distance matrix, distance]
-     Physiochemical Properties Heatmap:
+     Physicochemical Properties Heatmap:
           realName: properties
           options:
                - [fileInput, text/properties.table] # this is a 'magic' tag which provides files of this type as input
