@@ -18,6 +18,9 @@ class Application(models.Model):
 	output_type = models.CharField(max_length=250)
 	description = models.TextField()
 
+        class Meta:
+                ordering = ["id"]
+
 	def __unicode__(self):
 		return self.name
 
@@ -26,6 +29,9 @@ class ApplicationOptions(models.Model):
 	realName = models.CharField(max_length=255)
 	application = models.ForeignKey(Application)
 
+        class Meta:
+                ordering = ["id"]
+
 	def __unicode__(self):
 		return self.application.name + "_" + self.name
 
@@ -33,6 +39,9 @@ class ApplicationOptionsList(models.Model):
 	category = models.ForeignKey(ApplicationOptions)
 	name = models.CharField(max_length=255)
 	realName = models.CharField(max_length=255)
+
+        class Meta:
+                ordering = ["id"]
 
 	def __unicode__(self):
 		return self.name
@@ -52,6 +61,9 @@ class Job(models.Model):
 	input = models.CharField(max_length=1000)
 	output = models.CharField(max_length=1000)
 	task_id = models.CharField(max_length=255)
+
+        class Meta:
+                ordering = ["-id"]
 
 	def __unicode__(self):
 		return self.application.name + " " + self.start_time.strftime(DATETIME_FORMAT)
