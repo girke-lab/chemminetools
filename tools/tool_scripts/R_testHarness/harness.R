@@ -5,10 +5,10 @@ library(ChemmineR)
 debug_mode <- TRUE
 linkage <- "average"
 heatmap <- "MW"
-sdfInput <- read.SDFset("sampleSDF.sdf")
-# sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")
-properties <- "sampleSDF.csv"
-# properties <- "~/Desktop/table110.csv"
+# sdfInput <- read.SDFset("sampleSDF.sdf")
+sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")
+# properties <- "sampleSDF.csv"
+properties <- "~/Desktop/table110.csv"
 
 # run code
 source("../apcluster.R")
