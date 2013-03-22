@@ -40,10 +40,11 @@ newick <- hc2Newick(hc)
 
 # plot heatmap
 if(properties != "None"){
-     propData <- read.csv(properties)
-     newCids <- match(cids, propData[,1])
-     cids <- c(cids[newCids[! is.na(newCids)]], cids[is.na(newCids)])
-     plotdata <- propData[match(propData[,1], cids),2:ncol(propData)]
+     propData <- read.csv(properties)[6:4,]
+     matchingCidPositions <- match(propData[,1], cids)
+     matchingCids <- cids[matchingCidPositions]
+     cids <- c(matchingCids, cids[! cids %in% matchingCids])
+     plotdata <- propData[propData[,1] %in% cids,2:ncol(propData)]
      varids <- colnames(plotdata)
      plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
      plotdata <- as.data.frame(scale(plotdata))
