@@ -4,14 +4,13 @@
 library(ChemmineR)
 debug_mode <- TRUE
 linkage <- "average"
-heatmap <- "MW"
 # sdfInput <- read.SDFset("sampleSDF.sdf")
 sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")[1:70]
 # properties <- "sampleSDF.csv"
 properties <- "~/Desktop/table110.csv"
 
 # run code
-source("../apcluster.R")
+source("../propertiescluster.R")
 
 # run after to view results
 template <- readLines("template.html")
