@@ -82,7 +82,7 @@ if (length(varids) < 2){
 
 # compute optimal dimensions of output
 height <- as.character(length(sdfInput)*20 + 600)
-if(dim(plotdata)[2] > 5){
+if(dim(plotdata)[2] > 14){
      width <- as.character(600+dim(plotdata)[2]*20)
 } else {
      width <- "$(\"canvas\").parent().width()"
