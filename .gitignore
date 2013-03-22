@@ -1,4 +1,5 @@
 chemminetools/settings.py
+*.Rhistory
 *.pyc
 *~
 *.swp
