@@ -1,0 +1,21 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: Binning Clustering 
+category: Clustering
+script: binningcluster.R
+input_type: chemical/x-mdl-sdfile
+output_type: text/properties.table 
+description: <b>Binning clustering</b> partitions all the compounds into disjoint <i>bins</i>, and guarantees that every compound has all its neighboring compounds in the same bin. Neighbors are defined as compounds with similarity greater than a user-defined <i>cutoff similarity</i>. For more details on this clustering method, please see the theory section of the <a href="/help">online tutorial.</a>
+
+ApplicationOptions:
+     Similarity Cutoff: # this name will show up online
+          realName: cutoff # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [0.4, 0.4]
+               - [0.5, 0.5]
+               - [0.6, 0.6]
+               - [0.7, 0.7]
+               - [0.8, 0.8]
+               - [0.9, 0.9]
