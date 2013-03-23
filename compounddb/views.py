@@ -9,6 +9,7 @@ from django.views.decorators.vary import vary_on_cookie
 from django.forms import ModelForm
 from django.contrib import messages
 import pybel
+from simplejson import dumps
 
 class compoundForm(ModelForm):
 	class Meta:
@@ -29,6 +30,19 @@ def render_image(request, id, filename):
 	mymol = pybel.readstring("smi", str(smiles))
 	png = mymol.write(format='png')
 	return HttpResponse(png, mimetype='image/png') 
+
+@guest_allowed
+def cid_lookup(request):
+	if request.is_ajax():
+		try:
+			cid = request.GET['cid']
+			compound = Compound.objects.get(cid=cid, user=request.user)
+			response = dict(id=str(compound.id))
+		except:
+			response = dict(id="ERROR")
+		return HttpResponse(dumps(response),'text/json')
+	else:
+		raise Http404
 
 @guest_allowed
 def compound_detail(request, id, resource, filename):

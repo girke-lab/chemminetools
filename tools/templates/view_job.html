@@ -14,6 +14,24 @@ var showPlot = function () {
 }
 
 $(document).ready(function() {
+	detailPopup = function(cid){
+		if(cid.length == 1){
+			$.ajax({
+			    type: 'GET',
+			    url: '/compounds/cid_lookup',
+			    dataType: 'json',
+			    success: function(data) {perm_id = data.id},
+			    data: { cid: cid[0] },
+			    async: false
+			});
+			if(perm_id != 'ERROR'){
+				$('#compoundButtonLink').attr("href", '/compounds/' + perm_id + '/');
+				$('#compoundImage').attr("src", '/compounds/' + perm_id + '/png');
+				$('#cidLabel').html('CID: ' + cid);
+				$('#compoundModal').modal('toggle');
+			}
+		}
+	}
 	showPlot();
 });
 </script>
@@ -48,6 +66,23 @@ $(document).ready(function() {
 
 <div class="row-fluid">
 	<div class="span12">
+
+<!-- Modal -->
+<div id="compoundModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Compound Details</h3>
+  </div>
+  <div class="modal-body">
+<p id="cidLabel"></p>
+<img class="img-rounded" id="compoundImage" src="#"/>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    <a id="compoundButtonLink" href="#"><button class="btn">Compound Page</button></a>
+  </div>
+</div>
+
 	<canvas id="canvas"></canvas>
 	</div>
 </div><!--/row-->

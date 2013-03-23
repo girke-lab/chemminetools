@@ -63,7 +63,8 @@ width <- "$(\"canvas\").parent().width()"
 
 # add configuration parameters and output to file
 config <- paste("{\"graphType\": \"Scatter2D\",\"useFlashIE\": true, \"colorBy\": \"cluster\", \"legendPosition\": \"top\"}", sep="")
-output <- paste("$(\"canvas\").attr('height', '", height, "');\n$(\"canvas\").attr('width', ", width, ");\n new CanvasXpress(\"canvas\",\n", data, ",\n", config, "\n)", sep="")
+events <- "{click: function(o) {detailPopup(o.y.vars);}, dblclick: function(o) {detailPopup(o.y.vars);}}"
+output <- paste("$(\"canvas\").attr('height', '", height, "');\n$(\"canvas\").attr('width', ", width, ");\n new CanvasXpress(\"canvas\",\n", data, ",\n", config,",\n", events, "\n)", sep="")
 if(! exists("debug_mode")){
      writeLines(output, outfile)
 }
