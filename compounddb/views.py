@@ -9,6 +9,7 @@ from django.views.decorators.vary import vary_on_cookie
 from django.forms import ModelForm
 from django.contrib import messages
 import pybel
+import re
 from simplejson import dumps
 
 class compoundForm(ModelForm):
@@ -56,7 +57,11 @@ def compound_detail(request, id, resource, filename):
 		if form.is_valid():
 			compound.cid = form['cid'].value()	
 			compound.name = form['name'].value()
+			compound.smiles = re.match(r"^(\S*)", compound.smiles).group(1) + " " + compound.cid
 			compound.save()
+			sdf = compound.sdffile_set.all()[0]
+			sdf.sdffile = compound.cid + "\n" + re.match(r"^.*?\n(.*)$", sdf.sdffile, flags=re.M | re.S).group(1)
+			sdf.save()
 			messages.success(request, 'Success: details updated.')
 		else:
 			messages.error(request, 'Error: invalid form data.')
