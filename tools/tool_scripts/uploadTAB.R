@@ -9,7 +9,7 @@ outfile = commandArgs(asValues=TRUE)$outfile
 # read in csv from standard i/o
 f <- file("stdin")
 open(f)
-input <- read.table(f, header=TRUE)
+input <- read.table(f, header=TRUE, sep="\t")
 close(f)
 
 # perform validation
