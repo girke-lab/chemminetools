@@ -18,4 +18,4 @@ if(ncol(input) > 10000) stop()
 if(nrow(input) < 1) stop()
 if(nrow(input) > 10000) stop()
 
-write.table(input, outfile, quote=FALSE, sep=",", row.names=FALSE, col.names=TRUE)
+write.csv(input, outfile, row.names=FALSE)
