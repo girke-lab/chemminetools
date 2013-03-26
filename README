@@ -37,6 +37,16 @@ django-appmedia
 django-guest (http://code.google.com/p/django-guest/)
 django-cron (http://code.google.com/p/django-cron/)
 
+Compatible Browsers:
+Google Chrome 25
+Safari 5 
+Firefox 17
+
+Incompatible Browsers:
+Opera 12 (works but with minor issues with similarity workbench and table viewer)
+Internet Explorer 6
+Internet Explorer 8
+
 License:
 (C) 2013 Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
 
