@@ -21,12 +21,16 @@ if(! exists("debug_mode")){
      close(f)
 }
 
+cleanUp <- function(input){
+     input <- gsub("[^a-zA-Z_0-9 -]", " ", input, perl=TRUE) # remove weird chars
+     gsub("^\\s*(.{1,80}).*\\s*$", "\\1", input, perl=TRUE) # limit length to 80 and remove whitespace
+}
+
 # clean up input:
 sdfInput <- sdfInput[validSDF(sdfInput)]
-sdfInput <- sdfInput[! duplicated(sdfid(sdfInput))]
-
-# parse ids
 cids <- sdfid(sdfInput)
+cids <- cleanUp(cids)
+sdfInput <- sdfInput[! duplicated(cids)]
 
 # Create atom pair distance matrix
 apset <- sdf2ap(sdfInput)
@@ -45,6 +49,7 @@ newick <- hc2Newick(hc)
 # plot heatmap
 if(properties != "None"){
      propData <- read.csv(properties)
+     propData[,1] <- cleanUp(propData[,1])
      propData <- propData[! duplicated(propData[,1]),]
      matchingCidPositions <- match(propData[,1], cids)
      matchingCidPositions <- matchingCidPositions[! is.na(matchingCidPositions)]

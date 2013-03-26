@@ -5,13 +5,13 @@ library(ChemmineR)
 debug_mode <- TRUE
 linkage <- "average"
 # sdfInput <- read.SDFset("sampleSDF.sdf")
-sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")[1:70]
+sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")
 # properties <- "sampleSDF.csv"
-# properties <- "~/Desktop/table110.csv"
+properties <- "~/Desktop/table110.csv"
 cutoff <- 0.9
 
 # run code
-source("../multidimensionalscaling.R")
+source("../propertiescluster.R")
 
 # run after to view results
 template <- readLines("template.html")

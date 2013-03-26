@@ -6,6 +6,11 @@ library(R.utils)
 # parse command line arguments
 outfile = commandArgs(asValues=TRUE)$outfile
 
+cleanUp <- function(input){
+     input <- gsub("[^a-zA-Z_0-9 -]", " ", input, perl=TRUE) # remove weird chars
+     gsub("^\\s*(.{1,80}).*\\s*$", "\\1", input, perl=TRUE) # limit length to 80 and remove whitespace
+}
+
 # read in csv from standard i/o
 f <- file("stdin")
 open(f)
@@ -17,5 +22,11 @@ if(ncol(input) < 2) stop()
 if(ncol(input) > 10000) stop()
 if(nrow(input) < 1) stop()
 if(nrow(input) > 10000) stop()
+
+# clean up data with regexes
+colnames(input) <- cleanUp(colnames(input))
+input[,1] <- cleanUp(input[,1])
+numericData <- matrix(as.numeric(as.matrix(input[,2:ncol(plotdata)])), ncol=ncol(plotdata) - 1)
+input <- cbind(input[,1], numericData)
 
 write.csv(input, outfile, row.names=FALSE)
