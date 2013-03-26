@@ -24,9 +24,8 @@ if(nrow(input) < 1) stop()
 if(nrow(input) > 10000) stop()
 
 # clean up data with regexes
-colnames(input) <- cleanUp(colnames(input))
-input[,1] <- cleanUp(input[,1])
 numericData <- matrix(as.numeric(as.matrix(input[,2:ncol(input)])), ncol=ncol(input) - 1)
-input <- cbind(input[,1], numericData)
+output <- cbind(cleanUp(input[,1]), numericData)
+colnames(output) <- cleanUp(colnames(input))
 
-write.csv(input, outfile, row.names=FALSE)
+write.csv(output, outfile, row.names=FALSE)
