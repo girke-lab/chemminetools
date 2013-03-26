@@ -27,5 +27,6 @@ if(nrow(input) > 10000) stop()
 numericData <- matrix(as.numeric(as.matrix(input[,2:ncol(input)])), ncol=ncol(input) - 1)
 output <- cbind(cleanUp(input[,1]), numericData)
 colnames(output) <- cleanUp(colnames(input))
+colnames(output)[1] <- "CID"
 
 write.csv(output, outfile, row.names=FALSE)
