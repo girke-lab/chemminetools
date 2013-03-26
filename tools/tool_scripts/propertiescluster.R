@@ -20,18 +20,23 @@ if(! exists("debug_mode")){
      close(f)
 }
 
-# clean up input:
-sdfInput <- sdfInput[validSDF(sdfInput)]
-sdfInput <- sdfInput[! duplicated(sdfid(sdfInput))]
+cleanUp <- function(input){
+     input <- gsub("[^a-zA-Z_0-9 -]", " ", input, perl=TRUE) # remove weird chars
+     gsub("^\\s*(.{1,80}).*\\s*$", "\\1", input, perl=TRUE) # limit length to 80 and remove whitespace
+}
 
-# parse ids
+# clean up input and parse IDs:
+sdfInput <- sdfInput[validSDF(sdfInput)]
 cids <- sdfid(sdfInput)
+cids <- cleanUp(cids)
+sdfInput <- sdfInput[! duplicated(cids)]
 
 # create properties distance matrix
 if(properties == "None"){
   stop()
 }
 propData <- read.csv(properties)
+propData[,1] <- cleanUp(propData[,1])
 propData <- propData[! duplicated(propData[,1]),]
 matchingCidPositions <- match(propData[,1], cids)
 matchingCidPositions <- matchingCidPositions[! is.na(matchingCidPositions)]
@@ -41,7 +46,7 @@ plotdata <- propData[propData[,1] %in% cids,2:ncol(propData)]
 varids <- colnames(plotdata)
 plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
 plotdata <- as.data.frame(scale(plotdata))
-plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
+# plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
 key <- "Column Z-score"
 if(dim(plotdata)[1] < 1){
   stop()
@@ -49,6 +54,9 @@ if(dim(plotdata)[1] < 1){
 if(dim(plotdata)[2] < 1){
   stop()
 }
+
+# run a regex on the property fields to clean them up
+varids <- cleanUp(varids)
 
 distmat <- dist(plotdata, method = "euclidean")
 

@@ -1,5 +1,6 @@
 import re
 import os
+import csv
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
@@ -207,16 +208,16 @@ def view_job(request, job_id, resource, filename):
 			context_instance=RequestContext(request))
 		elif(job.application.output_type == 'text/properties.table'):
 			f = open(job.output, 'r')
-			textfile = f.read().rstrip()
+			csvinput = csv.reader(f)
+			csvOutput = []
+			for line in csvinput:
+				csvOutput.append(line)
 			f.close()
-			csv = []
-			for line in textfile.split('\n'):
-				csv.append(line.rstrip().split(','))
 			return render_to_response('view_csv.html', dict(
 				title = str(job.application) + " Results",
 				result = finalResult,
 				job = job,
-				csv = csv,
+				csv = csvOutput,
 			),
 			context_instance=RequestContext(request))
 		else:
@@ -228,6 +229,7 @@ def view_job(request, job_id, resource, filename):
 		),
 		context_instance=RequestContext(request))
 	elif job.status == Job.FAILED:
+		messages.error(request, "Job Failed due to invalid input data and/or invalid selected options. Please double check that your uploaded data (compounds and/or numeric data), and input options are valid and try running the tool again.")	
 		return render_to_response('view_job.html', dict(
 			title = "Error: " + str(job.application) + " Job Failed",
 			job = job,
