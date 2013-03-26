@@ -59,7 +59,7 @@ if(properties != "None"){
      varids <- colnames(plotdata)
      plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
      plotdata <- as.data.frame(scale(plotdata))
-     plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
+     # plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
      key <- "Column Z-score"
      if(dim(plotdata)[1] < 1){
           stop()
