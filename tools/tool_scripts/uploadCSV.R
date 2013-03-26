@@ -14,7 +14,7 @@ cleanUp <- function(input){
 # read in csv from standard i/o
 f <- file("stdin")
 open(f)
-input <- read.table(f, header=TRUE, sep=",")
+input <- read.table(f, header=TRUE, sep=",", row.names = NULL)
 close(f)
 
 # perform validation
