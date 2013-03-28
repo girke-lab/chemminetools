@@ -4,14 +4,14 @@
 library(ChemmineR)
 debug_mode <- TRUE
 linkage <- "average"
-# sdfInput <- read.SDFset("sampleSDF.sdf")
-sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")
-# properties <- "sampleSDF.csv"
-properties <- "~/Desktop/table110.csv"
+sdfInput <- read.SDFset("sampleSDF.sdf")
+# sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")
+properties <- "sampleSDF.csv"
+# properties <- "~/Desktop/table110.csv"
 cutoff <- 0.9
 
 # run code
-source("../propertiescluster.R")
+source("../apcluster.R")
 
 # run after to view results
 template <- readLines("template.html")
