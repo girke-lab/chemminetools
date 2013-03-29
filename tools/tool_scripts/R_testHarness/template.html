@@ -142,12 +142,11 @@
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     <h3 id="myModalLabel">Compound Details</h3>
   </div>
-  <div class="modal-body">
-    <p>Are you sure you want to delete all of your compounds?</p>
+  <div class="modal-body" id="compoundDetails">
   </div>
   <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">No</button>
-<a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    <a href="#"><button class="btn">Compound Page</button></a>
   </div>
 </div>
 
@@ -187,6 +186,20 @@ var showPlot = function () {
 }
 
 $(document).ready(function() {
+	detailPopup = function(cid){
+		$.ajax({
+		    type: 'GET',
+		    url: '/compounds/',
+		    dataType: 'json',
+		    success: function(data) {status = data.status, image_url= data.image_url, url = data.url},
+		    data: { cid: cid },
+		    async: false
+		});
+		if(status == SUCCESS){
+			$('#compoundDetails').html(cid);
+			$('#compoundModal').modal('toggle');
+		}
+	}
 	showPlot();
 });
 </script>
@@ -194,7 +207,7 @@ $(document).ready(function() {
 
 <script type="text/javascript">
 	$(document).ready(function() {
-		$(".alert").alert()
+		$(".alert").alert();
 	});
 </script>
   </body>
