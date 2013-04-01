@@ -44,8 +44,7 @@ Firefox 17
 
 Incompatible Browsers:
 Opera 12 (works but with minor issues with similarity workbench and table viewer)
-Internet Explorer 6
-Internet Explorer 8
+Internet Explorer 6, 8, 10 (9 not tested) 
 
 License:
 (C) 2013 Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
