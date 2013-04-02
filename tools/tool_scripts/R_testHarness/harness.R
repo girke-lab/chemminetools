@@ -5,7 +5,7 @@ library(ChemmineR)
 debug_mode <- TRUE
 linkage <- "average"
 sdfInput <- read.SDFset("sampleSDF.sdf")
-dimensions <- "Scatter2D"
+dimensions <- "Scatter3D"
 # sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")
 properties <- "sampleSDF.csv"
 # properties <- "~/Desktop/table110.csv"
