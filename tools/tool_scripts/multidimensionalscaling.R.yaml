@@ -19,3 +19,8 @@ ApplicationOptions:
                - [0.7, 0.7]
                - [0.8, 0.8]
                - [0.9, 0.9]
+     Dimensions: # this name will show up online
+          realName: dimensions # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [2D, Scatter2D]
+               - [3D, Scatter3D]

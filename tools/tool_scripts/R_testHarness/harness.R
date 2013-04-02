@@ -5,13 +5,14 @@ library(ChemmineR)
 debug_mode <- TRUE
 linkage <- "average"
 sdfInput <- read.SDFset("sampleSDF.sdf")
+dimensions <- "Scatter2D"
 # sdfInput <- read.SDFset("~/Desktop/downloadSDF.txt")
 properties <- "sampleSDF.csv"
 # properties <- "~/Desktop/table110.csv"
-cutoff <- 0.9
+cutoff <- 0.4
 
 # run code
-source("../apcluster.R")
+source("../multidimensionalscaling.R")
 
 # run after to view results
 template <- readLines("template.html")

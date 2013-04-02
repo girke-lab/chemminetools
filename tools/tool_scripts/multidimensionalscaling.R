@@ -11,6 +11,7 @@ if(! exists("debug_mode")){
      # parse command line arguments
      outfile = commandArgs(asValues=TRUE)$outfile
      cutoff = as.numeric(commandArgs(asValues=TRUE)$cutoff)
+     dimensions = commandArgs(asValues=TRUE)$dimensions
 
      # read in sdf from standard i/o
      f <- file("stdin")
@@ -62,7 +63,7 @@ height <- 600
 width <- "$(\"canvas\").parent().width()"
 
 # add configuration parameters and output to file
-config <- paste("{\"graphType\": \"Scatter2D\",\"useFlashIE\": true, \"colorBy\": \"cluster\", \"legendPosition\": \"top\"}", sep="")
+config <- paste("{\"graphType\": \"", dimensions, "\",\"useFlashIE\": true, \"colorBy\": \"cluster\", \"legendPosition\": \"top\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\"}", sep="")
 events <- "{click: function(o) {detailPopup(o.y.vars);}, dblclick: function(o) {detailPopup(o.y.vars);}}"
 output <- paste("$(\"canvas\").attr('height', '", height, "');\n$(\"canvas\").attr('width', ", width, ");\n new CanvasXpress(\"canvas\",\n", data, ",\n", config,",\n", events, "\n)", sep="")
 if(! exists("debug_mode")){
