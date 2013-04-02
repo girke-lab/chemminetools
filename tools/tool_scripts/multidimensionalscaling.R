@@ -38,19 +38,30 @@ apset <- sdf2ap(sdfInput)
 # compute coordinates
 clusters <- cmp.cluster(apset, cutoff = cutoff)
 myTempFile <- tempfile(fileext=".pdf")
-coords <- cluster.visualize(apset, clusters, size.cutoff=1, quiet = TRUE, non.interactive=myTempFile)
-unlink(myTempFile)
-coords <- coords[match(cids, rownames(coords)),]
-
-# setup plotting vars
-plotdata <- coords[,1:2]
-clusters <- as.numeric(coords[,3])
+if(dimensions == "Scatter2D"){
+  coords <- cluster.visualize(apset, clusters, size.cutoff=1, quiet = TRUE, non.interactive=myTempFile)
+  coords <- coords[match(cids, rownames(coords)),]
+  
+  # setup plotting vars
+  plotdata <- coords[,1:2]
+  clusters <- as.numeric(coords[,3])
+  smps=c("V1", "V2")
+} else {
+  coords <- cluster.visualize(apset, clusters, size.cutoff=1, dimensions=3, quiet = TRUE, non.interactive=myTempFile)
+  coords <- coords[match(cids, rownames(coords)),]
+  
+  # setup plotting vars
+  plotdata <- coords[,1:3]
+  clusters <- as.numeric(coords[,4])
+  smps=c("V1", "V2", "V3")
+}
 key <- "clusters"
+unlink(myTempFile)
 
 # create JSON object of results 
 plotdata <- as.data.frame(t(plotdata))
 colnames(plotdata) <- NULL
-y <- list(vars=cids, smps=c("V1", "V2"), desc="key_tag", data=plotdata)
+y <- list(vars=cids, smps=smps, desc="key_tag", data=plotdata)
 t <- list()
 data <- list(x=list(), y=y, z=list(cluster=clusters), t=t)
 data <- toJSON(data, method="C")
