@@ -233,5 +233,5 @@ python manage.py syncdb
 psql chemminetools -U chemminetools -h localhost -W
 \d # lists tables
 \d+ <tablename> # show schema
-drop table <tablename> # show schema
+drop table <tablename> # delete table 
 \q # quit
