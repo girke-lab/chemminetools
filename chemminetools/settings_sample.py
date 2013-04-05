@@ -154,6 +154,7 @@ INSTALLED_APPS = (
     'similarityworkbench',
     'eis',
     'pugsearch',
+    'ChemmineR',
 )
 
 WORK_DIR = PROJECT_DIR + '/working'
