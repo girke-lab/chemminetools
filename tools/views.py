@@ -170,7 +170,7 @@ def launch_job(request, category=None):
 		context_instance=RequestContext(request)) 
 
 @guest_allowed
-def view_job(request, job_id, resource, filename):
+def view_job(request, job_id, resource=None, filename=None):
 	try:
 		job = updateJob(request.user, job_id)
 	except Job.DoesNotExist:
