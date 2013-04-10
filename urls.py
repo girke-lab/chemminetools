@@ -1,6 +1,7 @@
 from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
+from django.views.generic.simple import direct_to_template
 
 # enable cron
 import django_cron
@@ -18,6 +19,8 @@ urlpatterns = patterns('',
     (r'^similarity/', include('similarityworkbench.urls')),
     (r'^ChemmineR/', include('ChemmineR.urls')),
     url(r'^status/(?P<s>[0-9a-f]+)/', 'eis.views.read', name='ajaxread'),
+    (r'^robots\.txt$', direct_to_template,
+        {'template': 'robots.txt', 'mimetype': 'text/plain'}),
     url(r'^', include('cms.urls')),
 )
 
