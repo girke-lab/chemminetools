@@ -19,7 +19,7 @@ urlpatterns = patterns('',
     (r'^similarity/', include('similarityworkbench.urls')),
     (r'^ChemmineR/', include('ChemmineR.urls')),
     url(r'^status/(?P<s>[0-9a-f]+)/', 'eis.views.read', name='ajaxread'),
-    (r'^robots\.txt$', direct_to_template,
+    (r'^robots\.txt/?$', direct_to_template,
         {'template': 'robots.txt', 'mimetype': 'text/plain'}),
     url(r'^', include('cms.urls')),
 )
