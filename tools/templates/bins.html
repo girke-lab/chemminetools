@@ -5,6 +5,26 @@
 <script>
 $(document).ready(function() {
 	var structures_loaded = false;
+	$("[data-toggle=popover]").popover({trigger: 'manual', html: true,});
+	$("[data-toggle=popover]").hover(function () {
+		cid = $(this).html();
+		$.ajax({
+		    type: 'GET',
+		    url: '/compounds/cid_lookup',
+		    dataType: 'json',
+		    success: function(data) {perm_id = data.id},
+		    data: { cid: cid },
+		    async: false
+		});
+		if(perm_id != 'ERROR'){
+			$(this).attr('data-content', '<img src="/compounds/' + perm_id + '/png"/>');
+		} else {
+			$(this).attr('data-content', 'Error: cid not in workbench')
+		}
+		$(this).popover('fixTitle').popover('show');
+	}, function() {
+		$(this).popover('hide');
+	});
 	$("#loadstructures").click(function () {
 		if (!structures_loaded) {
 			$(this).html('Hide Example Structures');
@@ -31,8 +51,8 @@ $(document).ready(function() {
 		}
 	});
 
-	detailPopup = function(){
-		cid = $(this).html();
+	gotoCidLink = function(){
+		var cid = $(this).html();
 		$.ajax({
 		    type: 'GET',
 		    url: '/compounds/cid_lookup',
@@ -42,14 +62,12 @@ $(document).ready(function() {
 		    async: false
 		});
 		if(perm_id != 'ERROR'){
-			$('#compoundButtonLink').attr("href", '/compounds/' + perm_id + '/');
-			$('#compoundImage').attr("src", '/compounds/' + perm_id + '/png');
-			$('#cidLabel').html('CID: ' + cid);
-			$('#compoundModal').modal('toggle');
+			var cidLink = '/compounds/' + perm_id + '/';
+			window.location.href = cidLink;
 		}
 	}
 
-	$('.cidLink').click(detailPopup);
+	$('.cidLink').click(gotoCidLink);
 });
 </script>
 
@@ -88,22 +106,6 @@ $(document).ready(function() {
 <div class="row-fluid">
 <div class="span12">
 
-<!-- Modal -->
-<div id="compoundModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Compound Details</h3>
-  </div>
-  <div class="modal-body">
-<p id="cidLabel"></p>
-<img class="img-rounded" id="compoundImage" src="#"/>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    <a id="compoundButtonLink" href="#"><button class="btn">Compound Page</button></a>
-  </div>
-</div>
-
 <p>
 <button id="loadstructures" class="btn">Show Example Structures</button>
 </p>
@@ -119,7 +121,7 @@ $(document).ready(function() {
 		</div>
 		<div id="collapse{{bin}}" class="accordion-body collapse">
 			<div class="accordion-inner">
-				<b>Compounds:</b> {% for cid in compounds %}<a href="#" class="cidLink">{{cid}}</a> {% endfor %}
+				<b>Compounds:</b> {% for cid in compounds %}<a data-container="body" data-toggle="popover" data-placement="top" title="{{cid}}" data-content="" class="cidLink">{{cid}}</a> {% endfor %}
 			</div>
 		</div>
 	</div>

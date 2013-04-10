@@ -10,26 +10,45 @@
 <script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-	detailPopup = function(){
-		cid = $(this).html();
-		$.ajax({
-		    type: 'GET',
-		    url: '/compounds/cid_lookup',
-		    dataType: 'json',
-		    success: function(data) {perm_id = data.id},
-		    data: { cid: cid },
-		    async: false
-		});
-		if(perm_id != 'ERROR'){
-			$('#compoundButtonLink').attr("href", '/compounds/' + perm_id + '/');
-			$('#compoundImage').attr("src", '/compounds/' + perm_id + '/png');
-			$('#cidLabel').html('CID: ' + cid);
-			$('#compoundModal').modal('toggle');
-		}
-	}
+        $("[data-toggle=popover]").popover({trigger: 'manual', html: true,});
+        $("[data-toggle=popover]").hover(function () {
+                cid = $(this).html();
+                $.ajax({
+                    type: 'GET',
+                    url: '/compounds/cid_lookup',
+                    dataType: 'json',
+                    success: function(data) {perm_id = data.id},
+                    data: { cid: cid },
+                    async: false
+                });
+                if(perm_id != 'ERROR'){
+                        $(this).attr('data-content', '<img src="/compounds/' + perm_id + '/png"/>');
+                } else {
+                        $(this).attr('data-content', 'Error: cid not in workbench')
+                }
+                $(this).popover('fixTitle').popover('show');
+        }, function() {
+                $(this).popover('hide');
+        });
 
-	$('.cidLink').click(detailPopup);
+        gotoCidLink = function(){
+                var cid = $(this).html();
+                $.ajax({
+                    type: 'GET',
+                    url: '/compounds/cid_lookup',
+                    dataType: 'json',
+                    success: function(data) {perm_id = data.id},
+                    data: { cid: cid },
+                    async: false
+                });
+                if(perm_id != 'ERROR'){
+                        var cidLink = '/compounds/' + perm_id + '/';
+                        window.location.href = cidLink;
+                }
+        }
 
+        $('.cidLink').click(gotoCidLink);
+	
 	$('#example').dataTable( {
 		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
 		"sScrollX": "100%",
@@ -77,22 +96,6 @@ $(document).ready(function() {
 <div class="row-fluid">
 	<div class="span12">
 
-	<!-- Modal -->
-	<div id="compoundModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-	  <div class="modal-header">
-	    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-	    <h3 id="myModalLabel">Compound Details</h3>
-	  </div>
-	  <div class="modal-body">
-	<p id="cidLabel"></p>
-	<img class="img-rounded" id="compoundImage" src="#"/>
-	  </div>
-	  <div class="modal-footer">
-	    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-	    <a id="compoundButtonLink" href="#"><button class="btn">Compound Page</button></a>
-	  </div>
-	</div>
-
 	{% if csv %}
 	<table class="table table-condensed table-striped table-bordered span12" id="example">
 	{% for row in csv %}
@@ -105,7 +108,7 @@ $(document).ready(function() {
 		{% else %}
 			<tr>
 			{% for cell in row %}
-				<td>{% if forloop.first %}<a href="#" class="cidLink">{{cell}}</a>{% else %}{{cell}}{% endif %}</td>
+				<td>{% if forloop.first %}<a data-container="body" data-toggle="popover" data-placement="top" title="{{cell}}" data-content="" class="cidLink">{{cell}}</a>{% else %}{{cell}}{% endif %}</td>
 			{% endfor %}
 			</tr>
 			{% if forloop.last %}
