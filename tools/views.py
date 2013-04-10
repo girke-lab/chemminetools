@@ -1,6 +1,7 @@
 import re
 import os
 import csv
+from collections import defaultdict, OrderedDict
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render_to_response
 from django.template import RequestContext
@@ -220,6 +221,27 @@ def view_job(request, job_id, resource=None, filename=None):
 				csv = csvOutput,
 			),
 			context_instance=RequestContext(request))
+		elif(job.application.output_type == 'text/bins.table'):
+			f = open(job.output, 'r')
+			csvinput = csv.reader(f)
+			bins = defaultdict(list) 
+			iterCsvInput = iter(csvinput)
+			next(iterCsvInput) # skip first line
+			for line in iterCsvInput:
+				cid = line[0]
+				binSize = line[1]
+				bin = line[2]
+				bins[bin].append(cid)
+			f.close()
+			bins = OrderedDict(sorted(bins.items(), key=lambda t: int(t[0])))
+			return render_to_response('bins.html', dict(
+				title = str(job.application) + " Results",
+				result = finalResult,
+				job = job,
+				bins = bins,
+			),
+			context_instance=RequestContext(request))
+			
 		else:
 			# if mimetype is unknown, just send the file to the user
 			return redirect(view_job, job_id=job.id, resource='download', filename='output')	
