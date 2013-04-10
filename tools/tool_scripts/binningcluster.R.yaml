@@ -6,7 +6,7 @@ name: Binning Clustering
 category: Clustering
 script: binningcluster.R
 input_type: chemical/x-mdl-sdfile
-output_type: text/properties.table 
+output_type: text/bins.table 
 description: <b>Binning clustering</b> partitions all the compounds into disjoint <i>bins</i>, and guarantees that every compound has all its neighboring compounds in the same bin. Neighbors are defined as compounds with similarity greater than a user-defined <i>cutoff similarity</i>. For more details on this clustering method, please see the theory section of the <a href="/help">online tutorial.</a>
 
 ApplicationOptions:

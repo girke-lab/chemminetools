@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+<script>
+$(document).ready(function() {
+	var structures_loaded = false;
+	$("#loadstructures").click(function () {
+		if (!structures_loaded) {
+			$(this).html('Hide Example Structures');
+			$(".compoundImage").each(function() {
+				var cid = $(this).attr('id');
+				$.ajax({
+				    type: 'GET',
+				    url: '/compounds/cid_lookup',
+				    dataType: 'json',
+				    success: function(data) {perm_id = data.id},
+				    data: { cid: cid },
+				    async: false
+				});
+				if(perm_id != 'ERROR'){
+					$(this).attr("src", '/compounds/' + perm_id + '/png');
+					$(this).show();
+				}
+			});
+			structures_loaded = true;
+		} else {
+			$(".compoundImage").hide();
+			$(this).html('Show Example Structures');
+			structures_loaded = false;	
+		}
+	});
+
+	detailPopup = function(){
+		cid = $(this).html();
+		$.ajax({
+		    type: 'GET',
+		    url: '/compounds/cid_lookup',
+		    dataType: 'json',
+		    success: function(data) {perm_id = data.id},
+		    data: { cid: cid },
+		    async: false
+		});
+		if(perm_id != 'ERROR'){
+			$('#compoundButtonLink').attr("href", '/compounds/' + perm_id + '/');
+			$('#compoundImage').attr("src", '/compounds/' + perm_id + '/png');
+			$('#cidLabel').html('CID: ' + cid);
+			$('#compoundModal').modal('toggle');
+		}
+	}
+
+	$('.cidLink').click(detailPopup);
+});
+</script>
+
+{% endblock %}
+
+{% block base_content %}
+<div class="row-fluid">
+	<div class="span12">
+		<h2>{{ title|default:"Job Result" }}</h2>
+	</div><!--/span-->
+</div><!--/row-->
+
+{% if job %}
+<div class="row-fluid">
+	<div class="span12">
+	<table class="table table-bordered table-hover">
+	<tbody>
+	<tr>
+		<th>Job Start Time</th>
+		<td>{{ job.start_time }}</td>
+	</tr>
+	<tr>
+		<th>Options</th>
+		<td>{{ job.options }}</td>
+	</tr>
+	<tr>
+		<th>Results</th>
+		<td><a class="btn" href="download/table{{job.id}}.csv">Download CSV »</a></td>
+	</tr>
+	</tbody>
+	</table>
+	</div><!--/span-->
+</div><!--/row-->
+{% endif %}
+
+<div class="row-fluid">
+<div class="span12">
+
+<!-- Modal -->
+<div id="compoundModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h3 id="myModalLabel">Compound Details</h3>
+  </div>
+  <div class="modal-body">
+<p id="cidLabel"></p>
+<img class="img-rounded" id="compoundImage" src="#"/>
+  </div>
+  <div class="modal-footer">
+    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+    <a id="compoundButtonLink" href="#"><button class="btn">Compound Page</button></a>
+  </div>
+</div>
+
+<p>
+<button id="loadstructures" class="btn">Show Example Structures</button>
+</p>
+
+<div class="accordion" id="accordion2">
+{% for bin, compounds in bins.items %}
+	<div class="accordion-group">
+		<div class="accordion-heading">
+			<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse{{bin}}">
+				<b>Bin:</b> {{bin}} <b>Size:</b> {{compounds|length}} 
+				<img style="display:none" class="compoundImage" id="{{compounds|first}}" width="150" src=""/> 
+				</a>
+		</div>
+		<div id="collapse{{bin}}" class="accordion-body collapse">
+			<div class="accordion-inner">
+				<b>Compounds:</b> {% for cid in compounds %}<a href="#" class="cidLink">{{cid}}</a> {% endfor %}
+			</div>
+		</div>
+	</div>
+{% endfor %}
+</div><!--/accordion-->
+
+</div><!--/span-->
+</div><!--/row-->
+{% endblock %}
