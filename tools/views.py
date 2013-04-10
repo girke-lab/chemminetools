@@ -141,7 +141,7 @@ def launch_job(request, category=None):
 		newJob.task_id = result.id
 		newJob.save()
 		messages.success(request, 'Success: job launched.')
-		return redirect(view_job, job_id=newJob.id, resource='', filename='')
+		return redirect(view_job, job_id=newJob.id, resource='')
 	else:
 		if category:
 			try:
