@@ -17,7 +17,7 @@ $(document).ready(function() {
 		    async: false
 		});
 		if(perm_id != 'ERROR'){
-			$(this).attr('data-content', '<img src="/compounds/' + perm_id + '/png"/>');
+			$(this).attr('data-content', '<img width="300" height="300" src="/compounds/' + perm_id + '/png"/>');
 		} else {
 			$(this).attr('data-content', 'Error: cid not in workbench')
 		}
@@ -121,7 +121,7 @@ $(document).ready(function() {
 		</div>
 		<div id="collapse{{bin}}" class="accordion-body collapse">
 			<div class="accordion-inner">
-				<b>Compounds:</b> {% for cid in compounds %}<a data-container="body" data-toggle="popover" data-placement="top" title="{{cid}}" data-content="" class="cidLink">{{cid}}</a> {% endfor %}
+				<b>Compounds:</b> {% for cid in compounds %}<a data-container="body" data-toggle="popover" data-placement="left" title="{{cid}}" data-content="" class="cidLink">{{cid}}</a> {% endfor %}
 			</div>
 		</div>
 	</div>

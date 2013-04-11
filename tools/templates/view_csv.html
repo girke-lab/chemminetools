@@ -108,7 +108,7 @@ $(document).ready(function() {
 		{% else %}
 			<tr>
 			{% for cell in row %}
-				<td>{% if forloop.first %}<a data-container="body" data-toggle="popover" data-placement="top" title="{{cell}}" data-content="" class="cidLink">{{cell}}</a>{% else %}{{cell}}{% endif %}</td>
+				<td>{% if forloop.first %}<a data-container="body" data-toggle="popover" data-placement="left" title="{{cell}}" data-content="" class="cidLink">{{cell}}</a>{% else %}{{cell}}{% endif %}</td>
 			{% endfor %}
 			</tr>
 			{% if forloop.last %}
