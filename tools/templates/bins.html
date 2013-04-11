@@ -19,7 +19,7 @@ $(document).ready(function() {
 		if(perm_id != 'ERROR'){
 			$(this).attr('data-content', '<img width="300" height="300" src="/compounds/' + perm_id + '/png"/>');
 		} else {
-			$(this).attr('data-content', 'Error: cid not in workbench')
+			$(this).attr('data-content', 'Error: cid not in workbench (or duplicated)')
 		}
 		$(this).popover('fixTitle').popover('show');
 	}, function() {
