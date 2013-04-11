@@ -31,6 +31,7 @@ sdfInput <- sdfInput[validSDF(sdfInput)]
 cids <- sdfid(sdfInput)
 cids <- cleanUp(cids)
 sdfInput <- sdfInput[! duplicated(cids)]
+cids <- cids[! duplicated(cids)]
 
 # Create atom pair distance matrix
 apset <- sdf2ap(sdfInput)

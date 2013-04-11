@@ -40,6 +40,7 @@ sdfInput <- sdfInput[validSDF(sdfInput)]
 cids <- sdfid(sdfInput)
 cids <- cleanUp(cids)
 sdfInput <- sdfInput[! duplicated(cids)]
+cids <- cids[! duplicated(cids)]
 
 results = eiQuery(r,d,refFile,queries = sdfInput,dir=baseDir,K=numResults)
 #print(results)
