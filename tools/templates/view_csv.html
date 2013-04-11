@@ -8,47 +8,9 @@
 {% block js_content %}
 <script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
 <script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
+<script src="/static/admin/cidpopups.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-        $("[data-toggle=popover]").popover({trigger: 'manual', html: true,});
-        $("[data-toggle=popover]").hover(function () {
-                cid = $(this).html();
-                $.ajax({
-                    type: 'GET',
-                    url: '/compounds/cid_lookup',
-                    dataType: 'json',
-                    success: function(data) {perm_id = data.id},
-                    data: { cid: cid },
-                    async: false
-                });
-                if(perm_id != 'ERROR'){
-                        $(this).attr('data-content', '<img src="/compounds/' + perm_id + '/png"/>');
-                } else {
-                        $(this).attr('data-content', 'Error: cid not in workbench (or duplicated)')
-                }
-                $(this).popover('fixTitle').popover('show');
-        }, function() {
-                $(this).popover('hide');
-        });
-
-        gotoCidLink = function(){
-                var cid = $(this).html();
-                $.ajax({
-                    type: 'GET',
-                    url: '/compounds/cid_lookup',
-                    dataType: 'json',
-                    success: function(data) {perm_id = data.id},
-                    data: { cid: cid },
-                    async: false
-                });
-                if(perm_id != 'ERROR'){
-                        var cidLink = '/compounds/' + perm_id + '/';
-                        window.location.href = cidLink;
-                }
-        }
-
-        $('.cidLink').click(gotoCidLink);
-	
 	$('#example').dataTable( {
 		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
 		"sScrollX": "100%",
@@ -108,7 +70,7 @@ $(document).ready(function() {
 		{% else %}
 			<tr>
 			{% for cell in row %}
-				<td>{% if forloop.first %}<a data-container="body" data-toggle="popover" data-placement="left" title="{{cell}}" data-content="" class="cidLink">{{cell}}</a>{% else %}{{cell}}{% endif %}</td>
+				<td>{% if forloop.first %}<a data-container="body" data-toggle="popover" data-placement="top" title="{{cell}}" data-content="" class="cidLink">{{cell}}</a>{% else %}{{cell}}{% endif %}</td>
 			{% endfor %}
 			</tr>
 			{% if forloop.last %}
