@@ -30,6 +30,7 @@ sdfInput <- sdfInput[validSDF(sdfInput)]
 cids <- sdfid(sdfInput)
 cids <- cleanUp(cids)
 sdfInput <- sdfInput[! duplicated(cids)]
+cids <- cids[! duplicated(cids)]
 
 # create properties distance matrix
 if(properties == "None"){
