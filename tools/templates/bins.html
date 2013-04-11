@@ -2,29 +2,10 @@
 {% load cms_tags %}
 
 {% block js_content %}
+<script src="/static/admin/cidpopups.js"></script>
 <script>
 $(document).ready(function() {
 	var structures_loaded = false;
-	$("[data-toggle=popover]").popover({trigger: 'manual', html: true,});
-	$("[data-toggle=popover]").hover(function () {
-		cid = $(this).html();
-		$.ajax({
-		    type: 'GET',
-		    url: '/compounds/cid_lookup',
-		    dataType: 'json',
-		    success: function(data) {perm_id = data.id},
-		    data: { cid: cid },
-		    async: false
-		});
-		if(perm_id != 'ERROR'){
-			$(this).attr('data-content', '<img width="300" height="300" src="/compounds/' + perm_id + '/png"/>');
-		} else {
-			$(this).attr('data-content', 'Error: cid not in workbench (or duplicated)')
-		}
-		$(this).popover('fixTitle').popover('show');
-	}, function() {
-		$(this).popover('hide');
-	});
 	$("#loadstructures").click(function () {
 		if (!structures_loaded) {
 			$(this).html('Hide Example Structures');
@@ -50,24 +31,6 @@ $(document).ready(function() {
 			structures_loaded = false;	
 		}
 	});
-
-	gotoCidLink = function(){
-		var cid = $(this).html();
-		$.ajax({
-		    type: 'GET',
-		    url: '/compounds/cid_lookup',
-		    dataType: 'json',
-		    success: function(data) {perm_id = data.id},
-		    data: { cid: cid },
-		    async: false
-		});
-		if(perm_id != 'ERROR'){
-			var cidLink = '/compounds/' + perm_id + '/';
-			window.location.href = cidLink;
-		}
-	}
-
-	$('.cidLink').click(gotoCidLink);
 });
 </script>
 
@@ -121,7 +84,7 @@ $(document).ready(function() {
 		</div>
 		<div id="collapse{{bin}}" class="accordion-body collapse">
 			<div class="accordion-inner">
-				<b>Compounds:</b> {% for cid in compounds %}<a data-container="body" data-toggle="popover" data-placement="left" title="{{cid}}" data-content="" class="cidLink">{{cid}}</a> {% endfor %}
+				<b>Compounds:</b> {% for cid in compounds %}<a data-container="body" data-toggle="popover" data-placement="top" title="{{cid}}" data-content="" class="cidLink">{{cid}}</a> {% endfor %}
 			</div>
 		</div>
 	</div>
