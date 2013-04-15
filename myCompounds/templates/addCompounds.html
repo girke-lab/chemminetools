@@ -1,14 +1,30 @@
 {% extends "base.html" %}
 {% load cms_tags %}
 
+{% block extra_headers %}
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<link rel="stylesheet" href="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb.css" type="text/css">
+<link rel="stylesheet" href="/static/dependenciesStatic/ChemDoodle/sketcher/jquery-ui-1.9.2.custom.css" type="text/css">
+{% endblock %}
+
 {% block js_content %}
+<!--these are required by the ChemDoodle Web Components library-->
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb-libs.js"></script>
+<script type="text/javascript">
+	$.noConflict();
+</script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/sketcher/jquery-ui-1.9.2.custom.min.js"></script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb.js"></script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/sketcher/ChemDoodleWeb-sketcher.js"></script>
+
+
 <script type="text/javascript">
 	var sample_smi = "CC1=C(N2C(C(C2=O)NC(=O)C(C3=CC=C(C=C3)O)[NH3+])SC1)C(=O)O\t21680720\nCCC(C)C1=C(C=CC(=C1)OC2=C(C=C(C=C2I)CC(C(=O)O)N)I)O\t13942129\nO=C2N(c1ncn(c1C(=O)N2C)C)C\tCaffeine\nCC1([C@@H](N2[C@@H](S1)[C@@H](C2=O)NC(=O)[C@@H](C3=CC=C(C=C3)O)[NH3+])C(=O)[O-])C\t6560161\nCC1(C(N2C(S1)[C@@H](C2=O)NC(=O)C(C3=CC=C(C=C3)O)[NH3+])C(=O)[O-])C.O.O.O\t44658234\nC[C@@H](C1=CC=C(C=C1)CC(C)C)C(=O)O\t39912\nCCCC1=CC=C(C=C1)C(C)C(=O)O\t14880971\nCC(C)C1=CC=C(C=C1)C(C)C(=O)O\t11321461\nC/C=C(\\C)/C1=CC=C(C=C1)C(C)C(=O)O\t20516638\nNC(Cc1cc(I)c(Oc2cc(I)c(O)c(I)c2)c(I)c1)C(O)=O\tThyroxine\nCC1=CC=C(C=C1)C(C(C)C)C(=O)O\t10241667\nCN1C=NC2=C1C(=O)N(C(=O)N2C)CP(=O)(C)C\t19689229\nCC1(C(N2C(S1)C(C2=O)NC(=O)C(C3=CC=C(C=C3)O)N)C(=O)O)C\tAmoxicillin\nCCCCCCCCCCCCCCCCCC(=O)O\tStearic_acid\nC1=C(C=C(C(=C1I)OC2=CC(=C(C(=C2)I)O)I)I)C[C@@H](C(=O)OI)N\t22812444\n[3H][C@](CC1=CC(=C(C(=C1)I)OC2=CC(=C(C(=C2)I)O)I)I)(C(=O)O)N([3H])[3H]\t22884210\nCCCCCCCCCCCCCCCCCCCCC(=O)O\t16898\nC1C(=C(N2C(S1)C(C2=O)NC(=O)C(C3=CC=C(C=C3)O)N)C(=O)O)CSCC(=O)O\t20470263\nCC(C)Cc1ccc(cc1)C(C)C(=O)O\tIbuprofen\n[Li+].CN1C=NC2=C1C(=O)NC(=O)N2C\tTheobromine_lithium\nCCCCCCCCCCCC[13CH2][13CH2][13CH2][13C](=O)O\t16213444\nCCCCCCCCCCCCCCC[11C](=O)O\t450634\nCCCCCCCCCCCCCCCCCCCC(=O)O\t10467\n[11CH3]CCCCCCCCCCCCCCC(=O)O\t450636\nC1=CC=C(C=C1)C2=CC(=C(C(=C2O)O)Cl)Cl\tAlginol_SN\nCSCCC(C(=O)O)NC(=O)C1CCCN1C(=O)C(CC2=CC=C(C=C2)O)NC(=O)CN\t18492125\n[2H]CN1C2=C(C(=O)N(C1=O)C([2H])([2H])[2H])N(C=N2)C\t45280315\n[2H]CN1C=NC2=C1C(=O)N(C(=O)N2C[2H])C([2H])[2H]\t45280314\nC1C(CC(C(C1I)O)I)OC2=C(C=C(C=C2I)CC(C(=O)O)N)I\t11564032\nC1=CC(=CC=C1CCOC2=C(C=C(C=C2I)CC(C(=O)O)N)I)O\t23276520\n";
+	var sketcher;
 	$(document).ready(function() {
-		$("[data-toggle=tooltip]").tooltip();
+	        sketcher = new ChemDoodle.SketcherCanvas('sketcher', 500, 300, {useServices:true, oneMolecule:true});
 
-		mol = $("#drawform").get(0).sdf.value + "";
-		mol = mol.replace(/\n/g, '|');
+		$("[data-toggle=tooltip]").tooltip();
 
 		jQuery("#use_sample").click(function() {
 			jQuery("#smiles").get(0).value = sample_smi;
@@ -17,11 +33,8 @@
 	});
 
 	$("#drawform").submit(function() {
-		$(this).get(0).sdf.value = document.applet.molFile();
-		if(!document.applet.smiles().replace(' ', '').length()) {
-			alert("You need to draw a query structure.");
-			return false;
-		}
+		var mol = sketcher.getMolecule();
+		$(this).get(0).sdf.value = ChemDoodle.writeMOL(mol);
 		return true;
 	});
 </script>
@@ -81,9 +94,7 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
         <p>
         Please draw a structure below and click "Submit."
         </p>
-        <applet code="JME.class" name="applet" archive="/static/JME.jar" width="300" height="300">
-          Please enable Java and JavaScript on your machine.
-        </applet>
+	<canvas id="sketcher"></canvas>
         <form id="drawform" action="." method="post" accept-charset="utf-8">
 	{% csrf_token %}
         <label for="id">CID:</label>
