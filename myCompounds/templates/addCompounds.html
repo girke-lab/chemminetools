@@ -52,7 +52,7 @@
 
 <ul class="nav nav-tabs">
   <li {% if input_mode == "smiles-input" %} class="active"{% endif %}><a href="#smiles_tab" data-toggle="tab">Smiles Input</a></li>
-  <li {% if input_mode == "draw" %} class="active"{% endif %}><a href="#draw" data-toggle="tab">Structural Drawing</a></li>
+  <li {% if input_mode == "draw" %} class="active"{% endif %}><a href="#draw" data-toggle="tab">Draw a Molecule</a></li>
   <li {% if input_mode == "sdf-input" %} class="active"{% endif %}><a href="#sdfinput" data-toggle="tab">SDF Input</a></li>
   <li {% if input_mode == "sdf-upload" %} class="active"{% endif %}><a href="#sdfupload" data-toggle="tab">SDF Upload</a></li>
   <li {% if input_mode == "pubchem" %} class="active"{% endif %}><a href="#pubchem" data-toggle="tab">PubChem Import</a></li>
@@ -92,7 +92,7 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
 </div><!--/tab-->
 <div class="tab-pane{% if input_mode == "draw" %} active{% endif %}" id="draw">
         <p>
-        Please draw a structure below and click "Submit."
+	The center dot is a carbon atom. Choose an atom or bond type, and click the center dot to add bonds to this central atom.
         </p>
 	<canvas id="sketcher"></canvas>
         <form id="drawform" action="." method="post" accept-charset="utf-8">
