@@ -163,13 +163,23 @@ def addMyCompounds(sdf, user):
 	namekey = 'PUBCHEM_IUPAC_NAME'
 	message = 'ERROR: bad input data.'
 	added_ids = []
-	try:
+	if 1 == 1:
 		if not isinstance(sdf, unicode):
 			sdf = unicode(sdf, 'utf-8')
 		sdf = sdf.encode('ascii', 'ignore')
 		sdf = sdf.split("\n")
 		for line in sdf:
 			linecounter += 1
+			if linecounter == 1:
+				# clean up cid with regexes
+				try:
+					line = re.match(r"^\W*(.+?)\W*$", line).group(1)
+				except:
+					break
+				line = re.sub(r"[^a-zA-Z_0-9-]", "_", line, count=0)
+				# loop adding "_2" to the cid until we find a unique cid in the database
+				while len(Compound.objects.filter(cid=line, user=user)) > 0:
+					line = line + "_2"
 			if linecounter > MAX_SDF_LENGTH:
 				message = "ERROR: an input sdf exceeds " + str(MAX_SDF_LENGTH) + " lines."
 				raise Exception
@@ -199,6 +209,8 @@ def addMyCompounds(sdf, user):
 			return "Success: Added " + str(counter) + " compounds."
 		else:
 			return "ERROR: No valid input found."
+	try:
+		pass
 	except:
 		for id in added_ids:
 			try:
