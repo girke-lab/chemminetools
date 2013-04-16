@@ -13,6 +13,7 @@ from django.contrib import messages
 import random
 import openbabel
 import re
+import string
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, InputError, sdf_to_smiles
 from django.conf import settings
 
@@ -175,7 +176,7 @@ def addMyCompounds(sdf, user):
 				try:
 					line = re.match(r"^\W*(.+?)\W*$", line).group(1)
 				except:
-					break
+					line = "unspecified_" + ''.join(random.sample(string.digits,6))
 				line = re.sub(r"[^a-zA-Z_0-9-]", "_", line, count=0)
 				# loop adding "_2" to the cid until we find a unique cid in the database
 				while len(Compound.objects.filter(cid=line, user=user)) > 0:
