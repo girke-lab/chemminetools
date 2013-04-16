@@ -14,62 +14,6 @@ from tools.runapp import *
 from models import *
 from simplejson import dumps
 
-class applicationForm(ModelForm):
-	class Meta:
-		model = Application
-
-class ApplicationOptionsForm(ModelForm):
-	class Meta:
-		model = ApplicationOptions
-
-class ApplicationOptionsListForm(ModelForm):
-	class Meta:
-		model = ApplicationOptionsList
-
-@user_passes_test(lambda u: u.is_superuser)
-def manage_application(request, chooseForm):
-	if request.method == 'POST': # If the form has been submitted...
-		if chooseForm == 'applicationForm':
-			form = applicationForm(request.POST) # A form bound to the POST data
-			title = 'Add Application'
-		elif chooseForm == 'ApplicationOptionsForm':
-			title = 'Add Option Type'
-			form = ApplicationOptionsForm(request.POST)
-		else:
-			title = 'Add Option Value'
-			form = ApplicationOptionsListForm(request.POST)
-		if form.is_valid(): # All validation rules pass
-		    # Process the data in form.cleaned_data
-			form.save()
-			messages.success(request, 'Success: application added.')				
-			return render_to_response('genericForm.html', dict(
-				title=title,
-				form=form,
-			),
-			context_instance=RequestContext(request)) 
-		else:
-			messages.error(request, 'error: invalid form data.')
-			return render_to_response('genericForm.html', dict(
-				title='Add Application',
-				form=form,
-			),
-			context_instance=RequestContext(request)) 
-	else:
-		if chooseForm == 'applicationForm':
-			form = applicationForm()
-			title = 'Add Application'
-		elif chooseForm == 'ApplicationOptionsForm':
-			form = ApplicationOptionsForm()
-			title = 'Add Option Type'
-		else:
-			title = 'Add Option Value'
-			form = ApplicationOptionsListForm()
-		return render_to_response('genericForm.html', dict(
-			title=title,
-			form=form,
-		),
-		context_instance=RequestContext(request))
-
 @guest_allowed
 def launch_job(request, category=None):
 	if request.is_ajax():
@@ -188,12 +132,13 @@ def view_job(request, job_id, resource=None, filename=None):
 			f = open(job.output, 'r')
 			message = f.read()
 			f.close()
+			deleteJob(request.user, job.id)
 			if re.search(r"^ERROR:", message):
 				messages.error(request, message)
+				return redirect('myCompounds.views.uploadCompound')
 			else:
 				messages.success(request, message)
-			deleteJob(request.user, job.id)
-			return redirect('myCompounds.views.showCompounds', resource='')
+				return redirect('myCompounds.views.showCompounds', resource='')
 		if(job.application.output_type == 'application/json.canvasxpress'):	
 			f = open(job.output, 'r')
 			plotJSON = f.read()
