@@ -14,6 +14,7 @@ import random
 import openbabel
 import re
 import string
+import time
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, InputError, sdf_to_smiles
 from django.conf import settings
 from tools.runapp import createJob
@@ -112,6 +113,7 @@ def uploadCompound(request, *args, **kargs):
 				),
 				context_instance=RequestContext(request))
 		newJob = createJob(request.user, 'Upload Compounds', '', '--user=' + str(request.user.id), sdf)
+		time.sleep(2)
 		return redirect('tools.views.view_job', job_id=newJob.id, resource='')
 
 def makeSDF(user):
