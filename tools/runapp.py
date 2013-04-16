@@ -7,11 +7,30 @@ import subprocess
 import random
 from django.forms import Form, FileField, ModelChoiceField, IntegerField, HiddenInput 
 from models import *
+from compounddb.models import Compound
 outputPath = settings.TOOLS_RESULTS
 projectDir = settings.PROJECT_DIR
 
+def createJob(user, applicationName, optionsList, commandOptions, input):
+	application = Application.objects.get(name=applicationName)
+	newJob = Job(
+		user=user,
+		application=application,
+		options=optionsList,
+		input='',
+		output='',
+		task_id='',
+	)
+	newJob.save()
+	result = launch.delay(application.script, commandOptions, input, newJob.id, user)
+	newJob.task_id = result.id
+	newJob.save()
+	return newJob
+
 @task()
-def launch(appname, commandOptions, input, job_id):
+def launch(appname, commandOptions, input, job_id, user):
+	if input == 'chemical/x-mdl-sdfile':
+		input = makeSDF(user)
 	outputFileName = outputPath + "/job_" + str(job_id)
 	command = projectDir + '/tools/tool_scripts/' + appname + ' --outfile=' + outputFileName + " " + commandOptions
 	print("Running: " + command + "\n")
@@ -100,3 +119,10 @@ def deleteOrphanJobs():
 		return True
 	except:
 		return False
+
+def makeSDF(user):
+	compoundList = Compound.objects.filter(user=user)
+	sdf = u''
+	for compound in compoundList:
+		sdf = sdf + compound.sdffile_set.all()[0].sdffile.rstrip() + '\n'
+	return sdf
