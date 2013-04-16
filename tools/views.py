@@ -77,15 +77,18 @@ def launch_job(request, category=None):
 		return redirect(view_job, job_id=newJob.id, resource='')
 	else:
 		if category:
+			fromWorkbench = False 
 			try:
 				category = ApplicationCategories.objects.get(name=category)
 				compoundCount = Compound.objects.filter(user=request.user).count()
+				if category.name != 'Upload':
+					fromWorkbench = True 
 				if category.name == 'Clustering' and compoundCount < 3:
 					messages.info(request, 'Notice: you must have at least 3 compounds to perform clustering. Please use this form to add more compounds and then click "Cluster" again.')
 					return redirect('myCompounds.views.uploadCompound')
 				if category.name == 'Properties' and compoundCount < 1:
 					messages.info(request, 'Notice: you must have at least one compound to compute properties. Please use this form to add compounds and then click "Properties" again.')
-					return redirect(uploadCompound)
+					return redirect('myCompounds.views.uploadCompound')
 				title = "Launch " + category.name + " Job"
 				apps = Application.objects.filter(category=category)
 			except:
@@ -99,6 +102,8 @@ def launch_job(request, category=None):
 		return render_to_response('submitForm.html', dict(
 			title=title,
 			form = form,
+			fromWorkbench = fromWorkbench,
+			totalCompounds = Compound.objects.filter(user=request.user).count(),
 		),
 		context_instance=RequestContext(request)) 
 
