@@ -192,6 +192,7 @@ def view_job(request, job_id, resource=None, filename=None):
 				messages.error(request, message)
 			else:
 				messages.success(request, message)
+			deleteJob(request.user, job.id)
 			return redirect('myCompounds.views.showCompounds', resource='')
 		if(job.application.output_type == 'application/json.canvasxpress'):	
 			f = open(job.output, 'r')
@@ -244,7 +245,7 @@ def view_job(request, job_id, resource=None, filename=None):
 			return redirect(view_job, job_id=job.id, resource='download', filename='output')	
 	elif job.status == Job.RUNNING:
 		return render_to_response('wait.html', dict(
-			title = 'Job Running <img src="/static/images/spinner.gif"/>',
+			title = job.application.name + ' Job Running <img src="/static/images/spinner.gif"/>',
 		),
 		context_instance=RequestContext(request))
 	elif job.status == Job.FAILED:
