@@ -6,12 +6,15 @@ from django.contrib.auth.models import User
 import subprocess
 import random
 from django.forms import Form, FileField, ModelChoiceField, IntegerField, HiddenInput 
+from myCompounds.views import makeSDF
 from models import *
 outputPath = settings.TOOLS_RESULTS
 projectDir = settings.PROJECT_DIR
 
 @task()
-def launch(appname, commandOptions, input, job_id):
+def launch(appname, commandOptions, input, job_id, user):
+	if input == 'chemical/x-mdl-sdfile':
+		input = makeSDF(user)
 	outputFileName = outputPath + "/job_" + str(job_id)
 	command = projectDir + '/tools/tool_scripts/' + appname + ' --outfile=' + outputFileName + " " + commandOptions
 	print("Running: " + command + "\n")

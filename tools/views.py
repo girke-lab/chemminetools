@@ -121,7 +121,7 @@ def launch_job(request, category=None):
 
 		# setup input
 		if application.input_type == 'chemical/x-mdl-sdfile':
-			input = makeSDF(request.user)
+			input = 'chemical/x-mdl-sdfile'
 		elif application.input_type == 'upload':
 			input = request.FILES['File Upload'].read()	
 			if not isinstance(input, unicode):
@@ -138,7 +138,7 @@ def launch_job(request, category=None):
 			task_id='',
 		)
 		newJob.save()
-		result = launch.delay(application.script, commandOptions, input, newJob.id)
+		result = launch.delay(application.script, commandOptions, input, newJob.id, request.user)
 		newJob.task_id = result.id
 		newJob.save()
 		messages.success(request, 'Success: job launched.')
