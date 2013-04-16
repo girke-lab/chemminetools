@@ -7,7 +7,7 @@ category: Clustering
 script: multidimensionalscaling.R
 input_type: chemical/x-mdl-sdfile
 output_type: application/json.canvasxpress 
-description: <p><b>Multidimensional Scaling</b> embeds compounds into a 2-Dimensional plane such that the distances between points in the plane can preserve the dis-similairties between compounds. For more details on this clustering method, please see the theory section of the <a href="/help">online tutorial.</a></p>
+description: <p><b>Multidimensional Scaling</b> embeds compounds into a 2-Dimensional plane such that the distances between points in the plane can preserve the dissimilarities between compounds. Similarity cutoff is used for coloring (highlighting) purposes only. For more details on this clustering method, please see the theory section of the <a href="/help">online tutorial.</a></p>
 
 ApplicationOptions:
      Similarity Cutoff: # this name will show up online
