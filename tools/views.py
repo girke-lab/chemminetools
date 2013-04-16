@@ -9,7 +9,6 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.forms import ModelForm
 from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
-from myCompounds.views import makeSDF, uploadCompound
 from compounddb.models import Compound
 from tools.runapp import * 
 from models import *
@@ -129,18 +128,7 @@ def launch_job(request, category=None):
 			input = input.encode('ascii', 'ignore')
 		else:
 			input = ''
-		newJob = Job(
-			user=request.user,
-			application=application,
-			options=optionsList,
-			input='myCompounds sdf',
-			output='',
-			task_id='',
-		)
-		newJob.save()
-		result = launch.delay(application.script, commandOptions, input, newJob.id, request.user)
-		newJob.task_id = result.id
-		newJob.save()
+		newJob = createJob(request.user, application.name, optionsList, commandOptions, input)
 		messages.success(request, 'Success: job launched.')
 		return redirect(view_job, job_id=newJob.id, resource='')
 	else:
@@ -150,7 +138,7 @@ def launch_job(request, category=None):
 				compoundCount = Compound.objects.filter(user=request.user).count()
 				if category.name == 'Clustering' and compoundCount < 3:
 					messages.info(request, 'Notice: you must have at least 3 compounds to perform clustering. Please use this form to add more compounds and then click "Cluster" again.')
-					return redirect(uploadCompound)
+					return redirect('myCompounds.views.uploadCompound')
 				if category.name == 'Properties' and compoundCount < 1:
 					messages.info(request, 'Notice: you must have at least one compound to compute properties. Please use this form to add compounds and then click "Properties" again.')
 					return redirect(uploadCompound)
@@ -196,6 +184,15 @@ def view_job(request, job_id, resource=None, filename=None):
 		finalResult = re.sub(".*/", "", finalResult, count=0)
 		finalResult = '/working/' + finalResult
 		# select correct viewer here based on output type
+		if(job.application.output_type == 'text/sdf.upload'):
+			f = open(job.output, 'r')
+			message = f.read()
+			f.close()
+			if re.search(r"^ERROR:", message):
+				messages.error(request, message)
+			else:
+				messages.success(request, message)
+			return redirect('myCompounds.views.showCompounds', resource='')
 		if(job.application.output_type == 'application/json.canvasxpress'):	
 			f = open(job.output, 'r')
 			plotJSON = f.read()
