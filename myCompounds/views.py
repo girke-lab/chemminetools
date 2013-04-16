@@ -171,6 +171,9 @@ def addMyCompounds(sdf, user):
 		sdf = sdf.split("\n")
 		for line in sdf:
 			linecounter += 1
+			if linecounter > MAX_SDF_LENGTH:
+				message = "ERROR: an input sdf exceeds " + str(MAX_SDF_LENGTH) + " lines."
+				raise Exception
 			if linecounter == 1:
 				# clean up cid with regexes
 				try:
@@ -181,9 +184,6 @@ def addMyCompounds(sdf, user):
 				# loop adding "_2" to the cid until we find a unique cid in the database
 				while len(Compound.objects.filter(cid=line, user=user)) > 0:
 					line = line + "_2"
-			if linecounter > MAX_SDF_LENGTH:
-				message = "ERROR: an input sdf exceeds " + str(MAX_SDF_LENGTH) + " lines."
-				raise Exception
 			sdffile += line
 			sdffile += '\n'
 			if line.startswith("$$$$"):
@@ -192,8 +192,6 @@ def addMyCompounds(sdf, user):
 				except:
 					message = "ERROR: invalid input format."	
 					raise Exception
-				if re.search("^unspecified_", moldata['id']):
-					sdffile = moldata['id'] + sdffile
 				counter += 1
 				linecounter = 0
 				if counter > MAX_COMPOUND_LIMIT:
