@@ -132,12 +132,13 @@ def view_job(request, job_id, resource=None, filename=None):
 			f = open(job.output, 'r')
 			message = f.read()
 			f.close()
+			deleteJob(request.user, job.id)
 			if re.search(r"^ERROR:", message):
 				messages.error(request, message)
+				return redirect('myCompounds.views.uploadCompound')
 			else:
 				messages.success(request, message)
-			deleteJob(request.user, job.id)
-			return redirect('myCompounds.views.showCompounds', resource='')
+				return redirect('myCompounds.views.showCompounds', resource='')
 		if(job.application.output_type == 'application/json.canvasxpress'):	
 			f = open(job.output, 'r')
 			plotJSON = f.read()
