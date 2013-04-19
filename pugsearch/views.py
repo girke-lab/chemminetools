@@ -1,10 +1,14 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
 import sys
 import os
 import re
 from pugsearch.PUG_services import *
 from time import sleep, time
 from django.conf import settings
-from django.http import Http404, HttpResponseBadRequest, HttpResponseRedirect
+from django.http import Http404, HttpResponseBadRequest, \
+    HttpResponseRedirect
 from compounddb.models import Compound
 from django.shortcuts import render_to_response
 import logging
@@ -17,25 +21,28 @@ from pybel import readfile
 loc = PUGLocator()
 port = loc.getPUGSoap()
 
+
 @guest_allowed
 def search(request, sid):
     try:
         cutoff = int(request.POST['cutoff'])
     except:
-	messages.error(request, 'Invalid cutoff!')
+        messages.error(request, 'Invalid cutoff!')
         return HttpResponseRedirect(reverse('compound_search'))
-    if (cutoff < 90) or (cutoff > 99):
-	messages.error(request, 'Cutoff must be between .90 and .99')
+    if cutoff < 90 or cutoff > 99:
+        messages.error(request, 'Cutoff must be between .90 and .99')
         return HttpResponseRedirect(reverse('compound_search'))
     dir = os.path.join(settings.WORK_DIR, sid)
     query = os.path.join(dir, 'query.sdf')
     try:
-	# generate smiles for renderer
-	mol = readfile("sdf", query).next()	
-	smiles = mol.write(format='smi')
-	smiles = re.match(r"^(\S+)", smiles).group(1)
+
+    # generate smiles for renderer
+
+        mol = readfile('sdf', query).next()
+        smiles = mol.write(format='smi')
+        smiles = re.match(r"^(\S+)", smiles).group(1)
     except:
-	smiles = u''	
+        smiles = u''
     if not os.path.exists(query):
         raise Http404, 'no such job: %s' % sid
     try:
@@ -44,7 +51,8 @@ def search(request, sid):
         url = f.next().strip()
         id_list = [int(i) for i in f]
         f.close()
-        logging.info("successfully loading cached results for sid:%s"%sid)
+        logging.info('successfully loading cached results for sid:%s'
+                     % sid)
     except:
         req = InputStructureBase64SoapIn()
         req.set_element_structure(file(query).read())
@@ -52,65 +60,79 @@ def search(request, sid):
 
         start = time()
         strKey = port.InputStructureBase64(req).get_element_StrKey()
-        
-        req = SimilaritySearch2DSoapIn();
+
+        req = SimilaritySearch2DSoapIn()
         req.set_element_StrKey(strKey)
         req.set_element_simOptions(req.new_simOptions())
         req.get_element_simOptions().set_element_threshold(cutoff)
         listKey = port.SimilaritySearch2D(req).get_element_ListKey()
-        logging.info("PubChem job key: %s" % listKey)
-        
+        logging.info('PubChem job key: %s' % listKey)
+
         # call GetOperationStatus until the operation is finished
+
         req = GetOperationStatusSoapIn()
         req.set_element_AnyKey(listKey)
         status = port.GetOperationStatus(req).get_element_status()
-        while (status == 'eStatus_Queued' or status == 'eStatus_Running'):
+        while status == 'eStatus_Queued' or status == 'eStatus_Running':
             sleep(1)
             status = port.GetOperationStatus(req).get_element_status()
-            
-        logging.info("PUG search done for %s" % listKey)
+
+        logging.info('PUG search done for %s' % listKey)
         elapse = time() - start
         warning = ''
-        # check status
-        if (status == 'eStatus_Success'
-                or status == 'eStatus_TimeLimit'
-                or status == 'eStatus_HitLimit'): 
 
-            if (status == 'eStatus_TimeLimit'):
-                warning = 'Warning: time limit reached before entire db searched'
-            elif (status == 'eStatus_HitLimit'):
-                warning = 'Warning: hit limit reached before entire db searched'
+        # check status
+
+        if status == 'eStatus_Success' or status == 'eStatus_TimeLimit' \
+            or status == 'eStatus_HitLimit':
+
+            if status == 'eStatus_TimeLimit':
+                warning = \
+                    'Warning: time limit reached before entire db searched'
+            elif status == 'eStatus_HitLimit':
+                warning = \
+                    'Warning: hit limit reached before entire db searched'
 
             # get Entrez key
+
             req = GetEntrezKeySoapIn()
-            req.set_element_ListKey(listKey);
+            req.set_element_ListKey(listKey)
             entrezKey = port.GetEntrezKey(req).get_element_EntrezKey()
-            
+
             # get URL
+
             req = GetEntrezUrlSoapIn()
             req.set_element_EntrezKey(entrezKey)
             url = port.GetEntrezUrl(req).get_element_url()
 
             # get ID list
+
             req = GetIDListSoapIn()
             req.set_element_ListKey(listKey)
-            id_list = port.GetIDList(req).get_element_IDList().get_element_int()[:200]
-            f = file(os.path.join(dir, 'pugsearch.results.%d' % cutoff), 'w')
+            id_list = \
+                port.GetIDList(req).get_element_IDList().get_element_int()[:200]
+            f = file(os.path.join(dir, 'pugsearch.results.%d'
+                     % cutoff), 'w')
             f.write('%f\n' % elapse)
             f.write('%s\n' % url)
-            for i in id_list: f.write('%d\n' % i)
+            for i in id_list:
+                f.write('%d\n' % i)
             f.close()
+        else:
 
-        else:   # status indicates error
-		messages.error(request, 'No hits! Please try another query, or select a lower cutoff.')
-        	return HttpResponseRedirect(reverse('compound_search'))
-	
-		# commented out, don't let users see these TERRIBLE error messages
-        	   # see if there's some explanatory message
-            	# req = GetStatusMessageSoapIn()
-            	# req.set_element_AnyKey(listKey)
-            	# error = port.GetStatusMessage(req).get_element_message()
-            	# return render_to_response(
+                # status indicates error
+
+            messages.error(request,
+                           'No hits! Please try another query, or select a lower cutoff.'
+                           )
+            return HttpResponseRedirect(reverse('compound_search'))
+
+        # commented out, don't let users see these TERRIBLE error messages
+               # see if there's some explanatory message
+                # req = GetStatusMessageSoapIn()
+                # req.set_element_AnyKey(listKey)
+                # error = port.GetStatusMessage(req).get_element_message()
+                # return render_to_response(
                 # 'pugsearch/result.html',
                 # dict(mode='error', error=error),
                 # context_instance=RequestContext(request)
@@ -123,9 +145,10 @@ def search(request, sid):
     #    str(tuple(_id_list)))
 
     # covered_ids = [int(row[0]) for row in cursor.fetchall()]
-    #covered_ids = Compound.objects.filter(cid__IN=_id_list).values_list('cid')
+    # covered_ids = Compound.objects.filter(cid__IN=_id_list).values_list('cid')
 
     # write IDs to file for downloader to access
+
     filename = os.path.join(dir, 'out')
     if os.path.exists(filename):
         os.unlink(filename)
@@ -136,6 +159,7 @@ def search(request, sid):
     f.close()
 
     # write status file for PUG download
+
     filename = os.path.join(dir, 'status')
     if os.path.exists(filename):
         os.unlink(filename)
@@ -152,13 +176,16 @@ def search(request, sid):
     # hits = dict([(int(i.split()[0]), 1-float(i.split()[1])) for i in out_f])
 
     # compounds = [(i, hits.get(i, None), i not in covered_ids, i not in hits and i in covered_ids) for i in id_list]
-    compounds = [(i,None,None,None,None) for i in id_list]
-    return render_to_response(
-        'pugsearch/result.html',
-        dict(mode='ready', smiles=smiles, sid=sid, compounds=compounds, elapse=elapse,
-            eis_time=0, e_url=url),
-        context_instance=RequestContext(request)
-        )
-        
+
+    compounds = [(i, None, None, None, None) for i in id_list]
+    return render_to_response('pugsearch/result.html', dict(
+        mode='ready',
+        smiles=smiles,
+        sid=sid,
+        compounds=compounds,
+        elapse=elapse,
+        eis_time=0,
+        e_url=url,
+        ), context_instance=RequestContext(request))
 
 # vim:tabstop=4:shiftwidth=4:expandtab
