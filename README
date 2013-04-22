@@ -2,41 +2,8 @@ ChemMine Tools: an Open Source Framework for Chemical Genomics
 
 This repository represents the codebase for the new Django based rewrite of ChemMine Tools.
 
-Software dependencies:
-Python 2.7.3 
-postgresql 9.1.7 
-R 2.15.1
-memcached 1.4.13
-rabbit-mq-server
-ghostscript
-jre1.7.0_17 installed in /opt/jre
-JOELib2-alpha-20070303 installed in /opt/JOELib2-alpha-20070303
-
-R libraries:
-ChemmineR
-Rutils
-ctc
-rjson
-eiR
-
-Python libraries:
-PyYAML
-simplejson
-django-celery
-python-pylibmc
-python-openbabel
-ZSI
-psycopg2
-skimage
-django-reversion
-django-bootstrap-toolkit
-Django 1.4.3 
-pip 
-django-cms 
-south 
-django-appmedia 
-django-guest (http://code.google.com/p/django-guest/)
-django-cron (http://code.google.com/p/django-cron/)
+Look at INSTALL_NOTES.sh for software dependencies and installation
+instructions.
 
 Compatible Browsers:
 Google Chrome 25

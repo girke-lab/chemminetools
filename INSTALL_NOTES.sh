@@ -1,5 +1,6 @@
 #!/bin/bash
-# These are notes for configuring and installing the chemminetools container
+# These are notes for configuring a chemminetools web server 
+# These instructions were tested on Debian Linux 7.0 aka "Wheezy"
 
 # 1st:
 # installed custom screen & vim plugins
