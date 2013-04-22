@@ -39,12 +39,11 @@ pip install pyyaml
 exit 0
 
 # create a user for chemmine tools, and su to that user
-cd /srv
 cd ~
 git clone git@github.com:TylerBackman/chemminetools.git
 
 # as root move to /srv
-mv chemminetools /srv
+mv chemminetools /srv/
 
 # rename config file
 mv /srv/chemminetools/chemminetools/settings_sample.py /srv/chemminetools/chemminetools/settings.py 
@@ -77,6 +76,7 @@ R
 source("http://bioconductor.org/biocLite.R")
 biocLite()
 biocLite(c("ChemmineR", "ctc", "rjson", "R.utils", "eiR"))
+q()
 
 # create working directory and set permissions
 mkdir /srv/chemminetools/working
