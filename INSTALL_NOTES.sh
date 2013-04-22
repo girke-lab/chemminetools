@@ -76,8 +76,7 @@ python manage.py collectstatic
 R
 source("http://bioconductor.org/biocLite.R")
 biocLite()
-biocLite(c("ChemmineR", "ctc", "rjson"))
-install.packages("R.utils")
+biocLite(c("ChemmineR", "ctc", "rjson", "R.utils", "eiR"))
 
 # create working directory and set permissions
 mkdir /srv/chemminetools/working
