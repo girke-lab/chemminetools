@@ -5,6 +5,7 @@ from django.conf.urls.defaults import *
 from django.contrib import admin
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
+from django.views.generic import RedirectView
 
 # enable cron
 
@@ -27,6 +28,7 @@ urlpatterns = patterns(
         ),
     (r'^robots\.txt/?$', direct_to_template, {'template': 'robots.txt',
      'mimetype': 'text/plain'}),
+    (r'^ei/?',  RedirectView.as_view(url='/downloads/')), 
     url(r'^', include('cms.urls')),
     )
 
