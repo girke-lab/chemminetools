@@ -1,5 +1,6 @@
 #!/bin/bash
-# These are notes for configuring and installing the chemminetools container
+# These are notes for configuring a chemminetools web server 
+# These instructions were tested on Debian Linux 7.0 aka "Wheezy"
 
 # 1st:
 # installed custom screen & vim plugins
@@ -39,12 +40,11 @@ pip install pyyaml
 exit 0
 
 # create a user for chemmine tools, and su to that user
-cd /srv
 cd ~
 git clone git@github.com:TylerBackman/chemminetools.git
 
 # as root move to /srv
-mv chemminetools /srv
+mv chemminetools /srv/
 
 # rename config file
 mv /srv/chemminetools/chemminetools/settings_sample.py /srv/chemminetools/chemminetools/settings.py 
@@ -77,6 +77,7 @@ R
 source("http://bioconductor.org/biocLite.R")
 biocLite()
 biocLite(c("ChemmineR", "ctc", "rjson", "R.utils", "eiR"))
+q()
 
 # create working directory and set permissions
 mkdir /srv/chemminetools/working
