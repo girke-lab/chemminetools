@@ -37,10 +37,10 @@ def showCompounds(request, resource):
             deleteMyCompounds(request)
             matches = None
             messages.error(request, 'All Compounds Deleted!')
-        if resource == 'downloadSMILES':
+	if resource == 'downloadSMILES.smi':
             smiles = makeSMILES(request.user)
             return HttpResponse(smiles, mimetype='text/plain')
-        if resource == 'downloadSDF':
+        if resource == 'downloadSDF.sdf':
             sdf = makeSDF(request.user)
             return HttpResponse(sdf, mimetype='text/plain')
     if matches:
