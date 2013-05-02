@@ -37,7 +37,7 @@ def render_image(request, id, filename):
         raise Http404
     if compound.weight > 2000:
         raise Http404
-    smiles = compound.smiles
+    smiles = re.match(r"^(\S+)", compound.smiles).group(1)
     mymol = pybel.readstring('smi', str(smiles))
     png = mymol.write(format='_png2')
     return HttpResponse(png, mimetype='image/png')
