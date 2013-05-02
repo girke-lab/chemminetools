@@ -39,7 +39,7 @@ def render_image(request, id, filename):
         raise Http404
     smiles = compound.smiles
     mymol = pybel.readstring('smi', str(smiles))
-    png = mymol.write(format='png')
+    png = mymol.write(format='_png2')
     return HttpResponse(png, mimetype='image/png')
 
 
