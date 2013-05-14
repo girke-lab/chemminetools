@@ -4,6 +4,7 @@
 """format conversion"""
 
 import openbabel
+import pybel
 import re
 
 
@@ -24,15 +25,12 @@ def unicode_wrapper(f):
 
 @unicode_wrapper
 def smiles_to_sdf(smiles):
-    obConversion = openbabel.OBConversion()
-    obConversion.SetInAndOutFormats('smi', 'sdf')
-
-    mol = openbabel.OBMol()
-    if not obConversion.ReadString(mol, smiles):
+    try:
+        mymol = pybel.readstring('smi', str(smiles))
+    except:
         raise InputError
-
-    return obConversion.WriteString(mol)
-
+    mymol.make3D()
+    return mymol.write(format='sdf')
 
 @unicode_wrapper
 def sdf_to_smiles(sdf):
