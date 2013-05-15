@@ -29,7 +29,10 @@ def smiles_to_sdf(smiles):
         mymol = pybel.readstring('smi', str(smiles))
     except:
         raise InputError
-    mymol.make3D()
+    try:
+        mymol.draw(show=False, update=True)
+    except:
+        pass
     return mymol.write(format='sdf')
 
 @unicode_wrapper
