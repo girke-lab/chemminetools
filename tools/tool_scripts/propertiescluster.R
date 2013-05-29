@@ -44,7 +44,8 @@ matchingCidPositions <- matchingCidPositions[! is.na(matchingCidPositions)]
 cids <- cids[matchingCidPositions]
 sdfInput <- sdfInput[sdfid(sdfInput) %in% cids]
 plotdata <- propData[propData[,1] %in% cids,2:ncol(propData)]
-varids <- colnames(plotdata)
+plotdata <- as.data.frame(plotdata)
+varids <- colnames(propData)[2:ncol(propData)]
 plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
 plotdata <- as.data.frame(scale(plotdata))
 # plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
