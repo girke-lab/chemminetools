@@ -12,6 +12,7 @@ if(! exists("debug_mode")){
      outfile = commandArgs(asValues=TRUE)$outfile
      properties = commandArgs(asValues=TRUE)$properties
      linkage = commandArgs(asValues=TRUE)$linkage
+     displayType = commandArgs(asValues=TRUE)$displayType
 
      # read in sdf from standard i/o
      f <- file("stdin")
@@ -47,9 +48,15 @@ plotdata <- propData[propData[,1] %in% cids,2:ncol(propData)]
 plotdata <- as.data.frame(plotdata)
 varids <- colnames(propData)[2:ncol(propData)]
 plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
+if(displayType == "actual"){
+     unNormalized <- as.data.frame(plotdata)
+     key <- "Column Numeric Values"
+} else {
+     unNormalized <- as.data.frame(scale(plotdata))  
+     key <- "Column Z-Scores"
+}
 plotdata <- as.data.frame(scale(plotdata))
 # plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
-key <- "Column Z-score"
 if(dim(plotdata)[1] < 1){
   stop()
 }
@@ -70,8 +77,8 @@ hc[["labels"]] <- cids
 newick <- hc2Newick(hc)
 
 # create JSON object of results 
-colnames(plotdata) <- NULL
-y <- list(vars=varids, smps=cids, desc="key_tag", data=plotdata)
+colnames(unNormalized) <- NULL
+y <- list(vars=varids, smps=cids, desc="key_tag", data=unNormalized)
 t <- list(smps=newick)
 data <- list(x=list(), y=y, z=list(), t=t)
 data <- toJSON(data, method="C")
