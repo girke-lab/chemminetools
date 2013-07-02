@@ -50,10 +50,10 @@ varids <- colnames(propData)[2:ncol(propData)]
 plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
 if(displayType == "actual"){
      unNormalized <- as.data.frame(plotdata)
-     key <- "Column Numeric Values"
+     key <- "Numeric Values"
 } else {
      unNormalized <- as.data.frame(scale(plotdata))  
-     key <- "Column Z-Scores"
+     key <- "Per Column Z-Scores"
 }
 plotdata <- as.data.frame(scale(plotdata))
 # plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
