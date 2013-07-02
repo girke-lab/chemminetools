@@ -7,7 +7,7 @@ category: Clustering
 script: propertiescluster.R
 input_type: chemical/x-mdl-sdfile
 output_type: application/json.canvasxpress
-description: <p><b>Numeric Data Clustering</b> clusters data by the euclidean distance between column z-scores for any uploaded or calculated properties table. A properties heatmap source must be chosen for this tool to operate. For more details on this clustering method, please see the theory section of the <a href="/help">online tutorial.</a></p>
+description: <p><b>Numeric Data Clustering</b> clusters data by the euclidean distance between column z-scores for any uploaded or calculated properties table. A properties heatmap source must be chosen for this tool to operate. While all clustering is done on normalized data (z-scores) the "Color and Display Values" option lets you display the true numeric values on the final plot. For more details on this clustering method, please see the theory section of the <a href="/help">online tutorial.</a></p>
 
 ApplicationOptions:
      Linkage Method: # this name will show up online
@@ -15,7 +15,12 @@ ApplicationOptions:
           options: # format: [web name, command line value]
                - [single, single]
                - [average, average]
-               - [complete, complete]     
+               - [complete, complete]    
+     Color and Display Values: # this name will show up online
+          realName: displayType # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [Z-scores, zscores]
+               - [actual, actual]
      Physicochemical Properties:
           realName: properties
           options:
