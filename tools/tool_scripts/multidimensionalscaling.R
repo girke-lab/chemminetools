@@ -75,7 +75,7 @@ height <- 600
 width <- "$(\"canvas\").parent().width()"
 
 # add configuration parameters and output to file
-config <- paste("{\"graphType\": \"", dimensions, "\",\"useFlashIE\": true, \"colorBy\": \"cluster\", \"legendPosition\": \"top\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\"}", sep="")
+config <- paste("{\"graphType\": \"", dimensions, "\",\"useFlashIE\": true, \"zoomSamplesDisable\": true, \"zoomVariablesDisable\": true, \"colorBy\": \"cluster\", \"legendPosition\": \"top\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\"}", sep="")
 events <- "{click: function(o) {detailPopup(o.y.vars);}, dblclick: function(o) {detailPopup(o.y.vars);}}"
 output <- paste("$(\"canvas\").attr('height', '", height, "');\n$(\"canvas\").attr('width', ", width, ");\n new CanvasXpress(\"canvas\",\n", data, ",\n", config,",\n", events, "\n)", sep="")
 if(! exists("debug_mode")){
