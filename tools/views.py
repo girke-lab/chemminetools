@@ -145,8 +145,10 @@ def view_job(
             f = open(job.output, 'r')
             result = f.read()
             f.close()
+            if job.application.output_type == 'application/json.canvasxpress':
+                result = re.search(r'smps":"(.*)"}},', result).group(1)
             return HttpResponse(result,
-                                mimetype=job.application.output_type)
+                             mimetype=job.application.output_type)
     if request.is_ajax():
         if job.status == Job.RUNNING:
             response = dict(status='RUNNING')
@@ -177,9 +179,14 @@ def view_job(
             f = open(job.output, 'r')
             plotJSON = f.read()
             f.close()
+            if (job.application.name == 'Hierarchical Clustering')\
+                or (job.application.name == 'Numeric Data Clustering'):
+                tree = True 
+            else:
+                tree = False
             return render_to_response('view_job.html',
                     dict(title=str(job.application) + ' Results',
-                    result=finalResult, job=job, plotJSON=plotJSON),
+                    result=finalResult, tree=tree, job=job, plotJSON=plotJSON),
                     context_instance=RequestContext(request))
         elif job.application.output_type == 'text/properties.table':
             f = open(job.output, 'r')
