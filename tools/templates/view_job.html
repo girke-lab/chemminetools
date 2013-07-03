@@ -58,6 +58,12 @@ $(document).ready(function() {
 		<th>Options</th>
 		<td>{{ job.options }}</td>
 	</tr>
+    {% if tree %}
+	<tr>
+		<th>Results</th>
+		<td><a class="btn" href="download/clusteringtree.tre">Download newick tree »</a></td>
+	</tr>
+    {% endif %}
 	</tbody>
 	</table>
 	</div>
