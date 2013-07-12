@@ -18,9 +18,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     r'',
     url(r'^admin/', include(admin.site.urls)),
-    (r'^accounts/login/$',  login),
-    (r'^accounts/logout/$', logout, {'next_page': '/'}),
-    (r'^users/', include(r'users.urls')),
+    (r'^accounts/', include('userena.urls')),
     (r'^compounds/', include(r'compounddb.urls')),
     (r'^my[Cc]ompounds/', include('myCompounds.urls')),
     (r'^tools/', include('tools.urls')),
