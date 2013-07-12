@@ -45,7 +45,11 @@
           <a class="brand" href="/" style="color:red">ChemMine Tools</a>
           <div class="nav-collapse collapse">
             <p class="navbar-text pull-right">
-              Logged in as Guest 
+            {% if user.is_authenticated %}
+              Logged in as, {{ user.username }}. <a href="/accounts/logout/">logout</a>
+            {% else %}
+              Optional: <a href="/accounts/login/?next=/">log in</a> or <a href="/users/register/">register</a>
+            {% endif %}
             </p>
             <ul class="nav">
 		{% show_menu 0 100 0 1 %}
