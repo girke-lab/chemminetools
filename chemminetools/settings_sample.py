@@ -3,6 +3,7 @@
 
 import os
 import djcelery
+from django.contrib.messages import constants as messages
 
 # load celery
 
@@ -12,7 +13,7 @@ gettext = lambda s: s
 
 PROJECT_DIR = '/srv/chemminetools'
 
-DEBUG = True
+DEBUG = False 
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = ()
@@ -34,7 +35,7 @@ DATABASES = {'default': {  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'o
     'NAME': '',
     'USER': '',
     'PASSWORD': '',
-    'HOST': 'localhost',
+    'HOST': '',
     'PORT': '',
     }}
 
@@ -137,6 +138,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.admin',
     'django.contrib.staticfiles',
+    'userena',
+    'guardian',
+    'easy_thumbnails',
     'cms',
     'menus',
     'mptt',
@@ -159,6 +163,7 @@ INSTALLED_APPS = (
     'eis',
     'pugsearch',
     'ChemmineR',
+    'accounts',
     )
 
 WORK_DIR = PROJECT_DIR + '/working'
@@ -172,6 +177,16 @@ BOOTSTRAP_BASE_URL = ADMIN_MEDIA_PREFIX + 'bootstrap/'
 BOOTSTRAP_CSS_BASE_URL = BOOTSTRAP_BASE_URL + 'css/'
 BOOTSTRAP_CSS_URL = BOOTSTRAP_CSS_BASE_URL + 'bootstrap.css'
 BOOTSTRAP_JS_BASE_URL = BOOTSTRAP_BASE_URL + 'js/'
+
+# setup twitter boostrap message tags
+
+MESSAGE_TAGS = {
+    messages.DEBUG: 'alert-error',
+    messages.INFO: 'alert-info',
+    messages.SUCCESS: 'alert-success',
+    messages.WARNING: 'alert-error',
+    messages.ERROR: 'alert-error',
+    }
 
 # Django-guests options
 # Override the default settings for cleaning up guests.
@@ -191,6 +206,23 @@ GUEST_DELETE_FREQUENCY = 8640
 ASSEI_SERVER = ('127.0.0.1', 50008)
 QUERY_TIMEOUT = 60
 
-PUBCHEM_DOWNLOADER = '/srv/ChemMineTools/ei/support/pubchemdl.py'
+PUBCHEM_DOWNLOADER = '/srv/chemminetools/eis/pubchemdl.py'
+
+# hard limits
+
 MAX_COMPOUND_LIMIT = 10000  # compounds allowed per upload
 MAX_SDF_LENGTH = 10000  # lines per SDF allowed
+
+# user auth settings
+ANONYMOUS_USER_ID = -1
+USERENA_DEFAULT_PRIVACY = 'closed'
+USERENA_WITHOUT_USERNAMES = True 
+AUTH_PROFILE_MODULE = 'accounts.MyProfile'
+LOGIN_REDIRECT_URL = '/accounts/%(username)s/'
+LOGIN_URL = '/accounts/signin/'
+LOGOUT_URL = '/accounts/signout/'
+AUTHENTICATION_BACKENDS = (
+    'userena.backends.UserenaAuthenticationBackend',
+    'guardian.backends.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
