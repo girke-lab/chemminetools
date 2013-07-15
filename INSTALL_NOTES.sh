@@ -35,6 +35,7 @@ pip install django-celery
 pip install simplejson
 pip install ghostscript
 pip install pyyaml
+pip install django-userena
 
 # exit now if a bash script, the rest should be run interactively 
 exit 0
@@ -71,6 +72,7 @@ cd /srv/chemminetools
 python manage.py syncdb
 python manage.py migrate
 python manage.py collectstatic
+python manage.py check_permissions
 
 # install R packages
 R

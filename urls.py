@@ -6,6 +6,7 @@ from django.contrib import admin
 from django.conf import settings
 from django.views.generic.simple import direct_to_template
 from django.views.generic import RedirectView
+from django.contrib.auth.views import login, logout
 
 # enable cron
 
@@ -17,6 +18,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     r'',
     url(r'^admin/', include(admin.site.urls)),
+    (r'^accounts/', include('userena.urls')),
     (r'^compounds/', include(r'compounddb.urls')),
     (r'^my[Cc]ompounds/', include('myCompounds.urls')),
     (r'^tools/', include('tools.urls')),
