@@ -46,9 +46,10 @@
           <div class="nav-collapse collapse">
             <p class="navbar-text pull-right">
             {% if user.email %}
-              Logged in as, <a href="/accounts/{{ user.username }}/">{{ user.email }}</a>. <a href="/accounts/signout/">logout</a>
+              Logged in as <a href="/accounts/{{ user.username }}/">{{ user.email }}</a>. <a href="/accounts/signout/">logout</a>
             {% else %}
-              Optional: <a href="/accounts/signin/">log in</a> or <a href="/accounts/signup/">register</a>
+              Optional: <a href="/accounts/signin/">login</a> or <a href="/accounts/signup/">register</a>
+                to save data.
             {% endif %}
             </p>
             <ul class="nav">
