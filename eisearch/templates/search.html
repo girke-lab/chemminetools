@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% load cms_tags %}
 
+{% block extra_headers %}
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<link rel="stylesheet" href="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb.css" type="text/css">
+<link rel="stylesheet" href="/static/dependenciesStatic/ChemDoodle/sketcher/jquery-ui-1.9.2.custom.css" type="text/css">
+{% endblock %}
+
 {% block js_content %}
 <script type="text/javascript">
 function do_example(){
@@ -35,6 +41,34 @@ $(document).ready(function() {
 		return true;
 	});
 });
+</script>
+
+<!--these are required by the ChemDoodle Web Components library-->
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb-libs.js"></script>
+<script type="text/javascript">
+        $.noConflict();
+</script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/sketcher/jquery-ui-1.9.2.custom.min.js"></script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb.js"></script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/sketcher/ChemDoodleWeb-sketcher.js"></script>
+<script type="text/javascript">
+        var sketcher;
+        $(document).ready(function() {
+                sketcher = new ChemDoodle.SketcherCanvas('sketcher', 500, 300, {useServices:false, oneMolecule:true});
+
+                $("[data-toggle=tooltip]").tooltip();
+
+                jQuery("#use_sample").click(function() {
+                        jQuery("#smiles").get(0).value = sample_smi;
+                        return false;
+                });
+        });
+
+        $("#drawform").submit(function() {
+                var mol = sketcher.getMolecule();
+                $(this).get(0).sdf.value = ChemDoodle.writeMOL(mol);
+                return true;
+        });
 </script>
 {% endblock %}
 
@@ -104,19 +138,14 @@ $(document).ready(function() {
 </div>
 
 <div class="tab-pane" id="draw">
-<form class="form-horizontal" id="drawform" action="{% url compound_search %}" method="post" accept-charset="utf-8">
-{% csrf_token %}
-	<input type="hidden" name="sdf"/><br/>
-
-	<div class="control-group">
-		<label class="control-label" for="drawStruct">Draw a structure here:</label>
-		<div class="controls">
-			<applet code="JME.class" name="applet" archive="/static/JME.jar" width="300" height="300">
-			      Please enable Java and JavaScript on your machine.
-r
-			</applet>
-		</div>
-	</div>		
+        <p>
+        The center dot is a carbon atom. To add bonds, choose a bond type and click the central atom. To replace atoms, choose an element and click the atom you would like to replace.
+        </p>
+        <canvas id="sketcher"></canvas>
+        <form id="drawform" action="." method="post" accept-charset="utf-8">
+        {% csrf_token %}
+        <input type="hidden" name="sdf" value="{{post_data.sdf}}"/><br/>
+        <input type="hidden" name="draw" value="1"/>
 
 	<div class="control-group">
 		<label class="control-label" for="cutoff">Similarity Cutoff:</label>
