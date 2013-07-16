@@ -6,7 +6,7 @@ name: EI Search
 category: Search 
 script: eiSearch.R
 input_type: chemical/x-mdl-sdfile
-output_type: text/properties.table 
+output_type: text/ei.search.result
 description: ei search 
 
 ApplicationOptions:

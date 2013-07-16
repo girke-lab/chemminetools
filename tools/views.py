@@ -162,7 +162,18 @@ def view_job(
 
         # select correct viewer here based on output type
 
-        if job.application.output_type == 'text/sdf.upload':
+        if job.application.output_type == 'text/ei.search.result':
+            f = open(job.output, 'r')
+            csvinput = csv.reader(f)
+            csvOutput = []
+            for line in csvinput:
+                csvOutput.append(line)
+            f.close()
+            return render_to_response('eiresult.html',
+                    dict(title=str(job.application) + ' Results',
+                    job=job, csv=csvOutput),
+                    context_instance=RequestContext(request))
+        elif job.application.output_type == 'text/sdf.upload':
             f = open(job.output, 'r')
             message = f.read()
             f.close()
@@ -174,7 +185,7 @@ def view_job(
                 messages.success(request, message)
                 return redirect('myCompounds.views.showCompounds',
                                 resource='')
-        if job.application.output_type \
+        elif job.application.output_type \
             == 'application/json.canvasxpress':
             f = open(job.output, 'r')
             plotJSON = f.read()

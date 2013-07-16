@@ -4,6 +4,6 @@
 from django.conf.urls.defaults import *
 from django.conf import settings
 import logging
+from views import *
 
-urlpatterns = patterns('', url(r'^$', 'eisearch.views.search',
-                       name='compound_search'))
+urlpatterns = patterns('', url(r'^query/$', search))
