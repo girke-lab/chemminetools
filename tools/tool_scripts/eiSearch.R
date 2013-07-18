@@ -45,4 +45,4 @@ results = eiQuery(r,d,refFile,queries = sdfInput,dir=baseDir,K=numResults)
 #print(results)
 filtered = results[results$distance < 1-simCutoff,]
 results = data.frame(target=filtered$target,similarities = 1 - filtered$distance)
-write.table(results,file=outfile)
+write.table(results,file=outfile,quote=FALSE,row.names=FALSE,col.names=FALSE)
