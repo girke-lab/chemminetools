@@ -22,6 +22,7 @@ def createJob(
     optionsList,
     commandOptions,
     input,
+    inputvar='',
     ):
 
     application = Application.objects.get(name=applicationName)
@@ -29,7 +30,7 @@ def createJob(
         user=user,
         application=application,
         options=optionsList,
-        input='',
+        input=inputvar,
         output='',
         task_id='',
         )

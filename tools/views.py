@@ -17,7 +17,6 @@ from tools.runapp import *
 from models import *
 from simplejson import dumps
 
-
 @guest_allowed
 def launch_job(request, category=None):
     if request.is_ajax():
@@ -164,14 +163,14 @@ def view_job(
 
         if job.application.output_type == 'text/ei.search.result':
             f = open(job.output, 'r')
-            csvinput = csv.reader(f)
+            csvinput = csv.reader(f, delimiter=' ')
             csvOutput = []
             for line in csvinput:
                 csvOutput.append(line)
             f.close()
             return render_to_response('eiresult.html',
                     dict(title=str(job.application) + ' Results',
-                    job=job, csv=csvOutput),
+                    job=job, compounds=csvOutput, query=job.input),
                     context_instance=RequestContext(request))
         elif job.application.output_type == 'text/sdf.upload':
             f = open(job.output, 'r')

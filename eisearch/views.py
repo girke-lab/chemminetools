@@ -37,6 +37,7 @@ def search(request):
             try:
                 sdf = request.FILES['sdf']
                 sdf = sdf.read()
+                smiles = sdf_to_smiles(sdf)
             except (InputError, InvalidInputError):
                 messages.error(request, 'Invalid SDF!')
                 sdf = None
@@ -55,11 +56,12 @@ def search(request):
             else:
                 input_mode = 'sdf-input'
                 sdf = request.POST['sdf']
+                smiles = sdf_to_smiles(sdf)
                 if not sdf:
                     messages.error(request, 'No input found!')
         if not sdf:
             return render_to_response('search.html', dict(mode='form'),
                 context_instance=RequestContext(request)) 
-        newJob = createJob(request.user, 'EI Search', '','', sdf)
+        newJob = createJob(request.user, 'EI Search', '','', sdf, smiles)
         time.sleep(2)
         return redirect('tools.views.view_job', job_id=newJob.id,resource='')
