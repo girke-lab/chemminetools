@@ -4,7 +4,7 @@
 # load with command: loader -i thisfile.yaml
 name: pubchemID2SDF
 category: Search 
-script: pubchemID2SDF
+script: pubchemID2SDF.R
 input_type: text/properties.table 
 output_type: chemical/x-mdl-sdfile
 description: Takes pubchem ID numbers and returns SDF objects

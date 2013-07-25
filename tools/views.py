@@ -4,6 +4,7 @@
 import re
 import os
 import csv
+import time
 from collections import defaultdict, OrderedDict
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render_to_response
@@ -15,6 +16,7 @@ from guest.decorators import guest_allowed, login_required
 from compounddb.models import Compound
 from tools.runapp import *
 from models import *
+from sdftools.moleculeformats import batch_sdf_to_smiles
 from simplejson import dumps
 
 @guest_allowed
@@ -204,6 +206,25 @@ def view_job(
                     dict(title=str(job.application) + ' Results',
                     result=finalResult, job=job, bins=bins),
                     context_instance=RequestContext(request))
+        elif job.application.output_type == 'chemical/x-mdl-sdfile':
+            f = open(job.output, 'r')
+            sdf = f.read()
+            f.close()
+            nextStep = job.input
+            deleteJob(request.user, job.id)
+            if nextStep == 'workbench':
+                newJob = createJob(request.user, 'Upload Compounds', '',
+                    '--user=' + str(request.user.id), sdf)
+                time.sleep(2)
+                return redirect('tools.views.view_job', job_id=newJob.id,
+                    resource='')
+            elif nextStep == 'smiles':
+                result = batch_sdf_to_smiles(sdf) 
+                return HttpResponse(result,
+                                 mimetype=job.application.output_type)
+            else:
+                return HttpResponse(sdf,
+                                 mimetype=job.application.output_type)
         else:
 
             # if mimetype is unknown, just send the file to the user

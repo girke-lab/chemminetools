@@ -7,8 +7,8 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
-from tools.models import Application
-from tools.runapp import createJob, getAppForm, parseToolForm
+from tools.models import Application, Job
+from tools.runapp import updateJob, createJob, getAppForm, parseToolForm
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 
@@ -77,3 +77,20 @@ def search(request):
         newJob = createJob(request.user, 'EI Search', optionsList, commandOptions, sdf, smiles)
         time.sleep(2)
         return redirect('tools.views.view_job', job_id=newJob.id,resource='')
+
+@guest_allowed
+def getStructures(request, job_id, format):
+
+    # takes a search job ID and returns an SDF of the compounds from this result 
+
+    try:
+        job = updateJob(request.user, job_id)
+        f = open(job.output, 'r')
+        result = f.read()
+        f.close() 
+    except Job.DoesNotExist:
+        raise Http404
+    # note: add in here a regex to keep only cids
+    newJob = createJob(request.user, 'pubchemID2SDF', '', '', result, format) 
+    time.sleep(2)
+    return redirect('tools.views.view_job', job_id=newJob.id,resource='')
