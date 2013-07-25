@@ -2,6 +2,7 @@
 
 import re
 import time
+from string import join
 from django.shortcuts import redirect, render_to_response
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.contrib import messages
@@ -74,6 +75,7 @@ def search(request):
             messages.error(request, "Invalid form options!")
         if not sdf:
             return redirect('eisearch.views.search')
+        smiles = re.search(r'(\S+)', smiles).group(1)
         newJob = createJob(request.user, 'EI Search', optionsList, commandOptions, sdf, smiles)
         time.sleep(2)
         return redirect('tools.views.view_job', job_id=newJob.id,resource='')
@@ -88,6 +90,7 @@ def getStructures(request, job_id, format):
         f = open(job.output, 'r')
         result = f.read()
         f.close() 
+        result = join(re.findall(r'^\S+', smiles, re.MULTILINE), sep='\n')
     except Job.DoesNotExist:
         raise Http404
     # note: add in here a regex to keep only cids
