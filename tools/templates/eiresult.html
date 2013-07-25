@@ -65,9 +65,9 @@ $(document).ready(function() {
 {% if compounds %}
     <h2>Hits</h2>
     <div class="btn-group">
-    <a href=""><button type="button" class="btn btn-primary">Send to Workbench</button></a>
-    <a href=""><button type="button" class="btn">Download SDF</button></a>
-    <a href=""><button type="button" class="btn">Download SMILES</button></a>
+    <a href="/eisearch/getStructures/{{job.id}}/workbench"><button type="button" class="btn btn-primary">Send to Workbench</button></a>
+    <a href="/eisearch/getStructures/{{job.id}}/sdf"><button type="button" class="btn">Download SDF</button></a>
+    <a href="/eisearch/getStructures/{{job.id}}/smiles"><button type="button" class="btn">Download SMILES</button></a>
     <button id="loadstructures" class="btn">Show Structures</button>
     </div>
 
