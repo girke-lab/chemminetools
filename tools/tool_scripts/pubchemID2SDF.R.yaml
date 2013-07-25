@@ -1,0 +1,10 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: pubchemID2SDF
+category: Search 
+script: pubchemID2SDF
+input_type: text/properties.table 
+output_type: chemical/x-mdl-sdfile
+description: Takes pubchem ID numbers and returns SDF objects

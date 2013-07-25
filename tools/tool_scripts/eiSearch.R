@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
-# requires: ChemmineR,R.utils,ctc,rjson
-# use: ./apcluster.R --outfile=output.json --linkage=single < input.sdf
+# requires: ChemmineR,R.utils
+# use: ./eiSearch.R --outfile=output.txt --simCutoff=0.3 --numResults=10 < input.sdf
 
 library(eiR)
 library(R.utils)
@@ -44,7 +44,6 @@ cids <- cids[! duplicated(cids)]
 
 results = eiQuery(r,d,refFile,queries = sdfInput,dir=baseDir,K=numResults)
 #print(results)
-filtered = results[results$distance < 1-simCutoff,]$target_ids
-#print(filtered)
-conn = initDb(db)
-getCompounds(conn,filtered,file=outfile)
+filtered = results[results$distance < 1-simCutoff,]
+results = data.frame(target=filtered$target,similarities = 1 - filtered$distance)
+write.table(results,file=outfile,quote=FALSE,row.names=FALSE,col.names=FALSE)
