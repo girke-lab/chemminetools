@@ -75,14 +75,14 @@ $(document).ready(function() {
 {% block base_content %}
 <div class="row-fluid">
 <div class="span12">
-<h2>Structural Similarity Search</h2>
+<h2>EI Structural Similarity Search</h2>
 </div>
 </div><!--/row-->
 
 
 <div class="row-fluid">
 <div class="span12">
-<p>Input your query structure using one of the following four options, and click the 'Search' button to initiate a similarity search against the PubChem Compound database.</p>
+<p>Input your query structure using one of the following four options, and click the 'Search' button to initiate a similarity search against the PubChem Compound database. Search is performed using the EI search algorithm with an atom pair (AP) similarity measure.</p>
 </div>
 </div><!--/row-->
 
@@ -105,26 +105,11 @@ $(document).ready(function() {
 			<input id="smiles" type="text" name="smiles" class="field span8" value="{{ smi  }}"/>
 		</div>
 	</div>
-	
-	<div class="control-group">
-		<label class="control-label" for="cutoff">Similarity Cutoff:</label>
-		<div class="controls">
-			<b>0.</b><select id="cutoff" name="cutoff">
-			<option value="95">95</option>
-			<option value="90">90</option>
-			<option value="91">91</option>
-			<option value="92">92</option>
-			<option value="93">93</option>
-			<option value="94">94</option>
-			<option value="95">95</option>
-			<option value="96">96</option>
-			<option value="97">97</option>
-			<option value="98">98</option>
-			<option value="99">99</option>
-			</select>
-		</div>
-	</div>
 
+    <table>
+        {{form}}
+    </table>
+	
 	<div class="control-group">
 		<div class="controls">
 			<div class="btn-group">
@@ -147,24 +132,9 @@ $(document).ready(function() {
         <input type="hidden" name="sdf" value="{{post_data.sdf}}"/><br/>
         <input type="hidden" name="draw" value="1"/>
 
-	<div class="control-group">
-		<label class="control-label" for="cutoff">Similarity Cutoff:</label>
-		<div class="controls">
-			<b>0.</b><select id="cutoff" name="cutoff">
-			<option value="95">95</option>
-			<option value="90">90</option>
-			<option value="91">91</option>
-			<option value="92">92</option>
-			<option value="93">93</option>
-			<option value="94">94</option>
-			<option value="95">95</option>
-			<option value="96">96</option>
-			<option value="97">97</option>
-			<option value="98">98</option>
-			<option value="99">99</option>
-			</select>
-		</div>
-	</div>
+    <table>
+        {{form}}
+    </table>
 
 	<div class="control-group">
 		<div class="controls">
@@ -187,24 +157,9 @@ Please copy and paste your single-molecule SDF below. If multiple compounds are 
 		</div>
 	</div>
 
-	<div class="control-group">
-		<label class="control-label" for="cutoff">Similarity Cutoff:</label>
-		<div class="controls">
-			<b>0.</b><select id="cutoff" name="cutoff">
-			<option value="95">95</option>
-			<option value="90">90</option>
-			<option value="91">91</option>
-			<option value="92">92</option>
-			<option value="93">93</option>
-			<option value="94">94</option>
-			<option value="95">95</option>
-			<option value="96">96</option>
-			<option value="97">97</option>
-			<option value="98">98</option>
-			<option value="99">99</option>
-			</select>
-		</div>
-	</div>
+    <table>
+        {{form}}
+    </table>
 
 	<div class="control-group">
 		<div class="controls">
@@ -226,24 +181,9 @@ Please upload a single-molecule SDF below. If multiple compounds are found in th
 		</div>
 	</div>
 
-	<div class="control-group">
-		<label class="control-label" for="cutoff">Similarity Cutoff:</label>
-		<div class="controls">
-			<b>0.</b><select id="cutoff" name="cutoff">
-			<option value="95">95</option>
-			<option value="90">90</option>
-			<option value="91">91</option>
-			<option value="92">92</option>
-			<option value="93">93</option>
-			<option value="94">94</option>
-			<option value="95">95</option>
-			<option value="96">96</option>
-			<option value="97">97</option>
-			<option value="98">98</option>
-			<option value="99">99</option>
-			</select>
-		</div>
-	</div>
+    <table>
+        {{form}}
+    </table>
 
 	<div class="control-group">
 		<div class="controls">

@@ -46,30 +46,7 @@ def launch_job(request, category=None):
         else:
             messages.error(request, str(form.errors))
             return redirect(launch_job, category=category)
-        commandOptions = u''
-        optionsList = u''
-        for question in form.cleaned_data.keys():
-            if question != 'application' and question != 'File Upload':
-                questionObject = \
-                    ApplicationOptions.objects.get(application=application,
-                        name=question)
-                try:
-                    job = form.cleaned_data[question]
-                    option = job.output
-                    optionName = str(job)
-                except:
-                    try:
-                        answerObject = form.cleaned_data[question]
-                        optionName = answerObject.name
-                        option = answerObject.realName
-                    except:
-                        option = 'None'
-                        optionName = 'None'
-                commandOptions = commandOptions + ' --' \
-                    + questionObject.realName + '=' + option
-                optionsList = optionsList + questionObject.name + ': ' \
-                    + optionName + ', '
-        optionsList = re.sub(",\s$", '', optionsList, count=0)
+        commandOptions, optionsList = parseToolForm(form, application)
 
         # setup input
 

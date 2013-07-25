@@ -164,6 +164,7 @@ INSTALLED_APPS = (
     'pugsearch',
     'ChemmineR',
     'accounts',
+    'eisearch',
     )
 
 WORK_DIR = PROJECT_DIR + '/working'
