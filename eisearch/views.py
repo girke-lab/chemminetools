@@ -74,6 +74,7 @@ def search(request):
             messages.error(request, "Invalid form options!")
         if not sdf:
             return redirect('eisearch.views.search')
+        smiles = re.search(r'(\S+)', smiles).group(1)
         newJob = createJob(request.user, 'EI Search', optionsList, commandOptions, sdf, smiles)
         time.sleep(2)
         return redirect('tools.views.view_job', job_id=newJob.id,resource='')
