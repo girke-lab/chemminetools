@@ -68,7 +68,7 @@ def search(request):
                     messages.error(request, 'Invalid input SDF!')
         form = AppFormSet(request.POST)
         if form.is_valid():
-            commandOptions, optionsList = parseToolForm(form, application) 
+            commandOptions, optionsList = parseToolForm(form) 
         else:
             sdf = None
             messages.error(request, "Invalid form options!")

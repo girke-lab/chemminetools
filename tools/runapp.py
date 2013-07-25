@@ -94,12 +94,13 @@ def getAppForm(application_id, user):
             widget=HiddenInput())
     return type('%sForm' % str(application.name), (Form, ), fields)
 
-def parseToolForm(form, application):
+def parseToolForm(form):
 
     # parses a form created by getAppForm to return command line options
 
     commandOptions = u''
     optionsList = u''
+    application = Application.objects.get(id=form.cleaned_data['application'])
     for question in form.cleaned_data.keys():
         if question != 'application' and question != 'File Upload':
             questionObject = \

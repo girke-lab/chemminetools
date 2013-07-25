@@ -46,7 +46,7 @@ def launch_job(request, category=None):
         else:
             messages.error(request, str(form.errors))
             return redirect(launch_job, category=category)
-        commandOptions, optionsList = parseToolForm(form, application)
+        commandOptions, optionsList = parseToolForm(form)
 
         # setup input
 
