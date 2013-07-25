@@ -90,7 +90,7 @@ def getStructures(request, job_id, format):
         f = open(job.output, 'r')
         result = f.read()
         f.close() 
-        result = join(re.findall(r'^\S+', smiles, re.MULTILINE), sep='\n')
+        result = join(re.findall(r'^\S+', result, re.MULTILINE), sep='\n')
     except Job.DoesNotExist:
         raise Http404
     # note: add in here a regex to keep only cids
