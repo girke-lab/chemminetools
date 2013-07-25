@@ -13,7 +13,7 @@ gettext = lambda s: s
 
 PROJECT_DIR = '/srv/chemminetools'
 
-DEBUG = False 
+DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = ()
@@ -32,10 +32,10 @@ DATABASES = {'default': {  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'o
                            # Set to empty string for localhost. Not used with sqlite3.
                            # Set to empty string for default. Not used with sqlite3.
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
-    'NAME': '',
+    'NAME': 'chemminetools',
     'USER': '',
     'PASSWORD': '',
-    'HOST': '',
+    'HOST': 'localhost',
     'PORT': '',
     }}
 
@@ -164,6 +164,7 @@ INSTALLED_APPS = (
     'pugsearch',
     'ChemmineR',
     'accounts',
+    'eisearch',
     )
 
 WORK_DIR = PROJECT_DIR + '/working'
@@ -217,8 +218,11 @@ MAX_SDF_LENGTH = 10000  # lines per SDF allowed
 ANONYMOUS_USER_ID = -1
 USERENA_DEFAULT_PRIVACY = 'closed'
 USERENA_WITHOUT_USERNAMES = True 
+USERENA_REDIRECT_ON_SIGNOUT = "/"
 AUTH_PROFILE_MODULE = 'accounts.MyProfile'
 LOGIN_REDIRECT_URL = '/accounts/%(username)s/'
+USERENA_MUGSHOT_GRAVATAR = False
+USERENA_DISABLE_PROFILE_LIST = True
 LOGIN_URL = '/accounts/signin/'
 LOGOUT_URL = '/accounts/signout/'
 AUTHENTICATION_BACKENDS = (

@@ -17,7 +17,6 @@ from tools.runapp import *
 from models import *
 from simplejson import dumps
 
-
 @guest_allowed
 def launch_job(request, category=None):
     if request.is_ajax():
@@ -47,30 +46,7 @@ def launch_job(request, category=None):
         else:
             messages.error(request, str(form.errors))
             return redirect(launch_job, category=category)
-        commandOptions = u''
-        optionsList = u''
-        for question in form.cleaned_data.keys():
-            if question != 'application' and question != 'File Upload':
-                questionObject = \
-                    ApplicationOptions.objects.get(application=application,
-                        name=question)
-                try:
-                    job = form.cleaned_data[question]
-                    option = job.output
-                    optionName = str(job)
-                except:
-                    try:
-                        answerObject = form.cleaned_data[question]
-                        optionName = answerObject.name
-                        option = answerObject.realName
-                    except:
-                        option = 'None'
-                        optionName = 'None'
-                commandOptions = commandOptions + ' --' \
-                    + questionObject.realName + '=' + option
-                optionsList = optionsList + questionObject.name + ': ' \
-                    + optionName + ', '
-        optionsList = re.sub(",\s$", '', optionsList, count=0)
+        commandOptions, optionsList = parseToolForm(form)
 
         # setup input
 
@@ -162,7 +138,18 @@ def view_job(
 
         # select correct viewer here based on output type
 
-        if job.application.output_type == 'text/sdf.upload':
+        if job.application.output_type == 'text/ei.search.result':
+            f = open(job.output, 'r')
+            csvinput = csv.reader(f, delimiter=' ')
+            csvOutput = []
+            for line in csvinput:
+                csvOutput.append(line)
+            f.close()
+            return render_to_response('eiresult.html',
+                    dict(title=str(job.application) + ' Results',
+                    job=job, compounds=csvOutput, query=job.input),
+                    context_instance=RequestContext(request))
+        elif job.application.output_type == 'text/sdf.upload':
             f = open(job.output, 'r')
             message = f.read()
             f.close()
@@ -174,7 +161,7 @@ def view_job(
                 messages.success(request, message)
                 return redirect('myCompounds.views.showCompounds',
                                 resource='')
-        if job.application.output_type \
+        elif job.application.output_type \
             == 'application/json.canvasxpress':
             f = open(job.output, 'r')
             plotJSON = f.read()

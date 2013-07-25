@@ -18,6 +18,7 @@ admin.autodiscover()
 urlpatterns = patterns(
     r'',
     url(r'^admin/', include(admin.site.urls)),
+    (r'^eisearch/', include('eisearch.urls')),
     (r'^accounts/', include('userena.urls')),
     (r'^compounds/', include(r'compounddb.urls')),
     (r'^my[Cc]ompounds/', include('myCompounds.urls')),

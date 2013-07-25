@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import re
 import os
 from celery import task
 from tempfile import NamedTemporaryFile
@@ -22,6 +23,7 @@ def createJob(
     optionsList,
     commandOptions,
     input,
+    inputvar='',
     ):
 
     application = Application.objects.get(name=applicationName)
@@ -29,7 +31,7 @@ def createJob(
         user=user,
         application=application,
         options=optionsList,
-        input='',
+        input=inputvar,
         output='',
         task_id='',
         )
@@ -92,6 +94,36 @@ def getAppForm(application_id, user):
             widget=HiddenInput())
     return type('%sForm' % str(application.name), (Form, ), fields)
 
+def parseToolForm(form):
+
+    # parses a form created by getAppForm to return command line options
+
+    commandOptions = u''
+    optionsList = u''
+    application = Application.objects.get(id=form.cleaned_data['application'])
+    for question in form.cleaned_data.keys():
+        if question != 'application' and question != 'File Upload':
+            questionObject = \
+                ApplicationOptions.objects.get(application=application,
+                    name=question)
+            try:
+                job = form.cleaned_data[question]
+                option = job.output
+                optionName = str(job)
+            except:
+                try:
+                    answerObject = form.cleaned_data[question]
+                    optionName = answerObject.name
+                    option = answerObject.realName
+                except:
+                    option = 'None'
+                    optionName = 'None'
+            commandOptions = commandOptions + ' --' \
+                + questionObject.realName + '=' + option
+            optionsList = optionsList + questionObject.name + ': ' \
+                + optionName + ', '
+    optionsList = re.sub(",\s$", '', optionsList, count=0)
+    return commandOptions, optionsList
 
 def getJobList(user):
 
