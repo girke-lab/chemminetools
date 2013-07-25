@@ -13,6 +13,11 @@ ApplicationOptions:
      Similarity Cutoff: # this name will show up online
           realName: similarity # this will be passed to the app
           options: # format: [web name, command line value]
+               - [0.90, 0.90]
+               - [0.91, 0.91]
+               - [0.92, 0.92]
+               - [0.93, 0.93]
+               - [0.94, 0.94]
                - [0.95, 0.95]
                - [0.96, 0.96]
                - [0.97, 0.97]
