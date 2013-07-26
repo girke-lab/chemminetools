@@ -13,6 +13,7 @@ from tools.models import Application, Job
 from tools.runapp import updateJob, createJob, getAppForm, parseToolForm
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
+from eisearch import first_mol
 
 @guest_allowed
 def search(request):
@@ -45,7 +46,7 @@ def search(request):
             input_mode = 'sdf-upload'
             try:
                 sdf = request.FILES['sdf']
-                sdf = sdf.read()
+                sdf = first_mol(sdf.read())
                 smiles = sdf_to_smiles(sdf)
             except (InputError, InvalidInputError):
                 messages.error(request, 'Invalid SDF!')
@@ -65,7 +66,7 @@ def search(request):
             else:
                 try:
                     input_mode = 'sdf-input'
-                    sdf = request.POST['sdf']
+                    sdf = first_mol(request.POST['sdf'])
                     smiles = sdf_to_smiles(sdf)
                 except:
                     messages.error(request, 'Invalid input SDF!')
