@@ -93,7 +93,6 @@ def getStructures(request, job_id, format):
         result = join(re.findall(r'^\S+', result, re.MULTILINE), sep='\n')
     except Job.DoesNotExist:
         raise Http404
-    # note: add in here a regex to keep only cids
     newJob = createJob(request.user, 'pubchemID2SDF', '', '', result, format) 
     time.sleep(2)
     return redirect('tools.views.view_job', job_id=newJob.id,resource='')
