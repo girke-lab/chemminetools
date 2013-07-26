@@ -24,6 +24,7 @@ def createJob(
     commandOptions,
     input,
     inputvar='',
+    async=True,
     ):
 
     application = Application.objects.get(name=applicationName)
@@ -38,6 +39,8 @@ def createJob(
     newJob.save()
     result = launch.delay(application.script, commandOptions, input,
                           newJob.id, user)
+    if not async:
+        result.wait()
     newJob.task_id = result.id
     newJob.save()
     return newJob

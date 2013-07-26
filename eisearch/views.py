@@ -8,6 +8,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
+from django.utils.http import urlunquote, urlquote
 from tools.models import Application, Job
 from tools.runapp import updateJob, createJob, getAppForm, parseToolForm
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
@@ -21,6 +22,7 @@ def search(request):
         smi = ''
         if 'smi' in request.GET:
             smi = str(request.GET['smi'])
+            smi = urlunquote(smi)
         form = AppFormSet()
         form = str(form)
         return render_to_response('search.html', dict(mode='form',
@@ -76,8 +78,10 @@ def search(request):
         if not sdf:
             return redirect('eisearch.views.search')
         smiles = re.search(r'(\S+)', smiles).group(1)
-        newJob = createJob(request.user, 'EI Search', optionsList, commandOptions, sdf, smiles)
-        time.sleep(2)
+        smiles = urlquote(smiles)
+        newJob = createJob(request.user, 'EI Search', optionsList, 
+                           commandOptions, sdf, smiles)
+        time.sleep(1)
         return redirect('tools.views.view_job', job_id=newJob.id,resource='')
 
 @guest_allowed
@@ -93,7 +97,6 @@ def getStructures(request, job_id, format):
         result = join(re.findall(r'^\S+', result, re.MULTILINE), sep='\n')
     except Job.DoesNotExist:
         raise Http404
-    # note: add in here a regex to keep only cids
-    newJob = createJob(request.user, 'pubchemID2SDF', '', '', result, format) 
-    time.sleep(2)
+    newJob = createJob(request.user, 'pubchemID2SDF', '', '', result,
+                       format, async=False) 
     return redirect('tools.views.view_job', job_id=newJob.id,resource='')
