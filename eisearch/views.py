@@ -99,4 +99,8 @@ def getStructures(request, job_id, format):
         raise Http404
     newJob = createJob(request.user, 'pubchemID2SDF', '', '', result,
                        format, async=False) 
-    return redirect('tools.views.view_job', job_id=newJob.id,resource='')
+    if format == 'smiles':
+        filename = 'search_result.smi'
+    else:
+        filename = 'search_result.sdf' 
+    return redirect('tools.views.view_job', job_id=newJob.id,resource='',filename=filename)
