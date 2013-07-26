@@ -11,6 +11,7 @@ from similarityworkbench import funcs
 from myCompounds.views import getMyCompounds
 from guest.decorators import guest_allowed, login_required
 from django.views.decorators.cache import cache_page
+from django.utils.http import urlunquote, urlquote
 import pybel
 import re
 
@@ -22,6 +23,7 @@ from django.conf import settings
 @cache_page(60 * 120)
 def renderer(request, smiles):
     try:
+        smiles = urlunquote(smiles)
         smiles = re.match(r"^(\S{1,2000})", str(smiles)).group(1)
         mymol = pybel.readstring('smi', str(smiles))
         png = mymol.write(format='png')
