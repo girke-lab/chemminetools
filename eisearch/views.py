@@ -79,8 +79,9 @@ def search(request):
             return redirect('eisearch.views.search')
         smiles = re.search(r'(\S+)', smiles).group(1)
         smiles = urlquote(smiles)
-        newJob = createJob(request.user, 'EI Search', optionsList, commandOptions, sdf, smiles)
-        time.sleep(2)
+        newJob = createJob(request.user, 'EI Search', optionsList, 
+                           commandOptions, sdf, smiles)
+        time.sleep(1)
         return redirect('tools.views.view_job', job_id=newJob.id,resource='')
 
 @guest_allowed
@@ -96,6 +97,6 @@ def getStructures(request, job_id, format):
         result = join(re.findall(r'^\S+', result, re.MULTILINE), sep='\n')
     except Job.DoesNotExist:
         raise Http404
-    newJob = createJob(request.user, 'pubchemID2SDF', '', '', result, format) 
-    time.sleep(2)
+    newJob = createJob(request.user, 'pubchemID2SDF', '', '', result,
+                       format, async=False) 
     return redirect('tools.views.view_job', job_id=newJob.id,resource='')
