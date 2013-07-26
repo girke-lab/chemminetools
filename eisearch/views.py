@@ -103,4 +103,4 @@ def getStructures(request, job_id, format):
         filename = 'search_result.smi'
     else:
         filename = 'search_result.sdf' 
-    return redirect('tools.views.view_job', job_id=newJob.id,resource='',filename=filename)
+    return redirect('tools.views.view_job', job_id=newJob.id,resource='other',filename=filename)
