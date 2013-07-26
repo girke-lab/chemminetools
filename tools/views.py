@@ -219,7 +219,7 @@ def view_job(
                 return redirect('tools.views.view_job', job_id=newJob.id,
                     resource='')
             elif nextStep == 'smiles':
-                result = batch_sdf_to_smiles(sdf) 
+                result, error = batch_sdf_to_smiles(sdf) 
                 return HttpResponse(result,
                                  mimetype=job.application.output_type)
             else:
