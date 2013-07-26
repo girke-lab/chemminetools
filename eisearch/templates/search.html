@@ -82,13 +82,12 @@ $(document).ready(function() {
 
 <div class="row-fluid">
 <div class="span12">
-<p>Input your query structure using one of the following four options, and click the 'Search' button to initiate a similarity search against the PubChem Compound database. Search is performed using the EI search algorithm with an atom pair (AP) similarity measure.</p>
+<p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> using the EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>) with an <a href="/help/#theory">atom pair (AP) similarity</a> measure.</p>
 </div>
 </div><!--/row-->
 
 <div class="row-fluid">
 <div class="span12">
-{% ifequal mode "form" %}
 <ul class="nav nav-tabs">
 	<li class="active"><a href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
 	<li><a href="#draw" data-toggle="tab">Structural Drawing</a></li>
@@ -97,28 +96,24 @@ $(document).ready(function() {
 </ul>
 <div class="tab-content">
 <div class="tab-pane active" id="smiles-input">
-<form class="form-horizontal" action="." method="post" accept-charset="utf-8">
+<form action="." method="post" accept-charset="utf-8">
 {% csrf_token %}
-	<div class="control-group">
-		<label class="control-label" for="smiles">SMILES:</label>
-		<div class="controls">
-			<input id="smiles" type="text" name="smiles" class="field span8" value="{{ smi  }}"/>
-		</div>
-	</div>
+
+    <label class="control-label" for="smiles">SMILES:</label>
+    <input id="smiles" type="text" name="smiles" class="field span12" value=""/>
 
     <table>
         {{form}}
+        <tr><th>
+        </th><td>
+                <div class="btn-group">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                    <button class="btn" id="loadexample">Load an example query</button>
+                    <button class="btn" type="reset">Clear entry field</button>
+                </div>
+        </td></tr>
     </table>
 	
-	<div class="control-group">
-		<div class="controls">
-			<div class="btn-group">
-				<button class="btn btn-primary" type="submit" name="pug">Search</button>
-				<button class="btn" id="loadexample">Load an example query</button>
-				<button class="btn" type="reset">Clear entry field</button>
-			</div>
-		</div>
-	</div>
 </form>
 </div>
 
@@ -127,20 +122,19 @@ $(document).ready(function() {
         The center dot is a carbon atom. To add bonds, choose a bond type and click the central atom. To replace atoms, choose an element and click the atom you would like to replace.
         </p>
         <canvas id="sketcher"></canvas>
-        <form class="form-horizontal" id="drawform" action="." method="post" accept-charset="utf-8">
+        <form id="drawform" action="." method="post" accept-charset="utf-8">
         {% csrf_token %}
         <input type="hidden" name="sdf" value="{{post_data.sdf}}"/><br/>
         <input type="hidden" name="draw" value="1"/>
 
     <table>
         {{form}}
+        <tr><th>
+        </th><td>
+                <button class="btn btn-primary" type="submit">Search</button>
+        </td></tr>
     </table>
 
-	<div class="control-group">
-		<div class="controls">
-			<button class="btn btn-primary" type="submit" name="pug">Search</button>
-		</div>
-	</div>
 </form>
 </div>
 
@@ -148,56 +142,40 @@ $(document).ready(function() {
 <p>
 Please copy and paste your single-molecule SDF below. If multiple compounds are supplied, only the first one will be used.
 </p>
-<form class="form-horizontal" action="." method="post" accept-charset="utf-8">
+<form action="." method="post" accept-charset="utf-8">
 {% csrf_token %}
-	<div class="control-group">
-		<label class="control-label" for="sdf_box">SDF Content:</label>
-		<div class="controls">
-			<textarea id="sdf_box" name="sdf" class="field span8" rows="12"></textarea><br/>
-		</div>
-	</div>
+	<label class="control-label" for="sdf_box">SDF Content:</label>
+	<textarea id="sdf_box" name="sdf" class="field span12" rows="12"></textarea><br/>
 
     <table>
         {{form}}
+        <tr><th>
+        </th><td>
+                <button class="btn btn-primary" type="submit">Search</button>
+        </td></tr>
     </table>
-
-	<div class="control-group">
-		<div class="controls">
-			<button class="btn btn-primary" type="submit" name="pug">Search</button>
-		</div>
-	</div>
 </form>
 </div>
 <div class="tab-pane" id="sdf-upload">
 <p>
 Please upload a single-molecule SDF below. If multiple compounds are found in the SDF, only the first one will be used.
 </p>
-<form class="form-horizontal" action="." method="post" enctype="multipart/form-data">
+<form action="." method="post" enctype="multipart/form-data">
 {% csrf_token %}
-	<div class="control-group">
-		<label class="control-label" for="sdf_file">SDF File:</label>
-		<div class="controls">
-			<input id="sdf_file" name="sdf" type="file"/>
-		</div>
-	</div>
+	<label class="control-label" for="sdf_file">SDF File:</label>
+	<input id="sdf_file" name="sdf" class="field span12" type="file"/>
 
     <table>
         {{form}}
+        <tr><th>
+        </th><td>
+                <button class="btn btn-primary" type="submit">Search</button>
+        </td></tr>
     </table>
-
-	<div class="control-group">
-		<div class="controls">
-			<button class="btn btn-primary" type="submit" name="pug">Search</button>
-		</div>
-	</div>
 </form>
 </div>
 </div>
 
 </div>
 </div><!--/row-->
-{% endifequal %}
-
 {% endblock %}
-
-
