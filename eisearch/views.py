@@ -48,7 +48,7 @@ def search(request):
                 sdf = request.FILES['sdf']
                 sdf = first_mol(sdf.read())
                 smiles = sdf_to_smiles(sdf)
-            except (InputError, InvalidInputError):
+            except:
                 messages.error(request, 'Invalid SDF!')
                 sdf = None
         elif 'sdf' in request.POST:
@@ -70,6 +70,7 @@ def search(request):
                     smiles = sdf_to_smiles(sdf)
                 except:
                     messages.error(request, 'Invalid input SDF!')
+                    sdf = None
         form = AppFormSet(request.POST)
         if form.is_valid():
             commandOptions, optionsList = parseToolForm(form) 
