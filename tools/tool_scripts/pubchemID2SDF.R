@@ -25,7 +25,9 @@ if(! exists("debug_mode")){
 
 #print("ids: ")
 #print(pubchemIds)
-#print(paste(pubchemIds,collapse=","))
+print(paste(pubchemIds,collapse=","))
 
-compoundIds = findCompoundsByName(conn,pubchemIds,allowMissing=TRUE)
+compoundIds = findCompoundsByName(conn,pubchemIds,keepOrder=TRUE,allowMissing=TRUE)
+#compoundIds = findCompoundsByName(conn,pubchemIds,allowMissing=TRUE)
+print(paste(compoundIds,collapse=","))
 getCompounds(conn,compoundIds,filename=outfile)
