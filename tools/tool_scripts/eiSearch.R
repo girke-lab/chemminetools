@@ -4,14 +4,26 @@
 
 library(eiR)
 library(R.utils)
+#library(RPostgreSQL)
 
-baseDir = "/srv/eiSearch/test-kinase"
-r = 40
-d = 30
-#/srv/eiSearch/test-kinase//run-40-30/ylpvkrqsw7j7xhu47cpmp3ttp2wqibaf.cdb
-refFile = file.path(baseDir,paste("run",r,d,sep="-"),"ylpvkrqsw7j7xhu47cpmp3ttp2wqibaf.cdb")
-db = file.path(baseDir,"data","chem.db")
 
+
+#conn = dbConnect(dbDriver("PostgreSQL"),dbname="pubchem",host="chemminetools-2.bioinfo.ucr.edu",user="pubchem_updater",password="48ruvbvnmwejf408rfdj")
+#baseDir = "/srv/eiSearch/pubchem"
+#r=200
+#d=100
+#refFile = file.path(baseDir,"run-200-100/rohkdx3p0eesolce2hzgbpxdsd7ce75y.cdb")
+
+library(rzmq)
+
+context = init.context()
+socket = init.socket(context,"ZMQ_REQ")
+connect.socket(socket,"tcp://localhost:5555")
+
+sendQuery <- function(...){
+        send.socket(socket,data=list(...))
+        receive.socket(socket)
+}
 
 if(! exists("debug_mode")){
 	# parse command line arguments
@@ -42,7 +54,8 @@ cids <- cleanUp(cids)
 sdfInput <- sdfInput[! duplicated(cids)]
 cids <- cids[! duplicated(cids)]
 
-results = eiQuery(r,d,refFile,queries = sdfInput,dir=baseDir,K=numResults)
+#results = eiQuery(r,d,refFile,queries = sdfInput,dir=baseDir,K=numResults,conn=conn)
+results = sendQuery(queries = sdfInput,K=numResults,format="sdf")
 #print(results)
 filtered = results[results$distance < 1-simCutoff,]
 results = data.frame(target=filtered$target,similarities = 1 - filtered$distance)

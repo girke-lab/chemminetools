@@ -26,7 +26,7 @@ def renderer(request, smiles):
         smiles = urlunquote(smiles)
         smiles = re.match(r"^(\S{1,2000})", str(smiles)).group(1)
         mymol = pybel.readstring('smi', str(smiles))
-        png = mymol.write(format='_png2')
+        png = mymol.write(format='png')
         return HttpResponse(png, mimetype='image/png')
     except:
         raise Http404
