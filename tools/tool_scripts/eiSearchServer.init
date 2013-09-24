@@ -23,8 +23,9 @@ DESC="eiSearch Query Server"
 NAME=eiSearchServer
 ROOTNAME=R
 DAEMON=/srv/chemminetools/tools/tool_scripts/$NAME.R
+#DAEMON=/home/khoran/repositories/chemminetools/tools/tool_scripts/$NAME.sh
 DAEMON_ARGS=""
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/$NAME/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
@@ -50,9 +51,9 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -m -b --test > /dev/null \
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --chuid nobody  --test > /dev/null \
 		|| return 1
-	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -m -b -- \
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON  --chuid nobody -- \
 		$DAEMON_ARGS \
 		|| return 2
 	# Add code here, if necessary, that waits for the process to be ready

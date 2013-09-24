@@ -37,8 +37,8 @@ loadTestSet <- function(){
 		eiQuery(r=r,d=d,refIddb=refIddb,dir=basedir,lshData=lshData,mainIds=mainIds,...)
 }
 
-queryFn = loadTestSet()
-#queryFn = loadPubchem()
+#queryFn = loadTestSet()
+queryFn = loadPubchem()
 
 
 while(1) {
