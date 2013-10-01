@@ -28,7 +28,7 @@ apt-get install -y libapache2-mod-wsgi
 apt-get install -y memcached
 
 # install these w/ sid allowed via apt pinning
-apt-get install -y -t=sid libopenbabel4 openbabel
+# apt-get install -y -t=sid libopenbabel4 openbabel
 
 pip install django-bootstrap-toolkit
 pip install django-cms south
