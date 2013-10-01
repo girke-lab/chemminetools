@@ -6,7 +6,7 @@ bind.socket(socket,"tcp://*:5555")
 
 
 
-library(eiR,lib.loc="~/R")
+library(eiR)
 
 
 loadPubchem <- function(){
@@ -15,12 +15,14 @@ loadPubchem <- function(){
 	d=100
 	basedir = "/srv/eiSearch/pubchem"
 	refIddb =file.path(basedir,"run-200-100","rohkdx3p0eesolce2hzgbpxdsd7ce75y.cdb")
-	dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_updater',password='48ruvbvnmwejf408rfdj')
 	lshData=loadLSHData(r,d,dir=basedir)
 	mainIds = eiR:::readIddb(file.path(basedir,eiR:::Main))
 
-	function(...)
+	function(...){
+		dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_updater',password='48ruvbvnmwejf408rfdj')
 		eiQuery(r=r,d=d,refIddb=refIddb,dir=basedir,lshData=lshData,conn=dbConn,mainIds=mainIds,...)
+		dbDisconnect(dbConn)
+	}
 }
 loadTestSet <- function(){
 	r=40
