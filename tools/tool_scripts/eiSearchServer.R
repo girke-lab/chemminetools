@@ -20,8 +20,9 @@ loadPubchem <- function(){
 
 	function(...){
 		dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_updater',password='48ruvbvnmwejf408rfdj')
-		eiQuery(r=r,d=d,refIddb=refIddb,dir=basedir,lshData=lshData,conn=dbConn,mainIds=mainIds,...)
+		results = eiQuery(r=r,d=d,refIddb=refIddb,dir=basedir,lshData=lshData,conn=dbConn,mainIds=mainIds,...)
 		dbDisconnect(dbConn)
+		results
 	}
 }
 loadTestSet <- function(){
