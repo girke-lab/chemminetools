@@ -14,7 +14,6 @@ apt-get install -y python-psycopg2
 apt-get install -y python-skimage
 apt-get install -y python-pip
 apt-get install -y python-django-reversion
-apt-get install -y python-openbabel
 apt-get install -y libcurl4-openssl-dev
 apt-get install -y rabbitmq-server
 apt-get install -y python-pylibmc
@@ -29,6 +28,8 @@ apt-get install -y memcached
 
 # install these w/ sid allowed via apt pinning
 # apt-get install -y -t=sid libopenbabel4 openbabel
+# update: this is commented out because the sid openbabel wasn't working....
+#       instead we are now compiling OB from source
 
 pip install django-bootstrap-toolkit
 pip install django-cms south
@@ -129,7 +130,7 @@ CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"
 CELERYCTL="$CELERYD_CHDIR/manage.py celeryctl"
 
 # Extra arguments to celeryd
-CELERYD_OPTS="--time-limit=172800 --concurrency=4"
+CELERYD_OPTS="--time-limit=172800 --concurrency=8"
 
 # %n will be replaced with the nodename.
 CELERYD_LOG_FILE="/var/log/celery/%n.log"
