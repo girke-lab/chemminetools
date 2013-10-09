@@ -1,12 +1,11 @@
 #!/usr/bin/env Rscript
 library(rzmq)
+library(eiR)
+
 context = init.context()
 socket = init.socket(context,"ZMQ_REP")
 bind.socket(socket,"tcp://*:5555")
 
-
-
-library(eiR)
 
 
 loadPubchem <- function(){

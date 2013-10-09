@@ -56,6 +56,9 @@ cids <- cids[! duplicated(cids)]
 
 #results = eiQuery(r,d,refFile,queries = sdfInput,dir=baseDir,K=numResults,conn=conn)
 results = sendQuery(queries = sdfInput,K=numResults,format="sdf")
+if(is.null(results) || results == TRUE){
+	stop("no results received from server")
+}
 #print(results)
 filtered = results[results$distance < 1-simCutoff,]
 results = data.frame(target=filtered$target,similarities = 1 - filtered$distance)
