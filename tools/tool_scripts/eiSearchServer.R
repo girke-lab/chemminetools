@@ -1,12 +1,11 @@
 #!/usr/bin/env Rscript
 library(rzmq)
+library(eiR)
+
 context = init.context()
 socket = init.socket(context,"ZMQ_REP")
 bind.socket(socket,"tcp://*:5555")
 
-
-
-library(eiR)
 
 
 loadPubchem <- function(){
@@ -20,8 +19,9 @@ loadPubchem <- function(){
 
 	function(...){
 		dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_updater',password='48ruvbvnmwejf408rfdj')
-		eiQuery(r=r,d=d,refIddb=refIddb,dir=basedir,lshData=lshData,conn=dbConn,mainIds=mainIds,...)
+		result = eiQuery(r=r,d=d,refIddb=refIddb,dir=basedir,lshData=lshData,conn=dbConn,mainIds=mainIds,...)
 		dbDisconnect(dbConn)
+		result
 	}
 }
 loadTestSet <- function(){
