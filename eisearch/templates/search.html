@@ -100,7 +100,7 @@ $(document).ready(function() {
 {% csrf_token %}
 
     <label class="control-label" for="smiles">SMILES:</label>
-    <input id="smiles" type="text" name="smiles" class="field span12" value=""/>
+    <input id="smiles" type="text" name="smiles" class="field span12" value="{{smi}}"/>
 
     <table>
         {{form}}

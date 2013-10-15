@@ -24,6 +24,7 @@ from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.conf import settings
 from tools.runapp import createJob
+from django.utils.http import urlquote
 
 
 @guest_allowed
@@ -46,6 +47,7 @@ def showCompounds(request, resource):
     if matches:
         for match in matches:
             match.smiles = re.match(r"^(\S+)", match.smiles).group(1)
+            match.smiles = urlquote(match.smiles)
     return render_to_response('showCompounds.html', dict(p=page,
                               matches=matches),
                               context_instance=RequestContext(request))
