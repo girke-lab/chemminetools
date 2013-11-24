@@ -1,0 +1,33 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: Fingerprint Search 
+category: Search 
+script: fingerprintSearch.py 
+input_type: chemical/x-mdl-sdfile
+output_type: text/ei.search.result
+description: PubChem Fingerprint Search 
+
+ApplicationOptions:
+     Similarity Cutoff: # this name will show up online
+          realName: similarity # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [0.90, 0.90]
+               - [0.91, 0.91]
+               - [0.92, 0.92]
+               - [0.93, 0.93]
+               - [0.94, 0.94]
+               - [0.95, 0.95]
+               - [0.96, 0.96]
+               - [0.97, 0.97]
+               - [0.98, 0.98]
+               - [0.99, 0.99]
+     Max Compounds Returned: # this name will show up online
+          realName: compounds # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [10, 10]
+               - [50, 50]
+               - [100, 100]
+               - [200, 200]
+               - [1000, 1000]

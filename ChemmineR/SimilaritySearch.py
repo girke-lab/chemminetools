@@ -10,7 +10,7 @@ from PUG_services import *
 from time import sleep
 
 
-def SimilaritySearch(smiles):
+def SimilaritySearch(smiles, similaritythreshold=95, maxReturned=200):
 
     # get a PUG SOAP port instance
 
@@ -31,7 +31,7 @@ def SimilaritySearch(smiles):
     req = SimilaritySearch2DSoapIn()
     req.set_element_StrKey(strKey)
     req.set_element_simOptions(req.new_simOptions())
-    req.get_element_simOptions().set_element_threshold(95)
+    req.get_element_simOptions().set_element_threshold(similaritythreshold)
     listKey = port.SimilaritySearch2D(req).get_element_ListKey()
 
     # print 'ListKey =', listKey
