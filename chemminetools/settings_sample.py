@@ -74,6 +74,7 @@ USE_L10N = True
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
 
+STATIC_ROOT = PROJECT_DIR + '/static_production'
 MEDIA_ROOT = PROJECT_DIR + '/working'
 
 STATICFILES_DIRS = (PROJECT_DIR + '/static', )
@@ -85,6 +86,9 @@ STATICFILES_DIRS = (PROJECT_DIR + '/static', )
 MEDIA_URL = '/working/'
 
 STATIC_URL = '/static/'
+
+
+
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
