@@ -8,6 +8,7 @@ chemminetools/settings.py
 *.DS_Store
 chemminetools/settings.py.devel
 chemminetools/settings.py.production
+working
 working/*
 static_production/*
 tools/tool_scripts/R_testHarness/testResult.html
