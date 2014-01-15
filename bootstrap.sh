@@ -81,8 +81,10 @@ biocLite(c(\"ChemmineR\", \"ctc\", \"rjson\", \"R.utils\", \"eiR\"))
 " | R --slave
 
 # create working directory and set permissions
-mkdir /srv/chemminetools/working
-sudo chown www-data /srv/chemminetools/working
+cd /srv/chemminetools
+mkdir /srv/working
+chown www-data /srv/working
+ln -s /srv/working working
 
 # register all applications in database
 cd /srv/chemminetools/tools/tool_scripts
@@ -90,6 +92,7 @@ find *.yaml -print | xargs -I {} ./loader.py -i {}
 
 # append correct settings to apache config
 cat /srv/chemminetools/apacheconfig >> /etc/apache2/mods-available/wsgi.conf
+# echo "export PYTHONPATH=\"/usr/local/lib/:/usr/local/lib/python2.7/dist-packages/\"" >> /etc/profile
 
 # add apache module
 a2enmod wsgi
