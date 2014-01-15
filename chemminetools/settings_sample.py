@@ -33,8 +33,8 @@ DATABASES = {'default': {  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'o
                            # Set to empty string for default. Not used with sqlite3.
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     'NAME': 'chemminetools',
-    'USER': '',
-    'PASSWORD': '',
+    'USER': 'cmt',
+    'PASSWORD': 'cmt',
     'HOST': 'localhost',
     'PORT': '',
     }}
@@ -94,7 +94,7 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Make this unique, and don't share it with anybody.
 
-SECRET_KEY = ''
+SECRET_KEY = 'd_ce0eja3qgm0b-3u487kf++d+m14satsx-b1l-niq=-e@wt#0'
 
 # List of callables that know how to import templates from various sources.
 
