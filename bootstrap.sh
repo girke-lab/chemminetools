@@ -101,7 +101,7 @@ a2enmod wsgi
 cd /etc/init.d
 cp /srv/chemminetools/celeryd .
 chmod ugo+x celeryd
-sudo update-rc.d celeryd defaults
+update-rc.d celeryd defaults
 cp /srv/chemminetools/celery_config /etc/default/celeryd
 
 # restart apache
