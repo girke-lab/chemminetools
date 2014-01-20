@@ -75,7 +75,7 @@ $(document).ready(function() {
 {% block base_content %}
 <div class="row-fluid">
 <div class="span12">
-<h2>EI Structural Similarity Search</h2>
+<h2>Structural Similarity Search</h2>
 </div>
 </div><!--/row-->
 
@@ -104,6 +104,14 @@ $(document).ready(function() {
 
     <table>
         {{form}}
+        <tr><td>
+                Show similar compounds and mixtures: 
+        </td><td>
+            <select name="algorithm" id="algorithm">
+            <option value="fp">No (fingerprint algorithm)</option>
+            <option value="ei">Yes (EI algorithm)</option>
+            </select>
+        </td></tr>
         <tr><th>
         </th><td>
                 <div class="btn-group">
