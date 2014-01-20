@@ -82,7 +82,19 @@ $(document).ready(function() {
 
 <div class="row-fluid">
 <div class="span12">
-<p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> using the EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>) with an <a href="/help/#theory">atom pair (AP) similarity</a> measure.</p>
+
+<p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> 
+using one of two algorithm and database options:
+<ul>
+<li><b>EI algorithm:</b> Searches the full PubChem Compound database (including very similar compounds
+and salts) using the EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>)
+with an <a href="/help/#theory">atom pair (AP) similarity</a> measure.</li>
+<li><b>Fingerprint algorithm:</b> Searches a "cleaned up" version of the PubChem Compound database
+(excluding some very similar compounds and some salts) by connecting to the PubChem web interface
+using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.</li>
+As this connects directly to PubChem, it will include new compounds sooner than the EI search.
+</ul>
+</p>
 </div>
 </div><!--/row-->
 
@@ -105,11 +117,11 @@ $(document).ready(function() {
     <table>
         {{form}}
         <tr><td>
-                Show similar compounds and mixtures: 
+		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="fp">No (fingerprint algorithm)</option>
-            <option value="ei">Yes (EI algorithm)</option>
+            <option value="ei">EI algorithm</option>
+            <option value="fp">Fingerprint algorithm</option>
             </select>
         </td></tr>
         <tr><th>
@@ -137,6 +149,14 @@ $(document).ready(function() {
 
     <table>
         {{form}}
+        <tr><td>
+		Algorithm and database:
+        </td><td>
+            <select name="algorithm" id="algorithm">
+            <option value="ei">EI algorithm</option>
+            <option value="fp">Fingerprint algorithm</option>
+            </select>
+        </td></tr>
         <tr><th>
         </th><td>
                 <button class="btn btn-primary" type="submit">Search</button>
@@ -157,6 +177,14 @@ Please copy and paste your single-molecule SDF below. If multiple compounds are 
 
     <table>
         {{form}}
+        <tr><td>
+		Algorithm and database:
+        </td><td>
+            <select name="algorithm" id="algorithm">
+            <option value="ei">EI algorithm</option>
+            <option value="fp">Fingerprint algorithm</option>
+            </select>
+        </td></tr>
         <tr><th>
         </th><td>
                 <button class="btn btn-primary" type="submit">Search</button>
@@ -175,6 +203,14 @@ Please upload a single-molecule SDF below. If multiple compounds are found in th
 
     <table>
         {{form}}
+        <tr><td>
+		Algorithm and database:
+        </td><td>
+            <select name="algorithm" id="algorithm">
+            <option value="ei">EI algorithm</option>
+            <option value="fp">Fingerprint algorithm</option>
+            </select>
+        </td></tr>
         <tr><th>
         </th><td>
                 <button class="btn btn-primary" type="submit">Search</button>

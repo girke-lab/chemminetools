@@ -6,7 +6,7 @@ name: Fingerprint Search
 category: Search 
 script: fingerprintSearch.py 
 input_type: chemical/x-mdl-sdfile
-output_type: text/ei.search.result
+output_type: text/fp.search.result
 description: PubChem Fingerprint Search 
 
 ApplicationOptions:

@@ -26,13 +26,16 @@ def SimilaritySearch(smiles, similaritythreshold=95, maxReturned=200):
 
     # print 'StrKey =', strKey
 
-    # Initialize similarity search @ 95%; no limits
+    # Initialize similarity search 
 
     req = SimilaritySearch2DSoapIn()
     req.set_element_StrKey(strKey)
     req.set_element_simOptions(req.new_simOptions())
     req.get_element_simOptions().set_element_threshold(similaritythreshold)
+    req.set_element_limits(req.new_limits())
+    req.get_element_limits().set_element_maxRecords(maxReturned)
     listKey = port.SimilaritySearch2D(req).get_element_ListKey()
+
 
     # print 'ListKey =', listKey
 
