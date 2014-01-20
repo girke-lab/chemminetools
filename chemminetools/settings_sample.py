@@ -33,8 +33,8 @@ DATABASES = {'default': {  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'o
                            # Set to empty string for default. Not used with sqlite3.
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     'NAME': 'chemminetools',
-    'USER': '',
-    'PASSWORD': '',
+    'USER': 'cmt',
+    'PASSWORD': 'cmt',
     'HOST': 'localhost',
     'PORT': '',
     }}
@@ -74,6 +74,7 @@ USE_L10N = True
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
 
+STATIC_ROOT = PROJECT_DIR + '/static_production'
 MEDIA_ROOT = PROJECT_DIR + '/working'
 
 STATICFILES_DIRS = (PROJECT_DIR + '/static', )
@@ -86,6 +87,9 @@ MEDIA_URL = '/working/'
 
 STATIC_URL = '/static/'
 
+
+
+
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
@@ -94,7 +98,7 @@ ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Make this unique, and don't share it with anybody.
 
-SECRET_KEY = ''
+SECRET_KEY = 'd_ce0eja3qgm0b-3u487kf++d+m14satsx-b1l-niq=-e@wt#0'
 
 # List of callables that know how to import templates from various sources.
 

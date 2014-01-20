@@ -151,6 +151,17 @@ def view_job(
                     dict(title=str(job.application) + ' Results',
                     job=job, compounds=csvOutput, query=job.input),
                     context_instance=RequestContext(request))
+        if job.application.output_type == 'text/fp.search.result':
+            f = open(job.output, 'r')
+            csvinput = csv.reader(f, delimiter=' ')
+            csvOutput = []
+            for line in csvinput:
+                csvOutput.append(line)
+            f.close()
+            return render_to_response('fpresult.html',
+                    dict(title=str(job.application) + ' Results',
+                    job=job, compounds=csvOutput, query=job.input),
+                    context_instance=RequestContext(request))
         elif job.application.output_type == 'text/sdf.upload':
             f = open(job.output, 'r')
             message = f.read()

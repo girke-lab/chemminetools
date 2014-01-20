@@ -81,8 +81,12 @@ def search(request):
             return redirect('eisearch.views.search')
         smiles = re.search(r'(\S+)', smiles).group(1)
         smiles = urlquote(smiles)
-        newJob = createJob(request.user, 'EI Search', optionsList, 
-                           commandOptions, sdf, smiles)
+        if request.POST['algorithm'] == u'fp':
+            newJob = createJob(request.user, 'Fingerprint Search', optionsList, 
+                               commandOptions, sdf, smiles)
+        else:
+            newJob = createJob(request.user, 'EI Search', optionsList, 
+                               commandOptions, sdf, smiles)
         time.sleep(1)
         return redirect('tools.views.view_job', job_id=newJob.id,resource='')
 
