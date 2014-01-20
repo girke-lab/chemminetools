@@ -1,0 +1,12 @@
+    Alias /static/ /srv/chemminetools/static_production/
+    WSGIScriptAlias / /srv/chemminetools/chemminetools/wsgi.py
+    <Location />
+        Order Allow,Deny
+        Allow from all
+    </Location>
+    <Location /admin>
+        Order Deny,Allow
+        Deny from all
+        Allow from .ucr.edu
+    </Location>
+

@@ -41,8 +41,76 @@ pip install ghostscript
 pip install pyyaml
 pip install django-userena
 
+# clean up package install 
+apt-get clean
+
+# create symbolic link for /srv/chemminetools
+ln -s /vagrant /srv/chemminetools
+
+# copy config file
+cd /srv/chemminetools
+cp chemminetools/settings_sample.py chemminetools/settings.py 
+# made changes to get it running: add in database settings and secret key
+
+# create postgresql database as postgres user
+sudo -u postgres createuser -U postgres cmt -w -S -R -d
+sudo -u postgres psql -U postgres -d postgres -c "alter user cmt with password 'cmt';"
+sudo -u postgres createdb -E utf8 -O cmt chemminetools -T template0 --locale=C.UTF-8
+
+# manually install packages in /usr/local/lib/python2.7/dist-packages:
+cd /tmp
+svn checkout http://django-guest.googlecode.com/svn/trunk/ django-guest-read-only
+svn checkout http://django-cron.googlecode.com/svn/trunk/ django-cron-read-only
+mv django-guest-read-only/guest /usr/local/lib/python2.7/dist-packages/
+mv django-guest-read-only/gyroid_utils /usr/local/lib/python2.7/dist-packages/
+mv django-cron-read-only/django_cron /usr/local/lib/python2.7/dist-packages/
+rm -rf django-cron-read-only django-guest-read-only
+
+# add sql commands to blank database
+cd /srv/chemminetools
+mkdir static_production
+python manage.py syncdb --noinput
+python manage.py migrate --noinput
+python manage.py collectstatic --noinput
+python manage.py check_permissions
+
+# install R packages
+printf "source(\"http://bioconductor.org/biocLite.R\")
+biocLite()
+biocLite(c(\"ChemmineR\", \"ctc\", \"rjson\", \"R.utils\", \"eiR\"))
+" | R --slave
+
+# create working directory and set permissions
+cd /srv/chemminetools
+mkdir /srv/working
+chown www-data /srv/working
+ln -s /srv/working working
+
+# register all applications in database
+cd /srv/chemminetools/tools/tool_scripts
+find *.yaml -print | xargs -I {} ./loader.py -i {}
+
+# append correct settings to apache config
+cat /srv/chemminetools/apacheconfig >> /etc/apache2/mods-available/wsgi.conf
+# echo "export PYTHONPATH=\"/usr/local/lib/:/usr/local/lib/python2.7/dist-packages/\"" >> /etc/profile
+
+# add apache module
+a2enmod wsgi
+
+# daemonize celery
+cd /etc/init.d
+cp /srv/chemminetools/celeryd .
+chmod ugo+x celeryd
+update-rc.d celeryd defaults
+cp /srv/chemminetools/celery_config /etc/default/celeryd
+
+# restart apache
+/etc/init.d/apache2 restart
+
 # exit now if a bash script, the rest should be run interactively 
 exit 0
+
+# The following steps are only necessary for creating a real production environment
 
 # create a user for chemmine tools, and su to that user
 cd ~
@@ -51,108 +119,11 @@ git clone git@github.com:TylerBackman/chemminetools.git
 # as root move to /srv
 mv chemminetools /srv/
 
-# rename config file
-mv /srv/chemminetools/chemminetools/settings_sample.py /srv/chemminetools/chemminetools/settings.py 
-# made changes to get it running: add in database settings and secret key
-
-# create postgresql database as postgres user
-su postgres
-createuser -U postgres chemminetools -P
-createdb -E utf8 -O chemminetools chemminetools -T template0
-
-# as root
-# manually install packages in /usr/local/lib/python2.7/dist-packages:
-svn checkout http://django-guest.googlecode.com/svn/trunk/ django-guest-read-only
-svn checkout http://django-cron.googlecode.com/svn/trunk/ django-cron-read-only
-mv django-guest-read-only/guest /usr/local/lib/python2.7/dist-packages/
-mv django-guest-read-only/gyroid_utils /usr/local/lib/python2.7/dist-packages/
-mv django-cron-read-only/django_cron /usr/local/lib/python2.7/dist-packages/
-
-# unset LC_ALL
-export LC_ALL=
-
-# add sql commands to blank database
-cd /srv/chemminetools
-python manage.py syncdb
-python manage.py migrate
-python manage.py collectstatic
-python manage.py check_permissions
-
-# install R packages
-R
-source("http://bioconductor.org/biocLite.R")
-biocLite()
-biocLite(c("ChemmineR", "ctc", "rjson", "R.utils", "eiR"))
-q()
-
-# create working directory and set permissions
-mkdir /srv/chemminetools/working
-sudo chown www-data /srv/chemminetools/working
-
-# register all applications in database
-cd /srv/chemminetools/tools/tool_scripts
-./loader.py -i <appname>.yaml
-
-# setup Apache: 
-# add to /etc/apache2/mods-available/wsgi.conf:
-    Alias /static/ /srv/chemminetools/static_production/
-    WSGIScriptAlias / /srv/chemminetools/chemminetools/wsgi.py
-    <Location />
-        Order Allow,Deny
-        Allow from all
-    </Location>
-    <Location /admin>
-        Order Deny,Allow
-        Deny from all
-        Allow from .ucr.edu
-    </Location>
-
-# add apache module
-sudo a2enmod wsgi
-
-# daemonize celery
-cd /etc/init.d
-wget https://raw.github.com/celery/celery/3.0/extra/generic-init.d/celeryd
-chmod ugo+x celeryd
-sudo update-rc.d celeryd defaults
-
-# put the following in /etc/default/celeryd:
-###############################################
-CELERYD_NODES="w1"
-
-# Where to chdir at start.
-CELERYD_CHDIR="/srv/chemminetools"
-
-# How to call "manage.py celeryd_multi"
-CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"
-
-# How to call "manage.py celeryctl"
-CELERYCTL="$CELERYD_CHDIR/manage.py celeryctl"
-
-# Extra arguments to celeryd
-CELERYD_OPTS="--time-limit=172800 --concurrency=8"
-
-# %n will be replaced with the nodename.
-CELERYD_LOG_FILE="/var/log/celery/%n.log"
-CELERYD_PID_FILE="/var/run/celery/%n.pid"
-CELERY_CREATE_DIRS=1
-
-# Workers should run as an unprivileged user.
-CELERYD_USER="www-data"
-CELERYD_GROUP="www-data"
-
-# Name of the projects settings module.
-export DJANGO_SETTINGS_MODULE="chemminetools.settings"
-############################################################
-
 # to get joelib working:
 # -install java jre1.7.0_17 in /opt/jre
 # - install JOELib2-alpha-20070303 in /opt/JOELib2-alpha-20070303
 
 # log into /admin and add users and static content
-
-# collect static files:
-./manage.py collectstatic
 
 ### OPTIONAL FOR DEV SITE: ###
 # launch test page on local port
