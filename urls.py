@@ -24,7 +24,8 @@ urlpatterns = patterns(
     (r'^my[Cc]ompounds/', include('myCompounds.urls')),
     (r'^tools/', include('tools.urls')),
     (r'^search/pug/', include('pugsearch.urls')),
-    (r'^search/', include('eis.urls')),
+    # (r'^search/', include('eis.urls')),
+    (r'^search/?',  RedirectView.as_view(url='/eisearch/query/')), 
     (r'^similarity/', include('similarityworkbench.urls')),
     (r'^ChemmineR/', include('ChemmineR.urls')),
     url(r'^status/(?P<s>[0-9a-f]+)/', 'eis.views.read', name='ajaxread'
