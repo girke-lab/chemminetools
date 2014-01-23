@@ -2,8 +2,24 @@ ChemMine Tools: an Open Source Framework for Chemical Genomics
 
 This repository represents the codebase for the new Django based rewrite of ChemMine Tools.
 
-Look at INSTALL_NOTES.sh for software dependencies and installation
-instructions.
+Look at bootstrap.sh for software dependencies and installation
+instructions. These instructions are automated, to use them do this:
+
+To get started with a development box:
+1) Install Vagrant and Virtualbox
+2) Clone this repo and cd into it
+3) Run this command to provision and launch your devel environment 
+    vagrant up
+4) You will now have a running chemmine tools at:
+    http://127.0.0.1:8080
+As the CMS isn't setup, try browsing to:
+    http://127.0.0.1:8080/myCompounds
+5) Log in and start celery manually as this isn't working for some reason:
+    sudo /etc/init.d/celeryd start
+6) Note that this server is very insecure, as the private keys and passwords
+come from the example file. You should block it with a firewall until you secure it
+for production! Also, note that some tools (such as EI search) require large
+databases and won't work with an out of the box devel container.
 
 Compatible Browsers:
 Google Chrome 25
@@ -15,7 +31,7 @@ Opera 12 (works but with minor issues with similarity workbench and table viewer
 Internet Explorer 6, 8, 10 (9 not tested) 
 
 License:
-(C) 2013 Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
+(C) 2013-2014 Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
