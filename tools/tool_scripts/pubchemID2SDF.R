@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# requires: ChemmineR,R.utils,ctc,rjson
+# requires: ChemmineR,R.utils,ctc,rjson,RPostgreSQL
 # use: ./pubchemID2SDF.R --outfile=output.sdf  < idfile
 
 library(ChemmineR)

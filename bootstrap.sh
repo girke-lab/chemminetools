@@ -6,7 +6,7 @@
 # installed custom screen & vim plugins
 
 
-# Install Django
+# Install Required Debian Packages (including django) 
 apt-get install -y git
 apt-get install -y python-django
 apt-get install -y postgresql-9.1
@@ -25,6 +25,7 @@ apt-get install -y subversion
 apt-get install -y apache2
 apt-get install -y libapache2-mod-wsgi
 apt-get install -y memcached
+apt-get install -y libpq-dev
 
 # install these w/ sid allowed via apt pinning
 # apt-get install -y -t=sid libopenbabel4 openbabel
@@ -77,7 +78,7 @@ python manage.py check_permissions
 # install R packages
 printf "source(\"http://bioconductor.org/biocLite.R\")
 biocLite()
-biocLite(c(\"ChemmineR\", \"ctc\", \"rjson\", \"R.utils\", \"eiR\"))
+biocLite(c(\"ChemmineR\", \"ctc\", \"rjson\", \"R.utils\", \"eiR\", \"RPostgreSQL\"))
 " | R --slave
 
 # create working directory and set permissions
