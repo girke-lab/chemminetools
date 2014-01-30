@@ -132,6 +132,11 @@ python manage.py runserver 8020
 # launch celery worker on local port
 python manage.py celery worker --loglevel=info
 
+########################
+# Creating a superuser #
+########################
+python manage.py createsuperuser
+
 #####################
 # Django Console    #
 #####################
