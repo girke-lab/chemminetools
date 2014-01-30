@@ -13,7 +13,7 @@ from compounddb import first_mol, InvalidInputError
 
 from compounddb.tools import parse_annotation, insert_single_compound
 from compounddb.models import Compound, SDFFile
-from myCompounds.DownloadCIDs import DownloadCIDs
+from pubchem_soap_interface.DownloadCIDs import DownloadCIDs
 from django.contrib import messages
 import random
 import openbabel
