@@ -4,9 +4,3 @@
         Order Allow,Deny
         Allow from all
     </Location>
-    <Location /admin>
-        Order Deny,Allow
-        Deny from all
-        Allow from .ucr.edu
-    </Location>
-

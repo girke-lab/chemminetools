@@ -7,11 +7,11 @@ from django.utils.daemonize import become_daemon
 import os
 import sys
 sys.path.append('/srv/chemminetools')
-sys.path.append('/srv/chemminetools/pugsearch')
+sys.path.append('/srv/chemminetools/pubchem_soap_interface')
 from django.core.management import setup_environ
 import chemminetools.settings
 setup_environ(chemminetools.settings)
-from pugsearch.PUG_services import *
+from pubchem_soap_interface.PUG_services import *
 
 # other modules/functions
 

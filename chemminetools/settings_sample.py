@@ -142,6 +142,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.admin',
     'django.contrib.staticfiles',
+    'accounts',
     'userena',
     'guardian',
     'easy_thumbnails',
@@ -164,11 +165,9 @@ INSTALLED_APPS = (
     'djcelery',
     'tools',
     'similarityworkbench',
-    'eis',
-    'pugsearch',
     'ChemmineR',
-    'accounts',
     'eisearch',
+    'pubchem_soap_interface',
     )
 
 WORK_DIR = PROJECT_DIR + '/working'

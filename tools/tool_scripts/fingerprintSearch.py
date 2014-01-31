@@ -13,7 +13,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 # load functions used
-from ChemmineR.SimilaritySearch import SimilaritySearch
+from pubchem_soap_interface.SimilaritySearch import SimilaritySearch
 from sdftools.moleculeformats import sdf_to_smiles
 
 # parse command line arguments

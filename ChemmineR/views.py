@@ -1,19 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-# Create your views here.
-
 from django.shortcuts import get_object_or_404, get_list_or_404, \
     render_to_response
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
-from eis.pubchemdl import download
-from SimilaritySearch import SimilaritySearch
+from pubchem_soap_interface.pubchemdl import download
+from pubchem_soap_interface.SimilaritySearch import SimilaritySearch
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.views.decorators.csrf import csrf_exempt
-
 
 @csrf_exempt
 def runapp(request, url):
