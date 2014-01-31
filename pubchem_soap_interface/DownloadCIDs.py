@@ -26,7 +26,7 @@ def DownloadCIDs(cids):
     req.get_element_ids().set_element_int(cids)
     req.set_element_idType('eID_CID')
     listKey = port.InputList(req).get_element_ListKey()
-    print 'ListKey =', listKey
+    # print 'ListKey =', listKey
 
     # request download in SDF format, gzip-compressed
 
@@ -35,7 +35,7 @@ def DownloadCIDs(cids):
     req.set_element_eFormat('eFormat_SDF')
     req.set_element_eCompress('eCompress_GZip')
     downloadKey = port.Download(req).get_element_DownloadKey()
-    print 'DownloadKey =', downloadKey
+    # print 'DownloadKey =', downloadKey
 
     # call GetOperationStatus until the operation is finished
 
@@ -43,7 +43,7 @@ def DownloadCIDs(cids):
     req.set_element_AnyKey(downloadKey)
     status = port.GetOperationStatus(req).get_element_status()
     while status == 'eStatus_Queued' or status == 'eStatus_Running':
-        print 'Waiting for operation to finish...'
+        # print 'Waiting for operation to finish...'
         sleep(10)
         status = port.GetOperationStatus(req).get_element_status()
 
@@ -56,7 +56,7 @@ def DownloadCIDs(cids):
         req = GetDownloadUrlSoapIn()
         req.set_element_DownloadKey(downloadKey)
         url = port.GetDownloadUrl(req).get_element_url()
-        print 'Success! URL =', url
+        # print 'Success! URL =', url
 
         # download to a local file
 
@@ -72,7 +72,7 @@ def DownloadCIDs(cids):
 
         req = GetStatusMessageSoapIn()
         req.set_element_AnyKey(downloadKey)
-        print 'Error:', port.GetStatusMessage(req).get_element_message()
+        # print 'Error:', port.GetStatusMessage(req).get_element_message()
 
 
 if __name__ == '__main__':
