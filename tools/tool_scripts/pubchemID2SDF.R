@@ -43,7 +43,6 @@ if(length(missingIds) > 0){
 }
 
 # get SDFs in database
-dbCompounds <- SDFset()
 if(length(compoundIds[! is.na(compoundIds)]) > 0){
     dbCompounds <- getCompounds(conn,compoundIds[! is.na(compoundIds)],keepOrder=TRUE)
     result <- append(result, dbCompounds)
