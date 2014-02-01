@@ -11,6 +11,36 @@ from pubchem_soap_interface.SimilaritySearch import SimilaritySearch
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.views.decorators.csrf import csrf_exempt
+from tools.models import Application
+from tools.runapp import createJob
+
+@csrf_exempt
+def listCMTools(request, url):
+    if request.method == 'POST':
+        toolList = u'Category\tName\tInput\tOutput\n'
+        allTools = Application.objects.all()
+        for tool in allTools:
+            toolList = toolList + tool.category.name + "\t" + tool.name + "\t"\
+                    + tool.input_type + "\t" + tool.output_type + "\n"
+        return HttpResponse(toolList,
+                            mimetype='text/plain')
+    else:
+        return HttpResponse('ERROR: query must be an HTTP POST\n',
+                            mimetype='text/plain')
+
+@csrf_exempt
+def launchCMTool(request, url):
+    if not request.method == 'POST':
+        return HttpResponse('ERROR: query must be an HTTP POST\n',
+                            mimetype='text/plain')
+    # get ChemmineR user
+
+    # create and validate job form
+
+    # launch job
+
+    # return task id token to user
+
 
 @csrf_exempt
 def runapp(request, url):

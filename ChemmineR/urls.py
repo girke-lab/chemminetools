@@ -7,4 +7,5 @@ import logging
 
 urlpatterns = patterns('', url(r'^runapp(.*)$', 'ChemmineR.views.runapp'
                        , name='runapp'))
-
+urlpatterns = patterns('', url(r'^listCMTools(.*)$', 'ChemmineR.views.listCMTools'
+                       , name='listCMTools'))
