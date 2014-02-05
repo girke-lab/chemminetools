@@ -6,13 +6,16 @@ from django.shortcuts import get_object_or_404, get_list_or_404, \
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
+from django.core.exceptions import ObjectDoesNotExist
 from pubchem_soap_interface.pubchemdl import download
 from pubchem_soap_interface.SimilaritySearch import SimilaritySearch
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.views.decorators.csrf import csrf_exempt
 from tools.models import Application
-from tools.runapp import createJob
+from tools.runapp import *
+from django.contrib.auth.models import User
+import random, string
 
 @csrf_exempt
 def listCMTools(request, url):
@@ -34,13 +37,36 @@ def launchCMTool(request, url):
         return HttpResponse('ERROR: query must be an HTTP POST\n',
                             mimetype='text/plain')
     # get ChemmineR user
+    try:
+        user = User.objects.get(username='ChemmineR')
+    except ObjectDoesNotExist:
+        # create user with a random password
+        sysrand = random.SystemRandom()
+        length = 64
+        chars = string.ascii_letters + string.digits + '!@#$%^&*()'
+        password = ''.join(foo.choice(chars) for _ in xrange(length))
+        user = User.objects.create_user('ChemmineR', 'none', password)
 
     # create and validate job form
+    tool_name = request.POST['tool_name']
+    try:
+        app = Application.objects.get(name=tool_name)
+    except ObjectDoesNotExist:
+        return HttpResponse(tool_name, mimetype='text/plain')
+        return HttpResponse('ERROR: tool name not in database.\n Check that the name matches exactly (case sensitive).\n',
+                            mimetype='text/plain')
+    # appForm = getAppForm(app.id, user)
+    # form = appForm(request.POST)
+    # if not form.is_valid():
+    #    return HttpResponse('ERROR: Invalid input options. Check that the names match exactly (case sensitive).\n',
+    #                        mimetype='text/plain')
 
     # launch job
+    # commandOptions, optionsList = parseToolForm(form)
+    newJob = createJob(user, app.name, '', '', request.POST['input'])
 
     # return task id token to user
-
+    return HttpResponse(newJob.task_id, mimetype='text/plain')
 
 @csrf_exempt
 def runapp(request, url):

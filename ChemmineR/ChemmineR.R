@@ -10,7 +10,8 @@ library(RCurl)
 setClass("jobToken", representation=representation(
     jobId = "character",
     status = "character",
-    output_type = "character"
+    output_type = "character",
+    result = ""
 ))
 
 # Purpose: retrieve list of all tools from server
@@ -28,13 +29,14 @@ launchCMTool <- function(tool_name, input = "", ...){
     if(! tool_name %in% toolList$Name){
         stop("invalid tool name")
     }
-    response <- postForm(paste(.serverURL, "listCMTools", sep=""), input = input, ...)[[1]]
+    response <- postForm(paste(.serverURL, "launchCMTool", sep=""), tool_name = tool_name, input = input, ...)[[1]]
     if(grepl("^ERROR:", response)){
         stop(response)
     }
     new("jobToken",
         jobId = response,
         status = "running",
-        output_type = as.character(toolList$Output[match(tool_name, toolList$Name)])
+        output_type = as.character(toolList$Output[match(tool_name, toolList$Name)]),
+        result = ""
     )
 }

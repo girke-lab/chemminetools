@@ -6,6 +6,8 @@ from django.conf import settings
 import logging
 
 urlpatterns = patterns('', url(r'^runapp(.*)$', 'ChemmineR.views.runapp'
-                       , name='runapp'))
-urlpatterns = patterns('', url(r'^listCMTools(.*)$', 'ChemmineR.views.listCMTools'
-                       , name='listCMTools'))
+                       , name='runapp'),
+    url(r'^listCMTools(.*)$', 'ChemmineR.views.listCMTools'
+                       , name='listCMTools'),
+    url(r'^launchCMTool(.*)$', 'ChemmineR.views.launchCMTool'
+                       , name='launchCMTool'))
