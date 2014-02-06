@@ -50,6 +50,7 @@ result <- function(object){
     }
     response <- "RUNNING"
     while(response == "RUNNING"){
+        Sys.sleep(2)
         response <- postForm(paste(.serverURL, "jobResult", sep=""), task_id=slot(object, "jobId"))[[1]]
     }
     if(grepl("^ERROR:", response)){

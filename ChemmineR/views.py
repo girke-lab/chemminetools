@@ -60,10 +60,8 @@ def launchCMTool(request, url):
     # parse form options
     fields = {'application': app.id}
     for optionName in request.POST:
-        if optionName == 'input':
+        if optionName in ('input', 'tool_name'):
             continue
-        if optionName == 'tool_name':
-            continue 
         try:
             AppOption = ApplicationOptions.objects.get(name__iexact=optionName, application=app)
             listid = ApplicationOptionsList.objects.get(category=AppOption, name__iexact=request.POST[optionName]).id
