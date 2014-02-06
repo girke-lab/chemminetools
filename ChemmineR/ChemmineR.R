@@ -8,11 +8,36 @@ library(RCurl)
 
 # job token class
 setClass("jobToken", representation=representation(
+    tool_name = "character",
     jobId = "character",
-    status = "character",
-    output_type = "character",
-    result = ""
+    output_type = "character"
 ))
+
+# show method for job token
+setMethod("show", signature=signature(
+    object="jobToken"),
+    function(object){
+        response <- status(object)
+        cat("tool name:\t", slot(object, "tool_name"), "\n")
+        cat("status:\t\t", response, "\n")
+    }
+)
+
+status <- function(object){
+    response <- postForm(paste(.serverURL, "jobStatus", sep=""), task_id=slot(object, "jobId"))[[1]]
+    if(grepl("^ERROR:", response)){
+        stop(response)
+    }
+    return(response)
+}
+
+result <- function(object){
+    response <- postForm(paste(.serverURL, "jobResult", sep=""), task_id=slot(object, "jobId"))[[1]]
+    if(grepl("^ERROR:", response)){
+        stop(response)
+    }
+    return(response)
+}
 
 # Purpose: retrieve list of all tools from server
 listCMTools <- function(){
@@ -34,9 +59,8 @@ launchCMTool <- function(tool_name, input = "", ...){
         stop(response)
     }
     new("jobToken",
+        tool_name = tool_name,
         jobId = response,
-        status = "running",
-        output_type = as.character(toolList$Output[match(tool_name, toolList$Name)]),
-        result = ""
+        output_type = as.character(toolList$Output[match(tool_name, toolList$Name)])
     )
 }

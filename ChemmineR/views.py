@@ -12,7 +12,7 @@ from pubchem_soap_interface.SimilaritySearch import SimilaritySearch
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.views.decorators.csrf import csrf_exempt
-from tools.models import Application
+from tools.models import Application, Job
 from tools.runapp import *
 from django.contrib.auth.models import User
 import random, string
@@ -67,6 +67,47 @@ def launchCMTool(request, url):
 
     # return task id token to user
     return HttpResponse(newJob.task_id, mimetype='text/plain')
+
+@csrf_exempt
+def jobStatus(request, url):
+    if not request.method == 'POST':
+        return HttpResponse('ERROR: query must be an HTTP POST\n',
+                            mimetype='text/plain')
+    task_id = request.POST['task_id']
+    user = User.objects.get(username='ChemmineR')
+    try:
+        job = Job.objects.get(task_id=task_id, user=user)
+    except ObjectDoesNotExist:
+        return HttpResponse('ERROR: job not in database.\n', mimetype='text/plain')
+    job = updateJob(user, job.id)
+    if job.status == Job.RUNNING:
+        return HttpResponse('RUNNING', mimetype='text/plain')
+    if job.status == Job.FAILED:
+        return HttpResponse('FAILED', mimetype='text/plain')
+    return HttpResponse('FINISHED', mimetype='text/plain')
+
+@csrf_exempt
+def jobResult(request, url):
+    if not request.method == 'POST':
+        return HttpResponse('ERROR: query must be an HTTP POST\n',
+                            mimetype='text/plain')
+    task_id = request.POST['task_id']
+    user = User.objects.get(username='ChemmineR')
+    try:
+        job = Job.objects.get(task_id=task_id, user=user)
+    except ObjectDoesNotExist:
+        return HttpResponse('ERROR: job not in database.\n', mimetype='text/plain')
+    job = updateJob(user, job.id)
+    if job.status == Job.RUNNING:
+        return HttpResponse('RUNNING', mimetype='text/plain')
+    if job.status == Job.FAILED:
+        deleteJob(user, job.id)
+        return HttpResponse('FAILED', mimetype='text/plain')
+    f = open(job.output, 'r')
+    result = f.read()
+    f.close()
+    deleteJob(user, job.id)
+    return HttpResponse(result, mimetype='text/plain')
 
 @csrf_exempt
 def runapp(request, url):
@@ -136,6 +177,8 @@ def runapp(request, url):
         return HttpResponse('ERROR: query must be an HTTP POST\n',
                             mimetype='text/plain')
 
+# below this line are legacy tools
+# to be eliminated in a future version
 
 def getIds(cids):
     cids = cids.split(',')
