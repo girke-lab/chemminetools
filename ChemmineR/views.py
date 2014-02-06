@@ -60,6 +60,10 @@ def launchCMTool(request, url):
     # parse form options
     fields = {'application': app.id}
     for optionName in request.POST:
+        if optionName == 'input':
+            continue
+        if optionName == 'tool_name':
+            continue 
         try:
             AppOption = ApplicationOptions.objects.get(name__iexact=optionName, application=app)
             listid = ApplicationOptionsList.objects.get(category=AppOption, name__iexact=request.POST[optionName]).id
@@ -228,5 +232,3 @@ def smiles2sdf(smiles):
 def sdf2smiles(sdf):
     sdf = sdf_to_smiles(sdf)
     return HttpResponse(sdf, mimetype='text/plain')
-
-
