@@ -15,7 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from tools.models import Application, Job
 from tools.runapp import *
 from django.contrib.auth.models import User
-import random, string
+import random, string, time
 
 @csrf_exempt
 def listCMTools(request, url):
@@ -50,20 +50,31 @@ def launchCMTool(request, url):
     # create and validate job form
     tool_name = request.POST['tool_name']
     try:
-        app = Application.objects.get(name=tool_name)
+        app = Application.objects.get(name__iexact=tool_name)
     except ObjectDoesNotExist:
         return HttpResponse(tool_name, mimetype='text/plain')
-        return HttpResponse('ERROR: tool name not in database.\n Check that the name matches exactly (case sensitive).\n',
+        return HttpResponse('ERROR: tool name not in database.\n Check that the name matches exactly.\n',
                             mimetype='text/plain')
-    # appForm = getAppForm(app.id, user)
-    # form = appForm(request.POST)
-    # if not form.is_valid():
-    #    return HttpResponse('ERROR: Invalid input options. Check that the names match exactly (case sensitive).\n',
-    #                        mimetype='text/plain')
+
+    # parse form options
+    fields = {'application': app.id}
+    for optionName in request.POST:
+        try:
+            AppOption = ApplicationOptions.objects.get(name__iexact=optionName, application=app)
+            listid = ApplicationOptionsList.objects.get(category=AppOption, name__iexact=request.POST[optionName]).id
+            fields[AppOption.name] = listid
+        except ObjectDoesNotExist:
+            pass
+
+    appForm = getAppForm(app.id, user)
+    form = appForm(fields, auto_id=False)
+    if not form.is_valid():
+        return HttpResponse('ERROR: invalid or missing input options',
+                           mimetype='text/plain')
 
     # launch job
-    # commandOptions, optionsList = parseToolForm(form)
-    newJob = createJob(user, app.name, '', '', request.POST['input'])
+    commandOptions, optionsList = parseToolForm(form)
+    newJob = createJob(user, app.name, optionsList, commandOptions, request.POST['input'])
 
     # return task id token to user
     return HttpResponse(newJob.task_id, mimetype='text/plain')
@@ -73,6 +84,7 @@ def jobStatus(request, url):
     if not request.method == 'POST':
         return HttpResponse('ERROR: query must be an HTTP POST\n',
                             mimetype='text/plain')
+    time.sleep(2)
     task_id = request.POST['task_id']
     user = User.objects.get(username='ChemmineR')
     try:
@@ -91,6 +103,7 @@ def jobResult(request, url):
     if not request.method == 'POST':
         return HttpResponse('ERROR: query must be an HTTP POST\n',
                             mimetype='text/plain')
+    time.sleep(2)
     task_id = request.POST['task_id']
     user = User.objects.get(username='ChemmineR')
     try:
