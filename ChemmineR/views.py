@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from django.shortcuts import get_object_or_404, get_list_or_404, \
-    render_to_response
+    render_to_response, redirect
 from django.template import RequestContext
-from django.http import HttpResponseRedirect, HttpResponse
+from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
 from pubchem_soap_interface.pubchemdl import download
@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from tools.models import Application, Job
 from tools.runapp import *
 from django.contrib.auth.models import User
+from guest.decorators import guest_allowed, login_required
 import random, string, time
 
 @csrf_exempt
@@ -98,6 +99,18 @@ def jobStatus(request, url):
         return HttpResponse('FAILED', mimetype='text/plain')
     return HttpResponse('FINISHED', mimetype='text/plain')
 
+@guest_allowed
+def showJob(request, task_id):
+    cmuser = User.objects.get(username='ChemmineR')
+    webuser = request.user
+    try:
+        job = Job.objects.get(task_id=task_id, user=cmuser)
+    except ObjectDoesNotExist:
+        raise Http404
+    job.user = webuser
+    job.save()
+    return redirect('tools.views.view_job', job_id=job.id, resource='')
+
 @csrf_exempt
 def jobResult(request, url):
     if not request.method == 'POST':
@@ -119,7 +132,7 @@ def jobResult(request, url):
     f = open(job.output, 'r')
     result = f.read()
     f.close()
-    deleteJob(user, job.id)
+    # deleteJob(user, job.id)
     return HttpResponse(result, mimetype='text/plain')
 
 @csrf_exempt

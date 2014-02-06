@@ -9,6 +9,7 @@ urlpatterns = patterns('', url(r'^runapp(.*)$', 'ChemmineR.views.runapp'
                        , name='runapp'),
     url(r'^listCMTools(.*)$', 'ChemmineR.views.listCMTools'
                        , name='listCMTools'),
+    url(r'^showJob/(?P<task_id>.*)/$', 'ChemmineR.views.showJob', name='showJob'),
     url(r'^jobStatus(.*)$', 'ChemmineR.views.jobStatus'
                        , name='jobStatus'),
     url(r'^jobResult(.*)$', 'ChemmineR.views.jobResult'

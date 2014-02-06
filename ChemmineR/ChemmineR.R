@@ -33,7 +33,17 @@ status <- function(object){
     return(response)
 }
 
-# get result (works only once)
+# browse job online (works only once, saves to user account)
+browseJob <- function(object){
+    if(class(object) != "jobToken"){
+        stop("input not of class jobToken")
+    }
+    url <- paste(.serverURL, "showJob", "/", slot(object, "jobId"), sep="")
+    browseURL(url)
+    return(url)
+}
+
+# get result 
 result <- function(object){
     if(class(object) != "jobToken"){
         stop("input not of class jobToken")
