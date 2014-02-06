@@ -135,6 +135,9 @@ def jobResult(request, url):
     # deleteJob(user, job.id)
     return HttpResponse(result, mimetype='text/plain')
 
+# below this line are legacy tools
+# to be eliminated in a future version
+
 @csrf_exempt
 def runapp(request, url):
     if request.method == 'POST':
@@ -202,9 +205,6 @@ def runapp(request, url):
     else:
         return HttpResponse('ERROR: query must be an HTTP POST\n',
                             mimetype='text/plain')
-
-# below this line are legacy tools
-# to be eliminated in a future version
 
 def getIds(cids):
     cids = cids.split(',')
