@@ -41,6 +41,7 @@ pip install simplejson
 pip install ghostscript
 pip install pyyaml
 pip install django-userena
+pip install beautifulsoup4 
 
 # clean up package install 
 apt-get clean
@@ -104,6 +105,12 @@ cp /srv/chemminetools/celeryd .
 chmod ugo+x celeryd
 update-rc.d celeryd defaults 98 02
 cp /srv/chemminetools/celery_config /etc/default/celeryd
+
+# cause celery to launch AFTER /vagrant is mounted
+cp /srv/chemminetools/udev_rule /etc/udev/rules.d/50-vagrant-mount.rules
+
+# start celery now
+/etc/init.d/celeryd start
 
 # restart apache
 /etc/init.d/apache2 restart

@@ -13,17 +13,13 @@ To get started with a development box:
     cd chemminetools
 3) Run this command to provision and launch your devel environment: 
     vagrant up
-4) Log in and start celery manually as this isn't working for some reason:
-    vagrant ssh
-    sudo /etc/init.d/celeryd start
-    exit
-5) You will now have a running chemmine tools at:
+4) You will now have a running chemmine tools at:
     http://127.0.0.1:8080/myCompounds/addCompounds/
-6) Note that this server is very insecure, as the private keys and passwords
+5) Note that this server is very insecure, as the private keys and passwords
 come from the example file. You should block it with a firewall until you secure it
 for production! Also, note that some tools (such as EI search) require large
 databases and won't work with an out of the box devel container.
-7) Shut down vagrant (re-run 'vagrant up' to relaunch):
+6) Shut down vagrant (re-run 'vagrant up' to relaunch):
     vagrant halt
 
 Compatible Browsers:
