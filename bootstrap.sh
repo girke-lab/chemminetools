@@ -41,6 +41,7 @@ pip install simplejson
 pip install ghostscript
 pip install pyyaml
 pip install django-userena
+pip install beautifulsoup4 
 
 # clean up package install 
 apt-get clean

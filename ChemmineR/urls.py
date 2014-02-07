@@ -12,7 +12,11 @@ urlpatterns = patterns('', url(r'^runapp(.*)$', 'ChemmineR.views.runapp'
     url(r'^showJob/(?P<task_id>.*)/$', 'ChemmineR.views.showJob', name='showJob'),
     url(r'^jobStatus(.*)$', 'ChemmineR.views.jobStatus'
                        , name='jobStatus'),
+    url(r'^getConverter(.*)$', 'ChemmineR.views.getConverter'
+                       , name='getConverter'),
     url(r'^jobResult(.*)$', 'ChemmineR.views.jobResult'
                        , name='jobResult'),
+    url(r'^toolDetails(.*)$', 'ChemmineR.views.toolDetails'
+                       , name='toolDetails'),
     url(r'^launchCMTool(.*)$', 'ChemmineR.views.launchCMTool'
                        , name='launchCMTool'))

@@ -4,12 +4,11 @@
 library(ChemmineR)
 library(RCurl)
 
-.serverURL <- "http://127.0.0.1/ChemmineR/"
+.serverURL <- "http://chemmine.ucr.edu/ChemmineR/"
 
 setClass("jobToken", representation=representation(
     tool_name = "character",
-    jobId = "character",
-    output_type = "character"
+    jobId = "character"
 ))
 
 setMethod("show", signature=signature(
@@ -59,7 +58,7 @@ result <- function(object){
     if(response == "FAILED"){
         stop("Job Failed")
     }
-    response <- .convertOutput(response, slot(object, "output_type"))
+    response <- .convertOutput(response, slot(object, "tool_name"))
     return(response)
 }
 
@@ -72,52 +71,55 @@ listCMTools <- function(){
     read.table(text=response, sep="\t", header=T)
 }
 
+# Purpose: retrieve details on a tool 
+toolDetails <- function(tool_name){
+    response <- postForm(paste(.serverURL, "toolDetails", sep=""), tool_name=tool_name)[[1]]
+    if(grepl("^ERROR:", response)){
+        stop(response)
+    }
+    cat(response)
+}
+
 # Purpose: launch a ChemMine Tools job on server
 launchCMTool <- function(tool_name, input = "", ...){
     toolList <- listCMTools()
     if(! tool_name %in% toolList$Name){
         stop("invalid tool name")
     }
-    inputFormat <- as.character(toolList$Input[which(tool_name == toolList$Name)])
-    input <- .convertInput(input, inputFormat)
+    input <- .convertInput(input, tool_name)
     response <- postForm(paste(.serverURL, "launchCMTool", sep=""), tool_name = tool_name, input = input, ...)[[1]]
     if(grepl("^ERROR:", response)){
         stop(response)
     }
     new("jobToken",
         tool_name = tool_name,
-        jobId = response,
-        output_type = as.character(toolList$Output[match(tool_name, toolList$Name)])
+        jobId = response
     )
 }
 
 # Purpose: convert input to correct format
-.convertInput <- function(input, format){
-    if(format == "chemical/x-mdl-sdfile"){
-        if(class(input) != "SDFset"){
-            stop("input not of class SDFset")
-        }
-        return(paste(unlist(sdfstr2list(as(input, "SDFstr"))), collapse="\n"))
-    }
-    if(format == "text/properties.table"){
-        input <- as.data.frame(input)
-        return(paste(capture.output(write.table(input, row.names = FALSE, col.names = FALSE, sep=",", qmethod="double")), collapse="\n"))
+.convertInput <- function(input, toolName){
+    response <- postForm(paste(.serverURL, "getConverter", sep=""), converterType="input", toolName=toolName)[[1]]
+    objectClass <- gsub("\n.*", "", response)
+    converter <- gsub("^.*?\n", "", response)
+
+    if(objectClass == "data.frame"){
+        try(input <- as.data.frame(input), silent = TRUE)
+    } else {
+        try(input <- as(input, objectClass), silent = TRUE)
     }
 
-    # if format is unknown, see if you can just make it a char
-    return(as.character(input))
+    if(class(input) != objectClass){
+        stop(paste("input not of class", objectClass))
+    }
+
+    eval(parse(text = converter))
 }
 
-# Purpose: convert output to correct format
-.convertOutput <- function(output, format){
-    if(format == "text/fp.search.result"){
-        return(read.table(text=output, sep="\t", header=F)[,1])
-    }
-    if(format == "text/properties.table"){
-        return(read.csv(text=output))
-    }
-    if(format == "chemical/x-mdl-sdfile"){
-        return(read.SDFset(read.SDFstr(unlist(strsplit(output, "\n")))))
-    }
-    return(output)
+# Purpose: convert output to correct format 
+.convertOutput <- function(output, toolName){
+    response <- postForm(paste(.serverURL, "getConverter", sep=""), converterType="output", toolName=toolName)[[1]]
+    converter <- gsub("^.*?\n", "", response)
+
+    eval(parse(text = converter))
 }

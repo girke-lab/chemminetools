@@ -12,25 +12,103 @@ from pubchem_soap_interface.SimilaritySearch import SimilaritySearch
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.views.decorators.csrf import csrf_exempt
-from tools.models import Application, Job
+from tools.models import Application, Job, ApplicationCategories
 from tools.runapp import *
 from django.contrib.auth.models import User
 from guest.decorators import guest_allowed, login_required
-import random, string, time
+import random, string, time, re
+from converters import inputConverters, outputConverters
+from bs4 import BeautifulSoup
 
 @csrf_exempt
 def listCMTools(request, url):
     if request.method == 'POST':
         toolList = u'Category\tName\tInput\tOutput\n'
-        allTools = Application.objects.all()
+        allTools = Application.objects.exclude(category = ApplicationCategories.objects.get(name="Internal"))
         for tool in allTools:
+            inputObject = RObjectType(tool, 'input')
+            outputObject = RObjectType(tool, 'output') 
+            outputObject = re.sub('\n.*', '', outputObject, count=0) 
             toolList = toolList + tool.category.name + "\t" + tool.name + "\t"\
-                    + tool.input_type + "\t" + tool.output_type + "\n"
+                    + inputObject + "\t" + outputObject + "\n"
         return HttpResponse(toolList,
                             mimetype='text/plain')
     else:
         return HttpResponse('ERROR: query must be an HTTP POST\n',
                             mimetype='text/plain')
+
+def RObjectType(tool, type):
+    if type == 'input':
+        if tool.input_type in inputConverters.keys():
+            object = inputConverters[tool.input_type]
+        else:
+            object = inputConverters['default']
+    else:
+        if tool.output_type in outputConverters.keys():
+            object = outputConverters[tool.output_type]
+        else:
+            object = outputConverters['default']
+    return re.sub('\n.*', '', object, count=0) 
+
+@csrf_exempt
+def toolDetails(request, url):
+    if not request.method == 'POST':
+        return HttpResponse('ERROR: query must be an HTTP POST\n',
+                            mimetype='text/plain')
+    tool_name = request.POST['tool_name']
+    try:
+        app = Application.objects.get(name__iexact=tool_name)
+    except ObjectDoesNotExist:
+        return HttpResponse('ERROR: tool name not in database.\n Check that the name matches exactly.\n',
+                            mimetype='text/plain')
+    details = 'Category:\t\t' + app.category.name + '\n' +\
+              'Name:\t\t\t' + app.name + '\n' +\
+              'Input R Object:\t\t' + RObjectType(app, 'input') + '\n' +\
+              'Input mime type:\t' + app.input_type + '\n' +\
+              'Output R Object:\t' + RObjectType(app, 'output') + '\n' +\
+              'Output mime type:\t' + app.output_type + '\n' +\
+              '###### BEGIN DESCRIPTION ######\n' +\
+              BeautifulSoup(app.description).get_text() + '\n' +\
+              '####### END DESCRIPTION #######\n' 
+    optionCounter = 0
+    for option in ApplicationOptions.objects.filter(application=app):
+        optionCounter += 1
+        details = details + "Option " + str(optionCounter) + ": '" +\
+                option.name + "'\nAllowed Values: " 
+        for value in ApplicationOptionsList.objects.filter(category=option):
+            details = details + " '" + value.name + "'"
+        details = details + "\n"
+    details = details + "Example function call:\n\t" +\
+            "job <- launchCMTool(\n\t\t'" +\
+                app.name + "',\n\t\t" +\
+                RObjectType(app, 'input')
+    for option in ApplicationOptions.objects.filter(application=app):
+        details = details + ",\n\t\t'" + option.name + "'='" +\
+            ApplicationOptionsList.objects.filter(category=option)[0].name + "'"
+    details = details + "\n\t)\n"
+    return HttpResponse(details,
+                        mimetype='text/plain')
+
+@csrf_exempt
+def getConverter(request, url):
+    if not request.method == 'POST':
+        return HttpResponse('ERROR: query must be an HTTP POST\n',
+                            mimetype='text/plain')
+    converterType = request.POST['converterType']
+    toolName = request.POST['toolName']
+    if converterType == 'input':
+        mimeType = Application.objects.get(name=toolName).input_type
+        if mimeType in inputConverters.keys():
+            result = inputConverters[mimeType]
+        else:
+            result = inputConverters['default']
+    else:
+        mimeType = Application.objects.get(name=toolName).output_type
+        if mimeType in outputConverters.keys():
+            result = outputConverters[mimeType]
+        else:
+            result = outputConverters['default']
+    return HttpResponse(result, mimetype='text/plain')
 
 @csrf_exempt
 def launchCMTool(request, url):
@@ -53,7 +131,6 @@ def launchCMTool(request, url):
     try:
         app = Application.objects.get(name__iexact=tool_name)
     except ObjectDoesNotExist:
-        return HttpResponse(tool_name, mimetype='text/plain')
         return HttpResponse('ERROR: tool name not in database.\n Check that the name matches exactly.\n',
                             mimetype='text/plain')
 
