@@ -123,7 +123,7 @@ def launchCMTool(request, url):
         sysrand = random.SystemRandom()
         length = 64
         chars = string.ascii_letters + string.digits + '!@#$%^&*()'
-        password = ''.join(foo.choice(chars) for _ in xrange(length))
+        password = ''.join(sysrand.choice(chars) for _ in xrange(length))
         user = User.objects.create_user('ChemmineR', 'none', password)
 
     # create and validate job form
