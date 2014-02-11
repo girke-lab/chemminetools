@@ -1,0 +1,17 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: Graph Visualizer
+category: Plotting 
+script: graphVisualizer.py 
+input_type: application/json.graph 
+output_type: application/json.cytoscape
+description: <p><b>Graph Visualizer</b> produces an interactive web page for viewing a graph consisting of nodes and edges.</p>
+
+ApplicationOptions:
+     Layout: # this name will show up online
+          realName: layout # this will be passed to the app
+          options: # format: [web name, command line value]
+               - [circle, circle]
+               - [arbor, arbor]
