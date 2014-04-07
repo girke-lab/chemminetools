@@ -1,0 +1,6 @@
+    Alias /static/ /srv/chemminetools/static_production/
+    WSGIScriptAlias / /srv/chemminetools/chemminetools/wsgi.py
+    <Location />
+        Order Allow,Deny
+        Allow from all
+    </Location>

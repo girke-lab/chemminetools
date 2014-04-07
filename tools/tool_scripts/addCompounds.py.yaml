@@ -6,7 +6,7 @@ name: Upload Compounds
 category: Internal 
 script: addCompounds.py 
 input_type: chemical/x-mdl-sdfile
-output_type: text/compound-quantitity 
+output_type: text/sdf.upload
 description: This tool adds new compounds to the workbench.
 
 ApplicationOptions:
@@ -14,9 +14,3 @@ ApplicationOptions:
           realName: user # this will be passed to the app
           options: # format: [web name, command line value]
                - [0, 0]
-     Input Format:
-          realName: format 
-          options:
-               - [Smiles, smiles]
-               - [SDF, sdf]
-               - [CID, cid]

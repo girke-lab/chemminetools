@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load cms_tags %}
+
+{% block js_content %}
+<script type="text/javascript">
+var structures_loaded = false;
+
+$(document).ready(function() {
+	$("#loadstructures").click(function () {
+		if (!structures_loaded) {
+			$(this).html('Hide Structures');
+			var buf = $(this).text();
+			$(".compoundImageTitle").show();
+			$(".compoundImage").show();
+			$(".compoundImage").each(function() {
+				$(this).html('<img width="100" class="img-rounded" src="http://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid='+ $(this).attr('id') + '"/>');
+			});
+			structures_loaded = true;
+		} else {
+			$(this).html('Show Structures');
+			structures_loaded = false;
+			$(".compoundImage").hide();
+			$(".compoundImageTitle").hide();
+			$(".compoundImage").each(function() {
+				$(this).html('');
+			});
+		}
+	});
+});	
+		
+</script>
+{% endblock %}
+{% block base_content %}
+<div class="row-fluid">
+        <div class="span12">
+                <h2>{{ title|default:"Job Result" }}</h2>
+        </div>
+</div><!--/row-->
+
+{% if job %}
+<div class="row-fluid">
+        <div class="span12">
+        <table class="table table-bordered table-hover">
+        <tbody>
+        <tr>
+                <th>Job Start Time</th>
+                <td>{{ job.start_time }}</td>
+        </tr>
+        <tr>
+                <th>Options</th>
+                <td>{{ job.options }}</td>
+        </tr>
+        <tr>
+                <th>Query Structure</th>
+                <td><img width="200" src="/similarity/renderer/{{query}}"/></td>
+        </tr>
+        </tbody>
+        </table>
+        </div>
+</div><!--/row-->
+{% endif %}
+
+<div class="row-fluid">
+<div class="span12">
+{% if compounds %}
+    <h2>Hits</h2>
+    <div class="btn-group">
+    <a href="/eisearch/getStructures/{{job.id}}/workbench"><button type="button" class="btn btn-primary">Send to Workbench</button></a>
+    <a href="/eisearch/getStructures/{{job.id}}/sdf"><button type="button" class="btn">Download SDF</button></a>
+    <a href="/eisearch/getStructures/{{job.id}}/smiles"><button type="button" class="btn">Download SMILES</button></a>
+    <button id="loadstructures" class="btn">Show Structures</button>
+    </div>
+
+    <table class="table table-striped table-bordered compounds">
+    <thead>
+    <tr>
+    <th style="display:none" class="compoundImageTitle">Structure</th>
+    <th>CID</th>
+    <th>Similarity</th>
+    <th>More Info</th>
+    <tr>
+    </thead>
+    <tbody>
+    {% for compound in compounds %}
+        <tr class="compound">
+            <td style="display:none" class="compoundImage" id="{{compound.0}}">  </td>
+            <td>{{compound.0}}</td>
+            <td>{{compound.1|floatformat:"2"}}</td>
+            <td><a href="http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid={{compound.0}}">PubChem Link</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+{% else %}
+    <h2>No Hits Found</h2>
+{% endif %}
+</div>
+</div>
+
+{% endblock %}

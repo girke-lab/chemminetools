@@ -27,6 +27,7 @@ sdfInput <- sdfInput[validSDF(sdfInput)]
 cids <- sdfid(sdfInput)
 cids <- cleanUp(cids)
 sdfInput <- sdfInput[! duplicated(cids)]
+cids <- cids[! duplicated(cids)]
 
 # parse ids
 cid(sdfInput) <- cids

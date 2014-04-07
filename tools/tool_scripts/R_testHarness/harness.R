@@ -10,9 +10,10 @@ dimensions <- "Scatter3D"
 properties <- "sampleSDF.csv"
 # properties <- "~/Desktop/table110.csv"
 cutoff <- 0.4
+displayType <- "zscore"
 
 # run code
-source("../multidimensionalscaling.R")
+source("../apcluster.R")
 
 # run after to view results
 template <- readLines("template.html")

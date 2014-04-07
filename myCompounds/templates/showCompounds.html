@@ -74,8 +74,8 @@
 		<div class="btn-group">
 		  <a href="#deleteModal" role="button" class="btn btn-danger" data-toggle="modal">Delete All</a>
 		  <button id="loadstructures" class="btn">Show Structures</button>
-		  <a href="/myCompounds/downloadSDF"><button class="btn">Download SDF</button></a>
-		  <a href="/myCompounds/downloadSMILES"><button class="btn">Download Smiles</button></a>
+		  <a href="/myCompounds/downloadSDF.sdf" download="myCompounds.sdf"><button class="btn">Download SDF</button></a>
+		  <a href="/myCompounds/downloadSMILES.smi" download="myCompounds.smi"><button class="btn">Download Smiles</button></a>
 		</div>
 	</div> 
 </div><!--/row-->
@@ -91,7 +91,7 @@
 	<th>CID</th>
 	<th>Name</th>
 	<th style="display:none" class="compoundImageTitle">Structure</th>
-	<th>Smiles</th>
+	<th>Formula</th>
 	<th>Options</th>
 	</tr>
 	</thead>
@@ -101,9 +101,9 @@
 		<td><a href="/compounds/{{compound.id}}">{{compound.cid}}</a></td>
 		<td>{{compound.name}}</td>
 		<td style="display:none" class="compoundImage" id="{{compound.id}}">  </td>
-		<td>{{compound.smiles}}</td>
+		<td>{{compound.formula}}</td>
 		<td><i data-toggle="tooltip" placement="top" title="delete this compound" class="icon-trash"></i>
-		<a href="/search/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
+		<a href="/eisearch/query/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
 		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="edit compound details"><i class="icon-pencil"></i></a>
 		</td>
 		</tr>

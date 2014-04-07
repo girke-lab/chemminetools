@@ -13,6 +13,7 @@ if(! exists("debug_mode")){
      linkage = commandArgs(asValues=TRUE)$linkage
      heatmap = commandArgs(asValues=TRUE)$heatmap
      properties = commandArgs(asValues=TRUE)$properties
+     displayType = commandArgs(asValues=TRUE)$displayType
 
      # read in sdf from standard i/o
      f <- file("stdin")
@@ -31,6 +32,7 @@ sdfInput <- sdfInput[validSDF(sdfInput)]
 cids <- sdfid(sdfInput)
 cids <- cleanUp(cids)
 sdfInput <- sdfInput[! duplicated(cids)]
+cids <- cids[! duplicated(cids)]
 
 # Create atom pair distance matrix
 apset <- sdf2ap(sdfInput)
@@ -58,9 +60,13 @@ if(properties != "None"){
      plotdata <- propData[propData[,1] %in% cids,2:ncol(propData)]
      varids <- colnames(plotdata)
      plotdata <- matrix(as.numeric(as.matrix(plotdata)), ncol=ncol(plotdata))
-     plotdata <- as.data.frame(scale(plotdata))
-     # plotdata[is.na(as.data.frame(scale(plotdata)))] <- 0
-     key <- "Column Z-score"
+     if(displayType == "actual"){
+          plotdata <- as.data.frame(plotdata)
+          key <- "Numeric Values"
+     } else {
+          plotdata <- as.data.frame(scale(plotdata))  
+          key <- "Per Column Z-Scores"
+     }
      if(dim(plotdata)[1] < 1){
           stop()
      }
@@ -101,7 +107,7 @@ if ((dim(plotdata)[2] > 38) || (length(sdfInput) > 70)){
 fontscale <- as.character(0.5 + max(length(sdfInput), dim(plotdata)[2])/55 )
 
 # add configuration parameters and output to file
-config <- paste("{\"graphType\": \"Heatmap\",\"useFlashIE\": true,\"showVarDendrogram\": false,\"showSmpDendrogram\": true,\"varLabelRotate\": 45,\"varHighlightColor\": \"rgb(0,255,0)\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\",\"dendrogramColor\": \"rgb(0,0,0)\",\"autoAdjust\": true, \"toolbarPermanent\": true, \"smpLabelScaleFontFactor\": ", fontscale, ", \"varLabelScaleFontFactor\": ", fontscale, "}", sep="")
+config <- paste("{\"graphType\": \"Heatmap\",\"useFlashIE\": true,\"showVarDendrogram\": false,\"showSmpDendrogram\": true,\"varLabelRotate\": 45,\"varHighlightColor\": \"rgb(0,255,0)\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\",\"dendrogramColor\": \"rgb(0,0,0)\",\"autoAdjust\": true, \"zoomSamplesDisable\": true, \"zoomVariablesDisable\": true, \"toolbarPermanent\": true, \"smpLabelScaleFontFactor\": ", fontscale, ", \"varLabelScaleFontFactor\": ", fontscale, "}", sep="")
 events <- "{click: function(o) {detailPopup(o.y.smps);}, dblclick: function(o) {detailPopup(o.y.smps);}}"
 output <- paste("$(\"canvas\").attr('height', '", height, "');\n$(\"canvas\").attr('width', ", width, ");\n new CanvasXpress(\"canvas\",\n", data, ",\n", config ,",\n", events, "\n)", sep="")
 if(! exists("debug_mode")){

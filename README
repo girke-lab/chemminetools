@@ -1,41 +1,26 @@
-ChemMine Tools: an Open Source Framework for Chemical Genomics
+ChemMine Tools: an Open Source Web Framework for Small Molecule Analysis
 
-This repository represents the codebase for the new Django based rewrite of ChemMine Tools.
+Look at bootstrap.sh for software dependencies and installation
+instructions.
 
-Software dependencies:
-Python 2.7.3 
-postgresql 9.1.7 
-R 2.15.1
-memcached 1.4.13
-rabbit-mq-server
-ghostscript
-jre1.7.0_17 installed in /opt/jre
-JOELib2-alpha-20070303 installed in /opt/JOELib2-alpha-20070303
+To get started with a development box:
 
-R libraries:
-ChemmineR
-Rutils
-ctc
-rjson
-
-Python libraries:
-PyYAML
-simplejson
-django-celery
-python-pylibmc
-python-openbabel
-ZSI
-psycopg2
-skimage
-django-reversion
-django-bootstrap-toolkit
-Django 1.4.3 
-pip 
-django-cms 
-south 
-django-appmedia 
-django-guest (http://code.google.com/p/django-guest/)
-django-cron (http://code.google.com/p/django-cron/)
+1) Download and install Vagrant and Virtualbox from here:
+    http://www.vagrantup.com
+    https://www.virtualbox.org
+2) Clone this repo and cd into it:
+    git clone https://github.com/TylerBackman/chemminetools.git
+    cd chemminetools
+3) Run this command to provision and launch your devel environment: 
+    vagrant up
+4) You will now have a running chemmine tools at:
+    http://127.0.0.1:8080/myCompounds/addCompounds/
+5) Note that this server is very insecure, as the private keys and passwords
+come from the example file. You should block it with a firewall until you secure it
+for production! Also, note that some tools (such as EI search) require large
+databases and won't work with an out of the box devel container.
+6) Shut down vagrant (re-run 'vagrant up' to relaunch):
+    vagrant halt
 
 Compatible Browsers:
 Google Chrome 25
@@ -47,7 +32,7 @@ Opera 12 (works but with minor issues with similarity workbench and table viewer
 Internet Explorer 6, 8, 10 (9 not tested) 
 
 License:
-(C) 2013 Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
+(C) 2013-2014 Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

@@ -41,6 +41,9 @@
 
 <div class="row-fluid">
 	<div class="span12">
+		{% if fromWorkbench %}
+		<p>Select a tool to process the <b>{{totalCompounds}}</b> compounds in your workbench. To modify the input compounds, add or delete compounds from your workbench.</p>
+		{% endif %}	
 		<form action="." method="post">{% csrf_token %}
 		{{ form.as_p }}
 		</form>

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+<script src="/static/admin/cidpopups.js"></script>
+<script>
+$(document).ready(function() {
+	var structures_loaded = false;
+	$("#loadstructures").click(function () {
+		if (!structures_loaded) {
+			$(this).html('Hide Example Structures');
+			$(".compoundImage").each(function() {
+				var cid = $(this).attr('id');
+				$.ajax({
+				    type: 'GET',
+				    url: '/compounds/cid_lookup',
+				    dataType: 'json',
+				    success: function(data) {perm_id = data.id},
+				    data: { cid: cid },
+				    async: false
+				});
+				if(perm_id != 'ERROR'){
+					$(this).attr("src", '/compounds/' + perm_id + '/png');
+					$(this).show();
+				}
+			});
+			structures_loaded = true;
+		} else {
+			$(".compoundImage").hide();
+			$(this).html('Show Example Structures');
+			structures_loaded = false;	
+		}
+	});
+});
+</script>
+
+{% endblock %}
+
+{% block base_content %}
+<div class="row-fluid">
+	<div class="span12">
+		<h2>{{ title|default:"Job Result" }}</h2>
+	</div><!--/span-->
+</div><!--/row-->
+
+{% if job %}
+<div class="row-fluid">
+	<div class="span12">
+	<table class="table table-bordered table-hover">
+	<tbody>
+	<tr>
+		<th>Job Start Time</th>
+		<td>{{ job.start_time }}</td>
+	</tr>
+	<tr>
+		<th>Options</th>
+		<td>{{ job.options }}</td>
+	</tr>
+	<tr>
+		<th>Results</th>
+		<td><a class="btn" href="download/table{{job.id}}.csv">Download CSV »</a></td>
+	</tr>
+	</tbody>
+	</table>
+	</div><!--/span-->
+</div><!--/row-->
+{% endif %}
+
+<div class="row-fluid">
+<div class="span12">
+
+<p>
+<button id="loadstructures" class="btn">Show Example Structures</button>
+</p>
+
+<div class="accordion" id="accordion2">
+{% for bin, compounds in bins.items %}
+	<div class="accordion-group">
+		<div class="accordion-heading">
+			<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse{{bin}}">
+				Bin: <b>{{bin}}</b> Size: <b>{{compounds|length}}</b> 
+				<img style="display:none" class="compoundImage" id="{{compounds|first}}" width="150" src=""/> 
+				</a>
+		</div>
+		<div id="collapse{{bin}}" class="accordion-body collapse">
+			<div class="accordion-inner">
+				<b>Members:</b> {% for cid in compounds %}<a data-container="body" data-toggle="popover" data-placement="left" title="{{cid}}" data-content="" class="cidLink">{{cid}}</a> {% endfor %}
+			</div>
+		</div>
+	</div>
+{% endfor %}
+</div><!--/accordion-->
+
+</div><!--/span-->
+</div><!--/row-->
+{% endblock %}
