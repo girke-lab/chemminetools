@@ -175,6 +175,15 @@ def view_job(
                 return redirect('myCompounds.views.showCompounds',
                                 resource='')
         elif job.application.output_type \
+            == 'application/json.cytoscape':
+            f = open(job.output, 'r')
+            plotJSON = f.read()
+            f.close()
+            return render_to_response('view_network.html',
+                    dict(title=str(job.application) + ' Results',
+                    result=finalResult, job=job, plotJSON=plotJSON),
+                    context_instance=RequestContext(request))
+        elif job.application.output_type \
             == 'application/json.canvasxpress':
             f = open(job.output, 'r')
             plotJSON = f.read()
