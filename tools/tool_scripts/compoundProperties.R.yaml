@@ -2,7 +2,7 @@
 ---
 # this description registers a ChemmineTools app in the database
 # load with command: loader -i thisfile.yaml
-name: Compound Properties
+name: ChemmineR Properties
 category: Properties
 script: compoundProperties.R
 input_type: chemical/x-mdl-sdfile
