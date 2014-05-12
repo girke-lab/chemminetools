@@ -26,4 +26,7 @@ properties =data.frame(MF=MF(sdfInput, addH=FALSE),
 							  groups(sdfInput, type="countMA"), 
 							  rings(sdfInput, upper=6, type="count", arom=TRUE))
 
-write.table(properties,file=outfile,quote=FALSE,row.names=FALSE,col.names=TRUE)
+rownames(properties)=sdfid(sdfInput)
+
+write(paste(c("cid",colnames(properties)),collapse=","),file=outfile)
+write.table(properties,file=outfile,append=TRUE,quote=FALSE,row.names=TRUE,col.names=FALSE,sep=",")
