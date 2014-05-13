@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
-# use: ./smartsSearc.R --outfile=output.txt --pattern=<SMARTS pattern> --distinct < input.sdf
+# use: ./smartsSearc.R --outfile=output.txt --pattern=<SMARTS pattern> --matchType=(all|unique) < input.sdf
+
 
 library(ChemmineR)
 library(R.utils)
@@ -12,8 +13,8 @@ if(!exists("debug_mode")){
     if(is.null(args$pattern))
         stop("no pattern option given")
 
-	outfile    = args$outfile
-    distinct = ! is.null(args$distinct)
+	 outfile  = args$outfile
+    distinct = ! is.null(args$matchType) && args$matchType == "unique"
     pattern = args$pattern
 	
 	# read in sdf from standard i/o
