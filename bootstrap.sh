@@ -35,7 +35,7 @@ apt-get install -y libpq-dev
 #       instead we are now compiling OB from source
 
 pip install django-bootstrap-toolkit
-pip install django-cms south
+pip install django-cms==2.3.5 south
 pip install django-appmedia
 pip install ZSI
 pip install django-celery
