@@ -103,7 +103,7 @@ def getStructures(request, job_id, format):
         result = join(re.findall(r'^\S+', result, re.MULTILINE), sep='\n')
     except Job.DoesNotExist:
         raise Http404
-    newJob = createJob(request.user, 'pubchemID2SDF', '', '', result,
+    newJob = createJob(request.user, 'pubchemID2SDF', '', [], result,
                        format, async=False) 
     if format == 'smiles':
         filename = 'search_result.smi'
