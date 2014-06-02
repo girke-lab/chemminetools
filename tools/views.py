@@ -234,7 +234,7 @@ def view_job(
             deleteJob(request.user, job.id)
             if nextStep == 'workbench':
                 newJob = createJob(request.user, 'Upload Compounds', '',
-                    '--user=' + str(request.user.id), sdf)
+                    ['--user=' + str(request.user.id)], sdf)
                 time.sleep(2)
                 return redirect('tools.views.view_job', job_id=newJob.id,
                     resource='')
