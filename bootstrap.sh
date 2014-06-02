@@ -8,7 +8,7 @@
 
 # Install Required Debian Packages (including django) 
 apt-get update
-apt-get upgrade -y
+# apt-get upgrade -y
 apt-get install -y git
 apt-get install -y python-django
 apt-get install -y postgresql-9.1
