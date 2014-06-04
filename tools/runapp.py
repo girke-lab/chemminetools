@@ -58,10 +58,9 @@ def launch(
     if input == 'chemical/x-mdl-sdfile':
         input = makeSDF(user)
     outputFileName = outputPath + '/job_' + str(job_id)
-    command = projectDir + '/tools/tool_scripts/' + appname \
-        + ' --outfile=' + outputFileName + ' ' + commandOptions
-    print 'Running: ' + command + '\n'
-    runningTask = subprocess.Popen(command, shell=True,
+    command = [projectDir + '/tools/tool_scripts/' + appname,'--outfile=' + outputFileName] + commandOptions
+    print 'Running: ' + str(command) + '\n'
+    runningTask = subprocess.Popen(command, shell=False,
                                    stdin=subprocess.PIPE)
     runningTask.stdin.write(input)
     runningTask.stdin.close()
@@ -101,7 +100,7 @@ def parseToolForm(form):
 
     # parses a form created by getAppForm to return command line options
 
-    commandOptions = u''
+    commandOptions = []
     optionsList = u''
     application = Application.objects.get(id=form.cleaned_data['application'])
     for question in form.cleaned_data.keys():
@@ -121,8 +120,7 @@ def parseToolForm(form):
                 except:
                     option = 'None'
                     optionName = 'None'
-            commandOptions = commandOptions + ' --' \
-                + questionObject.realName + '=' + option
+            commandOptions = commandOptions + ['--'+questionObject.realName + '=' + option]
             optionsList = optionsList + questionObject.name + ': ' \
                 + optionName + ', '
     optionsList = re.sub(",\s$", '', optionsList, count=0)
