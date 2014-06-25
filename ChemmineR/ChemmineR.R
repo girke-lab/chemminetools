@@ -4,7 +4,7 @@
 library(ChemmineR)
 library(RCurl)
 
-.serverURL <- "http://127.0.0.1:8080/ChemmineR/"
+.serverURL <- "http://chemmine.ucr.edu/ChemmineR/"
 
 setClass("jobToken", representation=representation(
     tool_name = "character",
