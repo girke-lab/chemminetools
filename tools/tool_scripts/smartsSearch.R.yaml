@@ -1,0 +1,24 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: Smarts Search
+category: Properties
+script: smartsSearch.R
+input_type: chemical/x-mdl-sdfile
+output_type: text/properties.table
+description: Tests given SMARTS pattern on each compound and return the number of matches on each, either total or disinct.
+
+ApplicationOptions:
+   Pattern: 
+      realName: pattern
+      options: 
+         - [stringInput, stringInput] # this is a 'magic' tag which allows text input
+   Match Type:
+      realName: matchType
+      options:
+         - [All,all]
+         - [Unique,unique]
+         
+
+
