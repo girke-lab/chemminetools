@@ -10,7 +10,8 @@ from django.contrib.auth.models import User
 import subprocess
 import random
 from django.forms import Form, FileField, ModelChoiceField, \
-    IntegerField, HiddenInput, CharField
+    IntegerField, HiddenInput, CharField, TextInput
+from django import forms
 from models import *
 from compounddb.models import Compound
 outputPath = settings.TOOLS_RESULTS
@@ -93,7 +94,7 @@ def getAppForm(application_id, user):
             pass
         try: # check for a special stringInput option
             value = ApplicationOptionsList.objects.get(name='stringInput', category=option)
-            fields[option.name] = CharField()
+            fields[option.name] = CharField(max_length=2056, widget=forms.Textarea(attrs={'cols': 200, 'rows': 1,}))
             continue
         except:
             pass
