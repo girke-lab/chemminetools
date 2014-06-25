@@ -10,7 +10,7 @@ from django.contrib.auth.models import User
 import subprocess
 import random
 from django.forms import Form, FileField, ModelChoiceField, \
-    IntegerField, HiddenInput
+    IntegerField, HiddenInput, CharField
 from models import *
 from compounddb.models import Compound
 outputPath = settings.TOOLS_RESULTS
@@ -79,7 +79,7 @@ def getAppForm(application_id, user):
     for option in \
         ApplicationOptions.objects.filter(application=application).order_by('id'
             ):
-        try:
+        try: # check for a special fileInput option
             value = ApplicationOptionsList.objects.get(name='fileInput'
                     , category=option)
             getJobList(user)
@@ -88,10 +88,18 @@ def getAppForm(application_id, user):
                                  user=user,
                                  status=Job.FINISHED).order_by('-id'),
                                  empty_label='None', required=False)
+            continue
         except:
-            fields[option.name] = \
-                ModelChoiceField(queryset=ApplicationOptionsList.objects.filter(category=option).order_by('id'
-                                 ), empty_label=None)
+            pass
+        try: # check for a special stringInput option
+            value = ApplicationOptionsList.objects.get(name='stringInput', category=option)
+            fields[option.name] = CharField()
+            continue
+        except:
+            pass
+        fields[option.name] = \
+            ModelChoiceField(queryset=ApplicationOptionsList.objects.filter(category=option).order_by('id'
+                             ), empty_label=None)
     fields['application'] = IntegerField(initial=application.id,
             widget=HiddenInput())
     return type('%sForm' % str(application.name), (Form, ), fields)
@@ -118,8 +126,9 @@ def parseToolForm(form):
                     optionName = answerObject.name
                     option = answerObject.realName
                 except:
-                    option = 'None'
-                    optionName = 'None'
+                    answerObject = form.cleaned_data[question]
+                    optionName = answerObject
+                    option = answerObject 
             commandOptions = commandOptions + ['--'+questionObject.realName + '=' + option]
             optionsList = optionsList + questionObject.name + ': ' \
                 + optionName + ', '
