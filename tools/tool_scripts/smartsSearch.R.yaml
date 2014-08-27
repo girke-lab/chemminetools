@@ -7,7 +7,7 @@ category: Properties
 script: smartsSearch.R
 input_type: chemical/x-mdl-sdfile
 output_type: text/properties.table
-description: Tests given SMARTS pattern on each compound and return the number of matches on each, either total or disinct.
+description: Tests given SMARTS pattern on each compound and return the number of matches on each, either total or distinct.
 
 ApplicationOptions:
    Pattern: 
