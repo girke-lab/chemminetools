@@ -130,7 +130,7 @@ def uploadCompound(request, *args, **kargs):
                     post_data=request.POST),
                     context_instance=RequestContext(request))
         newJob = createJob(request.user, 'Upload Compounds', '',
-                           '--user=' + str(request.user.id), sdf)
+                           ['--user=' + str(request.user.id)], sdf)
         time.sleep(2)
         return redirect('tools.views.view_job', job_id=newJob.id,
                         resource='')
