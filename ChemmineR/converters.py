@@ -13,6 +13,7 @@ inputConverters = {
 outputConverters = {
     'default': 'character\noutput',
     'text/fp.search.result': 'integer\nread.table(text=output, sep="\t", header=F)[,1]',
+    'text/ei.search.result': 'integer\nread.table(text=output, sep="\t", header=F)[,1]',
     'text/properties.table': 'data.frame\nread.csv(text=output)',
     'chemical/x-mdl-sdfile': 'SDFset\nread.SDFset(read.SDFstr(unlist(strsplit(output, "\n"))))'
 }
