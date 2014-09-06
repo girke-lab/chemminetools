@@ -14,6 +14,7 @@ from django.forms import Form, FileField, ModelChoiceField, \
 from django import forms
 from models import *
 from compounddb.models import Compound
+from types import NoneType
 outputPath = settings.TOOLS_RESULTS
 projectDir = settings.PROJECT_DIR
 
@@ -130,6 +131,10 @@ def parseToolForm(form):
                     answerObject = form.cleaned_data[question]
                     optionName = answerObject
                     option = answerObject 
+            if option == None:
+                option = u'None'
+            if optionName == None:
+                optionName = u'None'
             commandOptions = commandOptions + ['--'+questionObject.realName + '=' + option]
             optionsList = optionsList + questionObject.name + ': ' \
                 + optionName + ', '
