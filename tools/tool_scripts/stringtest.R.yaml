@@ -1,0 +1,16 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: string test 
+category: test 
+script: stringtest.R
+input_type: chemical/x-mdl-sdfile
+output_type: application/text
+description: for testing string input options
+
+ApplicationOptions:
+     text input string:
+          realName: inputstring 
+          options:
+               - [stringInput, stringInput] # this is a 'magic' tag which allows text input

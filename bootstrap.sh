@@ -8,7 +8,7 @@
 
 # Install Required Debian Packages (including django) 
 apt-get update
-apt-get upgrade -y
+# apt-get upgrade -y
 apt-get install -y git
 apt-get install -y python-django
 apt-get install -y postgresql-9.1
@@ -35,7 +35,7 @@ apt-get install -y libpq-dev
 #       instead we are now compiling OB from source
 
 pip install django-bootstrap-toolkit
-pip install django-cms south
+pip install django-cms==2.3.5 south
 pip install django-appmedia
 pip install ZSI
 pip install django-celery
