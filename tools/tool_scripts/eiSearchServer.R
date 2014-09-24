@@ -17,7 +17,8 @@ loadPubchem <- function(){
 	message("loading lsh data")
 	lshData=loadLSHData(r,d,dir=basedir)
 	message("loading main ids")
-	mainIds = eiR:::readIddb(file.path(basedir,eiR:::Main))
+    dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem_test',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_reader',password='lj4oijribnxnbwerioanfna44i3')
+	mainIds = eiR:::readIddb(dbConn,file.path(".",eiR:::Main))
 	message("done loading data")
 
 	function(...){
@@ -35,17 +36,20 @@ loadTestSet <- function(){
 	r=40
 	d=30
 	basedir = "/srv/eiSearch/test-kinase"
-	refIddb= file.path(basedir,"run-40-30","ylpvkrqsw7j7xhu47cpmp3ttp2wqibaf.cdb")
+#	refIddb= file.path(basedir,"run-40-30","ylpvkrqsw7j7xhu47cpmp3ttp2wqibaf.cdb")
+    conn = initDb(file.path(basedir,eiR:::ChemDb))
 
 	lshData=loadLSHData(r,d,dir=basedir)
-	mainIds = eiR:::readIddb(file.path(basedir,eiR:::Main))
+	mainIds = eiR:::readIddb(conn=conn,file.path(".",eiR:::Main))
+    print(mainIds)
+
 
 	function(...)
-		eiQuery(r=r,d=d,refIddb=refIddb,dir=basedir,lshData=lshData,mainIds=mainIds,...)
+		eiQuery(runId=1,dir=basedir,lshData=lshData,mainIds=mainIds,conn=initDb(file.path(basedir,eiR:::ChemDb)), ...)
 }
 
-#queryFn = loadTestSet()
-queryFn = loadPubchem()
+queryFn = loadTestSet()
+#queryFn = loadPubchem()
 
 
 while(1) {
