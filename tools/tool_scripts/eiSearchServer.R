@@ -4,7 +4,7 @@ library(eiR)
 
 context = init.context()
 socket = init.socket(context,"ZMQ_REP")
-bind.socket(socket,"tcp://*:5555")
+bind.socket(socket,"tcp://*:5556")
 
 
 
@@ -13,7 +13,7 @@ loadPubchem <- function(){
 	r=200
 	d=100
 	basedir = "/srv/eiSearch/pubchem"
-	refIddb =file.path(basedir,"run-200-100","rohkdx3p0eesolce2hzgbpxdsd7ce75y.cdb")
+#	refIddb =file.path(basedir,"run-200-100","20ce78e8a7a08151502a294ced998301.distmat")
 	message("loading lsh data")
 	lshData=loadLSHData(r,d,dir=basedir)
 	message("loading main ids")
@@ -22,9 +22,9 @@ loadPubchem <- function(){
 
 	function(...){
 		message("query starts, connecting to db...")
-		dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_updater',password='48ruvbvnmwejf408rfdj')
+		dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem_test',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_reader',password='lj4oijribnxnbwerioanfna44i3')
 		message("got db connection, starting, eiQuery")	
-		results = eiQuery(r=r,d=d,refIddb=refIddb,dir=basedir,lshData=lshData,conn=dbConn,mainIds=mainIds,...)
+		results = eiQuery(runId=1,dir=basedir,lshData=lshData,conn=dbConn,mainIds=mainIds,...)
 		message("got query result, disconnecting from db")
 		dbDisconnect(dbConn)
 		message("returning result")
