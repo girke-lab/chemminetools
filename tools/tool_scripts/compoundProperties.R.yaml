@@ -1,0 +1,12 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: ChemmineR Properties
+category: Properties
+script: compoundProperties.R
+input_type: chemical/x-mdl-sdfile
+output_type: text/properties.table
+description: Computes several properties of the given compounds using <a href="http://bioconductor.org/packages/release/bioc/html/ChemmineR.html">ChemmineR</a>. These are  MF MW Ncharges C H N O S F Cl Br I P RNH2 R2NH R3N ROPO3 ROH RCHO RCOR RCOOH RCOOR ROR RCCH RCN RINGS AROMATIC
+
+

@@ -175,6 +175,15 @@ def view_job(
                 return redirect('myCompounds.views.showCompounds',
                                 resource='')
         elif job.application.output_type \
+            == 'application/json.cytoscape':
+            f = open(job.output, 'r')
+            plotJSON = f.read()
+            f.close()
+            return render_to_response('view_network.html',
+                    dict(title=str(job.application) + ' Results',
+                    result=finalResult, job=job, plotJSON=plotJSON),
+                    context_instance=RequestContext(request))
+        elif job.application.output_type \
             == 'application/json.canvasxpress':
             f = open(job.output, 'r')
             plotJSON = f.read()
@@ -225,7 +234,7 @@ def view_job(
             deleteJob(request.user, job.id)
             if nextStep == 'workbench':
                 newJob = createJob(request.user, 'Upload Compounds', '',
-                    '--user=' + str(request.user.id), sdf)
+                    ['--user=' + str(request.user.id)], sdf)
                 time.sleep(2)
                 return redirect('tools.views.view_job', job_id=newJob.id,
                     resource='')
