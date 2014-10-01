@@ -18,7 +18,7 @@ library(rzmq)
 
 context = init.context()
 socket = init.socket(context,"ZMQ_REQ")
-connect.socket(socket,"tcp://localhost:5556")
+connect.socket(socket,"tcp://localhost:5555")
 
 sendQuery <- function(...){
         send.socket(socket,data=list(...))

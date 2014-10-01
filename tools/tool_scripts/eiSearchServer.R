@@ -4,7 +4,7 @@ library(eiR)
 
 context = init.context()
 socket = init.socket(context,"ZMQ_REP")
-bind.socket(socket,"tcp://*:5556")
+bind.socket(socket,"tcp://*:5555")
 
 
 
@@ -17,9 +17,10 @@ loadPubchem <- function(){
 	message("loading lsh data")
 	lshData=loadLSHData(r,d,dir=basedir)
 	message("loading main ids")
-    dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem_test',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_reader',password='lj4oijribnxnbwerioanfna44i3')
+   dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem_test',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_reader',password='lj4oijribnxnbwerioanfna44i3')
 	mainIds = eiR:::readIddb(dbConn,file.path(".",eiR:::Main))
 	message("done loading data")
+	eiR:::loadSearchCache(dbConn,runId=1,dir=basedir)
 
 	function(...){
 		message("query starts, connecting to db...")
@@ -48,8 +49,8 @@ loadTestSet <- function(){
 		eiQuery(runId=1,dir=basedir,lshData=lshData,mainIds=mainIds,conn=initDb(file.path(basedir,eiR:::ChemDb)), ...)
 }
 
-queryFn = loadTestSet()
-#queryFn = loadPubchem()
+#queryFn = loadTestSet()
+queryFn = loadPubchem()
 
 
 while(1) {
