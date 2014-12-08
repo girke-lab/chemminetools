@@ -42,7 +42,7 @@ pip install django-celery
 pip install simplejson
 pip install ghostscript
 pip install pyyaml
-pip install django-userena
+pip install django-userena==1.2.1
 pip install beautifulsoup4 
 
 # clean up package install 
