@@ -12,6 +12,7 @@ from django.template import RequestContext
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.forms import ModelForm
 from django.contrib import messages
+from django.utils.http import urlquote
 from guest.decorators import guest_allowed, login_required
 from compounddb.models import Compound
 from tools.runapp import *
@@ -140,6 +141,21 @@ def view_job(
 
         # select correct viewer here based on output type
 
+        if job.application.output_type == 'chemical/sdfUpload':
+            f = open(job.output, 'r')
+            sdf = f.read()
+            f.close()
+            result, error = batch_sdf_to_smiles(sdf) 
+            quotedSmiles = []
+            for smiles in result.splitlines():
+                match = re.search(r'(\S+)\s+(\S+)', smiles)
+                smiOnly = match.group(1)
+                cid = match.group(2)
+                quotedSmiles.append({'smiles': urlquote(smiOnly), 'cid':cid})
+            return render_to_response('sdfUpload.html',
+                    dict(title=str(job.application) + ' Results',
+                    job=job, compounds=quotedSmiles),
+                    context_instance=RequestContext(request))
         if job.application.output_type == 'text/ei.search.result':
             f = open(job.output, 'r')
             csvinput = csv.reader(f, delimiter=' ')

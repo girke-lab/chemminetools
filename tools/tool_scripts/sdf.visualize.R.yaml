@@ -1,0 +1,10 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: sdf.visualize 
+category: ChemmineR 
+script: sdf.visualize.R 
+input_type: chemical/x-mdl-sdfile 
+output_type: chemical/sdfUpload 
+description: upload and visualize SDF compounds
