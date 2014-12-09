@@ -23,7 +23,7 @@ import time
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.conf import settings
-from tools.runapp import createJob
+from tools.runapp import createJob, updateJob
 from django.utils.http import urlquote
 
 
@@ -54,8 +54,8 @@ def showCompounds(request, resource):
 
 
 @guest_allowed
-def uploadCompound(request, *args, **kargs):
-    if request.method == 'GET':
+def uploadCompound(request, resource = None, job_id = None):
+    if (request.method == 'GET') and (resource != u'job'):
         return render_to_response('addCompounds.html',
                                   dict(input_mode='smiles-input'),
                                   context_instance=RequestContext(request))
@@ -75,6 +75,12 @@ def uploadCompound(request, *args, **kargs):
             except:
                 messages.error(request, 'Error: Invalid SMILES string!')
                 sdf = None
+        elif resource == 'job':
+            input_mode = 'sdf-upload'
+            job = updateJob(request.user, job_id)
+            f = open(job.output, 'r')
+            sdf = f.read()
+            f.close()
         elif 'sdf' in request.FILES:
             input_mode = 'sdf-upload'
             try:
