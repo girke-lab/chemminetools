@@ -5,9 +5,11 @@ instructions.
 
 To get started with a development box:
 
-1) Download and install Vagrant and Virtualbox from here:
+1) Download and install git, Vagrant, and Virtualbox from here:
+    http://git-scm.com/downloads
     http://www.vagrantup.com
     https://www.virtualbox.org
+
 2) Clone this repo and cd into it:
     git clone https://github.com/TylerBackman/chemminetools.git
     cd chemminetools
@@ -23,16 +25,16 @@ databases and won't work with an out of the box devel container.
     vagrant halt
 
 Compatible Browsers:
-Google Chrome 25
-Safari 5 
-Firefox 17
+Google Chrome 25 or newer
+Safari 5 or newer 
+Firefox 17 or newer
 
 Incompatible Browsers:
 Opera 12 (works but with minor issues with similarity workbench and table viewer)
 Internet Explorer 6, 8, 10 (9 not tested) 
 
 License:
-(C) 2013-2014 Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
+(C) Tyler Backman, Yiqun Cao, and Thomas Girke (the authors)
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
