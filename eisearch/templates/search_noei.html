@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load cms_tags %}
+
+{% block extra_headers %}
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<link rel="stylesheet" href="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb.css" type="text/css">
+<link rel="stylesheet" href="/static/dependenciesStatic/ChemDoodle/sketcher/jquery-ui-1.9.2.custom.css" type="text/css">
+{% endblock %}
+
+{% block js_content %}
+<script type="text/javascript">
+function do_example(){
+  $("#smiles").get(0).value = 'CC(=O)OC1=CC=CC=C1C(=O)O';
+  $(".examplehelp").fadeIn(1000);
+}
+
+$(document).ready(function() {
+$("#loadexample").click(function() {
+do_example();
+return false;
+});
+$("#smiles").after("<span class=\"red examplehelp\" style=\"position:relative;left:100px;display:none\" ><br/>&uarr;<br/>example SMILES string inserted<br/><span>");
+
+var here = document.location.toString();
+if (here.match('#')) {
+  var anchor = here.split('#')[1];
+  if (anchor == 'example')
+    $("#loadexample").hide().click();
+}
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("#drawform").submit(function() {
+		$(this).get(0).sdf.value = document.applet.molFile();
+		if(!document.applet.smiles().replace(' ', '').length()) {
+			alert("You need to draw a query structure.");
+			return false;
+		}
+		return true;
+	});
+});
+</script>
+
+<!--these are required by the ChemDoodle Web Components library-->
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb-libs.js"></script>
+<script type="text/javascript">
+        $.noConflict();
+</script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/sketcher/jquery-ui-1.9.2.custom.min.js"></script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/ChemDoodleWeb.js"></script>
+<script type="text/javascript" src="/static/dependenciesStatic/ChemDoodle/sketcher/ChemDoodleWeb-sketcher.js"></script>
+<script type="text/javascript">
+        var sketcher;
+        $(document).ready(function() {
+                sketcher = new ChemDoodle.SketcherCanvas('sketcher', 500, 300, {useServices:false, oneMolecule:true});
+
+                $("[data-toggle=tooltip]").tooltip();
+
+                jQuery("#use_sample").click(function() {
+                        jQuery("#smiles").get(0).value = sample_smi;
+                        return false;
+                });
+        });
+
+        $("#drawform").submit(function() {
+                var mol = sketcher.getMolecule();
+                $(this).get(0).sdf.value = ChemDoodle.writeMOL(mol);
+                return true;
+        });
+</script>
+{% endblock %}
+
+{% block base_content %}
+<div class="row-fluid">
+<div class="span12">
+<h2>Structural Similarity Search</h2>
+</div>
+</div><!--/row-->
+
+
+<div class="row-fluid">
+<div class="span12">
+
+<p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> 
+using the fingerprint algorithm.
+<ul>
+<li><b>Fingerprint algorithm:</b> Searches a "cleaned up" version of the PubChem Compound database
+(excluding some very similar compounds and some salts) by connecting to the PubChem web interface
+using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.
+As this connects directly to PubChem, it will include new compounds sooner than the EI search.</li>
+<li><b>EI algorithm:</b> Temporarily offline due to system maintenance.</li>
+</ul>
+</p>
+</div>
+</div><!--/row-->
+
+<div class="row-fluid">
+<div class="span12">
+<ul class="nav nav-tabs">
+	<li class="active"><a href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
+	<li><a href="#draw" data-toggle="tab">Structural Drawing</a></li>
+	<li><a href="#sdf-input" data-toggle="tab">SDF Input</a></li>
+	<li><a href="#sdf-upload" data-toggle="tab">SDF Upload</a></li>
+</ul>
+<div class="tab-content">
+<div class="tab-pane active" id="smiles-input">
+<form action="." method="post" accept-charset="utf-8">
+{% csrf_token %}
+
+    <label class="control-label" for="smiles">SMILES:</label>
+    <input id="smiles" type="text" name="smiles" class="field span12" value="{{smi}}"/>
+
+    <table>
+        {{form}}
+        <tr><td>
+		Algorithm and database:
+        </td><td>
+            <select name="algorithm" id="algorithm">
+            <option value="fp">Fingerprint algorithm</option>
+            </select>
+        </td></tr>
+        <tr><th>
+        </th><td>
+                <div class="btn-group">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                    <button class="btn" id="loadexample">Load an example query</button>
+                    <button class="btn" type="reset">Clear entry field</button>
+                </div>
+        </td></tr>
+    </table>
+	
+</form>
+</div>
+
+<div class="tab-pane" id="draw">
+        <p>
+        The center dot is a carbon atom. To add bonds, choose a bond type and click the central atom. To replace atoms, choose an element and click the atom you would like to replace.
+        </p>
+        <canvas id="sketcher"></canvas>
+        <form id="drawform" action="." method="post" accept-charset="utf-8">
+        {% csrf_token %}
+        <input type="hidden" name="sdf" value="{{post_data.sdf}}"/><br/>
+        <input type="hidden" name="draw" value="1"/>
+
+    <table>
+        {{form}}
+        <tr><td>
+		Algorithm and database:
+        </td><td>
+            <select name="algorithm" id="algorithm">
+            <option value="fp">Fingerprint algorithm</option>
+            </select>
+        </td></tr>
+        <tr><th>
+        </th><td>
+                <button class="btn btn-primary" type="submit">Search</button>
+        </td></tr>
+    </table>
+
+</form>
+</div>
+
+<div class="tab-pane" id="sdf-input">
+<p>
+Please copy and paste your single-molecule SDF below. If multiple compounds are supplied, only the first one will be used.
+</p>
+<form action="." method="post" accept-charset="utf-8">
+{% csrf_token %}
+	<label class="control-label" for="sdf_box">SDF Content:</label>
+	<textarea id="sdf_box" name="sdf" class="field span12" rows="12"></textarea><br/>
+
+    <table>
+        {{form}}
+        <tr><td>
+		Algorithm and database:
+        </td><td>
+            <select name="algorithm" id="algorithm">
+            <option value="fp">Fingerprint algorithm</option>
+            </select>
+        </td></tr>
+        <tr><th>
+        </th><td>
+                <button class="btn btn-primary" type="submit">Search</button>
+        </td></tr>
+    </table>
+</form>
+</div>
+<div class="tab-pane" id="sdf-upload">
+<p>
+Please upload a single-molecule SDF below. If multiple compounds are found in the SDF, only the first one will be used.
+</p>
+<form action="." method="post" enctype="multipart/form-data">
+{% csrf_token %}
+	<label class="control-label" for="sdf_file">SDF File:</label>
+	<input id="sdf_file" name="sdf" class="field span12" type="file"/>
+
+    <table>
+        {{form}}
+        <tr><td>
+		Algorithm and database:
+        </td><td>
+            <select name="algorithm" id="algorithm">
+            <option value="fp">Fingerprint algorithm</option>
+            </select>
+        </td></tr>
+        <tr><th>
+        </th><td>
+                <button class="btn btn-primary" type="submit">Search</button>
+        </td></tr>
+    </table>
+</form>
+</div>
+</div>
+
+</div>
+</div><!--/row-->
+{% endblock %}
