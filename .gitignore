@@ -13,3 +13,5 @@ working/*
 static_production/*
 tools/tool_scripts/R_testHarness/testResult.html
 static/ei.tar.bz2
+tmp/*
+tmp
