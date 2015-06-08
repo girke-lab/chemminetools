@@ -26,7 +26,7 @@ def search(request):
             smi = urlunquote(smi)
         form = AppFormSet()
         form = str(form)
-        return render_to_response('search_noei.html', dict(mode='form',
+        return render_to_response('search.html', dict(mode='form',
             smi=smi, form=form),
             context_instance=RequestContext(request)) 
     else:
