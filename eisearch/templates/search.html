@@ -86,13 +86,14 @@ $(document).ready(function() {
 <p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> 
 using one of two algorithm and database options:
 <ul>
-<li><b>EI algorithm:</b> Searches the full PubChem Compound database (including very similar compounds
-and salts) using the EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>)
-with an <a href="/help/#theory">atom pair (AP) similarity</a> measure.</li>
 <li><b>Fingerprint algorithm:</b> Searches a "cleaned up" version of the PubChem Compound database
 (excluding some very similar compounds and some salts) by connecting to the PubChem web interface
-using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.</li>
-As this connects directly to PubChem, it will include new compounds sooner than the EI search.
+using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.
+As this connects directly to PubChem, it will include new compounds sooner than the EI search.</li>
+<li><b>EI algorithm:</b> Searches the full PubChem Compound database (including very similar compounds
+and salts) using the EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>)
+with an <a href="/help/#theory">atom pair (AP) similarity</a> measure. <b>NOTE: EI Search is currently undergoing updates
+and may be missing some results.</b></li>
 </ul>
 </p>
 </div>
@@ -120,8 +121,8 @@ As this connects directly to PubChem, it will include new compounds sooner than 
 		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="ei">EI algorithm</option>
             <option value="fp">Fingerprint algorithm</option>
+            <option value="ei">EI algorithm</option>
             </select>
         </td></tr>
         <tr><th>
@@ -153,8 +154,8 @@ As this connects directly to PubChem, it will include new compounds sooner than 
 		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="ei">EI algorithm</option>
             <option value="fp">Fingerprint algorithm</option>
+            <option value="ei">EI algorithm</option>
             </select>
         </td></tr>
         <tr><th>
@@ -181,8 +182,8 @@ Please copy and paste your single-molecule SDF below. If multiple compounds are 
 		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="ei">EI algorithm</option>
             <option value="fp">Fingerprint algorithm</option>
+            <option value="ei">EI algorithm</option>
             </select>
         </td></tr>
         <tr><th>
@@ -207,8 +208,8 @@ Please upload a single-molecule SDF below. If multiple compounds are found in th
 		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="ei">EI algorithm</option>
             <option value="fp">Fingerprint algorithm</option>
+            <option value="ei">EI algorithm</option>
             </select>
         </td></tr>
         <tr><th>

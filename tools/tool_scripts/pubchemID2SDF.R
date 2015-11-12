@@ -48,11 +48,11 @@ if(length(compoundIds[! is.na(compoundIds)]) > 0){
     result <- append(result, dbCompounds)
 }
 
-# reorder result properly
+# reorder result if necessary
 if((length(missingIds) > 0) && (length(compoundIds[! is.na(compoundIds)]) > 0)){
-    index <- insert((length(missingIds) + 1):length(result),
-           which(is.na(compoundIds)),
-           values=1:length(missingIds))
+    index <- rep(0, length(compoundIds))
+    index[which(is.na(compoundIds))] <- 1:length(missingIds)
+    index[which(! is.na(compoundIds))] <- (length(missingIds) + 1):length(compoundIds)
     result <- result[index]
 }
 
