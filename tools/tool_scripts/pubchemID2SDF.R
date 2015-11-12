@@ -26,10 +26,14 @@ if(! exists("debug_mode")){
 #print(paste(pubchemIds,collapse=","))
 
 # look in database for PubChem ids
-compoundIds = findCompoundsByName(conn,pubchemIds,keepOrder=TRUE,allowMissing=TRUE)
+compoundIds <- findCompoundsByName(conn,pubchemIds,keepOrder=TRUE,allowMissing=TRUE)
 
 # if any don't exist, grab them via the internet (pubchem soap)
-missingIds <- pubchemIds[is.na(compoundIds)]
+if(length(compoundIds) == 0){
+	missingIds <- pubchemIds
+} else {
+	missingIds <- pubchemIds[is.na(compoundIds)]
+}
 result <- SDFset()
 if(length(missingIds) > 0){
     idstring <- paste(missingIds, collapse="\n")
