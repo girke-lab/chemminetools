@@ -3,6 +3,7 @@
 
 import re
 import os
+import time 
 from celery import task
 from tempfile import NamedTemporaryFile
 from django.conf import settings
@@ -158,10 +159,16 @@ def updateJob(user, job_id):
 
     # checks if a job is done, updates it's status, and then returns it
 
-    try:
-        job = Job.objects.get(id=job_id, user=user)
-    except:
-        return False
+    # wait up to 5 seconds in case another process is still creating the new job
+    for i in range(5):
+        try:
+            job = Job.objects.get(id=job_id, user=user)
+        except Job.DoesNotExist:
+            if i == 4:
+                return False
+            time.sleep(1)
+            continue
+        break
     if job.status == Job.RUNNING:
         result = launch.AsyncResult(job.task_id)
         if result.ready():
