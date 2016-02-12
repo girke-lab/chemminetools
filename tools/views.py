@@ -112,9 +112,8 @@ def view_job(
     filename=None,
     ):
 
-    try:
-        job = updateJob(request.user, job_id)
-    except Job.DoesNotExist:
+    job = updateJob(request.user, job_id)
+    if job == False:
         raise Http404
     if resource:
         if resource == 'delete':
