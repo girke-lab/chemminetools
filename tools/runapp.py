@@ -159,17 +159,16 @@ def updateJob(user, job_id):
 
     # checks if a job is done, updates it's status, and then returns it
 
-    # wait here in case another process is still creating the new job
-    job = False
-    for i in range(0,5):
+    # wait up to 5 seconds in case another process is still creating the new job
+    for i in range(5):
         try:
             job = Job.objects.get(id=job_id, user=user)
-        except:
+        except Job.DoesNotExist:
+            if i == 4:
+                return False
             time.sleep(1)
             continue
         break
-    if job == False:
-        return False
     if job.status == Job.RUNNING:
         result = launch.AsyncResult(job.task_id)
         if result.ready():
