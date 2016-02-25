@@ -159,7 +159,7 @@ def updateJob(user, job_id):
 
     # checks if a job is done, updates it's status, and then returns it
 
-    # wait up to 5 seconds in case another process is still creating the new job
+    # wait in case another process is still creating the new job
     for i in range(5):
         try:
             job = Job.objects.get(id=job_id, user=user)
