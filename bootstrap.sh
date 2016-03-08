@@ -10,12 +10,12 @@
 apt-get update
 # apt-get upgrade -y
 apt-get install -y git
-apt-get install -y python-django
+# apt-get install -y python-django
 apt-get install -y postgresql-9.1
 apt-get install -y python-psycopg2
 apt-get install -y python-skimage
 apt-get install -y python-pip
-apt-get install -y python-django-reversion
+# apt-get install -y python-django-reversion
 apt-get install -y libcurl4-openssl-dev
 apt-get install -y rabbitmq-server
 apt-get install -y python-pylibmc
@@ -34,6 +34,7 @@ apt-get install -y libpq-dev
 # update: this is commented out because the sid openbabel wasn't working....
 #       instead we are now compiling OB from source
 
+pip install django==1.4.5
 pip install django-bootstrap-toolkit
 pip install django-cms==2.3.5 south
 pip install django-appmedia
