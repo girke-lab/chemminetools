@@ -1,0 +1,128 @@
+\chapter{Utilities}
+
+\ZSI{} defines some utility methods that general applications
+may want to use.
+
+\begin{funcdesc}{Version}{}
+Returns a three-element tuple containing the numbers representing the
+major, minor, and release identifying the \ZSI{} version.
+\versionadded{1.1}
+\end{funcdesc}
+
+\section{Low-Level Utilities}
+
+\ZSI{} also defines some low-level utilities for its own use that
+start with a leading underscore and must be imported explicitly.
+They are documented here because they can be useful for developing
+new typecode classes.
+
+These functions are mostly used in in \code{parse} methods and the
+\class{ParsedSoap} class.  The serialization routines use the
+\class{ElementProxy} class to encapsulate common DOM-level operations.
+
+Some \code{lambda}'s are defined so that some DOM accessors
+will return an empty list rather than \code{None}.
+This means that rather than writing:
+\begin{verbatim}
+if elt.childNodes:
+   for N in elt.childNodes:
+      ...
+\end{verbatim}
+One can write:
+\begin{verbatim}
+for N in _children(elt):
+   ...
+\end{verbatim}
+
+Other \code{lambda}'s return SOAP-related attributes from an element,
+or \code{None} if not present.
+
+
+\begin{funcdesc}{_attrs}{element}
+Returns a list of all attributes of the specified \code{element}.
+\end{funcdesc}
+
+\begin{funcdesc}{_backtrace}{elt, dom}
+This function returns a text string that traces a ``path'' from \code{dom},
+a DOM root, to \code{elt}, an element within that document, in
+XPath syntax.
+\end{funcdesc}
+
+\begin{funcdesc}{_child_elements}{element}
+Returns a list of all children elements of the specified \code{element}.
+\end{funcdesc}
+
+\begin{funcdesc}{_children}{element}
+Returns a list of all children of the specified \code{element}.
+\end{funcdesc}
+
+_copyright
+_empty_nsuri_list
+\begin{funcdesc}{_find_arraytype}{element}
+The value of the SOAP \code{arrayType} attribute.
+\versionadded{1.2}
+\end{funcdesc}
+
+\begin{funcdesc}{_find_attr}{element, name}
+The value of the unqualified \code{name} attribute.
+\end{funcdesc}
+
+\begin{funcdesc}{_find_attrNS}{element, namespaceURI, localName}
+The value of a \code{name} attribute in a namespace \code{namespaceURI}.
+\end{funcdesc}
+
+\begin{funcdesc}{_find_attrNodeNS}{element, namespaceURI, localName}
+Works just like \code{_find_attrNS}, but this function grabs the attribute Node to
+distinquish between an unspecified attribute(None) and one set to empty
+string("").
+\end{funcdesc}
+
+\begin{funcdesc}{_find_default_namespace}{element}
+Returns the value of the default namespace. 
+\end{funcdesc}
+
+\begin{funcdesc}{_find_encstyle}{element}
+The value of the SOAP \code{encodingStyle} attribute.
+\end{funcdesc}
+
+\begin{funcdesc}{_find_href}{element}
+The value of the unqualified \code{href} attribute.
+\end{funcdesc}
+
+\begin{funcdesc}{_find_type}{element}
+The value of the XML Schema \code{type} attribute.
+\end{funcdesc}
+
+\begin{funcdesc}{_find_xmlns_prefix}{element, prefix}
+The value of the xmlns:prefix \code{type} attribute.
+\end{funcdesc}
+
+\begin{funcdesc}{_find_xsi_attr}{element, attribute}
+Find the attribute in any of the XMLSchema namespaces.
+\end{funcdesc}
+
+\begin{funcdesc}{_get_element_nsuri_name}{element}
+Returns a \code{(namespace,name)} tuple representing the element tag.
+\end{funcdesc}
+
+\begin{funcdesc}{_get_idstr}{obj}
+Substitute for \function{id} function.  Python 2.3.x generates a \class{FutureWarning} for negative
+IDs, so we use a different prefix character to ensure uniqueness, and call abs()
+to avoid the warning.
+\end{funcdesc}
+
+\begin{funcdesc}{_get_postvalue_from_absoluteURI}{url}
+Returns POST value from \code{url}, and caches these values. 
+\end{funcdesc}
+
+\begin{funcdesc}{_resolve_prefix}{element, prefix}
+ resolve \code{prefix} to a namespaceURI.  If \code{None} or empty \code{str},
+ return default namespace or \code{None} if not defined.
+\end{funcdesc}
+
+\begin{funcdesc}{_valid_encoding}{elt}
+Return true if the element \code{elt} has a SOAP encoding
+that can be handled by \ZSI{}
+(currently Section 5 of the SOAP 1.1 specification or an empty encoding
+for XML).
+\end{funcdesc}

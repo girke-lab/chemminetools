@@ -1,0 +1,103 @@
+\chapter{The \module{resolvers} module --- fetching remote data}
+
+The \module{resolvers} module provides some functions and classes
+that can be used as the \code{resolver} attribute for \class{TC.String}
+or \class{TC.XML} typecodes.
+They process an absolute URL, as described above, and return the
+content.
+Because the \module{resolvers} module can import a number of other
+large modules, it must be imported directly, as in
+\samp{from ZSI import resolvers}.
+
+These first two functions pass the URI directly to the \method{urlopen}
+function in the \module{urllib} module.
+Therefore, if used directly as resolvers, a client could direct the
+SOAP application to fetch any file on the network or local disk.
+Needless to say, this could pose a security risks.
+
+\begin{funcdesc}{Opaque}{uri, tc, ps\optional{, **keywords}}
+This function returns the data contained at the specified \code{uri}
+as a Python string.
+Base-64 decoding will be done if necessary.
+The \code{tc} and \code{ps} parameters are ignored; the \code{keywords}
+are passed to the \method{urlopen} method.
+\end{funcdesc}
+
+\begin{funcdesc}{XML}{uri, tc, ps\optional{, **keywords}}
+This function returns a list of the child element nodes of the XML
+document at the specified \code{uri}.
+The \code{tc} and \code{ps} parameters are ignored; the \code{keywords}
+are passed to the \method{urlopen} method.
+\end{funcdesc}
+
+The \class{NetworkResolver} class provides a simple-minded way to limit
+the URI's that will be resolved.
+
+\begin{classdesc}{NetworkResolver}{\optional{prefixes=None}}
+The \code{prefixes} parameter is a list of strings defining the allowed
+prefixes of any URI's.
+If asked to fetch the content for a URI that does start with one of
+the prefixes, it will raise an exception.
+
+In addition to \code{Opaque} and \code{XML} methods, this class
+provides a \code{Resolve} method that examines the typecode to determine
+what type of data is desired.
+\end{classdesc}
+
+If the SOAP application is given a multi-part MIME document, the
+\class{MIMEResolver} class can be used to process SOAP with Attachments.
+
+The \class{MIMEResolver} class will read the entire multipart MIME document,
+noting any \code{Content-ID} or \code{Content-Location} headers that appear
+on the headers of any of the message parts, and use them to resolve
+any \code{href} attributes that appear in the SOAP message.
+
+\begin{classdesc}{MIMEResolver}{ct, f\optional{, **keywords}}
+The \code{ct} parameter is a string that contains the value of the
+MIME \code{Content-Type} header.
+The \code{f} parameter is the input stream, which should be positioned just
+after the message headers.
+
+The following keyword arguments may be used:
+
+\begin{tableiii}{l|c|p{30em}}{textrm}{Keyword}{Default}{Description}
+\lineiii{\code{seekable}}{\code{0}}{Whether or not the input stream is
+seekable; passed to the constructor for the internal \class{multifile}
+object.
+\versionchanged[default had been 1]{2.0}}
+\lineiii{\code{next}}{\code{None}}{A resolver object that will be
+asked to resolve the URI if it is not found in the MIME document.
+\versionadded{1.1}}
+\lineiii{\code{uribase}}{\code{None}}{The base URI to be used when
+resolving relative URI's; this will typically be the value of the
+\code{Content-Location} header, if present.
+\versionadded{1.1}}
+\end{tableiii}
+\end{classdesc}
+
+In addition to to the \code{Opaque}, \code{Resolve}, and \code{XML} methods
+as described above, the following method is available:
+
+\begin{methoddesc}{GetSOAPPart}{}
+This method returns a stream containing the SOAP message text.
+\end{methoddesc}
+
+The following attributes are read-only:
+
+\begin{memberdesc}{parts}
+An array of tuples, one for each MIME bodypart found.
+Each tuple has two elements, a \class{mimetools.Message} object
+which contains the headers for the bodypart, and a 
+\class{StringIO} object containing the data.
+\end{memberdesc}
+
+\begin{memberdesc}{id_dict}
+A dictionary whose keys are the values of any \code{Content-ID}
+headers, and whose value is the appropriate \code{parts} tuple.
+\end{memberdesc}
+
+\begin{memberdesc}{loc_dict}
+A dictionary whose keys are the values of any \code{Content-Location}
+headers, and whose value is the appropriate \code{parts} tuple.
+\end{memberdesc}
+

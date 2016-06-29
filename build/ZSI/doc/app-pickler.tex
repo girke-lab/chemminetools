@@ -1,0 +1,212 @@
+\chapter{pickler example}
+
+\section{Intro} This is an example of a stateful mod_python web service.
+
+\section{code}
+\subsection{typecode module} Module containing complex type typecode.
+\begin{verbatim}
+# Complex type definition
+from ZSI import *
+class Person:
+  def __init__(self, name=None, age=0):
+    self.name = name
+    self.age = age
+
+Person.typecode = TC.Struct(Person,
+                            [TC.String('name'),
+                             TC.InonNegativeInteger('age')],
+                            pname=('urn:MyApp','Person'))
+\end{verbatim}
+\subsection{pickler script} Configure appache to use this script with mod_python
+PythonHandler.
+\begin{verbatim}
+# pickler.py
+import pickle, new
+from mod_python import apache
+from ZSI import dispatch
+import MyComplexTypes
+
+# my web service that returns a complex structure
+def getPerson(name=None):
+  #fp = open('/tmp/%s.person.pickle'%Person.name, 'r')
+  fp = open('/tmp/%s.person.pickle'%name, 'r')
+  #return pickle.load(fp)
+  p = pickle.load(fp)
+  print "PERSON: ", p
+  print "typecode: ", p.typecode
+  return p
+
+# my web service that accepts a complex structure
+def savePerson(Person):
+  print "PERSON: ", Person
+  fp = open('/tmp/%s.person.pickle'%Person.name, 'w')
+  pickle.dump(Person, fp)
+  fp.close()
+  return {}
+
+mod = __import__('encodings.utf_8', globals(), locals(), '*')
+mod = __import__('encodings.utf_16_be', globals(), locals(), '*')
+
+
+handles = new.module('handles')
+handles.getPerson = getPerson
+handles.savePerson = savePerson
+def handler(req):
+    dispatch.AsHandler(modules=(handles,), request=req, typesmodule=MyComplexTypes, rpc=True)
+    return apache.OK
+
+\end{verbatim}
+
+\subsection{client: invoke savePerson} 
+\subsubsection{script}
+\begin{verbatim}
+import sys
+from ZSI.client import Binding
+from MyComplexTypes import Person
+
+b = Binding(url='http://localhost/test3/pickler.py', tracefile=sys.stdout)
+person = Person('christopher', 26)
+b.savePerson(person)
+\end{verbatim} 
+
+\subsubsection{SOAP Trace}
+\begin{verbatim}
+_________________________________ Wed Oct 11 13:10:05 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<savePerson xmlns:ns1="urn:MyApp">
+			<ns1:Person><name xsi:type="xsd:string">christopher</name>
+				<age xsi:type="xsd:nonNegativeInteger">26</age>
+			</ns1:Person>
+		</savePerson>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+_________________________________ Wed Oct 11 13:10:05 2006 RESPONSE:
+Server: Apache/2.0.53-dev (Unix) mod_ruby/1.2.4 Ruby/1.8.2(2004-12-25) 
+mod_python/3.1.4 Python/2.4.1
+Transfer-Encoding: chunked
+Content-Type: text/xml
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<savePersonResponse></savePersonResponse>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+\end{verbatim} 
+
+\subsection{client: invoke getPerson 3 different ways}
+\subsubsection{script}
+\begin{verbatim}
+import sys
+import MyComplexTypes
+from ZSI.client import NamedParamBinding as NPBinding, Binding
+from ZSI import TC
+
+kw = {'url':'http://localhost/test3/pickler.py', 'tracefile':sys.stdout}
+b = NPBinding(**kw)
+rsp = b.getPerson(name='christopher')
+assert type(rsp) is dict, 'expecting a dict'
+assert rsp['Person']['name'] == 'christopher', 'wrong person'
+
+b = NPBinding(typesmodule=MyComplexTypes, **kw)
+rsp = b.getPerson(name='christopher')
+assert isinstance(rsp['Person'], MyComplexTypes.Person), (
+    'expecting instance of %s' %MyComplexTypes.Person)
+
+b = Binding(typesmodule=MyComplexTypes, **kw)
+class Name(str):
+    typecode = TC.String("name")
+
+rsp = b.getPerson(Name('christopher'))
+assert isinstance(rsp['Person'], MyComplexTypes.Person), (
+    'expecting instance of %s' %MyComplexTypes.Person)
+\end{verbatim} 
+
+\subsubsection{SOAP Trace} All responses are exactly the same, for comparison
+the three requests are presented first and only the last response is included.
+\begin{verbatim}
+_________________________________ Wed Oct 11 13:19:00 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<getPerson>
+			<name id="o6c2a0" xsi:type="xsd:string">christopher</name>
+		</getPerson>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+** OMIT RESPONSE **
+
+_________________________________ Wed Oct 11 13:19:00 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<getPerson>
+			<name id="o6c2a0" xsi:type="xsd:string">christopher</name>
+		</getPerson>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+** OMIT RESPONSE **
+
+_________________________________ Wed Oct 11 13:19:00 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<getPerson>
+			<name xsi:type="xsd:string">christopher</name>
+		</getPerson>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+_________________________________ Wed Oct 11 13:19:00 2006 RESPONSE:
+Server: Apache/2.0.53-dev (Unix) mod_ruby/1.2.4 Ruby/1.8.2(2004-12-25) 
+mod_python/3.1.4 Python/2.4.1
+Transfer-Encoding: chunked
+Content-Type: text/xml
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<getPersonResponse xmlns:ns1="urn:MyApp">
+			<ns1:Person>
+				<name xsi:type="xsd:string">christopher</name>
+				<age xsi:type="xsd:nonNegativeInteger">26</age>
+			</ns1:Person>
+		</getPersonResponse>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+\end{verbatim} 
+

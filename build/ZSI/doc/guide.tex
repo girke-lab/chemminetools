@@ -1,0 +1,93 @@
+% $Header$
+\def\ZSI{\module{ZSI}}
+\documentclass{manual}
+\title{ZSI: The Zolera Soap Infrastructure \\
+       User's Guide}
+\author{}
+\authoraddress{
+  \email{}
+}
+\date{May 31, 2006}% edited date, not printed date
+\input{version}
+
+% tell latex2html to load the verbatim package so we get \verbatiminput
+\ifx\htmlonly\undefined\else\usepackage{verbatim}\fi
+
+\begin{document}
+
+\maketitle
+
+
+\centerline{\strong{COPYRIGHT}}
+
+Copyright \copyright{} 2001, Zolera Systems, Inc.\\
+All Rights Reserved.
+
+Copyright \copyright{} 2002-2003, Rich Salz.\\
+All Rights Reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the "Software"),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, and/or
+sell copies of the Software, and to permit persons to whom the Software
+is furnished to do so, provided that the above copyright notice(s) and
+this permission notice appear in all copies of the Software and that
+both the above copyright notice(s) and this permission notice appear in
+supporting documentation.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS
+INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT
+OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS
+OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE
+OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE
+OR PERFORMANCE OF THIS SOFTWARE.
+
+Except as contained in this notice, the name of a copyright holder
+shall not be used in advertising or otherwise to promote the sale, use
+or other dealings in this Software without prior written authorization
+of the copyright holder.
+
+\vspace{1.5cm}
+
+\centerline{\strong{Acknowledgments}}
+
+We are grateful to the members of the \code{soapbuilders}
+mailing list (see \url{http://groups.yahoo.com/soapbuilders}),
+Fredrik Lundh for his \code{soaplib} package (see
+\url{http://www.secretlabs.com/downloads/index.htm\#soap}),
+Cayce Ullman and Brian Matthews for their \code{SOAP.py} package
+(see \url{http://sourceforge.net/projects/pywebsvcs}).
+
+We are particularly grateful to Brian Lloyd and the Zope Corporation
+(\url{http://www.zope.com}) for letting us incorporate his ZOPE
+WebServices package and documentation into \ZSI{}.
+\begin{abstract}
+\noindent
+\ZSI{}, the Zolera SOAP Infrastructure, is a Python package that
+provides an implementation of SOAP messaging, as described in
+\citetitle[http://www.w3.org/TR/soap]{The SOAP 1.1 Specification}.
+In particular, \ZSI{} parses and generates SOAP messages, and
+converts between native Python datatypes and SOAP syntax.
+It can also be used to build applications using
+\citetitle[http://www.w3.org/TR/SOAP-attachments]{SOAP Messages with
+Attachments}.
+\ZSI{} is ``transport neutral'', and provides only a simple
+I/O and dispatch framework; a more complete solution is the
+responsibility of the application using \ZSI{}.
+As usage patterns emerge, and common application frameworks are
+more understood, this may change.
+
+\ZSI{} requires Python 2.0 or later and PyXML version 0.6.6 or later.
+
+The \ZSI{} homepage is at \url{http://pywebsvcs.sf.net/}.
+
+\end{abstract}
+
+\tableofcontents{}
+\input{guide01-intro}
+\input{guide02-wsdl2py}
+\end{document}

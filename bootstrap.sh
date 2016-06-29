@@ -8,14 +8,11 @@
 
 # Install Required Debian Packages (including django) 
 apt-get update
-# apt-get upgrade -y
 apt-get install -y git
-# apt-get install -y python-django
 apt-get install -y postgresql-9.1
 apt-get install -y python-psycopg2
 apt-get install -y python-skimage
 apt-get install -y python-pip
-# apt-get install -y python-django-reversion
 apt-get install -y libcurl4-openssl-dev
 apt-get install -y rabbitmq-server
 apt-get install -y python-pylibmc
@@ -29,25 +26,33 @@ apt-get install -y libapache2-mod-wsgi
 apt-get install -y memcached
 apt-get install -y libpq-dev
 
-# install these w/ sid allowed via apt pinning
-# apt-get install -y -t=sid libopenbabel4 openbabel
-# update: this is commented out because the sid openbabel wasn't working....
-#       instead we are now compiling OB from source
-
-pip install django==1.4.5
-pip install django-bootstrap-toolkit
-pip install django-cms==2.3.5 south
-pip install django-appmedia
-pip install ZSI
-pip install django-celery
-pip install simplejson
-pip install ghostscript
-pip install pyyaml
-pip install django-userena==1.2.1
-pip install beautifulsoup4 
-
 # clean up package install 
 apt-get clean
+
+# install PyXML-0.8.4 (missing from pip)
+cd /tmp
+wget http://biocluster.ucr.edu/~tbackman/vagrantImages/PyXML-0.8.4.tar.gz
+tar xvfz PyXML-0.8.4.tar.gz
+cd PyXML-0.8.4
+python setup.py build
+sudo python setup.py install
+cd ..
+rm -rf PyXML-0.8.4.tar.gz PyXML-0.8.4
+
+pip install django-guardian==1.1.1
+pip install Django==1.4.5 -I
+pip install ZSI==2.0-rc3
+pip install django-bootstrap-toolkit
+pip install django-cms==2.3.5 
+pip install South==0.7.5
+pip install django-appmedia==1.0.1
+pip install ZSI==2.0-rc3
+pip install django-celery==3.0.11
+pip install simplejson==3.1.0
+pip install ghostscript==0.4.1
+pip install PyYAML==3.10
+pip install django-userena==1.2.1
+pip install beautifulsoup4==4.3.2 
 
 # create symbolic link for /srv/chemminetools
 ln -s /vagrant /srv/chemminetools
@@ -64,12 +69,13 @@ sudo -u postgres createdb -E utf8 -O cmt chemminetools -T template0 --locale=C.U
 
 # manually install packages in /usr/local/lib/python2.7/dist-packages:
 cd /tmp
-svn checkout http://django-guest.googlecode.com/svn/trunk/ django-guest-read-only
-svn checkout http://django-cron.googlecode.com/svn/trunk/ django-cron-read-only
-mv django-guest-read-only/guest /usr/local/lib/python2.7/dist-packages/
-mv django-guest-read-only/gyroid_utils /usr/local/lib/python2.7/dist-packages/
-mv django-cron-read-only/django_cron /usr/local/lib/python2.7/dist-packages/
-rm -rf django-cron-read-only django-guest-read-only
+wget http://biocluster.ucr.edu/~tbackman/vagrantImages/django_cron.tgz
+wget http://biocluster.ucr.edu/~tbackman/vagrantImages/django_guest.tgz
+tar xvfz django_cron.tgz
+tar xvfz django_guest.tgz
+mv guest /usr/local/lib/python2.7/dist-packages/
+mv django_cron /usr/local/lib/python2.7/dist-packages/
+rm -rf guest django_cron django_cron.tgz django_guest.tgz
 
 # add sql commands to blank database
 cd /srv/chemminetools

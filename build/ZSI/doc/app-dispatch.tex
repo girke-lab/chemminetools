@@ -1,0 +1,231 @@
+\chapter{CGI Script Array}
+
+\section{Intro} This is an example of a simple web service CGI Script.  The
+service returns and expects SOAP Arrays (python \class{list}).  A sample soap
+trace is provided below.  In this example the CGI script is dispatched as a
+\emph{rpc} service.
+
+\subsection{rpc wrapper} The wrapper element of the request is the dispatch key
+to the callback function, the child elements are passes as a \class{list} or
+\class{dict} of values to the callback function.  The callback function is
+expected to return a \class{list} or \class{dict} of values, the response
+wrapper is by default set to the request wrapper name appended \emph{Response}.
+
+\section{CGI Script}
+
+\input{dispatch-rpc-hello-array}
+
+\section{client test script}
+\begin{verbatim}
+#!/usr/bin/env python
+# client.py
+import sys
+from ZSI.client import Binding
+b = Binding(url='http://127.0.0.1/cgi-bin/simple', tracefile=sys.stdout)
+print b.hello()
+try:
+    print b.hello(1)
+except Exception, ex:
+    print "Fault: ", ex
+
+print b.echo("whatever", "hi", 1, 2)
+print b.sum(*[2*i for i in range(5)])
+print b.average(*[2*i for i in range(5)])
+\end{verbatim}
+
+\section{SOAP Trace}
+\subsection{hello}
+\begin{verbatim}
+$ ./client.py 
+Hello:  _________________________________ Wed Oct  4 17:36:33 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<hello SOAP-ENC:arrayType="xsd:anyType[0]"></hello>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+_________________________________ Wed Oct  4 17:36:34 2006 RESPONSE:
+200
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<helloResponse SOAP-ENC:arrayType="xsd:anyType[1]">
+			<element id="o671b0" xsi:type="xsd:string">Hello, world</element>
+		</helloResponse>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+[u'Hello, world']
+\end{verbatim}
+
+\subsection{hello fault}
+\begin{verbatim}
+_________________________________ Wed Oct  4 17:36:34 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<hello SOAP-ENC:arrayType="xsd:anyType[1]">
+			<element id="o1803988" xsi:type="xsd:int">1</element>
+		</hello>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+_________________________________ Wed Oct  4 17:36:35 2006 RESPONSE:
+500
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<SOAP-ENV:Fault>
+			<faultcode>SOAP-ENV:Server</faultcode>
+			<faultstring>Processing Failure</faultstring>
+			<detail>
+				<ZSI:FaultDetail>
+<ZSI:string>exceptions:TypeError hello() takes no arguments (1 given)</ZSI:string>
+<ZSI:trace>build/bdist.darwin-8.8.0-Power_Macintosh/egg/ZSI/dispatch.py:86:_Dispatch</ZSI:trace>
+				</ZSI:FaultDetail>
+			</detail>
+		</SOAP-ENV:Fault>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+Fault:  Processing Failure
+exceptions:TypeError
+hello() takes no arguments (1 given)
+[trace: build/bdist.darwin-8.8.0-Power_Macintosh/egg/ZSI/dispatch.py:86:_Dispatch]
+\end{verbatim}
+
+\subsection{echo}
+\begin{verbatim}
+_________________________________ Wed Oct  4 17:36:35 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<echo SOAP-ENC:arrayType="xsd:anyType[4]">
+			<element id="o644c0" xsi:type="xsd:string">whatever</element>
+			<element id="o644e0" xsi:type="xsd:string">hi</element>
+			<element id="o1803988" xsi:type="xsd:int">1</element>
+			<element id="o180397c" xsi:type="xsd:int">2</element>
+		</echo>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+_________________________________ Wed Oct  4 17:36:36 2006 RESPONSE:
+200
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<echoResponse SOAP-ENC:arrayType="xsd:anyType[4]">
+			<element id="o4f4290" xsi:type="xsd:string">whatever</element>
+			<element id="o4f4338" xsi:type="xsd:string">hi</element>
+			<element id="o1803988" xsi:type="xsd:int">1</element>
+			<element id="o180397c" xsi:type="xsd:int">2</element>
+		</echoResponse>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+[u'whatever', u'hi', 1, 2]
+\end{verbatim}
+
+\subsection{sum}
+\begin{verbatim}
+_________________________________ Wed Oct  4 17:36:36 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<sum SOAP-ENC:arrayType="xsd:anyType[5]">
+			<element id="o1803994" xsi:type="xsd:int">0</element>
+			<element id="o180397c" xsi:type="xsd:int">2</element>
+			<element id="o1803964" xsi:type="xsd:int">4</element>
+			<element id="o180394c" xsi:type="xsd:int">6</element>
+			<element id="o1803934" xsi:type="xsd:int">8</element>
+		</sum>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+_________________________________ Wed Oct  4 17:36:37 2006 RESPONSE:
+200
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<sumResponse SOAP-ENC:arrayType="xsd:anyType[1]">
+			<element id="o18038a4" xsi:type="xsd:int">20</element>
+		</sumResponse>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+[20]
+\end{verbatim}
+
+\subsection{average}
+\begin{verbatim}
+_________________________________ Wed Oct  4 17:36:37 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<average SOAP-ENC:arrayType="xsd:anyType[5]">
+			<element id="o1803994" xsi:type="xsd:int">0</element>
+			<element id="o180397c" xsi:type="xsd:int">2</element>
+			<element id="o1803964" xsi:type="xsd:int">4</element>
+			<element id="o180394c" xsi:type="xsd:int">6</element>
+`			<element id="o1803934" xsi:type="xsd:int">8</element>
+		</average>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+_________________________________ Wed Oct  4 17:36:38 2006 RESPONSE:
+200
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<averageResponse SOAP-ENC:arrayType="xsd:anyType[1]">
+			<element id="o1803964" xsi:type="xsd:int">4</element>
+		</averageResponse>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+[4]
+\end{verbatim}

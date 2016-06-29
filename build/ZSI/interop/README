@@ -1,0 +1,29 @@
+
+This directory includes a server that implements "Round 2" interoperability
+testing.  More information is available from:
+    The soapbuilders mailing list, a forum for people creating SOAP
+    implementations.  See http://yahoogroups.com/group/soapbuilders
+
+    An "invitation to join the testing" message can be found at
+    http://groups.yahoo.com/group/soapbuilders/message/5885
+
+The client.py program will send pre-formatted test packets to a server.
+I have not done generic client test, for a couple of reasons:
+    1.  Too hard to keep track of all the endpoints; and
+    2.  I'm not good at writing corner-case tests that stretch the limits
+    3.  The server already exercises all the code -- it parses and
+	serializes There are several other clients out there already
+
+There are some other tests not currently implemented (in probable order
+of increasing difficulty):
+
+a.  Polymorph service (get a struct, return the parts, etc.).  See WSDL at
+    http://www.whitemesa.net/wsdl/polymorph.wsdl
+
+b.  Document/literal encoding.  See WSDL at
+    http://www.whitemesa.net/wsdl/interopdoc.wsdl
+
+c.  WS-Routing (not yet implemented in ZSI :).  See WSDL at
+    http://www.whitemesa.net/wsdl/interop_base_end.wsdl
+
+

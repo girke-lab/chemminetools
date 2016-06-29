@@ -1,0 +1,96 @@
+\chapter{The \module{SoapWriter} module --- serializing data}
+
+The SoapWriter class is used to output SOAP messages.
+Note that its output is encoded as UTF-8; when transporting SOAP over
+HTTP it is therefore important to set the \code{charset} attribute
+of the \code{Content-Type} header.
+
+The \class{SoapWriter} class reserves some namespace prefixes:
+\begin{tableii}{l|l}{}{Prefix}{URI}
+\lineii{\code{SOAP-ENV}}{\code{http://schemas.xmlsoap.org/soap/envelope/}}
+\lineii{\code{SOAP-ENC}}{\code{http://schemas.xmlsoap.org/soap/encoding/}}
+\lineii{\code{ZSI}}{\code{http://www.zolera.com/schemas/ZSI/}}
+\lineii{\code{xsd}}{\code{http://www.w3.org/2001/XMLSchema}}
+\lineii{\code{xsi}}{\code{http://www.w3.org/2001/XMLSchema-instance}}
+\end{tableii}
+
+\begin{classdesc}{SoapWriter}{optional{**keywords}}
+The following keyword arguments may be used:
+
+\begin{tableiii}{l|c|p{30em}}{textrm}{Keyword}{Default}{Description}
+\lineiii{\code{encodingStyle}}{None}{If not \code{None}, then
+use the specified value as the value for the SOAP \code{encodingStyle}
+attribute.
+\versionadded{1.2}}
+\lineiii{\code{envelope}}{\code{True}}{Create a SOAP Envelope
+\versionadded{1.2}}
+\lineiii{\code{nsdict}}{\code{\{\}}}{Dictionary of namespaces to declare
+in the SOAP \code{Envelope}}
+\lineiii{\code{header}}{\code{True}}{create a SOAP \code{Header} element}
+\lineiii{\code{outputclass}}{\code{ElementProxy}}{wrapper around DOM or other 
+XML library.}
+\end{tableiii}
+\end{classdesc}
+
+Creating a \class{SoapWriter} object with \code{envelope} set to \code{False}
+results in an object that can be used for serializing objects into a string.
+
+\begin{methoddesc}{serialize}{pyobj\optional{, typecode=None\optional{,
+root=None\optional{, header_pyobjs=None\optional{, **keywords}}}}}
+This method serializes the \code{pyobj} Python object as directed
+by the \code{typecode} typecode object.
+If \code{typecode} is omitted, then \code{pyobj} should be a Python
+object instance of a class that has a \code{typecode} attribute.
+It returns \code{self}, so that serializations can be chained together, or
+so that the \method{close()} method can be invoked.
+The \code{root} parameter may be used to explicitly indicate the root
+(main element) of a SOAP encoding, or indicate that the item is not the
+root.
+If specified, it should have the numeric value of zero or one.
+Any other keyword parameters are passed to the typecode's \code{serialize}
+method.
+\end{methoddesc}
+
+\begin{methoddesc}{close}{}
+Invokes all the callbacks, if any.  The \function{close} operations can only
+happen once, if invoked a second time it will just return. This method will be
+invoked automatically if the object is deleted.
+\end{methoddesc}
+
+
+\begin{methoddesc}{__str__}{}
+Invokes the \function{close} method, and returns a string representation of the
+serialized object.  Assumes that \function{serialize} has been invoked. 
+\end{methoddesc}
+
+The following methods are primarily useful for those writing new typecodes.
+
+\begin{methoddesc}{AddCallback}{func, arg}
+Used by typecodes when serializing, allows them to add output after
+the SOAP \code{Body} is written but before the SOAP \code{Envelope} is closed.
+The function \method{func()}
+will be called with the \class{SoapWriter} object and the specified \code{arg}
+argument, which may be a tuple.
+\end{methoddesc}
+
+\begin{methoddesc}{Forget}{obj}
+Forget that \code{obj} has been seen before.
+This is useful when repeatedly serializing a mutable object.
+\end{methoddesc}
+
+\begin{methoddesc}{Known}{obj}
+If \code{obj} has been seen before (based on its Python \code{id}), return
+\code{1}.  Otherwise, remember \code{obj} and return \code{0}.
+\end{methoddesc}
+
+\begin{methoddesc}{ReservedNS}{prefix, uri}
+Returns true if the specified namespace \code{prefix} and \code{uri} collide
+with those used by the implementation.
+\end{methoddesc}
+
+\begin{methoddesc}{writeNSDict}{nsdict}
+Outputs \code{nsdict} as a namespace dictionary.
+It is assumed that an XML start-element is pending on the output
+stream.
+\end{methoddesc}
+

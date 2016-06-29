@@ -1,0 +1,16 @@
+#! /bin/sh
+case "$1" in
+    -keep)
+	shift
+	;;
+    *)
+	: > debuglog
+	: > accesslog
+	;;
+esac
+./client.py $* -q
+rm -f nohup.out
+sleep 1
+nohup ./server.py -t debuglog -l accesslog $* &
+sleep 1
+cat nohup.out

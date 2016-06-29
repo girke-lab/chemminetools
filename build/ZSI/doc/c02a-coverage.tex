@@ -1,0 +1,38 @@
+\chapter{Serialization and Deserialization -- capabilities defined}
+
+ZSI supports serialization and deserialization of most Python constructs, 
+including those defined by an end user.  The following charts outline the
+capabilities ZSI provides, and are described from the perspective of the
+client developer and server developer for clarity.
+
+\section{Server Side Conversions}
+\module{ZSI} provides the server side capabilities outlined below:
+
+\begin{tableiii}{l|c|c}{textrm}{Type}{Response}{Request}
+\lineiii{string}{yes}{yes}
+\lineiii{float}{unknown}{unknown}
+\lineiii{long}{unknown}{unknown}
+\lineiii{double}{unknown}{unknown}
+\lineiii{no parameters or returns}{yes}{yes}
+\lineiii{complex types}{yes}{yes}
+\lineiii{array of complex types}{yes}{unknown}
+\lineiii{tuple of complex types}{unknown}{unknown}
+\lineiii{dict of complex types}{unknown}{unknown}
+\end{tableiii}
+
+
+\section{Client Side Conversions}
+\module{ZSI} provides the client side capabilities outlined below:
+
+\begin{tableiii}{l|c|c}{textrm}{Type}{Response}{Request}
+\lineiii{string}{yes}{yes}
+\lineiii{float}{unknown}{unknown}
+\lineiii{long}{unknown}{unknown}
+\lineiii{double}{unknown}{unknown}
+\lineiii{no parameters or returns}{yes}{yes}
+\lineiii{complex types}{yes}{yes}
+\lineiii{array of complex types}{yes}{unknown}
+\lineiii{tuple of complex types}{unknown}{unknown}
+\lineiii{dict of complex types}{unknown}{unknown}
+\end{tableiii}
+

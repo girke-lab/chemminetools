@@ -1,0 +1,157 @@
+############################################################################
+# Joshua R. Bovernof, LBNL
+# See Copyright for copyright notice!
+#
+# CONFIGURATION SECTIONS 
+#  [configuration] - global configuration of service tests.
+#	  tracefile -- trace soap messages
+#     debug -- turn on debugging
+#     skip -- skip generation steps, code generated don't generate again
+#     twisted -- Use twisted web client
+#     lazy -- use lazy typecode evaluation
+#     output -- file name where output will be stored, if unspecified test output goes to stdout
+#
+#  [dispatch] -- configuration for test_dispatch* tests
+#     host -- address of local container
+#     port -- port of local container
+#     path -- path of service
+#     twisted -- Use twisted web resource
+#
+##########################################################################
+[configuration]
+tracefile = False
+debug = False
+skip = False
+twisted = False
+lazy = False
+output = 
+
+[dispatch]
+host = localhost
+port = 9080
+path = test
+twisted = False
+test_WhiteMesa = servers/WhiteMesa.py
+test_Echo = servers/EchoServer.py 
+
+
+##########################################################################
+# URL SECTIONS: All SOAP-1.1
+#    document -- document style True/False
+#    literal  -- literal encoding True/False
+#    broke -- broke True/False
+#    tests -- whitespace separated list of test modules, referenced in 
+#        section WSDL.
+#
+#  [rpc_encoded] -- these are rpc/encoded services that WORK.
+#  [rpc_encoded_broke] -- these are rpc/encoded services that DONT WORK.
+#
+#  [doc_encoded] -- these are document/encoded services that WORK.
+#  [doc_encoded_broke] -- these are document/encoded services that DONT WORK.
+#
+#  [rpc_literal] -- these are rpc/literal services that WORK.
+#  [rpc_literal_broke] -- these are rpc/literal services that DONT WORK.
+#  [rpc_literal_broke_interop] -- these are broke BP-1.0 compliant rpc/literal services.
+#
+#  [doc_literal] -- these are doc/literal services that WORK.
+#  [doc_literal_broke] -- these are doc/literal services that DONT WORK.
+#  [doc_literal_broke_interop] -- these are broke BP-1.0 compliant doc/literal services.
+#
+##########################################################################
+
+
+########################## RPC/ENCODED ###################################
+#
+# Broken:
+#
+#
+##########################################################################
+[rpc_encoded]
+document = False
+literal = False
+broke = False
+tests = test_XMethodsQuery test_ThreatService
+
+[rpc_encoded_broke]
+document = False
+literal = False
+broke = True
+tests = 
+
+
+########################## RPC/LITERAL ###################################
+#
+# Broken:
+#
+#
+##########################################################################
+[rpc_literal]
+document = False
+literal = True
+broke = False
+tests = test_WhiteMesa
+
+[rpc_literal_broke]
+document = False
+literal = True
+broke = True
+tests = 
+
+[rpc_literal_broke_interop]
+document = False
+literal = True
+broke = True
+tests = 
+
+########################## DOCUMENT/LITERAL ##############################
+#
+# Broken:
+#     test_TerraService -- wsdl2python Not supporting content <ZSI.wstools.XMLSchema.List>
+#
+#
+##########################################################################
+[doc_literal]
+document = True
+literal = True
+broke = False
+tests =  test_MapPoint test_OpcDaGateway test_Sabre test_Echo test_AWSECommerceService
+
+[doc_literal_broke]
+document = True
+literal = True
+broke = True
+tests = 
+
+[doc_literal_broke_interop]
+document = True
+literal = True
+broke = True
+tests = 
+
+
+##########################################################################
+# SECTION [WSDL] - test name(equivalent to module name) and URL.
+# 
+##########################################################################
+[WSDL]
+test_AWSECommerceService = http://webservices.amazon.com/AWSECommerceService/AWSECommerceService.wsdl
+test_AmazonS3 = http://s3.amazonaws.com/doc/2006-03-01/AmazonS3.wsdl
+test_TemperatureService = http://www.xmethods.net/sd/2001/TemperatureService.wsdl
+test_WorldTimeService = http://ws.digiposs.com/WorldTime.jws?wsdl
+test_BFGraphLib = http://bfo.co.uk/products/graph/docs/bfograph-2.1.wsdl
+
+test_XMethodsQuery = http://www.xmethods.net/wsdl/query.wsdl
+test_ZipCodeResolver = http://webservices.eraserver.net/zipcoderesolver/zipcoderesolver.asmx?WSDL
+test_WhiteMesa = http://www.whitemesa.net/wsdl/test-rpc-lit.wsdl
+test_OpcDaGateway = http://tswinc.us/XMLDADemo/ts_sim/OpcDaGateway.asmx?WSDL
+test_MapPoint = http://staging.mappoint.net/standard-30/mappoint.wsdl
+test_Sabre = http://webservices.sabre.com/wsdl/sabreXML1.0.00/res/SessionCreateRQ.wsdl
+
+test_Echo = ../../samples/Echo/Echo.wsdl
+test_Choice = test_Choice.xsd
+test_Attributes = test_Attributes.xsd
+test_DerivedTypes = test_DerivedTypes.xsd
+
+test_ThreatService = http://www.boyzoid.com/threat.cfc?wsdl
+test_TerraService = http://terraservice.net/TerraService.asmx?WSDL
+test_InfoBil = http://javatest2.infodata.se/webservices/services/Infobil?wsdl

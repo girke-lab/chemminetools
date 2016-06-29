@@ -1,0 +1,227 @@
+\chapter{Complete Low Level Example}
+
+\section{Intro} This is a complete example of using the low level soap utilities
+in \ZSI{} to implement a web service.
+
+\section{code}
+\subsection{httpserver script} Minimal http server example, opens up a new
+process to do the SOAP processing.
+\begin{verbatim}
+#!/usr/bin/env python
+# file: httpserver.py
+import os
+from subprocess import Popen, PIPE
+from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+class RequestHandler(BaseHTTPRequestHandler):
+    def do_POST(self):
+        length = int(self.headers['content-length'])
+        xml_in = self.rfile.read(length)
+        p = Popen(os.path.join(os.path.curdir, 'player.py'),
+                  shell=True, stdin=PIPE, stdout=PIPE)
+
+        (stdout, stderr) = p.communicate(xml_in)
+        code = 200
+        if stdout.find('Fault') >= 0: code = 500 
+        self.send_response(code)
+        self.send_header('Content-type', 'text/xml; charset="utf-8"')
+        self.send_header('Content-Length', str(len(stdout)))
+        self.end_headers()
+        self.wfile.write(stdout)
+        self.wfile.flush()
+
+if __name__ == '__main__':
+    server = HTTPServer(('localhost', 8080), RequestHandler)
+    server.serve_forever()
+\end{verbatim}
+
+\subsection{typecode module}
+\begin{verbatim}
+# file: typecode.py
+# CHECK PYTHONPATH: Must be able to import
+class Player:
+    def __init__(self, *args):
+        if not len(args): return
+        self.Name = args[0]
+        self.Scores = args[1:]
+Player.typecode = TC.Struct(Player, [
+                                TC.String('Name'),
+                                TC.Array('Integer', TC.Integer(), 'Scores', undeclared=True),
+                                ], 'GetAverage')
+class Average:
+    def __init__(self, average=None):
+        self.average = average
+Average.typecode = TC.Struct(Average, [
+                                TC.Integer('average'),
+                                ], 'GetAverageResponse')
+\end{verbatim}                          
+\subsection{player script}
+\begin{verbatim}
+#!/usr/bin/env python
+# file: player.py
+from ZSI import *
+import sys
+IN, OUT = sys.stdin, sys.stdout
+try:
+    ps = ParsedSoap(IN)
+except ParseException, e:
+    OUT.write(FaultFromZSIException(e).AsSOAP())
+    sys.exit(1)
+except Exception, e:
+    # Faulted while processing; we assume it's in the header.
+    OUT.write(FaultFromException(e, 1).AsSOAP())
+    sys.exit(1)
+
+# We are not prepared to handle any actors or mustUnderstand elements,
+# so we'll arbitrarily fault back with the first one we found.
+a = ps.WhatActorsArePresent()
+if len(a):
+    OUT.write(FaultFromActor(a[0]).AsSOAP())
+    sys.exit(1)
+mu = ps.WhatMustIUnderstand()
+if len(mu):
+    uri, localname = mu[0]
+    OUT.write(FaultFromNotUnderstood(uri, localname).AsSOAP())
+    sys.exit(1)
+
+from typecode import Player, Average
+try:
+    player = ps.Parse(Player.typecode)
+except EvaluateException, e:
+    OUT.write(FaultFromZSIException(e).AsSOAP())
+    sys.exit(1)
+
+try:
+    total = 0
+    for value in player.Scores: total = total + value
+    result = Average(total / len(player.Scores))
+    sw = SoapWriter()
+    sw.serialize(result, Average.typecode)
+    sw.close()
+    OUT.write(str(sw))
+except Exception, e:
+    OUT.write(FaultFromException(e, 0, sys.exc_info()[2]).AsSOAP())
+    sys.exit(1)
+\end{verbatim}
+
+\subsection{client test script}
+\begin{verbatim}
+#!/usr/bin/env python2.4
+#file: client.py
+from ZSI import *
+from ZSI.wstools.Namespaces import SCHEMA
+from typecode import Player, Average
+
+if __name__ == '__main__':
+    import sys
+    from ZSI.client import Binding
+    b = Binding(url='http://localhost:8080', tracefile=sys.stdout)
+    pyobj = b.RPC(None, None, Player("Josh",10,20,30), replytype=Average)
+    print pyobj
+    print pyobj.__dict__
+\end{verbatim}
+
+\section{SOAP Trace}
+
+\subsection{GetAverage} 
+\begin{verbatim}
+$./client.py 
+_________________________________ Thu Oct  5 14:57:39 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<GetAverage>
+			<Name xsi:type="xsd:string">Josh</Name>
+			<Scores>
+				<element>10</element>
+				<element>20</element>
+				<element>30</element>
+			</Scores>
+		</GetAverage>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+_________________________________ Thu Oct  5 14:57:39 2006 RESPONSE:
+200
+OK
+-------
+Server: BaseHTTP/0.3 Python/2.5
+Date: Thu, 05 Oct 2006 21:57:39 GMT
+Content-type: text/xml; charset="utf-8"
+Content-Length: 431
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+	xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+	xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<GetAverageResponse>
+			<average>20</average>
+		</GetAverageResponse>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+<__main__.Average instance at 0x5f9760>
+{'average': 20}
+\end{verbatim}
+
+\subsection{fault} Purposely send a incorrect \emph{Nae} element for the
+\emph{Name}.
+\begin{verbatim}
+$./client.py 
+_________________________________ Thu Oct  5 14:33:25 2006 REQUEST:
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<GetAverage>
+			<Nae xsi:type="xsd:string">Josh</Nae>
+			<Scores>
+				<element>10</element>
+				<element>20</element>
+				<element>30</element>
+			</Scores>
+		</GetAverage>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+
+_________________________________ Thu Oct  5 14:33:26 2006 RESPONSE:
+500
+Internal Server Error
+
+<SOAP-ENV:Envelope xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" 
+xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" 
+xmlns:ZSI="http://www.zolera.com/schemas/ZSI/" 
+xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<SOAP-ENV:Header></SOAP-ENV:Header>
+	<SOAP-ENV:Body>
+		<SOAP-ENV:Fault>
+			<faultcode>SOAP-ENV:Client</faultcode>
+			<faultstring>Unparseable message</faultstring>
+			<detail><Eoe440>&lt;ZSI:ParseFaultDetail&gt;
+&lt;ZSI:string&gt;Element "Name" missing from complexType&lt;/ZSI:string&gt;
+&lt;ZSI:trace&gt;/SOAP-ENV:Envelope/SOAP-ENV:Body/GetAverage&lt;/ZSI:trace&gt;
+&lt;/ZSI:ParseFaultDetail&gt;</Eoe440></detail>
+		</SOAP-ENV:Fault>
+	</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+Traceback (most recent call last):
+  File "./player_client.py", line 25, in ?
+    pyobj = b.RPC(None, None, Player("Josh",10,20,30), replytype=Average)
+  File "/private/var/www/htdocs/guide/client.py", line 176, in RPC
+    
+  File "/private/var/www/htdocs/guide/client.py", line 420, in Receive
+    
+ZSI.FaultException: Unparseable message
+<Element Node at 5f9f58: Name='Eoe440' with 0 attributes and 1 children>
+\end{verbatim}
+

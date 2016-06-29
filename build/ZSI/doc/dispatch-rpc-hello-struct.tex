@@ -1,0 +1,22 @@
+\begin{verbatim}
+#!/usr/local/bin/python2.4
+# SOAP Struct
+
+def hello():
+    return {"value":"Hello, world"}
+
+def echo(**kw):
+    return kw
+
+def sum(**kw):
+    sum = 0
+    for i in kw.values(): sum += i
+	return {"value":sum}
+
+def average(**kw):
+	d = sum(**kw)
+    return d["value"] = d["value"]/len(kw)
+
+from ZSI import dispatch
+dispatch.AsCGI(rpc=True)
+\end{verbatim}

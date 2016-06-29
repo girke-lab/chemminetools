@@ -1,0 +1,13 @@
+\begin{verbatim}
+
+#!/usr/bin/env python
+import sys,time
+from ZSI.client import NamedParamBinding as NPBinding
+
+b = NPBinding(url='http://127.0.0.1/cgi-bin/soapstruct', tracefile=sys.stdout)
+print "Hello: ", b.hello()
+print "Echo: ", b.echo(name="josh", year=2006, pi=3.14, time=time.gmtime())
+print "Sum: ", b.sum(one=1, two=2, three=3)
+print "Average: ", b.average(one=100, two=200, three=300, four=400)
+
+\end{verbatim}

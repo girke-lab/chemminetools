@@ -1,0 +1,49 @@
+\chapter{Exceptions}
+
+\begin{excdesc}{ZSIException}
+Base class for all ZSI Exceptions, it is a subtype of the Python
+\exception{Exception} class.
+\end{excdesc}
+
+\begin{excdesc}{ParseException}
+\ZSI{} can raise this exception while creating a \class{ParsedSoap} object.
+It is a subtype of the \exception{ZSIException} class.
+The string form of a \exception{ParseException} object consists of a
+line of human-readable text.
+If the backtrace is available, it will be concatenated as a second line.
+\end{excdesc}
+
+The following attributes are read-only:
+
+\begin{memberdesc}{inheader}
+A boolean that indicates if the error was detected in the SOAP \code{Header}
+element.
+\end{memberdesc}
+
+\begin{memberdesc}{str}
+A text string describing the error.
+\end{memberdesc}
+
+\begin{memberdesc}{trace}
+A text string containing a backtrace to the error.
+This may be \code{None} if it was not possible, such as when there was
+a general DOM exception, or when the \code{str} text is believed to be
+sufficient.
+\end{memberdesc}
+
+\begin{excdesc}{EvaluateException}
+This exception is similar to \exception{ParseException}, except
+that \ZSI{} may raise it while converting between SOAP and local
+Python objects.
+\end{excdesc}
+
+The following attributes are read-only:
+
+\begin{memberdesc}{str}
+A text string describing the error.
+\end{memberdesc}
+
+\begin{memberdesc}{trace}
+A text backtrace, as described above for \exception{ParseException}.
+\end{memberdesc}
+

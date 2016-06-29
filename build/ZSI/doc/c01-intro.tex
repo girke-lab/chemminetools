@@ -1,0 +1,98 @@
+\chapter{Introduction}
+
+\ZSI{}, the Zolera SOAP Infrastructure, is a Python package that
+provides an implementation of the SOAP specification, as described in
+\citetitle[http://www.w3.org/TR/soap]{The SOAP 1.1 Specification}.
+In particular, \ZSI{} parses and generates SOAP messages, and
+converts between native Python datatypes and SOAP syntax.
+
+\module{ZSI} requires Python 2.3 or later and PyXML version 0.8.3 or later.
+
+The \module{ZSI} project is maintained at SourceForge, at
+\url{http://pywebsvcs.sf.net}.
+\ZSI{} is discussed on the Python web services mailing list, visit
+\url{http://lists.sourceforge.net/lists/listinfo/pywebsvcs-talk}
+to subscribe.
+
+For those interested in using the \program{wsdl2py} tool see the \emph{Users
+Guide}, it contains a detailed example of how to use the code generation
+facilities in \module{ZSI}.
+
+For those interested in a high-level tutorial covering \ZSI{} and why
+Python was chosen, see the article
+\url{http://www.xml.com/pub/a/ws/2002/06/12/soap.html}, 
+written by Rich Salz for xml.com.
+
+SOAP-based processing typically involves several steps.
+The following list details the steps of a common processing model naturally
+supported by \ZSI{} (other models are certainly possible):
+\begin{enumerate}
+\item
+    \ZSI{} takes data from an input stream and \emph{parses} it, generating
+    a DOM-based parse tree as part of creating a \class{ParsedSoap} object.
+    At this point the major syntactic elements of a SOAP message --- the
+    \code{Header}, the \code{Body}, etc. --- are available.
+\item
+    The application does \emph{header processing}.
+    More specifically, it does local dispatch and processing based on
+    the elements in the SOAP \code{Header}.
+    The SOAP \code{actor} and \code{mustUnderstand} attributes are
+    also handled (or at least recognized) here.
+\item
+    \ZSI{} next \emph{parses} the \code{Body}, creating local Python objects
+    from the data in the SOAP message.
+    The parsing is often under the control of a list of data descriptions,
+    known as \emph{typecodes}, defined by the application because it knows
+    what type of data it is expecting.
+    In cases where the SOAP data is known to be completely self-describing,
+    the parsing can be \emph{dynamic} through the use of the \class{TC.Any}
+    class.
+\item
+    The application now \emph{dispatches} to the appropriate handler
+    in order to do its ``real work.''
+    As part of its processing it may create \emph{output objects}
+\item
+    The application creates a \class{SoapWriter} instance and outputs
+    an initial set of namespace entries and header elements.
+\item
+    Any local data to be sent back to the client is \emph{serialized}.
+    As with \code{Body} parsing, the datatypes can be described through
+    typecodes or determined dynamically (here, through introspection).
+\item
+    In the event of any processing exceptions, a \class{Fault} object
+    can be raised, created, and/or serialized.
+\end{enumerate}
+
+Note that \ZSI{} is ``transport neutral'', and provides only a simple
+I/O and dispatch framework; a more complete solution is available through 
+the use of included WSDL tools (\program{wsdl2py}), but otherwise this is
+the responsibility of the application using \ZSI{}.  As usage patterns 
+emerge, and common application frameworks are more understood, this may 
+change.
+
+
+Within this document, \code{tns} is used as the prefix for the
+application's target namespace, and the term
+\emph{element} refers to a DOM element node.)
+
+\section{How to Read this Document}
+
+Readers interested in using WSDL and clients to web services, and those
+intending on implementing web services based on existing WSDL should refer
+to the \emph{Users Guide}.  Others interested in developing the simplest SOAP
+applications, or spending the least amount of time on building a web services
+infrastructure should read chapters 2, 3, and 10 of this document. Readers who
+are developing complex services, and who are familiar with XML Schema and/or
+WSDL, should read this manual in order. This will provide them with enough
+information to implement the processing model described above.  They can skip
+probably skip chapters 2 and 10.
+
+\ZSI{} has the capability to process WSDL definitions and XML Schema documents
+(described in \citetitle[http://www.w3.org/TR/wsdl]{The Web Services Description
+Language} and \citetitle[http://www.w3.org/XML/Schema]{XMLSchema 1.0})
+and generate typecodes automatically.  For more information see the \emph{Users
+Guide}.
+
+
+
+

@@ -1,0 +1,21 @@
+\begin{verbatim}
+#!/usr/local/bin/python2.4
+# SOAP Array
+
+def hello():
+    return ["Hello, world"]
+
+def echo(*args):
+    return args
+
+def sum(*args):
+    sum = 0
+    for i in args: sum += i
+    return [sum]
+
+def average(*args):
+    return [sum(*args) / len(args)]
+
+from ZSI import dispatch
+dispatch.AsCGI(rpc=True)
+\end{verbatim}

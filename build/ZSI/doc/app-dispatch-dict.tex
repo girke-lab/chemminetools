@@ -1,0 +1,23 @@
+\chapter{CGI Script Struct}
+
+\section{Intro} This is an example of a simple web service CGI Script.  The service
+returns and expects SOAP Structs (python \class{dict}).  A sample soap trace is
+provided below.  In this example the CGI script is dispatched as a \emph{rpc}
+service.
+
+\subsection{rpc wrapper} The wrapper element of the request is the dispatch key
+to the callback function, the child elements are passes as a \class{list} or
+\class{dict} of values to the callback function.  The callback function is
+expected to return a \class{list} or \class{dict} of values, the response
+wrapper is by default set to the request wrapper name appended \emph{Response}.
+
+\section{CGI Script}
+\input{dispatch-rpc-hello-struct}
+
+\section{client test script}
+\input{client-hello-struct}
+
+\section{SOAP Trace}
+\subsection{hello}
+\begin{verbatim}
+\end{verbatim}
