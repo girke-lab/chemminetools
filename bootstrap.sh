@@ -71,11 +71,14 @@ sudo -u postgres createdb -E utf8 -O cmt chemminetools -T template0 --locale=C.U
 cd /tmp
 wget http://biocluster.ucr.edu/~tbackman/vagrantImages/django_cron.tgz
 wget http://biocluster.ucr.edu/~tbackman/vagrantImages/django_guest.tgz
+wget http://biocluster.ucr.edu/~tbackman/vagrantImages/gyroid_utils.tgz
 tar xvfz django_cron.tgz
 tar xvfz django_guest.tgz
+tar xvfz gyroid_utils.tgz
 mv guest /usr/local/lib/python2.7/dist-packages/
 mv django_cron /usr/local/lib/python2.7/dist-packages/
-rm -rf guest django_cron django_cron.tgz django_guest.tgz
+mv gyroid_utils /usr/local/lib/python2.7/dist-packages/
+rm -rf guest django_cron django_cron.tgz django_guest.tgz gyroid_utils.tgz gyroid_utils
 
 # add sql commands to blank database
 cd /srv/chemminetools
