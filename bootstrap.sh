@@ -42,18 +42,16 @@ rm -rf PyXML-0.8.4.tar.gz PyXML-0.8.4
 pip install django-guardian==1.1.1
 pip install Django==1.4.5 -I
 pip install ZSI==2.0-rc3
-pip install django-bootstrap-toolkit
+pip install django-bootstrap-toolkit==2.8.0
 pip install django-cms==2.3.5 
 pip install South==0.7.5
 pip install django-appmedia==1.0.1
-pip install ZSI==2.0-rc3
 pip install django-celery==3.0.11
 pip install simplejson==3.1.0
 pip install ghostscript==0.4.1
 pip install PyYAML==3.10
 pip install django-userena==1.2.1
 pip install beautifulsoup4==4.3.2 
-pip install django-celery==3.0.11
 pip install celery==3.0.16
 
 # create symbolic link for /srv/chemminetools
