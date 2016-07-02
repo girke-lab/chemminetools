@@ -4,6 +4,8 @@
 import re
 import os
 import time 
+import socket
+import errno
 from celery import task
 from tempfile import NamedTemporaryFile
 from django.conf import settings
@@ -65,7 +67,11 @@ def launch(
     print 'Running: ' + str(command) + '\n'
     runningTask = subprocess.Popen(command, shell=False,
                                    stdin=subprocess.PIPE)
-    runningTask.stdin.write(input)
+    try: 
+        runningTask.stdin.write(input)
+    except socket.error:
+        time.sleep(2)
+        runningTask.stdin.write(input)
     runningTask.stdin.close()
     runningTask.wait()
     if runningTask.returncode != 0:
