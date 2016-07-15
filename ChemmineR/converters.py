@@ -15,6 +15,7 @@ outputConverters = {
     'text/fp.search.result': 'integer\nread.table(text=output, sep="\t", header=F, col.names=F)[,1]',
     'text/ei.search.result': 'integer\nread.table(text=output, sep="\t", header=F, col.names=F)[,1]',
     'text/properties.table': 'data.frame\nread.csv(text=output)',
+    'text/tab-separated-values': 'data.frame\nread.table(text=output, header=T, stringsAsFactors=F)',
     'chemical/x-mdl-sdfile': 'SDFset\nread.SDFset(read.SDFstr(unlist(strsplit(output, "\n"))))',
     'chemical/sdfUpload': 'SDFset\nread.SDFset(read.SDFstr(unlist(strsplit(output, "\n"))))'
 }
