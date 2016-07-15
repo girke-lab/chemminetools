@@ -1,0 +1,9 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+name: InChI Strings 
+category: ChemmineR
+script: inchi.py 
+input_type: chemical/x-mdl-sdfile
+output_type: text/tab-separated-values
+description: Computes InChI strings for compounds in workbench using the <a href="http://openbabel.org">Open Babel software library</a>. As this is not a numeric result, it is not suitable for downstream properties based clustering.
