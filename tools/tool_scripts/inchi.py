@@ -21,7 +21,7 @@ def main():
     fa = fa.rstrip()
     of = open(args['outfile'], 'w')
     of.write('cid\t')
-    labels = 'InChI'
+    labels = 'InChI\tInChIkey'
     of.write(labels + '\n')
     inputTemp = tempfile.NamedTemporaryFile(suffix='.sdf', delete=False)
     inputTemp.write(fa)
@@ -35,8 +35,10 @@ def main():
         conv = ob.OBConversion()
         conv.SetInAndOutFormats("sdf", "inchi")
         inchi = conv.WriteString(mol.OBMol)
+        conv.SetInAndOutFormats("sdf", "inchikey")
+        inchikey = conv.WriteString(mol.OBMol)
         info = re.match(r"^InChI=(.*)\n", inchi).group(1)
-        of.write(myid.strip() + '\t' + info + '\n')
+        of.write(myid.strip() + '\t' + info + '\t' + inchikey + '\n')
     of.close()
     os.unlink(inputTempName)
 
