@@ -39,6 +39,7 @@ sudo python setup.py install
 cd ..
 rm -rf PyXML-0.8.4.tar.gz PyXML-0.8.4
 
+pip install html5lib==1.0b8
 pip install django-guardian==1.1.1
 pip install Django==1.4.5 -I
 pip install ZSI==2.0-rc3
