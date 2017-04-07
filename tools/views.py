@@ -206,12 +206,16 @@ def view_job(
             if (job.application.name == 'Hierarchical Clustering')\
                 or (job.application.name == 'Numeric Data Clustering'):
                 tree = True 
+                return render_to_response('view_job_oldcx.html',
+                        dict(title=str(job.application) + ' Results',
+                        result=finalResult, tree=tree, job=job, plotJSON=plotJSON),
+                        context_instance=RequestContext(request))
             else:
                 tree = False
-            return render_to_response('view_job.html',
-                    dict(title=str(job.application) + ' Results',
-                    result=finalResult, tree=tree, job=job, plotJSON=plotJSON),
-                    context_instance=RequestContext(request))
+                return render_to_response('view_job.html',
+                        dict(title=str(job.application) + ' Results',
+                        result=finalResult, tree=tree, job=job, plotJSON=plotJSON),
+                        context_instance=RequestContext(request))
         elif job.application.output_type == 'text/properties.table':
             f = open(job.output, 'r')
             csvinput = csv.reader(f)
