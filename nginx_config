@@ -1,0 +1,8 @@
+server {
+    listen 9000;
+    server_name localhost;
+
+    location / {
+        proxy_pass https://pubchem.ncbi.nlm.nih.gov/;
+    }
+}

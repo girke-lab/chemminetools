@@ -25,6 +25,7 @@ apt-get install -y apache2
 apt-get install -y libapache2-mod-wsgi
 apt-get install -y memcached
 apt-get install -y libpq-dev
+apt-get install -y nginx
 
 # clean up package install 
 apt-get clean
@@ -39,7 +40,6 @@ sudo python setup.py install
 cd ..
 rm -rf PyXML-0.8.4.tar.gz PyXML-0.8.4
 
-pip install html5lib==1.0b8
 pip install django-guardian==1.1.1
 pip install Django==1.4.5 -I
 pip install ZSI==2.0-rc3
@@ -127,6 +127,10 @@ cp /srv/chemminetools/udev_rule /etc/udev/rules.d/50-vagrant-mount.rules
 
 # restart apache
 /etc/init.d/apache2 restart
+
+# setup and start nginx pubchem proxy
+cp /srv/chemminetools/nginx_config /etc/nginx/sites-enabled/default
+/etc/init.d/nginx restart
 
 # exit now if a bash script, the rest should be run interactively 
 exit 0

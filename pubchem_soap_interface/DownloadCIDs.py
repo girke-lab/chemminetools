@@ -4,11 +4,12 @@
 # bring in the ZSI-generated interface
 
 from PUG_services import *
+import re
 
 # other modules/functions
 
 from time import sleep
-from urllib import urlopen
+from urllib2 import urlopen
 import zlib
 
 
@@ -56,11 +57,12 @@ def DownloadCIDs(cids):
         req = GetDownloadUrlSoapIn()
         req.set_element_DownloadKey(downloadKey)
         url = port.GetDownloadUrl(req).get_element_url()
+        url = re.sub(r'^ftp://', 'http://', url)
         # print 'Success! URL =', url
 
         # download to a local file
 
-        sdfCompressed = urlopen(url)
+        sdfCompressed = urlopen(url, timeout=10)
         sdf = zlib.decompress(sdfCompressed.read(), 31)
         sdfCompressed.close()
         return sdf
