@@ -10,7 +10,7 @@ from celery import task
 from tempfile import NamedTemporaryFile
 from django.conf import settings
 from django.contrib.auth.models import User
-import subprocess
+import subprocess32 as subprocess
 import random
 from django.forms import Form, FileField, ModelChoiceField, \
     IntegerField, HiddenInput, CharField, TextInput
@@ -67,21 +67,12 @@ def launch(
     print 'Running: ' + str(command) + '\n'
     runningTask = subprocess.Popen(command, shell=False,
                                    stdin=subprocess.PIPE)
-    tryCounter = 0
-    while tryCounter < 10:
-	    try: 
-		runningTask.stdin.write(input)
-		break
-	    except socket.error:
-		time.sleep(1)
-		tryCounter += 1
-    runningTask.stdin.close()
-    runningTask.wait()
-    if runningTask.returncode != 0:
-        return False
-    else:
+    try:
+        outs, errs = runningTask.communicate(input, timeout=(60 * 60 * 24 * 7)) # wait a week
         return outputFileName
-
+    except:
+        runningTask.kill()
+        return False
 
 def getAppForm(application_id, user):
     fields = {}
