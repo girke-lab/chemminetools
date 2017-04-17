@@ -54,6 +54,7 @@ pip install PyYAML==3.10
 pip install django-userena==1.2.1
 pip install beautifulsoup4==4.3.2 
 pip install celery==3.0.16
+pip install subprocess32
 
 # create symbolic link for /srv/chemminetools
 ln -s /vagrant /srv/chemminetools
