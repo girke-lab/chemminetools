@@ -67,11 +67,14 @@ def launch(
     print 'Running: ' + str(command) + '\n'
     runningTask = subprocess.Popen(command, shell=False,
                                    stdin=subprocess.PIPE)
-    try: 
-        runningTask.stdin.write(input)
-    except socket.error:
-        time.sleep(2)
-        runningTask.stdin.write(input)
+    tryCounter = 0
+    while tryCounter < 10:
+	    try: 
+		runningTask.stdin.write(input)
+		break
+	    except socket.error:
+		time.sleep(1)
+		tryCounter += 1
     runningTask.stdin.close()
     runningTask.wait()
     if runningTask.returncode != 0:
