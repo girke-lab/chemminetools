@@ -35,26 +35,17 @@ cd /tmp
 wget http://biocluster.ucr.edu/~tbackman/vagrantImages/PyXML-0.8.4.tar.gz
 tar xvfz PyXML-0.8.4.tar.gz
 cd PyXML-0.8.4
+# There is a bug in newer Ubuntu systems that prevents this from building
+# Solution: echo '#define HAVE_MEMMOVE 1' >> /usr/include/python2.7/pyconfig.h
 python setup.py build
 sudo python setup.py install
 cd ..
 rm -rf PyXML-0.8.4.tar.gz PyXML-0.8.4
 
-pip install django-guardian==1.1.1
-pip install Django==1.4.5 -I
-pip install ZSI==2.0-rc3
-pip install django-bootstrap-toolkit==2.8.0
-pip install django-cms==2.3.5 
-pip install South==0.7.5
-pip install django-appmedia==1.0.1
-pip install django-celery==3.0.11
-pip install simplejson==3.1.0
-pip install ghostscript==0.4.1
-pip install PyYAML==3.10
-pip install django-userena==1.2.1
-pip install beautifulsoup4==4.3.2 
-pip install celery==3.0.16
-pip install subprocess32
+# For correct dependency resolution pip needs everything on a single line
+pip install Django==1.4.5 django-guardian==1.1.1 ZSI==2.0-rc3 django-bootstrap-toolkit==2.8.0 \
+django-cms==2.3.5 South==0.7.5 django-appmedia==1.0.1 django-celery==3.0.11 simplejson==3.1.0 \
+ghostscript==0.4.1 PyYAML==3.10 django-userena==1.2.1 beautifulsoup4==4.3.2 celery==3.0.16 subprocess32
 
 # create symbolic link for /srv/chemminetools
 ln -s /vagrant /srv/chemminetools
