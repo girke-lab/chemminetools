@@ -1,0 +1,32 @@
+AWS console:
+
+https://signin.aws.amazon.com/signin?redirect_uri=https%3A%2F%2Fus-east-2.console.aws.amazon.com%2Fconsole%2Fhome%3Fregion%3Dus-east-2%26state%3DhashArgs%2523%26isauthcode%3Dtrue&client_id=arn%3Aaws%3Aiam%3A%3A015428540659%3Auser%2Fhomepage&forceMobileApp=0
+
+AWS credentials:
+account #
+username
+password
+
+AWS instances:
+
+development - http://ec2-18-219-58-21.us-east-2.compute.amazonaws.com
+production - http://ec2-52-15-82-218.us-east-2.compute.amazonaws.com/
+
+Current server statistics:
+http://chemminedev.bioinfo.ucr.edu:8080/dashboard/#Chemmine Tools Load
+
+Installation scripts:
+
+/home/admin/scripts
+
+Access to the machines:
+
+ssh -i <key> admin@<aws instance>
+
+SSH is restricted to listed IPs
+
+Code repository: https://github.com/gitanna/chemminetools
+
+email setup is in chemminetools/settings.py
+
+

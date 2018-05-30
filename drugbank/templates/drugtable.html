@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Drug Tabale</title>
+
+  <meta http-equiv="Content-Type" content="text/html">
+  <title>Simple Table Sorting with jQuery - Treehouse Demo</title>
+  <meta name="author" content="Jake Rocheleau">
+  <link rel="shortcut icon" href="http://d15dxvojnvxp1x.cloudfront.net/assets/favicon.ico">
+  <link rel="icon" href="http://d15dxvojnvxp1x.cloudfront.net/assets/favicon.ico">
+  <link rel="stylesheet" type="text/css" media="all" href="css/styles.css">
+  <script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" src="js/jquery.tablesorter.min.js"></script>
+</head>
+
+<body>
+  <table id="box-table" style="width:auto;height:900px;"  title="Mosquito Collection Details"
+		class="easyui-datagrid"	url={{url}}
+		pageSize = "20"
+
+       fitColumns="true" rownumbers="true"
+       pagination="true" sortname='mosquitoid'>
+    <thead>
+<tr>
+{% for theField in theFields %}
+     {%with theField|cut:"_keyed" as field %}
+	<th field="{{ theField}}" width="80" sortable="true"><a href="#" title="{{fieldsTooltip|hash:field}}">{{ field}}</a></th>
+     {%endwith%}
+{% endfor %}
+</tr>
+</thead>
+
+</body>
+</html>
+<!--http://blog.teamtreehouse.com/how-to-code-sortable-tabular-data-with-jquery

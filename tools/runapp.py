@@ -10,7 +10,10 @@ from celery import task
 from tempfile import NamedTemporaryFile
 from django.conf import settings
 from django.contrib.auth.models import User
-import subprocess32 as subprocess
+#import subprocess32 as subprocess
+
+import subprocess
+
 import random
 from django.forms import Form, FileField, ModelChoiceField, \
     IntegerField, HiddenInput, CharField, TextInput
@@ -66,11 +69,14 @@ def launch(
     command = [projectDir + '/tools/tool_scripts/' + appname,'--outfile=' + outputFileName] + commandOptions
     print 'Running: ' + str(command) + '\n'
     runningTask = subprocess.Popen(command, shell=False,
-                                   stdin=subprocess.PIPE)
+                                   stdin=subprocess.PIPE,stderr=subprocess.PIPE,stdout=subprocess.PIPE)
     try:
-        outs, errs = runningTask.communicate(input, timeout=(60 * 60 * 24 * 7)) # wait a week
+        #outs, errs = runningTask.communicate(input, timeout=(60 * 60 * 24 * 7)) # wait a week
+        outs, errs = runningTask.communicate(input)#, timeout=(60 * 60 * 24 * 7))  # wait a week
+        print '\n outs --', outs, ' errs --', errs
         return outputFileName
-    except:
+    except Exception as e:
+        print (e)
         runningTask.kill()
         return False
 

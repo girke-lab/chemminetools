@@ -1,4 +1,3 @@
-chemminetools/settings.py
 .vagrant/*
 *.Rhistory
 *.RData
@@ -6,12 +5,10 @@ chemminetools/settings.py
 *~
 *.swp
 *.DS_Store
-chemminetools/settings.py.devel
-chemminetools/settings.py.production
 working
 working/*
-static_production/*
 tools/tool_scripts/R_testHarness/testResult.html
 static/ei.tar.bz2
 tmp/*
 tmp
+Vagrantfile.*

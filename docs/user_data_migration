@@ -1,0 +1,23 @@
+
+
+on source machine: 
+
+	# sync working data
+	rsync -a /srv/chemminetools/working/  admin@18.218.145.31:/srv/chemminetools/working/
+
+	#dump database roles
+	sudo -u postgres pg_dumpall -rc > /srv/pg_backup/chemminetools-global.sql
+	
+	#dump database
+	sudo -u postgres pg_dump -Fc  chemminetools  > /srv/pg_backup/chemminetools-may-9-2018.archive  
+
+copy database backup files to destination machine
+
+on destination machine: 
+
+	sudo /etc/inti.d/apache2 stop
+	sudo -u postgres psql -f chemminetools-global.sql
+	sudo -u postgres psql -c 'drop database chemminetools; create database chemminetools owner chemminetools'
+	sudo -u postgres pg_restore -d chemminetools chemminetools-may-9-2018.archive
+	sudo /etc/inti.d/apache2 start
+

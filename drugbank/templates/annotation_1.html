@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+
+{% block base_content %}
+
+
+    <table id="box-table" style="width:auto;height:900px;"  title="Drug Bank Data"
+	 	url={{url}}
+		pageSize = "20"
+       remotefilter = "true"
+       fitColumns="true" rownumbers="true"
+       pagination="true" sortname='id'>
+				<thead>
+					<tr>
+
+						<th id = "drug" class = "active"><a href = "#">Drug1</a></th>
+						<th id = "uniprot"><a href = "#">Uniprot2</a></th>
+						<th id = "organism"><a href = "#">Organism</a></th>
+
+
+					</tr>
+				</thead>
+
+			</table>
+
+
+{%endblock%}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block base_content %}
+
+<div class="container products-view-user">
+
+		<form class = "post-list">
+			<input type = "hidden" value = "" />
+		</form>
+
+		<article class="navbar-form navbar-left p-0 m-0 ml-b">
+			<div class="form-group">
+				<label>Per Page: </label>
+				<select class="form-control post_max">
+					<option value="1">1</option>
+					<option value="2">2</option>
+					<option value="3">3</option>
+				</select>
+				<label>Search Keyword: </label>
+				<input type="text" class="form-control post_search_text" placeholder="Enter a keyword">
+			</div>
+			<input type = "submit" value = "Filter" class = "btn btn-primary post_search_submit" />
+		</article>
+
+
+
+		<br class = "clear" />
+
+		<div class = "wave-box-wrapper">
+			<div class = "wave-box"></div>
+			<table class = "table table-striped table-post-list no-margin">
+				<thead>
+					<tr>
+						<th>Image</th>
+						<th id = "drug" class = "active"><a href = "#">Drug</a></th>
+						<th id = "uniprot"><a href = "#">Uniprot</a></th>
+						<th id = "organism"><a href = "#">Organism</a></th>
+
+						<th>Action</th>
+					</tr>
+				</thead>
+				<tbody class = "pagination-container"></tbody>
+			</table>
+
+			<div class = "pagination-nav"></div>
+		</div>
+	</div>
+{%endblock%}
