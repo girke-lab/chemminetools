@@ -12,3 +12,5 @@ static/ei.tar.bz2
 tmp/*
 tmp
 Vagrantfile.*
+settings.py
+static_production
