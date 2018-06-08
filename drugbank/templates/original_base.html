@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+{% block extracss %}
+    <link rel="stylesheet" type="text/css" href="/static/css/form.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/easyui/demo/demo.css">
+{% endblock %}
+{% block extrajs %}
+    <script type="text/javascript" src="/static/javascript/jquery/jquery-1.7.1.min.js"></script>
+    <script type="text/javascript" src="/static/javascript/easyui/jquery.easyui.min.js"></script>
+    <script type="text/javascript" src="/static/javascript/easyui/datagrid-filter.js"></script>
+    <script type="text/javascript">
+    function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    crossDomain: false, // obviates need for sameOrigin test
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type)) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+$(function(){
+
+    var dg = $('#box-table').datagrid({
+        filterBtnIconCls: 'icon-filter',
+        url: '{{url}}',
+        remoteFilter: true
+
+
+    });
+    //cohort
+
+    dg.datagrid('enableFilter', [
+        {
+            field: 'examinationdate',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal', 'between']
+        },
+        {
+            field: 'personid',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+        },
+
+        {
+            field: 'rdtresult_keyed_keyed',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+        },
+
+        {
+            field: 'hemocuereading_keyed_keyed',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+        },
+
+        {
+            field: 'fever1month_keyed',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+        },
+        {
+            field: 'fever24h_keyed',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+        },
+        {
+            field: 'feveradvice_keyed',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+        },
+
+
+        {
+            field: 'medication_name',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+        },
+        {
+
+            field: 'facility_name',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+
+        },
+        {
+
+            field: 'tripoutside_keyed',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+        },
+        {
+            field: 'district',
+            type: 'text',
+            op: ['equal', 'similar', 'notequal']
+
+        },
+        //collection:
+            {
+				field:'abdominal_status_keyed',
+				type:'text',
+				op:['equal','similar','notequal']
+			},
+                {
+                    field: 'blood_fed_keyed',
+                    type: 'text',
+                    op: ['equal','similar', 'notequal']
+                },
+                {
+                    field: 'morphspecies',
+                    type: 'text',
+                    op: ['equal','similar', 'notequal']
+                },
+                {
+                    field: 'parity_keyed',
+                    type: 'text',
+                    op: ['equal','similar', 'notequal']
+                },
+                  {
+                    field: 'date_collection',
+                    type: 'text',
+                    op: ['equal', 'notequal', 'between']
+                },
+                {
+
+                    field: 'mosquitoid',
+                    type: 'numberbox',
+                    options: {precision: 1},
+                    op: ['equal', 'notequal', 'less', 'greater']
+                },
+                {
+                    field: 'pcr_species_result_keyed',
+                    type: 'text',
+                    op: ['equal','similar', 'notequal']
+                },
+                {
+
+                    field: 'sex_keyed',
+                    type: 'text',
+                    op: ['equal','similar', 'notequal']
+
+                },
+                {
+
+                    field: 'study_name',
+                    type: 'text',
+                    op: ['equal','similar', 'notequal']
+                },
+                {
+                    field: 'trap_location',
+                    type: 'text',
+                    op: ['equal','similar', 'notequal']
+                },
+                {
+				    field:'timeofcollectionhlc',
+				    type:'text',
+				    op:['equal','notequal','less', 'greater','between']
+
+			},
+            //xss:
+                {
+                    field: 'rdtresult_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+                 },
+                {
+                    field: 'datetaken',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal','less','greater','between']
+                 },
+                {
+                    field: 'agegrp1_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+
+                },
+                {
+                    field: 'overnight_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+
+                },
+                {
+                    field: 'insecticidesprays_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+
+                },
+                 {
+                    field: 'sprayin12_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+
+                },
+                 {
+                    field: 'sprayin3_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+
+                },
+                 {
+                    field: 'sprayin6_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+
+                },
+
+                {
+                    field: 'fever14d_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+                },
+                 {
+                    field: 'usednetlastnight_keyed',
+                    type: 'text',
+                    op: ['equal', 'similar', 'notequal']
+
+                }//,
+
+
+
+
+    ]);
+
+});
+
+
+    </script>
+{%endblock%}
+{% block account_navigation %}{%endblock%}
+
+
+http://carlofontanos.com/python-django-ajax-pagination-with-search-and-sort/
+
+INSERT INTO drugbank_drug_targets_org(id, target_drugs, uniprot_id, "Organism") VALUES (1, 'DP001', 'PI001', 'Humans');
+INSERT INTO drugbank_drug_targets_org(id, target_drugs, uniprot_id, "Organism") VALUES (2, 'DP002', 'PI002', 'Humans');
+INSERT INTO drugbank_drug_targets_org(id, target_drugs, uniprot_id, "Organism") VALUES (3, 'DP003', 'PI003', 'Humans');
+
+https://raw.githubusercontent.com/shymonk/django-datatable/master/README.rst

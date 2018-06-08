@@ -6,7 +6,7 @@ library(ChemmineR)
 library(R.utils)
 library(RPostgreSQL)
 
-conn = dbConnect(dbDriver("PostgreSQL"),dbname="pubchem",host="chemminetools-2.bioinfo.ucr.edu",user="pubchem_updater",password="48ruvbvnmwejf408rfdj")
+conn = dbConnect(dbDriver("PostgreSQL"),dbname="pubchem",host="chemminetools-2.bioinfo.ucr.edu",user="pubchem_updater",password="48ruvbvnmwejf408rfdj", port=5434)
 
 if(! exists("debug_mode")){
 	# parse command line arguments

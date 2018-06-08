@@ -14,7 +14,7 @@ import django_cron
 django_cron.autodiscover()
 
 admin.autodiscover()
-
+print '\n before urls in general'
 urlpatterns = patterns(
     r'',
     url(r'^admin/', include(admin.site.urls)),
@@ -23,6 +23,7 @@ urlpatterns = patterns(
     (r'^compounds/', include(r'compounddb.urls')),
     (r'^my[Cc]ompounds/', include('myCompounds.urls')),
     (r'^tools/', include('tools.urls')),
+    (r'^drugbank/', include('drugbank.urls')),
     (r'^search/?',  RedirectView.as_view(url='/eisearch/query/')), 
     (r'^similarity/', include('similarityworkbench.urls')),
     (r'^ChemmineR/', include('ChemmineR.urls')),
@@ -31,7 +32,7 @@ urlpatterns = patterns(
     (r'^ei/?',  RedirectView.as_view(url='/downloads/')), 
     url(r'^', include('cms.urls')),
     )
-
+print '\n after urls in general'
 if settings.DEBUG:
     urlpatterns = patterns(r'', url(r'^working/(?P<path>.*)$',
                            r'django.views.static.serve',

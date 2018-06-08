@@ -84,16 +84,13 @@ $(document).ready(function() {
 <div class="span12">
 
 <p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> 
-using one of two algorithm and database options:
+using the fingerprint algorithm.
 <ul>
 <li><b>Fingerprint algorithm:</b> Searches a "cleaned up" version of the PubChem Compound database
 (excluding some very similar compounds and some salts) by connecting to the PubChem web interface
 using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.
 As this connects directly to PubChem, it will include new compounds sooner than the EI search.</li>
-<li><b>EI algorithm:</b> Searches the full PubChem Compound database (including very similar compounds
-and salts) using the EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>)
-with an <a href="/help/#theory">atom pair (AP) similarity</a> measure. <b>NOTE: EI Search is currently undergoing updates
-and may be missing some results.</b></li>
+<li><b>EI algorithm:</b> Temporarily offline due to system maintenance.</li>
 </ul>
 </p>
 </div>
@@ -122,7 +119,6 @@ and may be missing some results.</b></li>
         </td><td>
             <select name="algorithm" id="algorithm">
             <option value="fp">Fingerprint algorithm</option>
-            <option value="ei">EI algorithm</option>
             </select>
         </td></tr>
         <tr><th>
@@ -155,7 +151,6 @@ and may be missing some results.</b></li>
         </td><td>
             <select name="algorithm" id="algorithm">
             <option value="fp">Fingerprint algorithm</option>
-            <option value="ei">EI algorithm</option>
             </select>
         </td></tr>
         <tr><th>
@@ -183,7 +178,6 @@ Please copy and paste your single-molecule SDF below. If multiple compounds are 
         </td><td>
             <select name="algorithm" id="algorithm">
             <option value="fp">Fingerprint algorithm</option>
-            <option value="ei">EI algorithm</option>
             </select>
         </td></tr>
         <tr><th>
@@ -209,7 +203,6 @@ Please upload a single-molecule SDF below. If multiple compounds are found in th
         </td><td>
             <select name="algorithm" id="algorithm">
             <option value="fp">Fingerprint algorithm</option>
-            <option value="ei">EI algorithm</option>
             </select>
         </td></tr>
         <tr><th>

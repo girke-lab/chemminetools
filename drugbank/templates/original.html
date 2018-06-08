@@ -1,0 +1,51 @@
+{% extends 'kenyah_base.html' %}
+{% load django_hash %}
+{% load django_pretty %}
+{% load get_parameters %}
+{%block content%}
+<body>
+    <h2>Mosquito Data</h2>
+    <div class="container-title">
+    <div class="left-title">
+	<div class="panel-page-title">
+	  <div class="panel-page-title">Entomological Data for Kenya Highlands</div>
+	</div>
+    <div class="links">
+	<a href="{{ csvurl }}">Download all data to a file</a>
+	<a href="/search.html?location=kenyah&searchtype=collection">Back to Search</a>
+    </div>
+
+  </div>
+
+    <table id="box-table" style="width:auto;height:900px;"  title="Mosquito Collection Details"
+		class="easyui-datagrid"	url={{url}}
+		pageSize = "20"
+	   
+       fitColumns="true" rownumbers="true"
+       pagination="true" sortname='mosquitoid'>
+    <thead>
+<tr>
+{% for theField in theFields %}
+     {%with theField|cut:"_keyed" as field %}
+	<th field="{{ theField}}" width="80" sortable="true"><a href="#" title="{{fieldsTooltip|hash:field}}">{{ field}}</a></th>
+     {%endwith%}
+{% endfor %}
+</tr>
+</thead>
+{%comment%}
+<tbody>
+   
+{% for result in results.object_list %}
+ <tr>   
+{% for theField in theFields %}
+
+<td>{{ result|hash:theField }}</td>
+{% endfor %}
+</tr>
+{% endfor %}
+</tbody>
+    {%endcomment%}
+</table>
+
+</body>
+{%endblock%}

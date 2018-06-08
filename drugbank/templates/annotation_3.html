@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+
+<link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="/static/css/easyui/demo/demo.css">
+
+<script src="/static/javascript/easyui/jquery.easyui.min.js"></script>
+<script src="/static/javascript/jquery/jquery-1.7.2.min.js"></script>
+<script src="/static/javascript/easyui/datagrid-filter.js"></script>
+
+    <script type="text/javascript">
+    function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+var csrftoken = getCookie('csrftoken');
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    crossDomain: false, // obviates need for sameOrigin test
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type)) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+</scipt>
+
+{% endblock %}
+
+{% block base_content %}
+<table id="box-table" style="width:auto;height:900px;"  title="Drug Bank Details"
+		class="easyui-datagrid"
+       url =/drugbank/?isajax=true/
+		pageSize = "20"
+
+       fitColumns="true" rownumbers="true"
+       pagination="true" sortname='datetaken'>
+    <thead>
+<tr>
+
+	<th field="DID" width="80" sortable="true"><a href="#" title="Drug ID">Drug Id</a></th>
+    <th field="PID" width="80" sortable="true"><a href="#" title="PID">PID</a></th>
+	<th field="organism" width="80" sortable="true"><a href="#" title="organism">Orgnasim</a></th>
+
+</tr>
+</thead>
+
+</table>
+{%endblock%}

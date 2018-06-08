@@ -23,3 +23,9 @@ CELERYD_GROUP="www-data"
 
 # Name of the projects settings module.
 export DJANGO_SETTINGS_MODULE="chemminetools.settings"
+
+#Tthe default path when celery starts does not include /usr/local/bin/, 
+#which then causes R scripts using Rscript to fail when celery runs them.
+#So we set the path explicitly here.
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

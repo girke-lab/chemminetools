@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+
+{% block base_content %}
+<table id="box-table" style="width:auto;height:900px;"  title="Cross Sectional Details"
+		class="easyui-datagrid"
+       url =/drugbank/
+		pageSize = "20"
+
+       fitColumns="true" rownumbers="true"
+       pagination="true" sortname='datetaken'>
+    <thead>
+<tr>
+
+
+	<th field="agegrp1_keyed" width="80" sortable="true"><a href="#" title="age group of the participant">agegrp1</a></th>
+
+
+
+	<th field="datetaken" width="80" sortable="true"><a href="#" title="Date data taken">datetaken</a></th>
+
+
+
+	<th field="fever14d_keyed" width="80" sortable="true"><a href="#" title="Has the participant had fever in the last two weeks?">fever14d</a></th>
+
+
+
+	<th field="overnight_keyed" width="80" sortable="true"><a href="#" title="Did the participant spend the last night there?">overnight</a></th>
+
+
+
+	<th field="insecticidesprays_keyed" width="80" sortable="true"><a href="#" title="insecticidesprays">insecticidesprays</a></th>
+
+
+
+	<th field="sprayin12_keyed" width="80" sortable="true"><a href="#" title="Has the house been sprayed in the last 12 months?">sprayin12</a></th>
+
+
+
+	<th field="usednetlastnight_keyed" width="80" sortable="true"><a href="#" title="Did the particpant sleep under a net last night?">usednetlastnight</a></th>
+
+
+
+	<th field="rdtresult_keyed" width="80" sortable="true"><a href="#" title="RDT results?">rdtresult</a></th>
+
+
+</tr>
+</thead>
+
+</table>
+{%endblock%}
+
+{% coment %}
+<link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="/static/css/easyui/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="/static/css/easyui/demo/demo.css">
+
+
+
+
+url=/results?searchtype=person&amp;displaytype=table&amp;isajax=true&amp;location=kenyah&amp;startdate=&amp;enddate=&amp;showFields=agegrp1_keyed&amp;showFields=datetaken&amp;showFields=fever14d_keyed&amp;showFields=overnight_keyed&amp;showFields=insecticidesprays_keyed&amp;showFields=sprayin12_keyed&amp;showFields=usednetlastnight_keyed&amp;showFields=rdtresult_keyed
+{% endcomment %}\\\
+
+
+
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+$.ajaxSetup({
+    crossDomain: false, // obviates need for sameOrigin test
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type)) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+https://www.drugbank.ca/structures/DB02512/image.svg

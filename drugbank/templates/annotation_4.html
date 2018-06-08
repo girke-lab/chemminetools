@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+
+<link rel="stylesheet" type="text/css" href="/static/css/form.css">
+<link rel="stylesheet" type="text/css" href="/static/css/boxtable.css">
+<script src="{{STATIC_URL}}javascript/sorttable.js"></script>
+<script src="{{STATIC_URL}}javascript/pagination.js"></script>
+
+
+{% endblock %}
+
+{% block base_content %}
+
+<table class=sortable id="box-table">
+<thead>
+<tr>
+
+
+{% for showField in showFields %}
+
+<th><a href="#" title="showField">showField</a></th>
+
+{% endfor %}
+
+</tr>
+</thead>
+
+<tbody>
+
+{% for result in results.object_list %}
+<tr>
+<td>result.id</td>
+<td>result.target_drugs</td>
+<td>result.uniport_id</td>
+<td>result.organism</td>
+
+
+</tr>
+{% endfor %}
+
+</tbody>
+</table>
+{% comment %}
+<center>
+<div class="pagination">
+
+    <span class="step-links">
+        {% if results %}
+        {% if results.has_previous %}
+	    <a href="{% append_to_get page='1' %}">First</a>
+            <a href="{% append_to_get page=results.previous_page_number %}">Previous</a>
+        {% else %}
+	    First Previous
+	{% endif %}
+
+        <span class="current" style="padding-left: 4em; padding-right: 4em;">
+            Page {{ results.number }} of {{ results.paginator.num_pages }}
+        </span>
+	  {%endcomment%}
+  {%comment%}
+        {% if results.has_next %}
+            <a href="{% append_to_get page=results.next_page_number %}">Next</a>
+	    <a href="{% append_to_get page=results.paginator.num_pages %}">Last</a>
+	{% else %}
+	    Next Last
+	{% endif %}
+	<br /><br />
+     {%endcomment%}
+{%comment%}
+	<input type="button" onclick="goToPage();" value="Jump to page" />
+	<input type="text" size="5" id="goToPage" />
+	<input type="hidden" value="{{request.get_full_path}}" id="path" />
+        {% endif %}
+    </span>
+</div>
+</center>
+{% endcomment %}
+{% %endblock %}
