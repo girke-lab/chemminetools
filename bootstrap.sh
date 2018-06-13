@@ -90,7 +90,7 @@ python manage.py check_permissions
 # install R packages
 printf "source(\"http://bioconductor.org/biocLite.R\")
 biocLite()
-biocLite(c(\"ChemmineR\", \"ctc\", \"rjson\", \"R.utils\", \"eiR\", \"RPostgreSQL\"))
+biocLite(c(\"ChemmineR\", \"ctc\", \"rjson\", \"R.utils\", \"eiR\", \"RPostgreSQL\"),dependencies=c(\"Imports\"))
 " | R --slave
 
 # create working directory and set permissions
