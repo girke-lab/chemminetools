@@ -138,6 +138,8 @@ def view_job(
         finalResult = re.sub('.*/', '', finalResult, count=0)
         finalResult = '/working/' + finalResult
 
+        job.start_time = str(job.start_time)
+
         # select correct viewer here based on output type
 
         if job.application.output_type == 'chemical/sdfUpload':
@@ -289,5 +291,7 @@ def view_job(
 @guest_allowed
 def list_jobs(request):
     matches = getJobList(request.user)
+    for match in matches:
+        match.start_time = str(match.start_time)
     return render_to_response('list_jobs.html', dict(matches=matches),
                               context_instance=RequestContext(request))

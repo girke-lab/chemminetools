@@ -5,11 +5,12 @@
 # 1st:
 # installed custom screen & vim plugins
 
+set -o xtrace
 
 # Install Required Debian Packages (including django) 
 apt-get update
 apt-get install -y git
-apt-get install -y postgresql-9.1
+apt-get install -y postgresql-9.6
 apt-get install -y python-psycopg2
 apt-get install -y python-skimage
 apt-get install -y python-pip
@@ -17,7 +18,7 @@ apt-get install -y libcurl4-openssl-dev
 apt-get install -y rabbitmq-server
 apt-get install -y python-pylibmc
 apt-get install -y libxml2-dev
-apt-get install -y openjdk-7-jre
+apt-get install -y openjdk-8-jre
 apt-get install -y libreadline5
 apt-get install -y r-base-core
 apt-get install -y subversion
@@ -26,6 +27,9 @@ apt-get install -y libapache2-mod-wsgi
 apt-get install -y memcached
 apt-get install -y libpq-dev
 apt-get install -y nginx
+apt-get install -y libgsl-dev  # needed for eiR
+apt-get install -y openbabel libopenbabel-dev swig
+apt-get install -y libgc1c2 # for fmcs
 
 # clean up package install 
 apt-get clean
@@ -37,6 +41,7 @@ tar xvfz PyXML-0.8.4.tar.gz
 cd PyXML-0.8.4
 # There is a bug in newer Ubuntu systems that prevents this from building
 # Solution: echo '#define HAVE_MEMMOVE 1' >> /usr/include/python2.7/pyconfig.h
+grep -q HAVE_MEMMOVE  /usr/include/python2.7/pyconfig.h || echo '#define HAVE_MEMMOVE 1' >> /usr/include/python2.7/pyconfig.h
 python setup.py build
 sudo python setup.py install
 cd ..
@@ -45,7 +50,8 @@ rm -rf PyXML-0.8.4.tar.gz PyXML-0.8.4
 # For correct dependency resolution pip needs everything on a single line
 pip install Django==1.4.5 django-guardian==1.1.1 ZSI==2.0-rc3 django-bootstrap-toolkit==2.8.0 \
 django-cms==2.3.5 South==0.7.5 django-appmedia==1.0.1 django-celery==3.0.11 simplejson==3.1.0 \
-ghostscript==0.4.1 PyYAML==3.10 django-userena==1.2.1 beautifulsoup4==4.3.2 celery==3.0.16 subprocess32
+ghostscript==0.4.1 PyYAML==3.10 django-userena==1.2.1 beautifulsoup4==4.3.2 celery==3.0.16 \
+'html5lib<0.99999999' subprocess32 openbabel
 
 # create symbolic link for /srv/chemminetools
 ln -s /vagrant /srv/chemminetools
@@ -56,9 +62,9 @@ cp chemminetools/settings_sample.py chemminetools/settings.py
 # made changes to get it running: add in database settings and secret key
 
 # create postgresql database as postgres user
-sudo -u postgres createuser -U postgres cmt -w -S -R -d
-sudo -u postgres psql -U postgres -d postgres -c "alter user cmt with password 'cmt';"
-sudo -u postgres createdb -E utf8 -O cmt chemminetools -T template0 --locale=C.UTF-8
+sudo -u postgres createuser -U postgres chemminetools -w -S -R -d
+sudo -u postgres psql -U postgres -d postgres -c "alter user chemminetools with password 'chemminetools';"
+sudo -u postgres createdb -E utf8 -O chemminetools chemminetools -T template0 --locale=C.UTF-8
 
 # manually install packages in /usr/local/lib/python2.7/dist-packages:
 cd /tmp
@@ -97,8 +103,9 @@ ln -s /srv/working working
 cd /srv/chemminetools/tools/tool_scripts
 find *.yaml -print | xargs -I {} ./loader.py -i {}
 
-# append correct settings to apache config
-cat /srv/chemminetools/apacheconfig >> /etc/apache2/mods-available/wsgi.conf
+# enable wsgi settings in apache
+cp /srv/chemminetools/apacheconfig  /etc/apache2/conf-available/chemminetools.conf
+a2enconf chemminetools
 # echo "export PYTHONPATH=\"/usr/local/lib/:/usr/local/lib/python2.7/dist-packages/\"" >> /etc/profile
 
 # add apache module

@@ -14,3 +14,4 @@ tmp
 Vagrantfile.*
 settings.py
 static_production
+vagrant

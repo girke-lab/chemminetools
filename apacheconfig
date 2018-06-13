@@ -4,3 +4,11 @@
         Order Allow,Deny
         Allow from all
     </Location>
+    <Directory "/srv/chemminetools/chemminetools">
+    	<Files "wsgi.py">
+    		Require all granted
+    	</Files>
+    </Directory>
+    <Directory "/srv/chemminetools/static_production">
+    		Require all granted
+    </Directory>

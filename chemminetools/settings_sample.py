@@ -1,6 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import uuid
+uuid._uuid_generate_random = None
+
 import os
 import djcelery
 from django.contrib.messages import constants as messages
@@ -33,8 +36,8 @@ DATABASES = {'default': {  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'o
                            # Set to empty string for default. Not used with sqlite3.
     'ENGINE': 'django.db.backends.postgresql_psycopg2',
     'NAME': 'chemminetools',
-    'USER': 'cmt',
-    'PASSWORD': 'cmt',
+    'USER': 'chemminetools',
+    'PASSWORD': 'chemminetools',
     'HOST': 'localhost',
     'PORT': '',
     }}
