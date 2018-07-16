@@ -2,10 +2,16 @@
 # -*- coding: utf-8 -*-
 
 """format conversion"""
+from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import openbabel
 import pybel
 import re
+import sys
+import traceback
 
 
 class InputError(Exception):
@@ -13,21 +19,13 @@ class InputError(Exception):
     pass
 
 
-def unicode_wrapper(f):
 
-    def wrapped(inp, *args, **kwargs):
-        if isinstance(inp, unicode):
-            inp = unicode.encode(inp, 'iso8859-1')
-        return f(inp, *args, **kwargs)
-
-    return wrapped
-
-
-@unicode_wrapper
 def smiles_to_sdf(smiles):
     try:
-        mymol = pybel.readstring('smi', str(smiles))
+        mymol = pybel.readstring('smi', smiles)
     except:
+        print("Unexpected error:", sys.exc_info())
+        traceback.print_tb(sys.exc_info()[2])
         raise InputError
     try:
         mymol.draw(show=False, update=True)
@@ -35,7 +33,6 @@ def smiles_to_sdf(smiles):
         pass
     return mymol.write(format='sdf')
 
-@unicode_wrapper
 def sdf_to_smiles(sdf):
 
     # dos2unix
@@ -48,7 +45,7 @@ def sdf_to_smiles(sdf):
 
     # remove unicode
 
-    if isinstance(sdf, unicode):
+    if isinstance(sdf, str):
         sdf = sdf.encode('ascii', 'ignore')
 
     obConversion = openbabel.OBConversion()
@@ -61,23 +58,20 @@ def sdf_to_smiles(sdf):
     return obConversion.WriteString(mol)
 
 
-@unicode_wrapper
 def sdf_to_sdf(sdf):
     return smiles_to_sdf(sdf_to_smiles(sdf))
 
 
-@unicode_wrapper
 def smiles_to_smiles(smiles):
     return sdf_to_smiles(smiles_to_sdf(smiles))
 
 
-@unicode_wrapper
 def batch_sdf_to_smiles(sdfs):
-    from sdfiterator import sdf_iter
-    from cStringIO import StringIO
+    from compounddb.sdfiterator import sdf_iter
+    from io import StringIO
     buf = ''
     err = 0
-    for sdf in sdf_iter(StringIO(sdfs)):
+    for sdf in sdf_iter(StringIO(str(sdfs))):
         try:
             buf += sdf_to_smiles(sdf)
         except InputError:
@@ -85,7 +79,6 @@ def batch_sdf_to_smiles(sdfs):
     return (buf, err)
 
 
-@unicode_wrapper
 def batch_smiles_to_sdf(smiles):
     buf = ''
     err = 0
@@ -97,14 +90,12 @@ def batch_smiles_to_sdf(smiles):
     return (buf, err)
 
 
-@unicode_wrapper
 def batch_sdf_to_sdf(sdfs):
     (smiles, _) = batch_sdf_to_smiles(sdfs)
     (sdf, __) = batch_smiles_to_sdf(smiles)
     return (sdf, _ + __)
 
 
-@unicode_wrapper
 def batch_smiles_to_smiles(smiles):
     (sdf, __) = batch_smiles_to_sdf(smiles)
     (smiles, _) = batch_sdf_to_smiles(sdf)

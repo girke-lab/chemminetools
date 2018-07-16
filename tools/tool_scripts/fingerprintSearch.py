@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # make it possible to run as standalone program
+from builtins import str
 import sys
 sys.path.append('/srv/chemminetools')
 sys.path.append('/srv/chemminetools/sdftools')  # allow tools.py to be imported
@@ -13,7 +14,7 @@ from django.contrib.auth.models import User
 from django.conf import settings
 
 # load functions used
-from pubchem_soap_interface.SimilaritySearch import SimilaritySearch
+from pubchem_rest_interface.Pubchem_pug import SimilaritySearch
 from sdftools.moleculeformats import sdf_to_smiles
 
 # parse command line arguments
@@ -31,11 +32,12 @@ def main():
     query = sdf_to_smiles(sdf)
 
     try:
-        id_list = SimilaritySearch(query, similarity, compounds)
-        if id_list == 'error':
-            raise Exception
-        id_list = [str(cid) for cid in id_list]
-        output = '\n'.join(id_list)
+        output = SimilaritySearch(query, similarity, compounds)
+        #print("id_list: {}".format(id_list))
+       # if id_list == 'error':
+       #     raise Exception
+       # id_list = [str(cid) for cid in id_list]
+       # output = '\n'.join(id_list)
     except:
         output = ''
 

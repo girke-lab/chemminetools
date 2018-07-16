@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """subset a big sdf"""
+from __future__ import absolute_import
 
 import sys
 if len(sys.argv) != 4:
@@ -25,7 +26,7 @@ else:
     shutil.os.mkdir(out)
     mode = 'directory'
 
-from sdfiterator import sdf_iter
+from .sdfiterator import sdf_iter
 iter = sdf_iter(inp)
 
 cntr = 0

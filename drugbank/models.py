@@ -1,3 +1,4 @@
+from builtins import object
 from django.db import models
 
 # Create your models here.
@@ -20,7 +21,7 @@ class Drug_targets_org(models.Model):
     uniprot_id = models.TextField()
     organism = models.TextField()
 
-    class Meta:
+    class Meta(object):
         managed = True
         app_label = 'drugbank'
 
@@ -44,7 +45,7 @@ class Drugtargets_org(models.Model):
     uniprot_id = models.TextField()
     uniprot_name = models.TextField()
 
-    class Meta:
+    class Meta(object):
         managed = False
         app_label = 'drugbank'
         db_table = 'drugtargets_org'
@@ -68,7 +69,7 @@ class Drugtargets_distinct_org(models.Model):
     #uniprot_id = models.TextField()
     #uniprot_name = models.TextField()
 
-    class Meta:
+    class Meta(object):
         managed = False
         app_label = 'drugbank'
         db_table = 'drugtargets_distinct_org'
@@ -90,7 +91,7 @@ class Ensb_uniport(models.Model):
     ensemble_id = models.TextField()
     uniprot_id = models.TextField()
 
-    class Meta:
+    class Meta(object):
         managed = True
         app_label = 'drugbank'
 

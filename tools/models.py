@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from builtins import object
 import os
 from django.db import models
 from django.contrib.auth.models import User
@@ -25,7 +26,7 @@ class Application(models.Model):
     output_type = models.CharField(max_length=250)
     description = models.TextField()
 
-    class Meta:
+    class Meta(object):
 
         ordering = ['id']
 
@@ -39,7 +40,7 @@ class ApplicationOptions(models.Model):
     realName = models.CharField(max_length=255)
     application = models.ForeignKey(Application)
 
-    class Meta:
+    class Meta(object):
 
         ordering = ['id']
 
@@ -53,7 +54,7 @@ class ApplicationOptionsList(models.Model):
     name = models.CharField(max_length=255)
     realName = models.CharField(max_length=255)
 
-    class Meta:
+    class Meta(object):
 
         ordering = ['id']
 
@@ -77,7 +78,7 @@ class Job(models.Model):
     output = models.CharField(max_length=1000)
     task_id = models.CharField(max_length=255)
 
-    class Meta:
+    class Meta(object):
 
         ordering = ['-id']
 

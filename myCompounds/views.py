@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from builtins import str
 from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from guest.decorators import guest_allowed, login_required
@@ -13,12 +14,14 @@ from compounddb import first_mol, InvalidInputError
 
 from compounddb.tools import parse_annotation, insert_single_compound
 from compounddb.models import Compound, SDFFile
-from pubchem_soap_interface.DownloadCIDs import DownloadCIDs
+from pubchem_rest_interface.Pubchem_pug import DownloadCIDs
 from django.contrib import messages
 import random
 import openbabel
 import re
 import string
+import sys
+import traceback
 import time
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
@@ -38,7 +41,7 @@ def showCompounds(request, resource):
             deleteMyCompounds(request)
             matches = None
             messages.error(request, 'All Compounds Deleted!')
-	if resource == 'downloadSMILES.smi':
+        if resource == 'downloadSMILES.smi':
             smiles = makeSMILES(request.user)
             return HttpResponse(smiles, mimetype='text/plain')
         if resource == 'downloadSDF.sdf':
@@ -73,6 +76,8 @@ def uploadCompound(request, resource = None, job_id = None):
                     if re.match(r"^\S+", line):
                         sdf = sdf + smiles_to_sdf(str(line))
             except:
+                print("Unexpected error:", sys.exc_info())
+                traceback.print_tb(sys.exc_info()[2])
                 messages.error(request, 'Error: Invalid SMILES string!')
                 sdf = None
         elif resource == 'job':
@@ -101,6 +106,8 @@ def uploadCompound(request, resource = None, job_id = None):
                     smiles = smiles + ' ' + compid
                     sdf = smiles_to_sdf(smiles)
                 except:
+                    print("Unexpected error:", sys.exc_info())
+                    traceback.print_tb(sys.exc_info()[2])
                     messages.error(request, 'Invalid drawing!')
                     sdf = None
             else:
@@ -122,6 +129,8 @@ def uploadCompound(request, resource = None, job_id = None):
                 try:
                     sdf = DownloadCIDs(filteredCIDs)
                 except:
+                    print("Unexpected error:", sys.exc_info())
+                    traceback.print_tb(sys.exc_info()[2])
                     messages.error(request,
                                    'Invalid CIDs or no response from PubChem!'
                                    )
@@ -184,7 +193,7 @@ def getMyCompounds(request):
 
 
 def getMW(sdf):
-    if isinstance(sdf, unicode):
+    if isinstance(sdf, str):
         sdf = sdf.encode('ascii', 'ignore')
 
     obConversion = openbabel.OBConversion()
@@ -196,7 +205,7 @@ def getMW(sdf):
 
 
 def getFormula(sdf):
-    if isinstance(sdf, unicode):
+    if isinstance(sdf, str):
         sdf = sdf.encode('ascii', 'ignore')
 
     obConversion = openbabel.OBConversion()
@@ -208,7 +217,7 @@ def getFormula(sdf):
 
 
 def getInChI(sdf):
-    if isinstance(sdf, unicode):
+    if isinstance(sdf, str):
         sdf = sdf.encode('ascii', 'ignore')
 
     obConversion = openbabel.OBConversion()

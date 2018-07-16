@@ -1,4 +1,6 @@
+from __future__ import print_function
 # Create your views here.
+from builtins import str
 from django.shortcuts import redirect, render_to_response, render
 from django.http  import HttpResponse
 from django.template import RequestContext
@@ -7,6 +9,7 @@ from drugbank.models import Drugtargets_distinct_org,Drugtargets_org
 import json
 import operator
 from django.db.models import Q
+from functools import reduce
 
 
 def drugbank_lookup(request):
@@ -41,12 +44,12 @@ def drugbank_lookup(request):
     c = {'showFields':showFields, 'url':url}
 
     if 'isajax' in request.REQUEST:
-        print '\n in ajax in process_table_data_for_json'#, ' and total is ', results['total']
+        print('\n in ajax in process_table_data_for_json')#, ' and total is ', results['total']
         dict_page['total'] = results['total']
         dict_page['rows'] = get_rows(showFields, results['results'], int(results['page_number']), int(results['rows_number']))
-        print '\n this is rows for json', dict_page["rows"]
+        print('\n this is rows for json', dict_page["rows"])
         result_json = json.dumps(dict_page)
-        print '\n result_json is ', result_json
+        print('\n result_json is ', result_json)
 
        # result_json =  {"rows": [{"uniprot_id": "PI001", "organism": "Humans", "target_drugs": "DP001"}, {"uniprot_id": "PI002", "organism": "Humans", "target_drugs": "DP002"}, {"uniprot_id": "PI003", "organism": "Humans", "target_drugs": "DP003"}], "total": 3, "theFields": ["id", "target_drugs", "uniprot_id", "organism"]}
 
@@ -77,9 +80,9 @@ def get_results(queryset, sorting_order, request):
     rows_number = 10
     offset_number = (page_number - 1) * rows_number
     # sorting
-    print '\n in sorting order'
+    print('\n in sorting order')
     sorting_order = get_sorting_order(request, sorting_order)
-    print '\n finished sorting ', sorting_order
+    print('\n finished sorting ', sorting_order)
 
     # filter
     try:
@@ -88,7 +91,7 @@ def get_results(queryset, sorting_order, request):
     #     print '\n got all_filters ', results['results']
     except:
         #     results['results'] = queryset
-        print '\n did not get queryset '
+        print('\n did not get queryset ')
     # paging
     try:
         page_number = request.REQUEST['page']
@@ -104,7 +107,7 @@ def get_results(queryset, sorting_order, request):
     results['sorting_order'] = sorting_order
     results['offset_number'] = offset_number
     results['total'] = results['results'].count()
-    print '\n what is total? ', results['total']
+    print('\n what is total? ', results['total'])
 
     return results
 
@@ -113,7 +116,7 @@ def get_results_page(results, page_number, rows_number):
         offset_number = int((int(page_number) - 1)) * int(rows_number)
         beg = int(offset_number)
         end = int(rows_number) + beg
-        print '\n\n\n get beginning and end of the page ', beg, '->', end
+        print('\n\n\n get beginning and end of the page ', beg, '->', end)
         results_page = results[beg:end]
         return results_page
 
@@ -121,7 +124,7 @@ def get_rows(showFields, results, page_number, rows_number):
 
         r_list = []
         results_page = get_results_page(results, page_number, rows_number)
-        print '\n rows number, page_number ', rows_number, page_number
+        print('\n rows number, page_number ', rows_number, page_number)
 
         n = 0
         for r in results_page:
@@ -129,16 +132,16 @@ def get_rows(showFields, results, page_number, rows_number):
             r_dict = {}
 
             for f in showFields:
-                print '\n field f is ',
+                print('\n field f is ', end=' ')
                 if str(f) != 'id':  # todo:add more fields here
                     r_dict[f] = r.get_field(f)
             #r_dict['structure'] = '<img src="https://www.drugbank.ca/structures/DB02512/image.png" width="160" height="160">'
             drugname = r_dict['drugbank_id']
             #drugname =  'DB02512'
             r_dict['structure'] = '<img src="https://www.drugbank.ca/structures/' + drugname + '/image.png"  width="160" height="160">'
-            print '\n\n\n\n structure is for  ', drugname
+            print('\n\n\n\n structure is for  ', drugname)
             r_list.append(r_dict)
-        print '\n list is ', r_list
+        print('\n list is ', r_list)
         return r_list
 
 def get_range(string, separator):
@@ -150,9 +153,9 @@ def get_all_filters(filtering, queryset, sorting_order):
         try:
             filters = json.loads(filtering)
 
-            print '\n filters are now ', filters
+            print('\n filters are now ', filters)
             for filter in filters:
-                print '\n for filter in filters ', filter
+                print('\n for filter in filters ', filter)
 
                 argument_list = []
                 if str(filter["op"]) == 'similar':
@@ -164,7 +167,7 @@ def get_all_filters(filtering, queryset, sorting_order):
                     # kwargs[str(filter['field'])] = str(filter["value"])
                     value_list = get_range(str(filter["value"]), ",")
                     for l in value_list:
-                        print '\n in l is (', l, ')'
+                        print('\n in l is (', l, ')')
                         argument_list.append(Q(**{str(filter['field']) + '__iexact': l}))
 
                 elif str(filter["op"]) == 'notequal':
@@ -185,10 +188,10 @@ def get_all_filters(filtering, queryset, sorting_order):
                         try:
                             del argument_list[str(filter['field'])]
                         except:
-                            print '\n was not able to remove filter'
+                            print('\n was not able to remove filter')
 
                 result = result.filter(**kwargs).order_by(sorting_order)
-                print '\n before argument_list ', argument_list
+                print('\n before argument_list ', argument_list)
                 result = result.filter(reduce(operator.or_, argument_list))
 
         except:
@@ -202,15 +205,15 @@ def get_sorting_order(request,sorting_order):
         try:
             sorting_order = request.REQUEST['sort']
             ordering = request.REQUEST['order']
-            print '\n try sorting_order is ', sorting_order
-            print '\n try ordering is ', ordering
+            print('\n try sorting_order is ', sorting_order)
+            print('\n try ordering is ', ordering)
 
         except:
             pass
 
         if ordering == 'desc':
             sorting_order = '-'+str(sorting_order)
-        print '\n sorting_order is ', sorting_order
+        print('\n sorting_order is ', sorting_order)
         return sorting_order
 
 
@@ -224,23 +227,23 @@ def drugbank_lookup_1(request):
     dict_page['rows'] = ['hello1', 'hello2', 'hello3']
     dict_page['total'] = 5
     result_json = json.dumps(dict_page)
-    print 'result_json ', result_json
+    print('result_json ', result_json)
 
     url = '/drugbank/?isajax=true/' # not sure
-    print '\n request is ', request.REQUEST
+    print('\n request is ', request.REQUEST)
     if 'isajax' in request.REQUEST:
-        print '\n drugbank urls and is ajax ', url
+        print('\n drugbank urls and is ajax ', url)
     else:
-        print '\n not in request, ', url, '==', request.REQUEST
+        print('\n not in request, ', url, '==', request.REQUEST)
     if 'isajax' in request.REQUEST:
-        print '\n\n\n\n\n\n\n +++++++ in AJAX Drugbank', request.REQUEST
+        print('\n\n\n\n\n\n\n +++++++ in AJAX Drugbank', request.REQUEST)
         # +++++++ in AJAX MALI with checking filter {u'sort': u'id', u'startdate': u'', u'rows': u'20', u'enddate': u'', u'searchtype': u'emergence', u'order': u'asc', u'displaytype': u'table', u'location': u'mali', u'isajax': u'true', u'amp': u'', u'showFields': u'village', u'filterRules': u'[{"field":"morphosp_name","op":"notequal","value":"hello"}]', u'page': u'1'}
 
 
         dict_page['rows'] =['hello1','hello2','hello3']
         dict_page['total'] = 5
         result_json = json.dumps(dict_page)
-        print '\n do resutl_json', result_json
+        print('\n do resutl_json', result_json)
         return HttpResponse(result_json)
 
     return render_to_response('annotation_3.html', {'result': result_json, 'url': url}, context_instance=RequestContext(request))

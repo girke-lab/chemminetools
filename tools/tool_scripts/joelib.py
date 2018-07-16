@@ -1,13 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
 import argparse
 import os
 import sys
 import pickle
-import urllib2
-import urllib
-from StringIO import StringIO
+import urllib.request, urllib.error, urllib.parse
+import urllib.request, urllib.parse, urllib.error
+from io import StringIO
 import tempfile
 import re
 import pybel

@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from builtins import str
 import re
 import time
 from string import join
@@ -25,7 +26,6 @@ def search(request):
             smi = str(request.GET['smi'])
             smi = urlunquote(smi)
         form = AppFormSet()
-        form = str(form)
         return render_to_response('search.html', dict(mode='form',
             smi=smi, form=form),
             context_instance=RequestContext(request)) 

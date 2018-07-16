@@ -27,7 +27,7 @@ class GzipFile(object):
 
     def next(self):
         assert self.status == 'open'
-        return self.p.stdout.next()
+        return next(self.p.stdout)
 
     def close(self):
         try:

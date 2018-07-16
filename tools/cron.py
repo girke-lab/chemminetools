@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from django_cron import cronScheduler, Job
-from runapp import deleteOrphanJobs
+from .runapp import deleteOrphanJobs
 
 
 class deleteOrphans(Job):

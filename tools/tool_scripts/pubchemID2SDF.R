@@ -34,13 +34,17 @@ if(length(compoundIds) == 0){
 } else {
 	missingIds <- pubchemIds[is.na(compoundIds)]
 }
+
+
 result <- SDFset()
 if(length(missingIds) > 0){
-    idstring <- paste(missingIds, collapse="\n")
-    missingSDF <- system("/srv/chemminetools/pubchem_soap_interface/DownloadCIDs_standalone.py",
-           intern = TRUE,
-           input = idstring)
-    result <- read.SDFset(read.SDFstr(missingSDF))
+#message("fetching ids from pubchem")
+    result <- pubchemCidToSDF(missingIds)
+   # idstring <- paste(missingIds, collapse="\n")
+   # missingSDF <- system("/srv/chemminetools/pubchem_soap_interface/DownloadCIDs_standalone.py",
+   #        intern = TRUE,
+   #        input = idstring)
+   # result <- read.SDFset(read.SDFstr(missingSDF))
     if(length(result) != length(missingIds)){
         stop()
     }

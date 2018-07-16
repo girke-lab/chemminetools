@@ -1,8 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from django.conf.urls.defaults import *
-from views import compound_detail
+from .views import compound_detail
 
 urlpatterns = patterns('', url(r'^cid_lookup/?$',
                        'compounddb.views.cid_lookup'),

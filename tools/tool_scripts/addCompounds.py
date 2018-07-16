@@ -3,10 +3,13 @@
 
 # make it possible to run as standalone program
 
+from __future__ import unicode_literals
+from builtins import str
 import sys
 import re
 import random
 import string
+import traceback
 sys.path.append('/srv/chemminetools')
 sys.path.append('/srv/chemminetools/sdftools')  # allow tools.py to be imported
 from django.core.management import setup_environ
@@ -38,9 +41,9 @@ def addMyCompounds(sdf, user):
     message = 'ERROR: bad input data.'
     added_ids = []
     try:
-        if not isinstance(sdf, unicode):
-            sdf = unicode(sdf, 'utf-8')
-        sdf = sdf.encode('ascii', 'ignore')
+        if not isinstance(sdf, str):
+            sdf = str(sdf, 'utf-8')
+        #sdf = sdf.encode('ascii', 'ignore')
         sdf = sdf.split('\n')
         for line in sdf:
             linecounter += 1
@@ -65,7 +68,7 @@ def addMyCompounds(sdf, user):
                 while len(Compound.objects.filter(cid=line, user=user)) \
                     > 0:
                     appendNumber += 1
-                    line = oldCid + '_' + str(appendNumber)
+                    line = str(oldCid) + '_' + str(appendNumber)
             sdffile += line
             sdffile += '\n'
             if line.startswith('$$$$'):

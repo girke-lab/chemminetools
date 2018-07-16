@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from builtins import object
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -15,7 +16,7 @@ class Compound(models.Model):
     smiles = models.TextField()
     user = models.ForeignKey(User, db_index=True)
 
-    class Meta:
+    class Meta(object):
 
         ordering = ['id']
 

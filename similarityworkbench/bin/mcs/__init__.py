@@ -1,16 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import Cmcs
+from __future__ import absolute_import
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+from builtins import range
+from builtins import object
+from . import Cmcs
 
 
-class Graph:
+class Graph(object):
 
     def __init__(self, filename):
         self.content = file(filename).read()
         self.storage = Cmcs.read_graph(filename)
         if self.storage is None:
-            raise 'The graph file is not valid'
+            raise ValueError('The graph file is not valid')
 
     def __str__(self):
         return self.content
@@ -22,7 +28,7 @@ class SDFGraph(Graph):
         self.content = sdf
         self.storage = Cmcs.parse_sdf(sdf)
         if self.storage is None:
-            raise 'The SDF is not valid'
+            raise ValueError('The SDF is not valid')
 
     def sub(self, indices):
         if self.storage is None:

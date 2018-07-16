@@ -1,10 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
 from django.conf.urls.defaults import *
 from django.conf import settings
 import logging
-from views import *
+from .views import *
 
 urlpatterns = patterns('', 
     url(r'^query/$', search),

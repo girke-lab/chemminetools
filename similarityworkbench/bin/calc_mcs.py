@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 import sys
 import mcs
 
@@ -80,9 +81,9 @@ def sdf_mcs(sdffile1, sdffile2, aromatic=0):
         _g2 = convert_aromatic(g2, flexible=True)
         m = mcs.mcs(_g1, _g2)
     else:
-        raise 'wrong aromatic processing hint'
+        raise ValueError('wrong aromatic processing hint')
     m_size = len(m)
-    sub = g1.sub(m.keys())
+    sub = g1.sub(list(m.keys()))
     return (g1_size, g2_size, m_size, sub)
 
 
@@ -100,8 +101,8 @@ if __name__ == '__main__':
             flex = 2
         (g1_size, g2_size, m_size, sub) = sdf_mcs(sdffile1, sdffile2,
                 aromatic=flex)
-        print 'ok %d %d %d' % (m_size, g1_size, g2_size)
-        print sub
+        print('ok %d %d %d' % (m_size, g1_size, g2_size))
+        print(sub)
     except:
-        print 'error'
+        print('error')
         raise

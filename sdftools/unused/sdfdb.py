@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 
 """create a db to handle random access to large SDF file"""
+from __future__ import absolute_import
 
 from anydbm import open
-from sdfiterator import sdf_iter
+from .sdfiterator import sdf_iter
 import logging
 from logging import info, debug, NOTSET, DEBUG, INFO
 

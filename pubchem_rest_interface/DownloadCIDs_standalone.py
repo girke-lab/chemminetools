@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # make it possible to run as standalone program
+from __future__ import print_function
 import sys
 import string
 import re
@@ -14,7 +15,7 @@ from django.conf import settings
 from django.contrib import messages
 
 # load functions used
-from pubchem_soap_interface.DownloadCIDs import DownloadCIDs 
+from pubchem_rest_interface.Pubchem_pug import DownloadCIDs 
 
 def main():
     cids = sys.stdin.read()
@@ -34,7 +35,7 @@ def main():
     else:
         messages.error(request, 'Error: No valid CIDs entered!')
         sdf = None
-    print sdf
+    print(sdf)
 
 if __name__ == '__main__':
     main()

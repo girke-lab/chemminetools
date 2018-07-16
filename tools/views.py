@@ -1,10 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from builtins import next
+from builtins import str
 import re
 import os
 import csv
 import time
+import traceback
 from collections import defaultdict, OrderedDict
 from django.contrib.auth.decorators import user_passes_test
 from django.shortcuts import redirect, render_to_response
@@ -16,7 +20,7 @@ from django.utils.http import urlquote
 from guest.decorators import guest_allowed, login_required
 from compounddb.models import Compound
 from tools.runapp import *
-from models import *
+from .models import *
 from sdftools.moleculeformats import batch_sdf_to_smiles
 from simplejson import dumps
 
@@ -33,7 +37,8 @@ def launch_job(request, category=None):
             form = AppFormSet()
             form = str(form)
             response = dict(form=form, desc=application.description)
-        except:
+        except Exception as e:
+            print(traceback.format_exc())
             response = dict(form='ERROR')
         return HttpResponse(dumps(response), 'text/json')
     if request.method == 'POST':
@@ -57,8 +62,8 @@ def launch_job(request, category=None):
             input = 'chemical/x-mdl-sdfile'
         elif application.input_type == 'upload':
             input = request.FILES['File Upload'].read()
-            if not isinstance(input, unicode):
-                input = unicode(input, 'utf-8')
+            if not isinstance(input, str):
+                input = str(input, 'utf-8')
             input = input.encode('ascii', 'ignore')
         else:
             input = ''
@@ -241,7 +246,7 @@ def view_job(
                 bin = line[2]
                 bins[bin].append(cid)
             f.close()
-            bins = OrderedDict(sorted(bins.items(), key=lambda t: \
+            bins = OrderedDict(sorted(list(bins.items()), key=lambda t: \
                                int(t[0])))
             return render_to_response('bins.html',
                     dict(title=str(job.application) + ' Results',

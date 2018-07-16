@@ -1,14 +1,15 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
 from django.shortcuts import get_object_or_404, get_list_or_404, \
     render_to_response, redirect
 from django.template import RequestContext
 from django.http import HttpResponseRedirect, HttpResponse, Http404
 from django.core.paginator import Paginator, InvalidPage, EmptyPage
 from django.core.exceptions import ObjectDoesNotExist
-from pubchem_soap_interface.pubchemdl import download
-from pubchem_soap_interface.SimilaritySearch import SimilaritySearch
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.views.decorators.csrf import csrf_exempt
@@ -17,7 +18,7 @@ from tools.runapp import *
 from django.contrib.auth.models import User
 from guest.decorators import guest_allowed, login_required
 import random, string, time, re
-from converters import inputConverters, outputConverters
+from .converters import inputConverters, outputConverters
 from bs4 import BeautifulSoup
 
 @csrf_exempt
@@ -39,12 +40,12 @@ def listCMTools(request, url):
 
 def RObjectType(tool, type):
     if type == 'input':
-        if tool.input_type in inputConverters.keys():
+        if tool.input_type in list(inputConverters.keys()):
             object = inputConverters[tool.input_type]
         else:
             object = inputConverters['default']
     else:
-        if tool.output_type in outputConverters.keys():
+        if tool.output_type in list(outputConverters.keys()):
             object = outputConverters[tool.output_type]
         else:
             object = outputConverters['default']
@@ -98,13 +99,13 @@ def getConverter(request, url):
     toolName = request.POST['toolName']
     if converterType == 'input':
         mimeType = Application.objects.get(name=toolName).input_type
-        if mimeType in inputConverters.keys():
+        if mimeType in list(inputConverters.keys()):
             result = inputConverters[mimeType]
         else:
             result = inputConverters['default']
     else:
         mimeType = Application.objects.get(name=toolName).output_type
-        if mimeType in outputConverters.keys():
+        if mimeType in list(outputConverters.keys()):
             result = outputConverters[mimeType]
         else:
             result = outputConverters['default']
@@ -123,7 +124,7 @@ def launchCMTool(request, url):
         sysrand = random.SystemRandom()
         length = 64
         chars = string.ascii_letters + string.digits + '!@#$%^&*()'
-        password = ''.join(sysrand.choice(chars) for _ in xrange(length))
+        password = ''.join(sysrand.choice(chars) for _ in range(length))
         user = User.objects.create_user('ChemmineR', 'none', password)
 
     # create and validate job form
@@ -217,93 +218,98 @@ def jobResult(request, url):
 # below this line are legacy tools
 # to be eliminated in a future version
 
-@csrf_exempt
 def runapp(request, url):
-    if request.method == 'POST':
-        app = str(request.GET.get('app', '1'))
-        if app == 'getIds':
-            try:
+    app = str(request.GET.get('app', '1'))
+    print("request for app "+app)
+    return HttpResponse('ERROR: invalid app specified', mimetype='text/plain')
 
-                # parse and test input
-
-                cids = str(request.POST['cids'])
-
-                # launch app
-
-                response = getIds(cids)
-            except:
-                response = \
-                    HttpResponse('ERROR: no results or invalid query',
-                                 mimetype='text/plain')
-        elif app == 'searchString':
-            try:
-
-                # parse and test input
-
-                smiles = str(request.POST['smiles'])
-
-                # launch app
-
-                response = searchString(smiles)
-            except:
-                response = \
-                    HttpResponse('ERROR: no results or invalid query',
-                                 mimetype='text/plain')
-        elif app == 'sdf2smiles':
-            try:
-
-                # parse and test input
-
-                sdf = str(request.POST['sdf'])
-
-                # launch app
-
-                response = sdf2smiles(sdf)
-            except:
-                response = \
-                    HttpResponse('ERROR: no results or invalid query',
-                                 mimetype='text/plain')
-        elif app == 'smiles2sdf':
-            try:
-
-                # parse and test input
-
-                smiles = str(request.POST['smiles'])
-
-                # launch app
-
-                response = smiles2sdf(smiles)
-            except:
-                response = \
-                    HttpResponse('ERROR: no results or invalid query',
-                                 mimetype='text/plain')
-        else:
-            response = HttpResponse('ERROR: invalid app specified',
-                                    mimetype='text/plain')
-        return response
-    else:
-        return HttpResponse('ERROR: query must be an HTTP POST\n',
-                            mimetype='text/plain')
-
-def getIds(cids):
-    cids = cids.split(',')
-    cids = [int(cid) for cid in cids]
-    response = download(cids)
-    return HttpResponse(response, mimetype='text/plain')
-
-
-def searchString(smiles):
-    id_list = SimilaritySearch(smiles)
-    id_list = [str(cid) for cid in id_list]
-    id_list = ','.join(id_list)
-    return HttpResponse(id_list, mimetype='text/plain')
-
-
-def smiles2sdf(smiles):
-    sdf = smiles_to_sdf(smiles)
-    return HttpResponse(sdf, mimetype='text/plain')
-
-
-def sdf2smiles(sdf):
-    sdf = sdf_to_smiles(sdf)
-    return HttpResponse(sdf, mimetype='text/plain')
+#@csrf_exempt
+#def runapp(request, url):
+#    if request.method == 'POST':
+#        app = str(request.GET.get('app', '1'))
+#        if app == 'getIds':
+#            try:
+#
+#                # parse and test input
+#
+#                cids = str(request.POST['cids'])
+#
+#                # launch app
+#
+#                response = getIds(cids)
+#            except:
+#                response = \
+#                    HttpResponse('ERROR: no results or invalid query',
+#                                 mimetype='text/plain')
+#        elif app == 'searchString':
+#            try:
+#
+#                # parse and test input
+#
+#                smiles = str(request.POST['smiles'])
+#
+#                # launch app
+#
+#                response = searchString(smiles)
+#            except:
+#                response = \
+#                    HttpResponse('ERROR: no results or invalid query',
+#                                 mimetype='text/plain')
+#        elif app == 'sdf2smiles':
+#            try:
+#
+#                # parse and test input
+#
+#                sdf = str(request.POST['sdf'])
+#
+#                # launch app
+#
+#                response = sdf2smiles(sdf)
+#            except:
+#                response = \
+#                    HttpResponse('ERROR: no results or invalid query',
+#                                 mimetype='text/plain')
+#        elif app == 'smiles2sdf':
+#            try:
+#
+#                # parse and test input
+#
+#                smiles = str(request.POST['smiles'])
+#
+#                # launch app
+#
+#                response = smiles2sdf(smiles)
+#            except:
+#                response = \
+#                    HttpResponse('ERROR: no results or invalid query',
+#                                 mimetype='text/plain')
+#        else:
+#            response = HttpResponse('ERROR: invalid app specified',
+#                                    mimetype='text/plain')
+#        return response
+#    else:
+#        return HttpResponse('ERROR: query must be an HTTP POST\n',
+#                            mimetype='text/plain')
+#
+#def getIds(cids):
+#    cids = cids.split(',')
+#    cids = [int(cid) for cid in cids]
+#    response = download(cids)
+#    return HttpResponse(response, mimetype='text/plain')
+#
+#
+#def searchString(smiles):
+#    id_list = SimilaritySearch(smiles)
+#    id_list = [str(cid) for cid in id_list]
+#    id_list = ','.join(id_list)
+#    return HttpResponse(id_list, mimetype='text/plain')
+#
+#
+#def smiles2sdf(smiles):
+#    sdf = smiles_to_sdf(smiles)
+#    return HttpResponse(sdf, mimetype='text/plain')
+#
+#
+#def sdf2smiles(sdf):
+#    sdf = sdf_to_smiles(sdf)
+#    return HttpResponse(sdf, mimetype='text/plain')

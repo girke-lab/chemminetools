@@ -1,6 +1,16 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import str
+from builtins import range
+try:
+    # Python 2
+    from __builtin__ import str as builtin_str
+except ImportError:
+    # Python 3
+    from builtins import str as builtin_str
 import re
 import os
 import time 
@@ -18,7 +28,7 @@ import random
 from django.forms import Form, FileField, ModelChoiceField, \
     IntegerField, HiddenInput, CharField, TextInput
 from django import forms
-from models import *
+from .models import *
 from compounddb.models import Compound
 from types import NoneType
 outputPath = settings.TOOLS_RESULTS
@@ -67,13 +77,13 @@ def launch(
         input = makeSDF(user)
     outputFileName = outputPath + '/job_' + str(job_id)
     command = [projectDir + '/tools/tool_scripts/' + appname,'--outfile=' + outputFileName] + commandOptions
-    print 'Running: ' + str(command) + '\n'
+    print('Running: ' + str(command) + '\n')
     runningTask = subprocess.Popen(command, shell=False,
                                    stdin=subprocess.PIPE,stderr=subprocess.PIPE,stdout=subprocess.PIPE)
     try:
         #outs, errs = runningTask.communicate(input, timeout=(60 * 60 * 24 * 7)) # wait a week
         outs, errs = runningTask.communicate(input)#, timeout=(60 * 60 * 24 * 7))  # wait a week
-        print '\n outs --', outs, ' errs --', errs
+        print('\n outs --', outs, ' errs --', errs)
         return outputFileName
     except Exception as e:
         print (e)
@@ -111,7 +121,8 @@ def getAppForm(application_id, user):
                              ), empty_label=None)
     fields['application'] = IntegerField(initial=application.id,
             widget=HiddenInput())
-    return type('%sForm' % str(application.name), (Form, ), fields)
+
+    return type(builtin_str(application.name+"Form"), (Form, ), fields)
 
 def parseToolForm(form):
 
@@ -120,7 +131,7 @@ def parseToolForm(form):
     commandOptions = []
     optionsList = u''
     application = Application.objects.get(id=form.cleaned_data['application'])
-    for question in form.cleaned_data.keys():
+    for question in list(form.cleaned_data.keys()):
         if question != 'application' and question != 'File Upload':
             questionObject = \
                 ApplicationOptions.objects.get(application=application,
@@ -190,7 +201,7 @@ def updateJob(user, job_id):
 
 def deleteJob(user, job_id):
     job = updateJob(user, job_id)
-    if isinstance(job.output, unicode):
+    if isinstance(job.output, str):
         if os.path.isfile(job.output):
             os.remove(job.output)
     try:

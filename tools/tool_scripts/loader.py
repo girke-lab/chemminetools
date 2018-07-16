@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
 from yaml import load, Loader, Dumper
 
 # make it possible to run as standalone program
@@ -49,7 +50,7 @@ def main():
         )
     newApp.save()
     try:
-        for option in data['ApplicationOptions'].keys():
+        for option in list(data['ApplicationOptions'].keys()):
             optionData = data['ApplicationOptions'][option]
             newOption = ApplicationOptions(name=option,
                     realName=optionData['realName'], application=newApp)
@@ -60,7 +61,7 @@ def main():
                 newValue.save()
     except:
         pass
-    print 'Registered application ' + newApp.name + '\n'
+    print('Registered application ' + newApp.name + '\n')
     return True
 
 

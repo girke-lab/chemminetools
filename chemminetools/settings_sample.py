@@ -170,7 +170,7 @@ INSTALLED_APPS = (
     'similarityworkbench',
     'ChemmineR',
     'eisearch',
-    'pubchem_soap_interface',
+    'pubchem_rest_interface',
     )
 
 WORK_DIR = PROJECT_DIR + '/working'

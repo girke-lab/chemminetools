@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from builtins import str
+from builtins import object
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -18,7 +20,7 @@ from simplejson import dumps
 
 class compoundForm(ModelForm):
 
-    class Meta:
+    class Meta(object):
 
         model = Compound
         fields = ('cid', 'name')

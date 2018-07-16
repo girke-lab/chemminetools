@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from builtins import str
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.http import Http404, HttpResponseBadRequest, HttpResponse

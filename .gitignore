@@ -15,3 +15,5 @@ Vagrantfile.*
 settings.py
 static_production
 vagrant
+__pycache__
+*.bak

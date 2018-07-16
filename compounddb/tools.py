@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+from builtins import str
 from django.db import models
 from django.contrib.auth.models import User
 from logging import root, basicConfig
@@ -73,7 +75,7 @@ def parse_annotation(sdf, namekey):
 
     # if the name is not in sdf:
 
-    if not moldata.has_key(namekey):
+    if namekey not in moldata:
         moldata[namekey] = ''
 
     # smiles
@@ -206,7 +208,7 @@ def update_mw(
 
     import datetime
     begin = datetime.datetime.now()
-    print 'starts at: %s' % begin
+    print('starts at: %s' % begin)
 
     library = get_library(lib_name, lib_ver)
     mw = PropertyField.objects.get(name='MW')
@@ -223,7 +225,7 @@ def update_mw(
             else:
                 c = Compound.objects.get(library=library, cid=cid)
         except Compound.DoesNotExist:
-            print 'not found: line %s, cid=%s' % (count, cid)
+            print('not found: line %s, cid=%s' % (count, cid))
             pass
 
         try:
@@ -233,9 +235,9 @@ def update_mw(
         except Property.DoesNotExist:
             p = Property(field=mw, compound=c, value=weight)
             p.save()
-            print 'new p for %s, line %s' % (cid, count)
+            print('new p for %s, line %s' % (cid, count))
         except:
-            print '----->line %s, cid=%s' % (count, cid)
+            print('----->line %s, cid=%s' % (count, cid))
             pass
 
         count += 1
@@ -245,7 +247,7 @@ def update_mw(
     fp.close()
 
     end = datetime.datetime.now()
-    print 'ends at: %s' % end
+    print('ends at: %s' % end)
 
     return
 
@@ -272,12 +274,12 @@ def fix_kegg_cid():
     for c in library.compound_set.all():
         if '(noMol)' in c.cid:
             old = c.cid
-            print old
+            print(old)
             c.cid = old.strip('(noMol)')
             c.save()
             count += 1
 
-    print '%s compounds updated with new cid' % count
+    print('%s compounds updated with new cid' % count)
     return
 
 

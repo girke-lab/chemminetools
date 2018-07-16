@@ -3,6 +3,8 @@
 
 """iterator over an sdf files"""
 
+from builtins import next
+from builtins import object
 from subprocess import Popen, PIPE
 import re
 
@@ -25,9 +27,9 @@ class GzipFile(object):
         for i in self.p.stdout:
             yield i
 
-    def next(self):
+    def __next__(self):
         assert self.status == 'open'
-        return self.p.stdout.next()
+        return next(self.p.stdout)
 
     def close(self):
         try:
