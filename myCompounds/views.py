@@ -6,7 +6,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
-from django.shortcuts import redirect, render_to_response
+from django.shortcuts import redirect, render
 from compounddb import first_mol, InvalidInputError
 
 # from compounddb.search import search
@@ -23,6 +23,7 @@ import string
 import sys
 import traceback
 import time
+import tools
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.conf import settings
@@ -36,6 +37,8 @@ def showCompounds(request, resource):
     # perform query for existing myCompounds
 
     (page, matches) = getMyCompounds(request)
+    print("page count: "+str(page.count))
+    print("page num pages: "+str(page.num_pages))
     if resource:
         if resource == 'deleteAll':
             deleteMyCompounds(request)
@@ -43,25 +46,22 @@ def showCompounds(request, resource):
             messages.error(request, 'All Compounds Deleted!')
         if resource == 'downloadSMILES.smi':
             smiles = makeSMILES(request.user)
-            return HttpResponse(smiles, mimetype='text/plain')
+            return HttpResponse(smiles, content_type='text/plain')
         if resource == 'downloadSDF.sdf':
             sdf = makeSDF(request.user)
-            return HttpResponse(sdf, mimetype='text/plain')
+            return HttpResponse(sdf, content_type='text/plain')
     if matches:
         for match in matches:
             match.smiles = re.match(r"^(\S+)", match.smiles).group(1)
             match.smiles = urlquote(match.smiles)
-    return render_to_response('showCompounds.html', dict(p=page,
-                              matches=matches),
-                              context_instance=RequestContext(request))
+    return render(request,'showCompounds.html', dict(p=page, matches=matches))
 
 
 @guest_allowed
 def uploadCompound(request, resource = None, job_id = None):
     if (request.method == 'GET') and (resource != u'job'):
-        return render_to_response('addCompounds.html',
-                                  dict(input_mode='smiles-input'),
-                                  context_instance=RequestContext(request))
+        return render(request,'addCompounds.html',
+                                  dict(input_mode='smiles-input'))
     else:
         sdf = None
         name = None
@@ -90,7 +90,7 @@ def uploadCompound(request, resource = None, job_id = None):
             input_mode = 'sdf-upload'
             try:
                 sdf = request.FILES['sdf']
-                sdf = sdf.read()
+                sdf = sdf.read().decode("utf-8")
             except (InputError, InvalidInputError):
                 messages.error(request, 'Invalid SDF!')
                 sdf = None
@@ -140,14 +140,13 @@ def uploadCompound(request, resource = None, job_id = None):
                 sdf = None
 
         if not sdf:
-            return render_to_response('addCompounds.html',
+            return render('addCompounds.html',
                     dict(input_mode=input_mode,
-                    post_data=request.POST),
-                    context_instance=RequestContext(request))
+                    post_data=request.POST))
         newJob = createJob(request.user, 'Upload Compounds', '',
                            ['--user=' + str(request.user.id)], sdf)
         time.sleep(2)
-        return redirect('tools.views.view_job', job_id=newJob.id,
+        return redirect(tools.views.view_job, job_id=newJob.id,
                         resource='')
 
 
@@ -193,8 +192,8 @@ def getMyCompounds(request):
 
 
 def getMW(sdf):
-    if isinstance(sdf, str):
-        sdf = sdf.encode('ascii', 'ignore')
+    #if isinstance(sdf, str):
+        #sdf = sdf.encode('ascii', 'ignore')
 
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats('sdf', 'smi')
@@ -205,8 +204,8 @@ def getMW(sdf):
 
 
 def getFormula(sdf):
-    if isinstance(sdf, str):
-        sdf = sdf.encode('ascii', 'ignore')
+    #if isinstance(sdf, str):
+        #sdf = sdf.encode('ascii', 'ignore')
 
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats('sdf', 'smi')
@@ -217,8 +216,8 @@ def getFormula(sdf):
 
 
 def getInChI(sdf):
-    if isinstance(sdf, str):
-        sdf = sdf.encode('ascii', 'ignore')
+    #if isinstance(sdf, str):
+        #sdf = sdf.encode('ascii', 'ignore')
 
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats('sdf', 'InChI')

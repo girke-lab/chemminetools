@@ -3,18 +3,22 @@
 from builtins import str
 import re
 import time
-from string import join
-from django.shortcuts import redirect, render_to_response
+#from string import join
+from django.shortcuts import redirect, render
 from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
 from django.utils.http import urlunquote, urlquote
 from tools.models import Application, Job
 from tools.runapp import updateJob, createJob, getAppForm, parseToolForm
+import tools
+import eisearch
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from eisearch import first_mol
+import traceback
 
 @guest_allowed
 def search(request):
@@ -26,9 +30,8 @@ def search(request):
             smi = str(request.GET['smi'])
             smi = urlunquote(smi)
         form = AppFormSet()
-        return render_to_response('search.html', dict(mode='form',
-            smi=smi, form=form),
-            context_instance=RequestContext(request)) 
+        return render(request,'search.html', dict(mode='form',
+            smi=smi, form=form))
     else:
         sdf = None
         smiles = None
@@ -38,7 +41,7 @@ def search(request):
             sdf = u''
             try:
                 smiles = request.POST['smiles']
-                sdf = smiles_to_sdf(str(smiles))
+                sdf = smiles_to_sdf(smiles)
             except:
                 messages.error(request, 'Error: Invalid SMILES string!')
                 sdf = None
@@ -49,6 +52,7 @@ def search(request):
                 sdf = first_mol(sdf.read())
                 smiles = sdf_to_smiles(sdf)
             except:
+                print(traceback.format_exc())
                 messages.error(request, 'Invalid SDF!')
                 sdf = None
         elif 'sdf' in request.POST:
@@ -61,6 +65,7 @@ def search(request):
                     smiles = smiles + ' ' + compid
                     sdf = smiles_to_sdf(smiles)
                 except:
+                    print(traceback.format_exc())
                     messages.error(request, 'Invalid drawing!')
                     sdf = None
             else:
@@ -69,6 +74,7 @@ def search(request):
                     sdf = first_mol(request.POST['sdf'])
                     smiles = sdf_to_smiles(sdf)
                 except:
+                    print(traceback.format_exc())
                     messages.error(request, 'Invalid input SDF!')
                     sdf = None
         form = AppFormSet(request.POST)
@@ -78,7 +84,8 @@ def search(request):
             sdf = None
             messages.error(request, "Invalid form options!")
         if not sdf:
-            return redirect('eisearch.views.search')
+            print("no sdf found")
+            return redirect(eisearch.views.search)
         smiles = re.search(r'(\S+)', smiles).group(1)
         smiles = urlquote(smiles)
         if request.POST['algorithm'] == u'fp':
@@ -88,7 +95,7 @@ def search(request):
             newJob = createJob(request.user, 'EI Search', optionsList, 
                                commandOptions, sdf, smiles)
         time.sleep(1)
-        return redirect('tools.views.view_job', job_id=newJob.id,resource='')
+        return redirect(tools.views.view_job, job_id=newJob.id,resource='')
 
 @guest_allowed
 def getStructures(request, job_id, format):
@@ -100,8 +107,9 @@ def getStructures(request, job_id, format):
         f = open(job.output, 'r')
         result = f.read()
         f.close() 
-        result = join(re.findall(r'^\S+', result, re.MULTILINE), sep='\n')
+        result = '\n'.join(re.findall(r'^\S+', result, re.MULTILINE))
     except Job.DoesNotExist:
+        print(traceback.format_exc())
         raise Http404
     newJob = createJob(request.user, 'pubchemID2SDF', '', [], result,
                        format, async=False) 
@@ -109,4 +117,5 @@ def getStructures(request, job_id, format):
         filename = 'search_result.smi'
     else:
         filename = 'search_result.sdf' 
-    return redirect('tools.views.view_job', job_id=newJob.id,resource='other',filename=filename)
+    return redirect(tools.views.view_job, job_id=newJob.id,resource='other',filename=filename)
+    #return redirect('/tools/view_job/'+str(newJob.id),resource='other',filename=filename)

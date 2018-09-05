@@ -13,7 +13,7 @@ class ApplicationCategories(models.Model):
 
     name = models.CharField(max_length=250, unique=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -30,7 +30,7 @@ class Application(models.Model):
 
         ordering = ['id']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -44,7 +44,7 @@ class ApplicationOptions(models.Model):
 
         ordering = ['id']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.application.name + '_' + self.name
 
 
@@ -58,7 +58,7 @@ class ApplicationOptionsList(models.Model):
 
         ordering = ['id']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.name
 
 
@@ -82,7 +82,7 @@ class Job(models.Model):
 
         ordering = ['-id']
 
-    def __unicode__(self):
+    def __str__(self):
         return self.application.name + ' ' \
             + self.start_time.strftime(DATETIME_FORMAT)
 

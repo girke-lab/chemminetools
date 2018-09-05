@@ -45,8 +45,8 @@ def sdf_to_smiles(sdf):
 
     # remove unicode
 
-    if isinstance(sdf, str):
-        sdf = sdf.encode('ascii', 'ignore')
+    #if isinstance(sdf, str):
+        #sdf = sdf.encode('ascii', 'ignore')
 
     obConversion = openbabel.OBConversion()
     obConversion.SetInAndOutFormats('sdf', 'smi')

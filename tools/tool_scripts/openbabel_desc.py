@@ -45,7 +45,7 @@ def main():
     labels = re.match(r"^(.*),", labels).group(1)
     of.write(labels + '\n')
     inputTemp = tempfile.NamedTemporaryFile(suffix='.sdf', delete=False)
-    inputTemp.write(fa)
+    inputTemp.write(fa.encode())
     inputTempName = inputTemp.name
     inputTemp.close()
     for mol in pybel.readfile('sdf', inputTempName):

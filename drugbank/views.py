@@ -1,7 +1,7 @@
 from __future__ import print_function
 # Create your views here.
 from builtins import str
-from django.shortcuts import redirect, render_to_response, render
+from django.shortcuts import redirect, render
 from django.http  import HttpResponse
 from django.template import RequestContext
 from guest.decorators import guest_allowed, login_required
@@ -61,7 +61,7 @@ def drugbank_lookup(request):
         #
 
         return HttpResponse(result_json)
-    return render_to_response('annotation_5.html',c, context_instance=RequestContext(request) )
+    return render(request,'annotation_5.html',c)
 
 
 def get_results(queryset, sorting_order, request):
@@ -246,10 +246,8 @@ def drugbank_lookup_1(request):
         print('\n do resutl_json', result_json)
         return HttpResponse(result_json)
 
-    return render_to_response('annotation_3.html', {'result': result_json, 'url': url}, context_instance=RequestContext(request))
+    return render(request,'annotation_3.html', {'result': result_json, 'url': url})
                         #      'annotation_test.html',{'result': result_json, 'url': url})
-   # return render_to_response('annotation_test.html', {},
-                                   #context_instance=RequestContext(request))
 
 
 #

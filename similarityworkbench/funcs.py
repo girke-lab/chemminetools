@@ -16,7 +16,7 @@ from subprocess import Popen, PIPE
 import os
 cur_dir = os.path.dirname(os.path.abspath(__file__))
 ap_cmd = os.path.join(cur_dir, 'bin', 'compare cmp-cmp')
-mcs_cmd = os.path.join(cur_dir, 'bin', 'calc_mcs.py')
+mcs_cmd = os.path.join(cur_dir, 'bin', 'calc_mcs.R')
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_smiles
 
 
@@ -75,7 +75,7 @@ def smiles_to_sdf_input_adaptor(func):
 @smiles_to_sdf_input_adaptor
 def mcs(sdf1, sdf2):
     calc_cmd = "%s '%s' '%s'" % (mcs_cmd, sdf1, sdf2)
-    ret = popen(calc_cmd)
+    ret = popen(calc_cmd).decode()
     (status, mcs) = ret.split('\n', 1)
     if status == 'error':
         raise ExternalProgramError()
@@ -96,7 +96,7 @@ def mcs(sdf1, sdf2):
         sim_max='%.4f' % sim_max,
         sim_tanimoto='%.4f' % sim_tanimoto,
         img='/similarity/renderer/' + s,
-        md5=md5(mcs).hexdigest(),
+        md5=md5(mcs.encode()).hexdigest(),
         title=title,
         smiles=mcs,
         )

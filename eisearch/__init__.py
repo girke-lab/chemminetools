@@ -18,6 +18,7 @@ def first_mol(sdf):
         content = sdf.read(160000)
     except:
         content = sdf
+    content = content if type(content) is str else  content.decode()
     m_end = re.compile(r'^M\s+END', re.MULTILINE)
     match = m_end.search(content)
     if not match:

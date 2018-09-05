@@ -129,7 +129,7 @@ def main():
     labels = re.match(r"^(.*),", labels).group(1)
     of.write(labels + '\n')
     inputTemp = tempfile.NamedTemporaryFile(suffix='.sdf', delete=False)
-    inputTemp.write(fa)
+    inputTemp.write(fa.encode())
     inputTempName = inputTemp.name
     inputTemp.close()
     for mol in pybel.readfile('sdf', inputTempName):
@@ -141,7 +141,7 @@ def main():
         sdf = sdf.write(format='sdf')
         sdfTemp = tempfile.NamedTemporaryFile(suffix='.sdf',
                 delete=False)
-        sdfTemp.write(sdf)
+        sdfTemp.write(sdf.encode())
         sdfName = sdfTemp.name
         sdfTemp.close()
         fh = tempfile.NamedTemporaryFile(suffix='.sdf')

@@ -6,10 +6,16 @@ from builtins import str
 import sys
 sys.path.append('/srv/chemminetools')
 sys.path.append('/srv/chemminetools/sdftools')  # allow tools.py to be imported
-from django.core.management import setup_environ
-import chemminetools.settings
+
+import os 
+import django
+os.environ.setdefault("DJANGO_SETTINGS_MODULE","chemminetools.settings")
+django.setup()
+#from django.core.management import setup_environ
+
+#import chemminetools.settings
+#setup_environ(chemminetools.settings)
 import argparse
-setup_environ(chemminetools.settings)
 from django.contrib.auth.models import User
 from django.conf import settings
 

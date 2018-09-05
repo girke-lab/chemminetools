@@ -4,7 +4,7 @@
 from builtins import str
 from builtins import object
 from django.http import Http404, HttpResponse, HttpResponseRedirect
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from compounddb.models import Compound
 from guest.decorators import guest_allowed, login_required
@@ -16,6 +16,8 @@ from django.contrib import messages
 import pybel
 import re
 from simplejson import dumps
+import tempfile
+import os
 
 
 class compoundForm(ModelForm):
@@ -41,8 +43,19 @@ def render_image(request, id, filename):
         raise Http404
     smiles = re.match(r"^(\S+)", compound.smiles).group(1)
     mymol = pybel.readstring('smi', str(smiles))
-    png = mymol.write(format='_png2')
-    return HttpResponse(png, mimetype='image/png')
+    #this simple method below does not work as it returns the image as a unicode string
+    # which cannot be converted back to raw bytes
+    ##png = mymol.write(format='_png2')
+
+    # so we write the image to a temp file and then read it back as bytes
+    fp = tempfile.NamedTemporaryFile()
+    fp.close() # deletes the file, but we still use the unique file name
+    mymol.write(format='_png2',filename=fp.name)
+    imageFile = open(fp.name,"rb")
+    image = imageFile.read()
+    imageFile.close()
+    os.remove(fp.name)
+    return HttpResponse(image, content_type='image/png')
 
 
 @guest_allowed
@@ -95,21 +108,19 @@ def compound_detail(
 
     if resource:
         if resource == 'smiles':
-            return HttpResponse(smiles, mimetype='text/plain')
+            return HttpResponse(smiles, content_type='text/plain')
         elif resource == 'inchi':
-            return HttpResponse(inchi, mimetype='text/plain')
+            return HttpResponse(inchi, content_type='text/plain')
         elif resource == 'sdf':
-            return HttpResponse(sdf, mimetype='text/plain')
+            return HttpResponse(sdf, content_type='text/plain')
         elif resource == 'delete':
             compound.delete()
-            return HttpResponse('deleted', mimetype='text/plain')
+            return HttpResponse('deleted', content_type='text/plain')
         elif resource == 'editform':
             form = compoundForm(instance=compound)
-            return render_to_response('genericForm.html',
+            return render(request,'genericForm.html',
                     dict(title='Edit Compound \'' + compound.cid + '\''
-                    , form=form),
-                    context_instance=RequestContext(request))
+                    , form=form))
 
-    return render_to_response('compound.html', dict(compound=compound,
-                              sdf=sdf, smiles=smiles, inchi=inchi),
-                              context_instance=RequestContext(request))
+    return render(request,'compound.html', dict(compound=compound,
+                              sdf=sdf, smiles=smiles, inchi=inchi))

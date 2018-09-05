@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from builtins import str
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 from django.template import RequestContext
 from django.http import Http404, HttpResponseBadRequest, HttpResponse
 from simplejson import dumps
@@ -17,6 +17,9 @@ import pybel
 import re
 
 import os
+import tempfile
+import sys
+import traceback
 from django.conf import settings
 
 
@@ -25,23 +28,44 @@ from django.conf import settings
 def renderer(request, smiles):
     try:
         smiles = urlunquote(smiles)
-        smiles = re.match(r"^(\S{1,2000})", str(smiles)).group(1)
-        mymol = pybel.readstring('smi', str(smiles))
-        png = mymol.write(format='_png2')
-        return HttpResponse(png, mimetype='image/png')
+        smiles = re.match(r"^(\S{1,2000})", smiles).group(1)
+        mymol = pybel.readstring('smi', smiles)
+        #this simple method below does not work as it returns the image as a unicode string
+        # which cannot be converted back to raw bytes
+        ##png = mymol.write(format='_png2')
+
+        # so we write the image to a temp file and then read it back as bytes
+        fp = tempfile.NamedTemporaryFile()
+        fp.close() # deletes the file, but we still use the unique file name
+        mymol.write(format='_png2',filename=fp.name)
+        imageFile = open(fp.name,"rb")
+        image = imageFile.read()
+        imageFile.close()
+        os.remove(fp.name)
+        return HttpResponse(image, content_type='image/png')
     except:
+        print("error rendering "+smiles)
+        print("Unexpected error:", sys.exc_info())
+        traceback.print_tb(sys.exc_info()[2])
         raise Http404
 
 
 def get_workbench_compounds(request):
+    print("getting workbench compounds")
     ret = []
     from hashlib import md5
     (page, compounds) = getMyCompounds(request)
     for compound in compounds:
-        md5id = md5(compound.cid).hexdigest()
-        img = '/compounds/' + str(compound.id) + '/png'
-        ret.append(dict(img=img, md5=md5id, title=compound.cid,
-                   smiles=compound.smiles))
+        try:
+            md5id = md5(compound.cid.encode()).hexdigest()
+            img = '/compounds/' + str(compound.id) + '/png'
+            ret.append(dict(img=img, md5=md5id, title=compound.cid,
+                       smiles=compound.smiles))
+        except:
+            print("error while processing compound: ")
+            print("Unexpected error:", sys.exc_info())
+            traceback.print_tb(sys.exc_info()[2])
+            raise
     return ret
 
 
@@ -52,7 +76,7 @@ def add_compounds(smiles):
     ret = []
     from hashlib import md5  # for md5 ID of compounds
     for (i, c) in enumerate(smiles.splitlines()):
-        md5id = md5(c).hexdigest()
+        md5id = md5(c.encode()).hexdigest()
         try:
             (s, name) = c.split(None, 1)
         except:
@@ -68,14 +92,14 @@ def ui(request):
     if request.method == 'GET':
 
         # on GET, show the UI page
+        print("loading similarity page")
 
         try:
             preload = dumps(get_workbench_compounds(request))
         except:
             preload = ''
-        return render_to_response('similarityworkbench.html',
-                                  dict(preload=preload),
-                                  context_instance=RequestContext(request))
+        return render(request,'similarityworkbench.html',
+                                  dict(preload=preload))
     else:
 
         # on POST, do actual work; the form tells what function to invoke
@@ -117,7 +141,7 @@ def ui(request):
 
             failed = err
             return HttpResponse(dumps(dict(failed=failed,
-                                status=status)), mimetype='text/json')
+                                status=status)), content_type='text/json')
         elif hasattr(funcs, func):
 
         # the other type is actually processing request. Check whether the
@@ -126,7 +150,7 @@ def ui(request):
 
             f = getattr(funcs, func)
             ret = f(*request.POST.getlist('compound'))
-            return HttpResponse(dumps(ret), mimetype='text/json')
+            return HttpResponse(dumps(ret), content_type='text/json')
         else:
 
         # we don't know how to process this request

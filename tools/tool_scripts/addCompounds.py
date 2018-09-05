@@ -12,10 +12,20 @@ import string
 import traceback
 sys.path.append('/srv/chemminetools')
 sys.path.append('/srv/chemminetools/sdftools')  # allow tools.py to be imported
-from django.core.management import setup_environ
-import chemminetools.settings
+
+import os
+import django
+#from chemmminetools import models
+
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE","chemminetools.settings")
+django.setup()
+
+#import chemminetools.settings
+#from django.core.management import setup_environ
+#setup_environ(chemminetools.settings)
+
 import argparse
-setup_environ(chemminetools.settings)
 from django.contrib.auth.models import User
 from django.conf import settings
 from compounddb.tools import parse_annotation, insert_single_compound
@@ -32,9 +42,8 @@ parser.add_argument('-o', '--outfile', help='output file',
                     required=True)
 args = vars(parser.parse_args())
 
-
 def addMyCompounds(sdf, user):
-    sdffile = u''
+    sdffile = ''
     counter = 0
     linecounter = 0
     namekey = 'PUBCHEM_IUPAC_NAME'
@@ -43,7 +52,6 @@ def addMyCompounds(sdf, user):
     try:
         if not isinstance(sdf, str):
             sdf = str(sdf, 'utf-8')
-        #sdf = sdf.encode('ascii', 'ignore')
         sdf = sdf.split('\n')
         for line in sdf:
             linecounter += 1
@@ -75,6 +83,9 @@ def addMyCompounds(sdf, user):
                 try:
                     moldata = parse_annotation(sdffile, namekey)
                 except:
+                    print("error while processing sdf: ")
+                    print("Unexpected error:", sys.exc_info())
+                    traceback.print_tb(sys.exc_info()[2])
                     message = 'ERROR: invalid input format.'
                     raise Exception
                 counter += 1
@@ -84,24 +95,32 @@ def addMyCompounds(sdf, user):
                         + str(MAX_COMPOUND_LIMIT) + ' compounds.'
                     raise Exception
                 try:
+                    print("inserting compound into db")
                     newid = insert_single_compound(moldata, sdffile,
                             namekey, 'id', user)
                 except:
+                    print("error while inserting compount: ")
+                    print("Unexpected error:", sys.exc_info())
+                    traceback.print_tb(sys.exc_info()[2])
                     message = \
                         'ERROR: Database error, possibly excessively large compound?'
                     raise Exception
                 added_ids.append(newid)
-                sdffile = u''
+                sdffile = ''
         if counter > 0:
             return 'Success: Added ' + str(counter) + ' compounds.'
         else:
             return 'ERROR: No valid input found.'
-    except:
+    except Exception as e:
+        print("error while reading sdf: ")
+        print("Unexpected error:", sys.exc_info())
+        traceback.print_tb(sys.exc_info()[2])
         for id in added_ids:
             try:
                 Compound.objects.get(id=id).delete()
             except:
                 pass
+        print("exception: "+message)
         return message
 
 

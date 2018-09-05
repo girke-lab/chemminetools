@@ -1,42 +1,40 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from django.conf.urls.defaults import *
+from __future__ import print_function
+#from django.conf.urls.defaults import *
+from django.conf.urls import *
 from django.contrib import admin
 from django.conf import settings
-from django.views.generic.simple import direct_to_template
+#from django.views.generic.simple import direct_to_template
+from django.views.generic import TemplateView
 from django.views.generic import RedirectView
 from django.contrib.auth.views import login, logout
 
-# enable cron
-
-import django_cron
-django_cron.autodiscover()
 
 admin.autodiscover()
-print '\n before urls in general'
-urlpatterns = patterns(
-    r'',
+print('\n before urls in general')
+urlpatterns =[
     url(r'^admin/', include(admin.site.urls)),
-    (r'^eisearch/', include('eisearch.urls')),
-    (r'^accounts/', include('userena.urls')),
-    (r'^compounds/', include(r'compounddb.urls')),
-    (r'^my[Cc]ompounds/', include('myCompounds.urls')),
-    (r'^tools/', include('tools.urls')),
-    (r'^drugbank/', include('drugbank.urls')),
-    (r'^search/?',  RedirectView.as_view(url='/eisearch/query/')), 
-    (r'^similarity/', include('similarityworkbench.urls')),
-    (r'^ChemmineR/', include('ChemmineR.urls')),
-    (r'^robots\.txt/?$', direct_to_template, {'template': 'robots.txt',
-     'mimetype': 'text/plain'}),
-    (r'^ei/?',  RedirectView.as_view(url='/downloads/')), 
+    url(r'^eisearch/', include('eisearch.urls')),
+    url(r'^accounts/', include('userena.urls')),
+    url(r'^compounds/', include('compounddb.urls')),
+    url(r'^my[Cc]ompounds/', include('myCompounds.urls')),
+    url(r'^tools/', include('tools.urls')),
+    url(r'^drugbank/', include('drugbank.urls')),
+    url(r'^search/?',  RedirectView.as_view(url='/eisearch/query/')), 
+    url(r'^similarity/', include('similarityworkbench.urls')),
+    url(r'^ChemmineR/', include('ChemmineR.urls')),
+    url(r'^robots\.txt/?$', TemplateView.as_view(template_name='robots.txt')),
+    url(r'^ei/?',  RedirectView.as_view(url='/downloads/')), 
     url(r'^', include('cms.urls')),
-    )
-print '\n after urls in general'
+    ]
+print('\n after urls in general')
 if settings.DEBUG:
-    urlpatterns = patterns(r'', url(r'^working/(?P<path>.*)$',
-                           r'django.views.static.serve',
+    import django
+    urlpatterns = [url(r'^working/(?P<path>.*)$',
+                           django.views.static.serve,
                            {'document_root': settings.MEDIA_ROOT,
-                           'show_indexes': False}), url(r'',
-                           include(r'django.contrib.staticfiles.urls'
-                           ))) + urlpatterns
+                           'show_indexes': False}), 
+                   url(r'', include('django.contrib.staticfiles.urls'))
+                    ] + urlpatterns

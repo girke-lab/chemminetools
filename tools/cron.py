@@ -2,16 +2,18 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import absolute_import
-from django_cron import cronScheduler, Job
+from django_cron import CronJobBase, Schedule
 from .runapp import deleteOrphanJobs
 
 
-class deleteOrphans(Job):
+class deleteOrphans(CronJobBase):
 
-    run_every = 4000
+    RUN_EVERY_MINS = 4000
 
-    def job(self):
+    schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    code = 'tools.cron.deleteOrphans'
+
+    def do(self):
         deleteOrphanJobs()
 
 
-cronScheduler.register(deleteOrphans)

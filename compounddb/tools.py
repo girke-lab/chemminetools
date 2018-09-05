@@ -12,7 +12,7 @@ import re
 import tempfile
 import os
 import codecs
-import md5
+#import md5
 import compounddb.sdfiterator
 import string
 import random
@@ -56,7 +56,7 @@ def parse_annotation(sdf, namekey):
 
     inchiconv.SetInAndOutFormats('sdf', 'Inchi')
     mol = openbabel.OBMol()
-    res = inchiconv.ReadString(mol, codecs.encode(sdf, 'utf-8'))
+    res = inchiconv.ReadString(mol, sdf)
     if mol.Empty():
         root.warning('  -->  ERROR on sdf')
         raise Exception
@@ -82,7 +82,8 @@ def parse_annotation(sdf, namekey):
 
     inchiconv.SetInAndOutFormats('sdf', 'smi')
     mol = openbabel.OBMol()
-    res = inchiconv.ReadString(mol, codecs.encode(sdf, 'utf-8'))
+    #res = inchiconv.ReadString(mol, codecs.encode(sdf, 'utf-8'))
+    res = inchiconv.ReadString(mol, sdf)
     if mol.Empty():
         root.warning('  -->  ERROR on sdf')
         raise Exception
@@ -162,7 +163,8 @@ def gen_joelib_property(sdf):
     # save the input in FS
 
     t = tempfile.NamedTemporaryFile(suffix='.sdf')
-    t.write(codecs.encode(sdf, 'utf-8'))
+    #t.write(codecs.encode(sdf, 'utf-8'))
+    t.write(sdf)
     t.flush()
 
     # prepare the output file

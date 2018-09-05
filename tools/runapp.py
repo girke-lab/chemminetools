@@ -30,7 +30,7 @@ from django.forms import Form, FileField, ModelChoiceField, \
 from django import forms
 from .models import *
 from compounddb.models import Compound
-from types import NoneType
+#from types import NoneType
 outputPath = settings.TOOLS_RESULTS
 projectDir = settings.PROJECT_DIR
 
@@ -81,11 +81,13 @@ def launch(
     runningTask = subprocess.Popen(command, shell=False,
                                    stdin=subprocess.PIPE,stderr=subprocess.PIPE,stdout=subprocess.PIPE)
     try:
+        print("input type: "+str(type(input)))
         #outs, errs = runningTask.communicate(input, timeout=(60 * 60 * 24 * 7)) # wait a week
-        outs, errs = runningTask.communicate(input)#, timeout=(60 * 60 * 24 * 7))  # wait a week
+        outs, errs = runningTask.communicate(input.encode())#, timeout=(60 * 60 * 24 * 7))  # wait a week
         print('\n outs --', outs, ' errs --', errs)
         return outputFileName
     except Exception as e:
+        print("An exception occured while running "+str(command))
         print (e)
         runningTask.kill()
         return False
