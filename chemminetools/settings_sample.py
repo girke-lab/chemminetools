@@ -8,6 +8,8 @@ import os
 import djcelery
 from django.contrib.messages import constants as messages
 
+
+
 # load celery
 
 djcelery.setup_loader()
@@ -17,7 +19,9 @@ gettext = lambda s: s
 PROJECT_DIR = '/srv/chemminetools'
 
 DEBUG = True
-TEMPLATE_DEBUG = DEBUG
+#TEMPLATE_DEBUG = DEBUG
+
+ALLOWED_HOSTS= ['18.219.7.240']
 
 ADMINS = ()
 
@@ -25,7 +29,7 @@ ADMINS = ()
 
 MANAGERS = ADMINS
 
-LANGUAGES = [('en', 'English')]
+LANGUAGES = [('en', 'English'),('en-us', 'English')]
 DEFAULT_LANGUAGE = 0
 
 DATABASES = {'default': {  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -43,7 +47,9 @@ DATABASES = {'default': {  # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'o
     }}
 
 CACHES = \
-    {'default': {'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+    {'default': {
+        #'BACKEND': 'django.core.cache.backends.memcached.PyLibMCCache',
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
      'LOCATION': '127.0.0.1:11211'}}
 
 # Local time zone for this installation. Choices can be found here:
@@ -105,11 +111,12 @@ SECRET_KEY = 'd_ce0eja3qgm0b-3u487kf++d+m14satsx-b1l-niq=-e@wt#0'
 
 # List of callables that know how to import templates from various sources.
 
-TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
-                    'django.template.loaders.app_directories.Loader')
+#TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
+                    #'django.template.loaders.app_directories.Loader')
 
 MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -117,23 +124,53 @@ MIDDLEWARE_CLASSES = (
     'cms.middleware.page.CurrentPageMiddleware',
     'cms.middleware.user.CurrentUserMiddleware',
     'cms.middleware.toolbar.ToolbarMiddleware',
+    'cms.middleware.language.LanguageCookieMiddleware',
     'guest.middleware.LogGuests',
     )
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.i18n',
-    'django.core.context_processors.request',
-    'django.core.context_processors.media',
-    'django.core.context_processors.static',
-    'django.contrib.messages.context_processors.messages',
-    'cms.context_processors.media',
-    'sekizai.context_processors.sekizai',
-    )
+#TEMPLATE_CONTEXT_PROCESSORS = (
+#    'django.contrib.auth.context_processors.auth',
+#    'django.core.context_processors.i18n',
+#    'django.core.context_processors.request',
+#    'django.core.context_processors.media',
+#    'django.core.context_processors.static',
+#    'django.contrib.messages.context_processors.messages',
+#    'cms.context_processors.media',
+#    'sekizai.context_processors.sekizai',
+#    )
 
-TEMPLATE_DIRS = (PROJECT_DIR + '/templates', )
+#TEMPLATE_DIRS = (PROJECT_DIR + '/templates', )
 
 CMS_TEMPLATES = (('template_1.html', 'Template One'), )
+
+TEMPLATES = [
+{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+#    'APP_DIRS': True,
+    'DIRS': (PROJECT_DIR + '/templates', ),
+    'OPTIONS': {
+        'debug': DEBUG,
+        'context_processors':
+            (
+            'django.contrib.auth.context_processors.auth',
+            'django.template.context_processors.debug',
+            'django.template.context_processors.i18n',
+            'django.template.context_processors.media',
+            'django.template.context_processors.static',
+            'django.template.context_processors.tz',
+            'django.template.context_processors.csrf',
+            'django.template.context_processors.request',
+            'django.contrib.messages.context_processors.messages',
+            'sekizai.context_processors.sekizai',
+            'cms.context_processors.cms_settings',
+            #'cms.context_processors.media',
+            ),
+        'loaders': ('django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader'),
+    },
+},
+]
+
 
 ROOT_URLCONF = 'urls'
 
@@ -152,16 +189,15 @@ INSTALLED_APPS = (
     'cms',
     'menus',
     'mptt',
-    'south',
-    'cms.plugins.text',
-    'cms.plugins.picture',
-    'cms.plugins.link',
-    'cms.plugins.file',
-    'cms.plugins.googlemap',
+    'treebeard',
+    'djangocms_text_ckeditor',
+    'djangocms_picture',
+    'djangocms_link',
+    'djangocms_file',
+    'djangocms_googlemap',
     'sekizai',
     'bootstrap_toolkit',
     'guest',
-    'django_cron',
     'compounddb',
     'myCompounds',
     'sdftools',
@@ -171,7 +207,15 @@ INSTALLED_APPS = (
     'ChemmineR',
     'eisearch',
     'pubchem_rest_interface',
+    'django_cron',
+    'filer',
     )
+
+CRON_CLASSES= [
+        'guest.cron.DeleteOldGuests',
+        'tools.cron.deleteOrphans',
+        'ChemmineR.cron.deleteOldChemmineR',
+        ]
 
 WORK_DIR = PROJECT_DIR + '/working'
 

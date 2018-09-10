@@ -34,24 +34,12 @@ apt-get install -y libgc1c2 # for fmcs
 # clean up package install 
 apt-get clean
 
-# install PyXML-0.8.4 (missing from pip)
-cd /tmp
-wget http://biocluster.ucr.edu/~tbackman/vagrantImages/PyXML-0.8.4.tar.gz
-tar xvfz PyXML-0.8.4.tar.gz
-cd PyXML-0.8.4
-# There is a bug in newer Ubuntu systems that prevents this from building
-# Solution: echo '#define HAVE_MEMMOVE 1' >> /usr/include/python2.7/pyconfig.h
-grep -q HAVE_MEMMOVE  /usr/include/python2.7/pyconfig.h || echo '#define HAVE_MEMMOVE 1' >> /usr/include/python2.7/pyconfig.h
-python setup.py build
-sudo python setup.py install
-cd ..
-rm -rf PyXML-0.8.4.tar.gz PyXML-0.8.4
 
 # For correct dependency resolution pip needs everything on a single line
-pip install Django==1.4.5 django-guardian==1.1.1 ZSI==2.0-rc3 django-bootstrap-toolkit==2.8.0 \
-django-cms==2.3.5 South==0.7.5 django-appmedia==1.0.1 django-celery==3.0.11 simplejson==3.1.0 \
-ghostscript==0.4.1 PyYAML==3.10 django-userena==1.2.1 beautifulsoup4==4.3.2 celery==3.0.16 \
-'html5lib<0.99999999' subprocess32 openbabel
+pip install Django==1.11.14 django-guardian==1.4.9  django-bootstrap-toolkit==2.15.0 \
+django-cms==3.5.2 South==1.0.2  django-appmedia==1.0.1 django-celery==3.2.2 simplejson==3.16.0 \
+ghostscript==1.4.1 PyYAML==3.12 beautifulsoup4==4.6.1 celery==3.1.26.post2 \
+html5lib==0.99999999 subprocess32 openbabel
 
 # create symbolic link for /srv/chemminetools
 ln -s /vagrant /srv/chemminetools
@@ -68,16 +56,10 @@ sudo -u postgres createdb -E utf8 -O chemminetools chemminetools -T template0 --
 
 # manually install packages in /usr/local/lib/python2.7/dist-packages:
 cd /tmp
-wget http://biocluster.ucr.edu/~tbackman/vagrantImages/django_cron.tgz
 wget http://biocluster.ucr.edu/~tbackman/vagrantImages/django_guest.tgz
-wget http://biocluster.ucr.edu/~tbackman/vagrantImages/gyroid_utils.tgz
-tar xvfz django_cron.tgz
 tar xvfz django_guest.tgz
-tar xvfz gyroid_utils.tgz
-mv guest /usr/local/lib/python2.7/dist-packages/
-mv django_cron /usr/local/lib/python2.7/dist-packages/
-mv gyroid_utils /usr/local/lib/python2.7/dist-packages/
-rm -rf guest django_cron django_cron.tgz django_guest.tgz gyroid_utils.tgz gyroid_utils
+mv guest /usr/local/lib/python3.5/dist-packages/
+rm -rf guest django_guest.tgz 
 
 # add sql commands to blank database
 cd /srv/chemminetools
