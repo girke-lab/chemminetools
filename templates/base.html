@@ -10,11 +10,9 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <!-- Le styles -->
-    <!--{% bootstrap_stylesheet_tag %} -->
     <link href="/static/admin/bootstrap/css/bootstrap.css" rel="stylesheet">
     <link href="/static/admin/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
-	{% render_block "css" %}
+    {% render_block "css" %}
     <style type="text/css">
       body {
         padding-top: 60px;
@@ -35,6 +33,7 @@
   </head>
 
   <body>
+    {% cms_toolbar %}
     <div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container-fluid">

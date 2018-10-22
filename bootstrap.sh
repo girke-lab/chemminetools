@@ -136,7 +136,7 @@ exit 0
 
 # create a user for chemmine tools, and su to that user
 cd ~
-git clone git@github.com:TylerBackman/chemminetools.git
+git clone git@github.com/girke-lab/chemminetools.git
 
 # as root move to /srv
 mv chemminetools /srv/
