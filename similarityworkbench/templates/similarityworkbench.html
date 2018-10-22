@@ -90,7 +90,7 @@
 			</div>
 		</div>
 		<div id="selectionnotice">Awaiting <span id="num_selection">2</span> selected compounds</div>
-		<form name="compoundsel" id="compoundsel" action="." method="post">
+		<form name="compoundsel" id="compoundsel" action="./" method="post">
 		{% csrf_token %}
 			<input type="hidden" name="func" value="mcs"/>
 			<input type="hidden" name="compound" value=""/>

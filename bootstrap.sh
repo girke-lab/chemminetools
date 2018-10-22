@@ -51,7 +51,7 @@ django-cms==3.5.2 South==1.0.2  django-appmedia==1.0.1 django-celery==3.2.2 simp
 ghostscript PyYAML==3.12 beautifulsoup4==4.6.1 celery==3.1.26.post2 django-userena==2.0.1 \
 'html5lib<0.99999999' subprocess32 openbabel django-mptt==0.9.1 djangocms_text_ckeditor==3.6.0 \
 djangocms_picture djangocms_link djangocms_file djangocms_googlemap django_cron==0.5.1 \
-python-memcached future configparser
+python-memcached future configparser django-ckeditor
 
 # create symbolic link for /srv/chemminetools
 ln -s /vagrant /srv/chemminetools
