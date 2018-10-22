@@ -10,10 +10,14 @@ import sys
 sys.path.append('/srv/chemminetools')
 sys.path.append('/srv/chemminetools/tools')  # allow tools.py to be imported
 import os
-from django.core.management import setup_environ
-import chemminetools.settings
+import django
+#from django.core.management import setup_environ
+#import chemminetools.settings
 import argparse
-setup_environ(chemminetools.settings)
+#setup_environ(chemminetools.settings)
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE","chemminetools.settings")
+django.setup()
 
 from tools.models import *
 from tools.runapp import deleteApp
