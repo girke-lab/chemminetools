@@ -88,7 +88,7 @@ printf "install.packages(c(\"amap\",\"bitops\",\"R.oo\",\"gridExtra\"),repos=\"h
 
 printf "source(\"http://bioconductor.org/biocLite.R\")
 biocLite()
-biocLite(c(\"ChemmineR\", \"ctc\", \"rjson\", \"R.utils\", \"eiR\", \"RPostgreSQL\"),dependencies=c(\"Imports\"))
+biocLite(c(\"ChemmineR\", \"fmcsR\",\"ctc\", \"rjson\", \"R.utils\", \"eiR\", \"RPostgreSQL\"),dependencies=c(\"Imports\"))
 " | R --slave
 
 # create working directory and set permissions

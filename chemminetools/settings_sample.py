@@ -285,3 +285,11 @@ AUTHENTICATION_BACKENDS = (
 SOUTH_MIGRATION_MODULES = {
     'easy_thumbnails': 'easy_thumbnails.south_migrations',
 }
+#EMAIL GOOGLE SETTINGS
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST='smtp.gmail.com'
+EMAIL_PORT=587
+EMAIL_HOST_USER='chemminetool@gmail.com'
+EMAIL_HOST_PASSWORD='chemminetools2!'
+EMAIL_USE_TLS=True
+
