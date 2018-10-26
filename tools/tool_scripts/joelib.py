@@ -72,7 +72,7 @@ def getinfo(f):
     # skip to annotation
 
     while flag == 1:
-        line = f.readline()
+        line = f.readline().decode()
         if line == '':
             return ''
         if line[0:6] == 'M  END':
@@ -82,7 +82,7 @@ def getinfo(f):
     tag = ''
     tagdata = ''
     while flag == 1:
-        line = f.readline()
+        line = f.readline().decode()
         if line == '':
             break
         if line == None:
@@ -149,7 +149,7 @@ def main():
         # for every compound run the conversion
 
         cmd = \
-            'JAVA_HOME=/opt/jre/ JOELIBDIR=/opt/JOELib/ CLASSPATH=/opt/JOELib/build /opt/JOELib/convert.sh +d -iSDF -oSDF ' \
+            'JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64/ JOELIBDIR=/opt/JOELib/ CLASSPATH=/opt/JOELib/build /opt/JOELib/convert.sh +d -iSDF -oSDF ' \
             + sdfName + ' ' + fh.name + ' > /dev/null'
         os.system(cmd)
         os.unlink(sdfName)
