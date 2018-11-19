@@ -47,13 +47,14 @@ class GzipFile(object):
 def sdf_iter(sdf, skip_annotations=False):
 
     def _next():
+        #print("sdf: ",sdf)
         if sdf == '-':
             import sys
             f = sys.stdin
         elif hasattr(sdf, 'next'):
             f = sdf
         else:
-            f = file(sdf, 'r')
+            f = sdf
         buf = []
         structure_ends = False
         for i in f:

@@ -1,4 +1,4 @@
-#!/usr/local/bin/Rscript
+#!/usr/bin/Rscript
 library(rzmq)
 library(eiR)
 
@@ -12,19 +12,19 @@ loadPubchem <- function(){
 	library(RPostgreSQL)
 	r=200
 	d=100
-	basedir = "/srv/eiSearch/pubchem"
+	basedir = "/srv/eiSearch/chembl"
 #	refIddb =file.path(basedir,"run-200-100","20ce78e8a7a08151502a294ced998301.distmat")
 	message("loading lsh data")
 	lshData=loadLSHData(r,d,dir=basedir)
 	message("loading main ids")
-   dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem_test',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_reader',password='lj4oijribnxnbwerioanfna44i3')
+        dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='chembl',host='localhost',user='chembl_reader',password='alskfjien4b2ujfxau')
 	mainIds = eiR:::readIddb(dbConn,file.path(".",eiR:::Main))
 	message("done loading data")
 	eiR:::loadSearchCache(dbConn,runId=1,dir=basedir)
 
 	function(...){
 		message("query starts, connecting to db...")
-		dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='pubchem_test',host='chemminetools-2.bioinfo.ucr.edu',user='pubchem_reader',password='lj4oijribnxnbwerioanfna44i3')
+		dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='chembl',host='localhost',user='chembl_reader',password='alskfjien4b2ujfxau')
 		message("got db connection, starting, eiQuery")	
 		results = eiQuery(runId=1,dir=basedir,lshData=lshData,conn=dbConn,mainIds=mainIds,...)
 		message("got query result, disconnecting from db")

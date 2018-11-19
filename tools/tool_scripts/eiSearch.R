@@ -4,9 +4,11 @@
 
 library(eiR)
 library(R.utils)
-#library(RPostgreSQL)
+library(RPostgreSQL)
 
 
+basedir = "/srv/eiSearch/chembl"
+dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='chembl',host='localhost',user='chembl_reader',password='alskfjien4b2ujfxau')
 
 #conn = dbConnect(dbDriver("PostgreSQL"),dbname="pubchem",host="chemminetools-2.bioinfo.ucr.edu",user="pubchem_updater",password="48ruvbvnmwejf408rfdj")
 #baseDir = "/srv/eiSearch/pubchem"
@@ -14,16 +16,16 @@ library(R.utils)
 #d=100
 #refFile = file.path(baseDir,"run-200-100/rohkdx3p0eesolce2hzgbpxdsd7ce75y.cdb")
 
-library(rzmq)
-
-context = init.context()
-socket = init.socket(context,"ZMQ_REQ")
-connect.socket(socket,"tcp://localhost:5555")
-
-sendQuery <- function(...){
-        send.socket(socket,data=list(...))
-        receive.socket(socket)
-}
+#library(rzmq)
+#
+#context = init.context()
+#socket = init.socket(context,"ZMQ_REQ")
+#connect.socket(socket,"tcp://localhost:5555")
+#
+#sendQuery <- function(...){
+#        send.socket(socket,data=list(...))
+#        receive.socket(socket)
+#}
 
 if(! exists("debug_mode")){
 	# parse command line arguments
@@ -52,14 +54,23 @@ sdfInput <- sdfInput[validSDF(sdfInput)]
 cids <- sdfid(sdfInput)
 cids <- cleanUp(cids)
 sdfInput <- sdfInput[! duplicated(cids)]
-cids <- cids[! duplicated(cids)]
 
-#results = eiQuery(r,d,refFile,queries = sdfInput,dir=baseDir,K=numResults,conn=conn)
-results = sendQuery(queries = sdfInput,K=numResults,format="sdf")
-if(is.null(results) || results == TRUE){
-	stop("no results received from server")
-}
+results = eiQuery(1,sdfInput,conn=dbConn,dir=basedir)
+
+#results = sendQuery(queries = sdfInput,K=numResults,format="sdf")
+#if(is.null(results) || results == TRUE){
+#	stop("no results received from server")
+#}
 #print(results)
 filtered = results[results$distance < 1-simCutoff,]
-results = data.frame(target=filtered$target,similarities = 1 - filtered$distance)
+pubchemCids = unlist(lapply(filtered$target,
+			    function(chemblName){
+				    cid = pubchemName2CID(chemblName)
+				    if(is.na(cid)) # return CHEMBL name if translation to pubchem CID fails
+					    chemblName
+				    else 
+					    cid
+			    }))
+			    
+results = data.frame(target=pubchemCids,similarities = 1 - filtered$distance)
 write.table(results,file=outfile,quote=FALSE,row.names=FALSE,col.names=FALSE)

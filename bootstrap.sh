@@ -36,8 +36,11 @@ apt-get install -y memcached
 apt-get install -y libpq-dev
 apt-get install -y nginx
 apt-get install -y libgsl-dev  # needed for eiR
+apt-get install -y libssl-dev  # needed for eiR
+apt-get install -y librsvg2-dev  # needed for ChemmineR
 apt-get install -y openbabel libopenbabel-dev swig
 apt-get install -y libgc1c2 # for fmcs
+apt-get install -y libzmq3-dev #for rzmq server used by eiSearch
 
 # clean up package install 
 apt-get clean
@@ -84,11 +87,11 @@ python manage.py check_permissions
 
 # install R packages
 
-printf "install.packages(c(\"amap\",\"bitops\",\"R.oo\",\"gridExtra\"),repos=\"https://cloud.r-project.org\")" | R --slave
+printf "install.packages(c(\"amap\",\"bitops\",\"R.oo\",\"gridExtra\",\"rzmq\",\"RPostgreSQL\",\"BiocManager\"),repos=\"https://cloud.r-project.org\")" | R --slave
 
-printf "source(\"http://bioconductor.org/biocLite.R\")
-biocLite()
-biocLite(c(\"ChemmineR\", \"fmcsR\",\"ctc\", \"rjson\", \"R.utils\", \"eiR\", \"RPostgreSQL\"),dependencies=c(\"Imports\"))
+#printf "source(\"http://bioconductor.org/biocLite.R\")
+#biocLite()
+printf "BiocManager::install(c(\"ChemmineR\", \"fmcsR\",\"ChemmineOB\",\"ctc\", \"rjson\", \"R.utils\", \"eiR\", \"RPostgreSQL\"),dependencies=c(\"Imports\"))
 " | R --slave
 
 # create working directory and set permissions

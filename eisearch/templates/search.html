@@ -84,13 +84,16 @@ $(document).ready(function() {
 <div class="span12">
 
 <p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> 
-using the fingerprint algorithm.
+or the ChEMBL database, 
+using one of two algorithm and database options:
 <ul>
 <li><b>Fingerprint algorithm:</b> Searches a "cleaned up" version of the PubChem Compound database
 (excluding some very similar compounds and some salts) by connecting to the PubChem web interface
 using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.
-As this connects directly to PubChem, it will include new compounds sooner than the EI search.</li>
-<li><b>EI algorithm:</b> Temporarily offline due to system maintenance.</li>
+</li>
+<li><b>EI algorithm:</b> Searches the ChEMBL Compound database using the 
+	EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>)
+with an <a href="/help/#theory">atom pair (AP) similarity</a> measure. </li>
 </ul>
 </p>
 </div>
@@ -118,7 +121,8 @@ As this connects directly to PubChem, it will include new compounds sooner than 
 		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="fp">Fingerprint algorithm</option>
+            <option value="fp">Fingerprint algorithm (PubChem)</option>
+            <option value="ei">EI algorithm (ChEMBL)</option>
             </select>
         </td></tr>
         <tr><th>
@@ -150,7 +154,8 @@ As this connects directly to PubChem, it will include new compounds sooner than 
 		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="fp">Fingerprint algorithm</option>
+            <option value="fp">Fingerprint algorithm (PubChem)</option>
+            <option value="ei">EI algorithm (ChEMBL)</option>
             </select>
         </td></tr>
         <tr><th>
@@ -177,7 +182,8 @@ Please copy and paste your single-molecule SDF below. If multiple compounds are 
 		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="fp">Fingerprint algorithm</option>
+            <option value="fp">Fingerprint algorithm (PubChem)</option>
+            <option value="ei">EI algorithm (ChEMBL)</option>
             </select>
         </td></tr>
         <tr><th>
@@ -202,7 +208,8 @@ Please upload a single-molecule SDF below. If multiple compounds are found in th
 		Algorithm and database:
         </td><td>
             <select name="algorithm" id="algorithm">
-            <option value="fp">Fingerprint algorithm</option>
+            <option value="fp">Fingerprint algorithm (PubChem)</option>
+            <option value="ei">EI algorithm (ChEMBL)</option>
             </select>
         </td></tr>
         <tr><th>
