@@ -49,6 +49,8 @@ def addMyCompounds(sdf, user):
     namekey = 'PUBCHEM_IUPAC_NAME'
     message = 'ERROR: bad input data.'
     added_ids = []
+    initial_compound_count = Compound.objects.filter(user=user).count()
+
     try:
         if not isinstance(sdf, str):
             sdf = str(sdf, 'utf-8')
@@ -90,12 +92,11 @@ def addMyCompounds(sdf, user):
                     raise Exception
                 counter += 1
                 linecounter = 0
-                if counter > MAX_COMPOUND_LIMIT:
+                if initial_compound_count + counter > MAX_COMPOUND_LIMIT:
                     message = 'ERROR: upload exceeds ' \
                         + str(MAX_COMPOUND_LIMIT) + ' compounds.'
                     raise Exception
                 try:
-                    print("inserting compound into db")
                     newid = insert_single_compound(moldata, sdffile,
                             namekey, 'id', user)
                 except:
