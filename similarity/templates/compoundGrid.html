@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+<script type="text/javascript">
+	var selectedCompounds = [];
+	$(document).ready(function() {
+		$.ajaxSetup({
+			  headers: { "X-CSRFToken": '{{csrf_token}}' }
+		});
+		$("[data-toggle=tooltip]").tooltip();
+		$(".compound-box").click(function(){
+			var compound_id = $(this).attr("id");
+			var selected = $(this).find(".selector:visible").length > 0;
+			       	//selectedCompounds.filter(function(cid){
+				//return cid === compound_id;}).length !== 0;
+			var clone;
+			var removeLink;
+			var numSelected = $(".selected-compounds .compound-box").length;
+
+
+			console.log("clicked on ",compound_id,selected);
+			console.log("number selected: ",numSelected);
+
+			if(selected){ //remove selection
+				//selectedCompounds = selectedCompounds.filter(function(cid){
+					//return cid !== compound_id;});
+				console.log("removing ",$(this));
+				$(".selected-compounds").find("#"+compound_id).remove();
+				$(this).find(".selector").hide();
+			}else{ //add selection
+				console.log("selecting ",$(this));
+
+				if(numSelected > 1){ // 2 already selected
+					alert("Two compounds already selected, please deselect "+
+						"one or both before selected another compound");
+				}else{
+					//selectedCompounds.push(compound_id);
+					$(this).find(".selector").show();
+
+					removeLink = $("<a>remove</a>").click(function(){
+						var id = $(this).parents("div").first().attr("id");
+						console.log("removing selected compound ",id);
+						$(".selected-compounds").find("#"+id).remove();
+						$(".compound-grid").find("#"+id+" .selector").hide();
+
+					});
+					clone = $(this).clone();
+					clone.find(".selector").remove();
+					clone.append(removeLink);
+					$(".selected-compounds").append(clone);
+					if(numSelected == 1){ //was one, now two after appending
+						//then we are ready to compute ap and mcs
+						var smilesStrings ;
+						var data={};
+						smilesStrings=$(".selected-compounds .compound-box").
+							map(function(i,el){
+								return $(el).attr("data-smiles");
+							}).get();
+						console.log("selected smiles: ",smilesStrings);
+						data.compound1 = smilesStrings[0];
+						data.compound2 = smilesStrings[1];
+						$(".loading").show();
+						$.post("ap/",data).
+							then(function(result){
+								$("#ap").text(result.sim);
+							}).
+							fail(function(){
+								console.log("post to ap failed");
+							});
+						$.post("mcs/",data).
+							then(function(result){
+								console.log("mcs result: ",result);
+								$(".result").show();
+								$("#mcs_tanimoto").text(result.sim_tanimoto);
+								$("#mcs_size").text(result.m_size);
+								$("#mcs_min").text(result.sim_min);
+								$("#mcs_max").text(result.sim_max);
+								$("#mcs_img").attr("src",result.img);
+								$("#mcs_smiles").text(result.smiles);
+
+							}).
+							fail(function(){
+								console.log("post to ap failed");
+							}).always(function(){
+								$(".loading").hide();
+							});;
+					}
+				}
+			}
+
+		});
+
+
+	});
+
+</script>
+<style>
+	.compound-grid{
+		width:98%;
+		height: 60vh;
+		overflow-y: auto;
+	}
+	.selected-compounds{
+		height: 40vh;
+	}
+	.compound-box{
+		position: relative;
+		border: 2px solid;
+	       	width: 200px;
+		display: inline-block;
+		margin: 4px;
+	}
+	.compound-box .selector{
+		position: absolute;
+		z-index: 9999;
+		background-color: rgba(92, 165, 238, 0.4);
+		display: none;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+{% endblock %} 
+
+{% block base_content %}
+<div class="row-fluid"> 
+	<div class="span12">
+	<h2>Compound Similarity &nbsp; <img class="loading" style="display:none" src="/static/images/spinner.gif"></img></h2>
+	Select two compounds to compare from the grid below.
+	</div>
+</div><!--/row--> 
+
+<div class="row-fluid">
+
+	<div class="span6">
+		<h4>Selected Compounds</h4>
+		<div id="selectedCompounds" class="selected-compounds">
+		</div>
+		<hr>
+	</div>
+	<div class="span3 result" style="display:none">
+		<p>
+		<div>
+			<b>AP Tanimoto:</b> <span id="ap"></span> <br>
+			<b>MCS Tanimoto:</b> <span id="mcs_tanimoto"></span> <br>
+			<b>MCS Size:</b> <span id="mcs_size"></span> <br>
+			<b>MCS Min:</b> <span id="mcs_min"></span> <br>
+			<b>MCS Max:</b> <span id="mcs_max"></span> <br>
+			<b>SMILES:</b> <span id="mcs_smiles"></span><br>
+		</div>
+	</div>
+	<div class="span3 result" style="display:none">
+		<img id="mcs_img" src=""></img> <br>
+	</div>
+</div>
+<div class="row-fluid">
+	<div class="span12" >
+	{% if matches %}
+
+		<div class="compound-grid">
+		{% for compound in matches %}
+		<div class="compound-box" id="{{compound.id}}" data-smiles="{{compound.smiles}}">
+				<div class="selector"></div>
+				<h4 style="text-align:center">{{compound.cid}}</h4>
+				<img src="/compounds/{{compound.id}}/png"/>
+			</div>
+		{% endfor %}
+		</div>
+	{% else %}
+	<p>No compounds uploaded.</p>
+	{% endif %}
+	</div>
+
+
+</div>
+<!--
+<div class="row-fluid">
+	<div class="span12">
+		<div class="pagination pagination-centered">
+		<ul>
+		{% if matches.has_previous %}
+			<li ><a href="?page={{matches.previous_page_number}}">Previous</a></li>
+		{% endif %}
+		{% for page in p.page_range %}
+		<li{% if matches.number == page %} class="active"{% endif %}><a href="?page={{page}}">{{page}}</a></li>
+		{% endfor %}
+		{% if matches.has_next%}
+			<li ><a href="?page={{matches.next_page_number}}">Next</a></li>
+		{% endif %}
+		</ul>
+		</div>
+	</div> 
+</div>-->
+{% endblock %}
