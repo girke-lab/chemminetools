@@ -204,7 +204,7 @@ INSTALLED_APPS = (
     'sdftools',
     'djcelery',
     'tools',
-    'similarityworkbench',
+    'similarity',
     'ChemmineR',
     'eisearch',
     'pubchem_rest_interface',
