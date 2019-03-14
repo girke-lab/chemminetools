@@ -27,6 +27,7 @@ urlpatterns =[
     url(r'^similarity/', include('similarity.urls')),
     url(r'^ChemmineR/', include('ChemmineR.urls')),
     url(r'^robots\.txt/?$', TemplateView.as_view(template_name='robots.txt')),
+    url(r'^bioassayr/?$', RedirectView.as_view(url='/static/pubchem_protein_only.sqlite')),
     url(r'^ei/?',  RedirectView.as_view(url='/downloads/')), 
     url(r'^', include('cms.urls')),
     ]
