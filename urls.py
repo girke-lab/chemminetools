@@ -23,11 +23,9 @@ urlpatterns =[
     url(r'^tools/', include('tools.urls')),
     url(r'^drugbank/', include('drugbank.urls')),
     url(r'^search/?',  RedirectView.as_view(url='/eisearch/query/')), 
-    #url(r'^similarity/', include('similarityworkbench.urls')),
     url(r'^similarity/', include('similarity.urls')),
     url(r'^ChemmineR/', include('ChemmineR.urls')),
     url(r'^robots\.txt/?$', TemplateView.as_view(template_name='robots.txt')),
-    url(r'^bioassayr/?$', RedirectView.as_view(url='/static/pubchem_protein_only.sqlite')),
     url(r'^ei/?',  RedirectView.as_view(url='/downloads/')), 
     url(r'^', include('cms.urls')),
     ]
