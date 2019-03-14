@@ -14,6 +14,7 @@ from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
 from django.views.decorators.csrf import csrf_exempt
 from tools.models import Application, Job, ApplicationCategories
 from tools.runapp import *
+import tools
 from django.contrib.auth.models import User
 from guest.decorators import guest_allowed, login_required
 import random, string, time, re
@@ -112,6 +113,7 @@ def getConverter(request, url):
 
 @csrf_exempt
 def launchCMTool(request, url):
+    #print("launching CM tool")
     if not request.method == 'POST':
         return HttpResponse('ERROR: query must be an HTTP POST\n',
                             content_type='text/plain')
@@ -119,6 +121,7 @@ def launchCMTool(request, url):
     try:
         user = User.objects.get(username='ChemmineR')
     except ObjectDoesNotExist:
+       # print("creating a new ChemmineR user");
         # create user with a random password
         sysrand = random.SystemRandom()
         length = 64
@@ -180,15 +183,15 @@ def jobStatus(request, url):
 
 @guest_allowed
 def showJob(request, task_id):
-    cmuser = User.objects.get(username='ChemmineR')
     webuser = request.user
     try:
-        job = Job.objects.get(task_id=task_id, user=cmuser)
+        job = Job.objects.get(task_id=task_id)
     except ObjectDoesNotExist:
+        print("could not find a job for task_id "+str(task_id))
         raise Http404
     job.user = webuser
     job.save()
-    return redirect('tools.views.view_job', job_id=job.id, resource='')
+    return redirect(tools.views.view_job, job_id=job.id, resource='')
 
 @csrf_exempt
 def jobResult(request, url):

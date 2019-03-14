@@ -178,6 +178,7 @@ def updateJob(user, job_id):
 
     # checks if a job is done, updates it's status, and then returns it
 
+    #print("user: "+str(user.username)+", user_id: "+str(user.id)+", job_id: "+str(job_id))
     # wait in case another process is still creating the new job
     for i in range(5):
         try:
@@ -202,6 +203,7 @@ def updateJob(user, job_id):
 
 
 def deleteJob(user, job_id):
+    #print("deleting job id: "+str(job_id))
     job = updateJob(user, job_id)
     if isinstance(job.output, str):
         if os.path.isfile(job.output):
