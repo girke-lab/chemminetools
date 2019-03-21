@@ -5,14 +5,15 @@ import uuid
 uuid._uuid_generate_random = None
 
 import os
-import djcelery
 from django.contrib.messages import constants as messages
 
 
 
 # load celery
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_ACCEPT_CONTENT = {'pickle'}
 
-djcelery.setup_loader()
 
 gettext = lambda s: s
 
@@ -202,7 +203,6 @@ INSTALLED_APPS = (
     'compounddb',
     'myCompounds',
     'sdftools',
-    'djcelery',
     'tools',
     'similarity',
     'ChemmineR',
@@ -220,9 +220,7 @@ CRON_CLASSES= [
 
 WORK_DIR = PROJECT_DIR + '/working'
 
-# celery apps
 
-CELERY_IMPORTS = ('tools.runapp', )
 TOOLS_RESULTS = PROJECT_DIR + '/working'
 
 BOOTSTRAP_BASE_URL = ADMIN_MEDIA_PREFIX + 'bootstrap/'

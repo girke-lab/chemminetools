@@ -14,25 +14,18 @@ except ImportError:
 import re
 import os
 import time 
-import socket
-import errno
-from celery import task
-from tempfile import NamedTemporaryFile
-from django.conf import settings
+#import socket
+#import errno
+#from celery import task
 from django.contrib.auth.models import User
-#import subprocess32 as subprocess
 
-import subprocess
 
-import random
+#import random
 from django.forms import Form, FileField, ModelChoiceField, \
     IntegerField, HiddenInput, CharField, TextInput
 from django import forms
 from .models import *
-from compounddb.models import Compound
-#from types import NoneType
-outputPath = settings.TOOLS_RESULTS
-projectDir = settings.PROJECT_DIR
+from .tasks import *
 
 
 def createJob(
@@ -63,34 +56,6 @@ def createJob(
     newJob.save()
     return newJob
 
-
-@task()
-def launch(
-    appname,
-    commandOptions,
-    input,
-    job_id,
-    user,
-    ):
-
-    if input == 'chemical/x-mdl-sdfile':
-        input = makeSDF(user)
-    outputFileName = outputPath + '/job_' + str(job_id)
-    command = [projectDir + '/tools/tool_scripts/' + appname,'--outfile=' + outputFileName] + commandOptions
-    print('Running: ' + str(command) + '\n')
-    runningTask = subprocess.Popen(command, shell=False,
-                                   stdin=subprocess.PIPE,stderr=subprocess.PIPE,stdout=subprocess.PIPE)
-    try:
-        print("input type: "+str(type(input)))
-        #outs, errs = runningTask.communicate(input, timeout=(60 * 60 * 24 * 7)) # wait a week
-        outs, errs = runningTask.communicate(input.encode())#, timeout=(60 * 60 * 24 * 7))  # wait a week
-        print('\n outs --', outs, ' errs --', errs)
-        return outputFileName
-    except Exception as e:
-        print("An exception occured while running "+str(command))
-        print (e)
-        runningTask.kill()
-        return False
 
 def getAppForm(application_id, user):
     fields = {}
@@ -237,14 +202,5 @@ def deleteOrphanJobs():
         return True
     except:
         return False
-
-
-def makeSDF(user):
-    compoundList = Compound.objects.filter(user=user)
-    sdf = u''
-    for compound in compoundList:
-        sdf = sdf + compound.sdffile_set.all()[0].sdffile.rstrip() \
-            + '\n'
-    return sdf
 
 
