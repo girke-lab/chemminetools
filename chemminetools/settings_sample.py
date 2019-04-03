@@ -13,7 +13,8 @@ from django.contrib.messages import constants as messages
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_ACCEPT_CONTENT = {'pickle'}
-
+CELERY_BROKER_URL= "amqp://guest@localhost//"
+CELERY_RESULT_BACKEND="cache+memcached://127.0.0.1:11211/"
 
 gettext = lambda s: s
 

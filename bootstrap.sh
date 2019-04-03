@@ -132,6 +132,10 @@ cp /srv/chemminetools/udev_rule /etc/udev/rules.d/50-vagrant-mount.rules
 cp /srv/chemminetools/nginx_config /etc/nginx/sites-enabled/default
 /etc/init.d/nginx restart
 
+#setup rabbitmq for remote connections
+rabbitmqctl add_user remote_worker askfj4l3nbb43
+rabbitmqctl set_permissions -p '/' remote_worker ".*" ".*" ".*"
+
 # exit now if a bash script, the rest should be run interactively 
 exit 0
 

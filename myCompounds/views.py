@@ -37,8 +37,8 @@ def showCompounds(request, resource):
     # perform query for existing myCompounds
 
     (page, matches) = getMyCompounds(request)
-    print("page count: "+str(page.count))
-    print("page num pages: "+str(page.num_pages))
+    #print("page count: "+str(page.count))
+    #print("page num pages: "+str(page.num_pages))
     if resource:
         if resource == 'deleteAll':
             deleteMyCompounds(request)
