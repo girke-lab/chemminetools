@@ -8,24 +8,8 @@ library(RPostgreSQL)
 
 
 basedir = "/srv/eiSearch/chembl"
-dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='chembl',host='localhost',user='chembl_reader',password='alskfjien4b2ujfxau')
+dbConn = dbConnect(dbDriver('PostgreSQL'),dbname='eisearch_chembl',host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='eisearch',password='alskfjien4b2ujfxau')
 
-#conn = dbConnect(dbDriver("PostgreSQL"),dbname="pubchem",host="chemminetools-2.bioinfo.ucr.edu",user="pubchem_updater",password="48ruvbvnmwejf408rfdj")
-#baseDir = "/srv/eiSearch/pubchem"
-#r=200
-#d=100
-#refFile = file.path(baseDir,"run-200-100/rohkdx3p0eesolce2hzgbpxdsd7ce75y.cdb")
-
-#library(rzmq)
-#
-#context = init.context()
-#socket = init.socket(context,"ZMQ_REQ")
-#connect.socket(socket,"tcp://localhost:5555")
-#
-#sendQuery <- function(...){
-#        send.socket(socket,data=list(...))
-#        receive.socket(socket)
-#}
 
 if(! exists("debug_mode")){
 	# parse command line arguments
@@ -57,10 +41,6 @@ sdfInput <- sdfInput[! duplicated(cids)]
 
 results = eiQuery(1,sdfInput,conn=dbConn,dir=basedir)
 
-#results = sendQuery(queries = sdfInput,K=numResults,format="sdf")
-#if(is.null(results) || results == TRUE){
-#	stop("no results received from server")
-#}
 #print(results)
 filtered = results[results$distance < 1-simCutoff,]
 pubchemCids = unlist(lapply(filtered$target,
