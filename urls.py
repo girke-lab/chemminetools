@@ -27,6 +27,7 @@ urlpatterns =[
     url(r'^ChemmineR/', include('ChemmineR.urls')),
     url(r'^robots\.txt/?$', TemplateView.as_view(template_name='robots.txt')),
     url(r'^ei/?',  RedirectView.as_view(url='/downloads/')), 
+    url(r'^targetsearch/', include('targetsearch.urls')),
     url(r'^', include('cms.urls')),
     ]
 print('\n after urls in general')

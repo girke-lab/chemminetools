@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block base_content %}
+<ul>
+	<li><a href="{% url 'getTargets' %}">Find target accessions by ChEMBL ID</a></li>
+	<li><a href="{% url 'getChembl' %}">Find ChEMBL IDs by accession ID</a></li>
+</ul>
+{% endblock base_content %}

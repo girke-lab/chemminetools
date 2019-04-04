@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block base_content %}
+	<form method="GET">
+		<label for="chembl_id">ChEMBL ID: </label>
+		<input id="chembl_id" type="text" name="chembl_id">
+		<input type="submit" value="Search">
+	</form>
+	{% if query_submit %}
+	{% if matches %}
+		<table>
+		<tr>
+			<td>Target Accession ({{ chembl_id }}):</td>
+		</tr>
+		{% for target_id in matches %}
+			<tr>
+				<td>{{ target_id }}</td>
+			</tr>
+		{% endfor %}
+		</table>
+	{% else %}
+        <p>No matching targets for {{ chembl_id }}.</p>
+	{% endif %}
+	{% endif %}
+{% endblock base_content %}
