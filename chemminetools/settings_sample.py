@@ -211,11 +211,14 @@ INSTALLED_APPS = (
     'pubchem_rest_interface',
     'django_cron',
     'filer',
+    'targetsearch',
     )
 
 CRON_CLASSES= [
         'guest.cron.DeleteOldGuests',
         'tools.cron.deleteOrphans',
+        'tools.cron.deleteOldJobs',
+        'tools.cron.deleteOldUsers',
         'ChemmineR.cron.deleteOldChemmineR',
         ]
 
