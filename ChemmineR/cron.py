@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from tools.runapp import deleteJob
 from tools.models import Job as toolJob
 
-class deleteOldChemmmineR(CronJobBase):
+class deleteOldChemmineR(CronJobBase):
 
     RUN_EVERY_MINS = 4000
 
