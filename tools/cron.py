@@ -33,8 +33,8 @@ class deleteOldJobs(CronJobBase):
             how_many_days = 365
             oldJobs = Job.objects.filter(start_time__lte=datetime.now()-timedelta(days=how_many_days))
             for thisjob in oldJobs:
-                #print("deleting job for user "+str(thisjob.user)+", job id: "+str(thisjob.id)+", started on "+str(thisjob.start_time)+
-                        #", file: "+str(thisjob.output))
+                print("deleting job for user "+str(thisjob.user)+", job id: "+str(thisjob.id)+", started on "+str(thisjob.start_time)+
+                        ", file: "+str(thisjob.output))
                 try:
                     deleteJob(thisjob.user, thisjob.id)
                 except OSError:
