@@ -7,7 +7,6 @@ from .views import *
 
 urlpatterns = [
         url(r'^$', home, name='home'),
-#        url(r'^getTargets/(?P<chembl_id>\S*)$', getTargets, name='getTargets')
         url(r'^getTargets/$', getTargets, name='getTargets'),
         url(r'^getChembl/$', getChembl, name='getChembl')
         ]

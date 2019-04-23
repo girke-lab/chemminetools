@@ -8,19 +8,19 @@
 		<input type="submit" value="Search">
 	</form>
 	{% if query_submit %}
-	{% if matches %}
+	{% for chembl_id in chembl_id_tuple %}
 		<table>
 		<tr>
-			<td>Target Accession ({{ chembl_id }}):</td>
+			<td><b>Matching Target Accession IDs ({{ chembl_id }}):</b></td>
 		</tr>
-		{% for target_id in matches %}
+		{% for target_id in matches|dict_lookup:chembl_id %}
 			<tr>
-				<td>{{ target_id }}</td>
+				<td><a href="https://www.uniprot.org/uniprot/?query=accession:{{target_id}}">{{ target_id }}</a></td>
 			</tr>
+		{% empty %}
+			<tr><td>No matching targets.</td></tr>
 		{% endfor %}
 		</table>
-	{% else %}
-        <p>No matching targets for {{ chembl_id }}.</p>
-	{% endif %}
+	{% endfor %}
 	{% endif %}
 {% endblock base_content %}

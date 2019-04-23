@@ -11,20 +11,17 @@ def home(request):
 def getTargets(request):
     if 'chembl_id' in request.GET:
         query_submit = True
-        chembl_id = request.GET['chembl_id']
-        result = chemblTargetAccessions(chembl_id)
-        if len(result) == 0:
-            matches = None
-        else:
-            matches = result[chembl_id]
+        chembl_id_str = request.GET['chembl_id']
+        chembl_id_tuple = tuple(chembl_id_str.split())
+        matches = chemblTargetAccessions(chembl_id_tuple)
     else:
         query_submit = False
-        chembl_id = None
+        chembl_id_tuple = None
         matches = None
     
     context = {
         'query_submit': query_submit,
-        'chembl_id': chembl_id,
+        'chembl_id_tuple': chembl_id_tuple,
         'matches': matches,
         }
     
@@ -33,20 +30,17 @@ def getTargets(request):
 def getChembl(request):
     if 'accession_id' in request.GET:
         query_submit = True
-        accession_id = request.GET['accession_id']
-        result = accessionToChembl(accession_id)
-        if len(result) == 0:
-            matches = None
-        else:
-            matches = result[accession_id]
+        accession_id_str = request.GET['accession_id']
+        accession_id_tuple = tuple(accession_id_str.split())
+        matches = accessionToChembl(accession_id_tuple)
     else:
         query_submit = False
-        accession_id = None
+        accession_id_tuple = None
         matches = None
     
     context = {
         'query_submit': query_submit,
-        'accession_id': accession_id,
+        'accession_id_tuple': accession_id_tuple,
         'matches': matches,
         }
     

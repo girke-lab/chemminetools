@@ -24,7 +24,7 @@ def chemblTargetAccessions(chemblIds):
                         join target_components using(tid)
                         join component_sequences using(component_id)
                 where 
-                        chembl_id_lookup.chembl_id IN ( %s )
+                        chembl_id_lookup.chembl_id in %s
                 order by 1
             """,(chemblIds,))
     return tupleArray2Dict(data)
@@ -38,9 +38,9 @@ def accessionToChembl(accessionIds):
                         join target_components using(tid)
                         join component_sequences using(component_id)
                 where
-                        accession IN ( %s )
+                        accession in %s
                 order by 1
-            """,[accessionIds])
+            """,(accessionIds,))
     return tupleArray2Dict(data)
 
 def mapToChembl(unknownIds):

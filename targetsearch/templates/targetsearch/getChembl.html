@@ -8,19 +8,19 @@
 		<input type="submit" value="Search">
 	</form>
 	{% if query_submit %}
-	{% if matches %}
+	{% for accession_id in accession_id_tuple %}
 		<table>
 		<tr>
 			<td>Matching ChEMBL IDs ({{ accession_id }}):</td>
 		</tr>
-		{% for chembl_id in matches %}
+		{% for chembl_id in matches|dict_lookup:accession_id %}
 			<tr>
-				<td>{{ chembl_id }}</td>
+				<td><a href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ chembl_id }}/">{{ chembl_id }}</a></td>
 			</tr>
+		{% empty %}
+			<tr><td>No matching ChEMBL IDs.</td></tr>
 		{% endfor %}
 		</table>
-	{% else %}
-        <p>No matching ChEMBL IDs for {{ accession_id }}.</p>
-	{% endif %}
+	{% endfor %}
 	{% endif %}
 {% endblock base_content %}
