@@ -2,25 +2,48 @@
 {% load cms_tags %}
 
 {% block base_content %}
+	<div class="row-fluid">
+	<div class="span12">
 	<form method="GET">
-		<label for="accession_id">Accession ID: </label>
-		<input id="accession_id" type="text" name="accession_id">
-		<input type="submit" value="Search">
+	<div class="form-group">
+		<label for="accession_id">Accession ID:</label>
+		<input id="accession_id" name="accession_id" type="text" class="form-control" placeholder="Enter accession ID(s)">
+		<small class="form-text text-muted">To perform multiple searches, separate search terms with spaces.</small>
+	</div>
+	<div class="form-group">
+		<button type="submit" class="btn btn-primary">Search</button>
+	</div>
 	</form>
+	</div>
+	</div>
 	{% if query_submit %}
 	{% for accession_id in accession_id_tuple %}
-		<table>
-		<tr>
-			<td>Matching ChEMBL IDs ({{ accession_id }}):</td>
-		</tr>
+		<div class="row-fluid">
+		<div class="span12">
+		<h3>Matching ChEMBL IDs ({{ accession_id }}):</h3>
+		<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>ChEMBL IDs</th>
+				<th>EBI Compound Report Card</th>
+			</tr>
+		</thead>
+		<tbody>
 		{% for chembl_id in matches|dict_lookup:accession_id %}
 			<tr>
-				<td><a href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ chembl_id }}/">{{ chembl_id }}</a></td>
+				<td>{{ chembl_id }}</td>
+				<td><a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ chembl_id }}/">{{ chembl_id }}</a></td>
 			</tr>
 		{% empty %}
-			<tr><td>No matching ChEMBL IDs.</td></tr>
+			<tr>
+				<td>No matching ChEMBL IDs.</td>
+				<td>-</td>
+			</tr>
 		{% endfor %}
+		</tbody>
 		</table>
+		</div>
+		</div>
 	{% endfor %}
 	{% endif %}
 {% endblock base_content %}

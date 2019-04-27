@@ -2,25 +2,48 @@
 {% load cms_tags %}
 
 {% block base_content %}
+	<div class="row-fluid">
+	<div class="span12">
 	<form method="GET">
-		<label for="chembl_id">ChEMBL ID: </label>
-		<input id="chembl_id" type="text" name="chembl_id">
-		<input type="submit" value="Search">
+	<div class="form-group">
+		<label for="chembl_id">ChEMBL ID:</label>
+		<input id="chembl_id" name="chembl_id" type="text" class="form-control" placeholder="Enter ChEMBL ID(s)">
+		<small class="form-text text-muted">To perform multiple searches, separate search terms with spaces.</small>
+	</div>
+	<div class="form-group">
+		<button type="submit" class="btn btn-primary">Search</button>
+	</div>
 	</form>
+	</div>
+	</div>
 	{% if query_submit %}
 	{% for chembl_id in chembl_id_tuple %}
-		<table>
-		<tr>
-			<td><b>Matching Target Accession IDs ({{ chembl_id }}):</b></td>
-		</tr>
+		<div class="row-fluid">
+		<div class="span12">
+		<h3>Matching Target Accession IDs ({{ chembl_id }}):</h3>
+		<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Accession ID</th>
+				<th>UniProt KB</th>
+			</tr>
+		</thead>
+		<tbody>
 		{% for target_id in matches|dict_lookup:chembl_id %}
 			<tr>
-				<td><a href="https://www.uniprot.org/uniprot/?query=accession:{{target_id}}">{{ target_id }}</a></td>
+				<td>{{ target_id }}</td>
+				<td><a target="_blank" href="https://www.uniprot.org/uniprot/?query=accession:{{target_id}}">{{ target_id }}</a></td>
 			</tr>
 		{% empty %}
-			<tr><td>No matching targets.</td></tr>
+			<tr>
+				<td>No matching targets.</td>
+				<td>-</td>
+			</tr>
 		{% endfor %}
+		</tbody>
 		</table>
+		</div>
+		</div>
 	{% endfor %}
 	{% endif %}
 {% endblock base_content %}
