@@ -49,7 +49,7 @@ pubchemCids = unlist(lapply(filtered$target,
 				    if(is.na(cid)) # return CHEMBL name if translation to pubchem CID fails
 					    chemblName
 				    else 
-					    cid
+					    cid[1]
 			    }))
 			    
 results = data.frame(target=pubchemCids,similarities = 1 - filtered$distance)

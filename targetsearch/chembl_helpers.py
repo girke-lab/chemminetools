@@ -42,3 +42,15 @@ def accessionToChembl(accessionIds):
                 order by 1
             """,[accessionIds])
     return tupleArray2Dict(data)
+
+def mapToChembl(unknownIds):
+    chemblIds = set()
+    for unknownId in unknownIds:
+        req = requests.get("https://www.ebi.ac.uk/unichem/rest/orphanIdMap/"+unknownId+"/1")
+        data = [ source[0]["src_compound_id"]  for source in req.json().values()]
+        #print("got result: "+str(data))
+        chemblIds |= set(data)
+
+    #print("final chembl ids: "+str(chemblIds))
+
+    return list(chemblIds)
