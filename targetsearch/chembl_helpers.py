@@ -1,4 +1,5 @@
 import psycopg2
+import requests
 
 
 def tupleArray2Dict(tuples):
@@ -79,18 +80,34 @@ def accessionToChembl(accessionIds):
     #return tupleArray2Dict(data)
     return groupBy(lambda t: t[0], data)
 
-def mapToChembl(unknownIds):
+def mapToChembl(unknownIds, sourceId):
     chemblIds = set()
     for unknownId in unknownIds:
-        req = requests.get("https://www.ebi.ac.uk/unichem/rest/orphanIdMap/"+unknownId+"/1")
-        data = [ source[0]["src_compound_id"]  for source in req.json().values()]
+        #req = requests.get("https://www.ebi.ac.uk/unichem/rest/orphanIdMap/"+unknownId+"/1")
+        #data = [ source[0]["src_compound_id"]  for source in req.json().values()]
+        req = requests.get("https://www.ebi.ac.uk/unichem/rest/src_compound_id/"+unknownId+"/"+str(sourceId)+"/1")
+        data = req.json()[0]["src_compound_id"]
         #print("got result: "+str(data))
-        chemblIds |= set(data)
+        chemblIds.add(data)
 
     #print("final chembl ids: "+str(chemblIds))
 
     return list(chemblIds)
 
+def getUniChemSources():
+    sources = {}
+    sourceReq = requests.get("https://www.ebi.ac.uk/unichem/rest/src_ids/")
+    sourceIds = [ source["src_id"] for source in sourceReq.json()]
+
+    for sourceId in sourceIds:
+        infoReq = requests.get(" https://www.ebi.ac.uk/unichem/rest/sources/"+sourceId)
+        data = infoReq.json()[0]
+        sources[data["src_id"]] = data["name_label"]
+    return sources;
+
+
+#getUniChemSources()
+#mapToChembl(['DB00829','DB00945'],2)
 
 #print(chemblTargetAccessions(('CHEMBL26',)))
 #print(chemblTargetAccessionsByAnnotations(('CHEMBL25',)))
