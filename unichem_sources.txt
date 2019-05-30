@@ -1,0 +1,36 @@
+1	ChEMBL
+2	DrugBank
+3	PDBe
+4	Guide to Pharmacology
+5	PubChem: Drugs of the Future 
+6	KEGG Ligand
+7	ChEBI
+8	NIH Clinical Collection
+9	ZINC
+10	eMolecules
+11	IBM Patent System
+12	Atlas
+14	FDA SRS
+15	SureChEMBL
+17	PharmGKB
+18	Human Metabolome Database
+20	Selleck
+21	PubChem: Thomson Pharma 
+22	PubChem
+23	Mcule
+24	NMRShiftDB
+25	LINCS
+26	ACToR
+27	Recon
+28	MolPort
+29	Nikkaji
+31	BindingDB
+32	EPA CompTox Dashboard
+33	LipidMaps
+34	DrugCentral
+35	CarotenoidDB
+36	Metabolights
+37	Brenda
+38	Rhea
+39	ChemicalBook
+41	SwissLipids

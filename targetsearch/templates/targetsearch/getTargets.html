@@ -2,13 +2,45 @@
 {% load cms_tags %}
 
 {% block base_content %}
+
+
+{% block js_content %}
+<script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
+<script src="/static/admin/cidpopups.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('.result-table').dataTable( {
+		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"sScrollX": "100%",
+		"bScrollCollapse": true
+         } );
+
+} );
+</script>
+
+{% endblock %}
+
+
 	<div class="row-fluid">
 	<div class="span12">
+	{% if message %}
+	<span style="color: red">{{message}}</span>
+	{% endif %}
 	<form method="GET">
 	<div class="form-group">
-		<label for="chembl_id">ChEMBL ID:</label>
-		<input id="chembl_id" name="chembl_id" type="text" class="form-control" placeholder="Enter ChEMBL ID(s)">
+		<label for="source_id">Database:</label>
+		<select id="source_id" name="source_id">
+			{% for id,name in sources.items %}
+				<option value="{{id}}">{{name}}</option>
+			{% endfor %}
+		</select>
+		<br>
+		<label for="chembl_id">Database IDs:</label>
 		<small class="form-text text-muted">To perform multiple searches, separate search terms with spaces.</small>
+		
+		<br>
+		<textarea id="chembl_id" name="chembl_id" class="form-control" rows="10" placeholder="Enter ID(s)"></textarea>
 	</div>
 	<div class="form-group">
 		<button type="submit" class="btn btn-primary">Search</button>
@@ -19,20 +51,72 @@
 	{% if query_submit %}
 	{% for chembl_id in chembl_id_tuple %}
 		<div class="row-fluid">
-		<div class="span12">
+		<div class="span12" >
 		<h3>Matching Target Accession IDs ({{ chembl_id }}):</h3>
-		<table class="table table-striped">
+		<h4>By Annotation</h4>
+		<table class="table table-striped result-table" >
 		<thead>
 			<tr>
 				<th>Accession ID</th>
-				<th>UniProt KB</th>
+				<th>Mechanism of Action</th>
+				<th>Target ID</th>
+				<th>Component ID</th>
+				<th>Description</th>
+				<th>Organism</th>
+				<th>Mesh ID</th>
+				<th>Mesh Heading</th>
 			</tr>
 		</thead>
 		<tbody>
-		{% for target_id in matches|dict_lookup:chembl_id %}
+		{% for match in annotationMatches|dict_lookup:chembl_id %}
 			<tr>
-				<td>{{ target_id }}</td>
-				<td><a target="_blank" href="https://www.uniprot.org/uniprot/?query=accession:{{target_id}}">{{ target_id }}</a></td>
+				<td><a target="_blank" href="https://www.uniprot.org/uniprot/{{match.accession}}">{{ match.accession}}</a></td>
+				<td>{{ match.mechanism_of_action}}</td>
+				<td>{{ match.tid}}</td>
+				<td>{{ match.component_id}}</td>
+				<td>{{ match.description}}</td>
+				<td>{{ match.organism}}</td>
+				<td>{{ match.mesh_id}}</td>
+				<td>{{ match.mesh_heading}}</td>
+			</tr>
+		{% empty %}
+			<tr>
+				<td>No matching targets.</td>
+				<td>-</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+		</table>
+
+		<h4>By Activity</h4>
+		<table class="table table-striped result-table" >
+		<thead>
+			<tr>
+				<th>Accession ID</th>
+				<th>Name</th>
+				<th>Activity ID</th>
+				<th>Assay ID</th>
+				<th>Description</th>
+				<th>Organism</th>
+				<th>Value</th>
+				<th>Units</th>
+				<th>Flag</th>
+				<th>Type</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for match in matches|dict_lookup:chembl_id %}
+			<tr>
+				<td><a target="_blank" href="https://www.uniprot.org/uniprot/{{match.accession}}">{{ match.accession}}</a></td>
+				<td>{{ match.pref_name}}</td>
+				<td>{{ match.activity_id}}</td>
+				<td>{{ match.chembl_assay_id}}</td>
+				<td>{{ match.description}}</td>
+				<td>{{ match.organism}}</td>
+				<td>{{ match.standard_value}}</td>
+				<td>{{ match.standard_units}}</td>
+				<td>{{ match.standard_flag}}</td>
+				<td>{{ match.standard_type}}</td>
 			</tr>
 		{% empty %}
 			<tr>

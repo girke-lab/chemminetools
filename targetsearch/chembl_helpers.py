@@ -1,5 +1,6 @@
 import psycopg2
 import requests
+from psycopg2.extras import NamedTupleCursor
 
 
 def tupleArray2Dict(tuples):
@@ -23,7 +24,7 @@ def groupBy(keyFn, tuples):
 def runQuery(query,values):
     conn = psycopg2.connect(host = "chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com",
             user="chembl",dbname="chembl",password="chembl1889")
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
     cur.execute(query,values)
     return cur.fetchall()
 
@@ -35,8 +36,8 @@ def chemblTargetAccessions(chemblIds):
                     activities.standard_value, activities.standard_units, 
                     activities.standard_flag, activities.standard_type
                 from chembl_id_lookup
-                        join molecule_dictionary using(molregno)
                         join activities on(entity_id = molregno)
+                        join molecule_dictionary using(molregno)
                         join assays using(assay_id)
                         join target_components using(tid)
                         join component_sequences using(component_id)
@@ -83,16 +84,16 @@ def accessionToChembl(accessionIds):
 def mapToChembl(unknownIds, sourceId):
     chemblIds = set()
     for unknownId in unknownIds:
-        #req = requests.get("https://www.ebi.ac.uk/unichem/rest/orphanIdMap/"+unknownId+"/1")
-        #data = [ source[0]["src_compound_id"]  for source in req.json().values()]
         req = requests.get("https://www.ebi.ac.uk/unichem/rest/src_compound_id/"+unknownId+"/"+str(sourceId)+"/1")
-        data = req.json()[0]["src_compound_id"]
-        #print("got result: "+str(data))
-        chemblIds.add(data)
+        #print("\n\nreq.json: "+str(req.json()))
+        result = req.json()
+        #print("got result: "+str(result))
+        if len(result) > 0 and ("src_compound_id" in result[0]) :
+            chemblIds.add(result[0]["src_compound_id"])
 
     #print("final chembl ids: "+str(chemblIds))
 
-    return list(chemblIds)
+    return tuple(chemblIds)
 
 def getUniChemSources():
     sources = {}
@@ -102,7 +103,9 @@ def getUniChemSources():
     for sourceId in sourceIds:
         infoReq = requests.get(" https://www.ebi.ac.uk/unichem/rest/sources/"+sourceId)
         data = infoReq.json()[0]
+        #print(str(data["src_id"])+"\t"+data["name_label"])
         sources[data["src_id"]] = data["name_label"]
+
     return sources;
 
 

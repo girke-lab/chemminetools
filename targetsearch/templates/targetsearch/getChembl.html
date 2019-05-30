@@ -2,13 +2,34 @@
 {% load cms_tags %}
 
 {% block base_content %}
+
+
+{% block js_content %}
+<script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
+<script src="/static/admin/cidpopups.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+	$('.result-table').dataTable( {
+		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"sScrollX": "100%",
+		"bScrollCollapse": true
+         } );
+} );
+</script>
+
+{% endblock %}
+
+
+
 	<div class="row-fluid">
 	<div class="span12">
 	<form method="GET">
 	<div class="form-group">
 		<label for="accession_id">Accession ID:</label>
-		<input id="accession_id" name="accession_id" type="text" class="form-control" placeholder="Enter accession ID(s)">
 		<small class="form-text text-muted">To perform multiple searches, separate search terms with spaces.</small>
+		<br>
+		<textarea id="accession_id" name="accession_id" rows="10" class="form-control" placeholder="Enter accession ID(s)"></textarea>
 	</div>
 	<div class="form-group">
 		<button type="submit" class="btn btn-primary">Search</button>
@@ -21,18 +42,16 @@
 		<div class="row-fluid">
 		<div class="span12">
 		<h3>Matching ChEMBL IDs ({{ accession_id }}):</h3>
-		<table class="table table-striped">
+		<table class="table table-striped result-table">
 		<thead>
 			<tr>
 				<th>ChEMBL IDs</th>
-				<th>EBI Compound Report Card</th>
 			</tr>
 		</thead>
 		<tbody>
-		{% for chembl_id in matches|dict_lookup:accession_id %}
+		{% for match in matches|dict_lookup:accession_id %}
 			<tr>
-				<td>{{ chembl_id }}</td>
-				<td><a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ chembl_id }}/">{{ chembl_id }}</a></td>
+				<td><a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ match.chembl_id }}/">{{ match.chembl_id }}</a></td>
 			</tr>
 		{% empty %}
 			<tr>
