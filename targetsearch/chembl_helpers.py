@@ -28,7 +28,7 @@ def runQuery(query,values):
     cur.execute(query,values)
     return cur.fetchall()
 
-def chemblTargetAccessions(chemblIds):
+def chemblTargetAccessionsByActivity(chemblIds):
     data = runQuery("""
             select distinct chembl_id_lookup.chembl_id, accession,
                     activities.molregno, pref_name, activity_id, assays.chembl_id AS chembl_assay_id, 
@@ -47,6 +47,7 @@ def chemblTargetAccessions(chemblIds):
             """,(chemblIds,))
     #return tupleArray2Dict(data)
     return groupBy(lambda t: t[0], data)
+
 def chemblTargetAccessionsByAnnotations(chemblIds):
     data = runQuery("""
             select distinct chembl_id,  accession,
@@ -64,7 +65,6 @@ def chemblTargetAccessionsByAnnotations(chemblIds):
             """,(chemblIds,))
     #return tupleArray2Dict(data)
     return groupBy(lambda t: t[0], data)
-
 
 def accessionToChembl(accessionIds):
     data = runQuery("""
@@ -112,5 +112,5 @@ def getUniChemSources():
 #getUniChemSources()
 #mapToChembl(['DB00829','DB00945'],2)
 
-#print(chemblTargetAccessions(('CHEMBL26',)))
+#print(chemblTargetAccessionsByActivity(('CHEMBL26',)))
 #print(chemblTargetAccessionsByAnnotations(('CHEMBL25',)))

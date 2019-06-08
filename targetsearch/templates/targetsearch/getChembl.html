@@ -42,6 +42,7 @@ $(document).ready(function() {
 		<div class="row-fluid">
 		<div class="span12">
 		<h3>Matching ChEMBL IDs ({{ accession_id }}):</h3>
+		<h5><a target="_blank" href="{% url 'getChemblTSV' %}?accession_id={{accession_id}}">[Export to TSV text file]</a></h5>
 		<table class="table table-striped result-table">
 		<thead>
 			<tr>
