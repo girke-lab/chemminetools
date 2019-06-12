@@ -68,7 +68,7 @@ def chemblTargetAccessionsByAnnotations(chemblIds):
 
 def accessionToChembl(accessionIds):
     data = runQuery("""
-            select distinct accession, chembl_id_lookup.chembl_id
+            select distinct accession, chembl_id_lookup.chembl_id, chembl_id_lookup.entity_type
                 from chembl_id_lookup
                         join activities on(entity_id = molregno)
                         join assays using(assay_id)

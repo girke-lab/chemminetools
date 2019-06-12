@@ -24,21 +24,23 @@
 		<div class="row-fluid">
 		<div class="span12">
 		<h3>Matching ChEMBL IDs ({{ accession_id }}):</h3>
-		<table class="table table-striped result-table">
+		<table class="table table-striped result-table" style="display:none">
 		<thead>
 			<tr>
 				<th>ChEMBL IDs</th>
+				<th>Entity Type</th>
 			</tr>
 		</thead>
 		<tbody>
 		{% for match in matches|dict_lookup:accession_id %}
 			<tr>
 				<td><a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ match.chembl_id }}/">{{ match.chembl_id }}</a></td>
+				<td>{{match.entity_type}}</td>
 			</tr>
 		{% empty %}
 			<tr>
 				<td>No matching ChEMBL IDs.</td>
-				<td>-</td>
+				<td></td>
 			</tr>
 		{% endfor %}
 		</tbody>
@@ -65,11 +67,26 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	$('.result-table').dataTable( {
-		//sDom: "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-		//sScrollX: "100%",
-		//bScrollCollapse: true,
 		dom: 'Bfrtip',
-		buttons: ['csv'],
+		buttons: ['csv',
+			{
+				text: "All Results",
+				action: function(e,dt,node,config){
+					dt.search("").draw();
+				},
+			},
+
+			{
+				text: "Compounds Only",
+				action: function(e,dt,node,config){
+					dt.search("COMPOUND").draw();
+
+				},
+			},
+		],
+		initComplete: function(){
+			$('.result-table').show();
+		},
          } );
 } );
 </script>

@@ -31,27 +31,29 @@
 	</div>
 	</div>
 	{% if query_submit %}
+	<div class="row-fluid">
+	<div class="span12" >
+	<!--<h3>Matching Target Accession IDs ({{ chembl_id }}):</h3>-->
+	<h4>By Annotation</h4>
+	<table class="table table-striped result-table" style="display:none">
+	<thead>
+		<tr>
+			<th>ChEMBL ID</th>
+			<th>Accession ID</th>
+			<th>Mechanism of Action</th>
+			<th>Target ID</th>
+			<th>Component ID</th>
+			<th>Description</th>
+			<th>Organism</th>
+			<th>Mesh ID</th>
+			<th>Mesh Heading</th>
+		</tr>
+	</thead>
+	<tbody>
 	{% for chembl_id in chembl_id_tuple %}
-		<div class="row-fluid">
-		<div class="span12" >
-		<h3>Matching Target Accession IDs ({{ chembl_id }}):</h3>
-		<h4>By Annotation</h4>
-		<table class="table table-striped result-table" >
-		<thead>
-			<tr>
-				<th>Accession ID</th>
-				<th>Mechanism of Action</th>
-				<th>Target ID</th>
-				<th>Component ID</th>
-				<th>Description</th>
-				<th>Organism</th>
-				<th>Mesh ID</th>
-				<th>Mesh Heading</th>
-			</tr>
-		</thead>
-		<tbody>
 		{% for match in annotationMatches|dict_lookup:chembl_id %}
 			<tr>
+				<td>{{chembl_id}}</td>
 				<td><a target="_blank" href="https://www.uniprot.org/uniprot/{{match.accession}}">{{ match.accession}}</a></td>
 				<td>{{ match.mechanism_of_action}}</td>
 				<td>{{ match.tid}}</td>
@@ -63,34 +65,43 @@
 			</tr>
 		{% empty %}
 			<tr>
+				<td>{{chembl_id}}</td>
 				<td>No matching targets.</td>
-				<td>-</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
 			</tr>
 		{% endfor %}
-		</tbody>
-		</table>
+	{% endfor %}
+	</tbody>
+	</table>
 
-		<h4>By Activity</h4>
-		<h5><a target="_blank" href="{% url 'getTargetsTSV' %}?by=activity&chembl_id={{chembl_id}}">[Export to TSV text file]</a>
-        </h5>
-		<table class="table table-striped result-table" >
-		<thead>
-			<tr>
-				<th>Accession ID</th>
-				<th>Name</th>
-				<th>Activity ID</th>
-				<th>Assay ID</th>
-				<th>Description</th>
-				<th>Organism</th>
-				<th>Value</th>
-				<th>Units</th>
-				<th>Flag</th>
-				<th>Type</th>
-			</tr>
-		</thead>
-		<tbody>
+	<h4>By Activity</h4>
+	<table class="table table-striped result-table" style="display:none">
+	<thead>
+		<tr>
+			<th>ChEMBL ID</th>
+			<th>Accession ID</th>
+			<th>Name</th>
+			<th>Activity ID</th>
+			<th>Assay ID</th>
+			<th>Description</th>
+			<th>Organism</th>
+			<th>Value</th>
+			<th>Units</th>
+			<th>Flag</th>
+			<th>Type</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for chembl_id in chembl_id_tuple %}
 		{% for match in activityMatches|dict_lookup:chembl_id %}
 			<tr>
+				<td>{{chembl_id}}</td>
 				<td><a target="_blank" href="https://www.uniprot.org/uniprot/{{match.accession}}">{{ match.accession}}</a></td>
 				<td>{{ match.pref_name}}</td>
 				<td>{{ match.activity_id}}</td>
@@ -104,35 +115,47 @@
 			</tr>
 		{% empty %}
 			<tr>
+				<td>{{chembl_id}}</td>
 				<td>No matching targets.</td>
-				<td>-</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
 			</tr>
 		{% endfor %}
-		</tbody>
-		</table>
-		</div>
-		</div>
 	{% endfor %}
+	</tbody>
+	</table>
+	</div>
+	</div>
 	{% endif %}
 {% endblock base_content %}
 
 {% block js_content %}
-<!--
-<script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
--->
 
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/b-print-1.5.6/datatables.min.css"/>
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/b-print-1.5.6/datatables.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/rg-1.1.0/datatables.min.css"/>
+ 
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/rg-1.1.0/datatables.min.js"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
 	$('.result-table').dataTable( {
-		//"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-		//"sScrollX": "100%",
-		//"bScrollCollapse": true
 		dom: 'Bfrtip',
 		buttons: ['csv'],
+		//columnDefs: [ //hide grouping column (chembl_id)
+	        	//{ "visible": false, "targets": 0}
+		//],
+		rowGroup:{
+			dataSrc: 0,
+		},
+		initComplete: function(){
+			$('.result-table').show();
+		},
          } );
 
 } );
