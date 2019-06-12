@@ -1,26 +1,8 @@
 {% extends "base.html" %}
 {% load cms_tags %}
 
+
 {% block base_content %}
-
-
-{% block js_content %}
-<script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
-<script src="/static/admin/cidpopups.js"></script>
-<script type="text/javascript">
-$(document).ready(function() {
-	$('.result-table').dataTable( {
-		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
-		"sScrollX": "100%",
-		"bScrollCollapse": true
-         } );
-} );
-</script>
-
-{% endblock %}
-
-
 
 	<div class="row-fluid">
 	<div class="span12">
@@ -42,7 +24,6 @@ $(document).ready(function() {
 		<div class="row-fluid">
 		<div class="span12">
 		<h3>Matching ChEMBL IDs ({{ accession_id }}):</h3>
-		<h5><a target="_blank" href="{% url 'getChemblTSV' %}?accession_id={{accession_id}}">[Export to TSV text file]</a></h5>
 		<table class="table table-striped result-table">
 		<thead>
 			<tr>
@@ -67,3 +48,32 @@ $(document).ready(function() {
 	{% endfor %}
 	{% endif %}
 {% endblock base_content %}
+
+
+
+{% block js_content %}
+<!--
+<script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
+
+-->
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/b-print-1.5.6/datatables.min.css"/>
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/b-print-1.5.6/datatables.min.js"></script>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$('.result-table').dataTable( {
+		//sDom: "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		//sScrollX: "100%",
+		//bScrollCollapse: true,
+		dom: 'Bfrtip',
+		buttons: ['csv'],
+         } );
+} );
+</script>
+
+{% endblock %}
+
+
