@@ -210,7 +210,7 @@ def view_job(
             if (job.application.name == 'Hierarchical Clustering')\
                 or (job.application.name == 'Numeric Data Clustering'):
                 tree = True 
-                return render(request,'view_job_oldcx.html',
+                return render(request,'view_job.html',
                         dict(title=str(job.application) + ' Results',
                         result=finalResult, tree=tree, job=job, plotJSON=plotJSON))
             else:

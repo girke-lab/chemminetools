@@ -107,7 +107,7 @@ if ((dim(plotdata)[2] > 38) || (length(sdfInput) > 70)){
 fontscale <- as.character(0.5 + max(length(sdfInput), dim(plotdata)[2])/55 )
 
 # add configuration parameters and output to file
-config <- paste("{\"graphType\": \"Heatmap\",\"useFlashIE\": true,\"showVarDendrogram\": false,\"showSmpDendrogram\": true,\"varLabelRotate\": 45,\"varHighlightColor\": \"rgb(0,255,0)\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\",\"dendrogramColor\": \"rgb(0,0,0)\",\"autoAdjust\": true, \"zoomSamplesDisable\": true, \"zoomVariablesDisable\": true, \"toolbarPermanent\": true, \"smpLabelScaleFontFactor\": ", fontscale, ", \"varLabelScaleFontFactor\": ", fontscale, "}", sep="")
+config <- paste("{\"graphType\": \"Heatmap\",\"useFlashIE\": true,\"showVarDendrogram\": false,\"showSmpDendrogram\": true,\"varLabelRotate\": 45,\"varHighlightColor\": \"rgb(0,255,0)\",\"heatmapType\": \"blue-red\",\"indicatorCenter\": \"rainbow-red\",\"dendrogramColor\": \"rgb(0,0,0)\",\"autoAdjust\": true, \"zoomSamplesDisable\": true, \"zoomVariablesDisable\": true, \"toolbarPermanent\": true, \"smpLabelScaleFontFactor\": ", fontscale, ", \"varLabelScaleFontFactor\": ", fontscale,",\"samplesClustered\": true", "}", sep="")
 events <- "{click: function(o) {detailPopup(o.y.smps);}, dblclick: function(o) {detailPopup(o.y.smps);}}"
 output <- paste("$(\"canvas\").attr('height', '", height, "');\n$(\"canvas\").attr('width', ", width, ");\n new CanvasXpress(\"canvas\",\n", data, ",\n", config ,",\n", events, "\n)", sep="")
 if(! exists("debug_mode")){
