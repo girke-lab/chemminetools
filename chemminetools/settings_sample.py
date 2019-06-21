@@ -214,6 +214,7 @@ INSTALLED_APPS = (
     'django_cron',
     'filer',
     'targetsearch',
+    'lockdown',
     )
 
 CRON_CLASSES= [
@@ -297,3 +298,4 @@ EMAIL_HOST_USER='chemminetool@gmail.com'
 EMAIL_HOST_PASSWORD='chemminetools2!'
 EMAIL_USE_TLS=True
 
+LOCKDOWN_PASSWORDS=('consortium')

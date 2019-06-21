@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from lockdown.decorators import lockdown
 
 from .chembl_helpers import (
     chemblTargetAccessionsByActivity,
@@ -13,9 +14,11 @@ from django.conf import settings
 import os
 import csv
 
+@lockdown()
 def home(request):
     return render(request, 'targetsearch/home.html')
 
+@lockdown()
 def getTargets(request):
     sourceDbs  = readSources()
     query_submit = False
@@ -128,6 +131,7 @@ def getTargetsTSV(request):
         message = "Error: Invalid 'by' value. Should be 'annotation' or 'activity'."
         return HttpResponse(message, content_type='text/plain')
 
+@lockdown()
 def getChembl(request):
     if 'accession_id' in request.GET:
         query_submit = True
