@@ -11,11 +11,11 @@
 <script type="text/javascript">
 	var oTable;
 	$(document).ready(function() {
-		$('.icon-trash').click(DeleteRow);
+		$('.fa-trash-alt').click(DeleteRow);
 		$("[data-toggle=tooltip]").tooltip();
 		oTable = $('#jobTable').dataTable( {
 			"bSort": false,
-			"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>"
+			"sDom": "<'row'<'col-md-6'l><'col-md-6'f>r>t<'row'<'col-md-6'i><'col-md-6'p>>"
 		} );
 	});
 
@@ -34,16 +34,16 @@ function DeleteRow()
 {% endblock %} 
 
 {% block base_content %}
-<div class="row-fluid"> 
-<div class="span12">
+<div class="row"> 
+<div class="col-md-12">
 <h2>My Jobs</h2>
 </div>
 </div><!--/row--> 
 
-<div class="row-fluid">
+<div class="row">
 
 
-<div class="span12">
+<div class="col-md-12">
 {% if matches %}
 	<table id="jobTable" class="table table-striped">
 	<thead>
@@ -60,7 +60,7 @@ function DeleteRow()
 		<td><a href="/tools/view_job/{{job.id}}/">{{job.application}}</a></td>
 		<td>{{job.start_time}}</td>
 		<td>{% if job.status == 0 %}Running<img src="/static/images/spinner.gif"/>{% endif %}{% if job.status == 1 %}Finished{% endif %}{% if job.status == 2 %}Failed{% endif %}</td>
-		<td>{% if job.status != 0 %}<i data-toggle="tooltip" placement="top" title="delete this job" class="icon-trash"></i>{% endif %}
+		<td>{% if job.status != 0 %}<i data-toggle="tooltip" placement="top" title="delete this job" class="fas fa-trash-alt"></i>{% endif %}
 		</td>
 		</tr>
 	{% endfor %}

@@ -31,15 +31,15 @@ $(document).ready(function() {
 </script>
 {% endblock %}
 {% block base_content %}
-<div class="row-fluid">
-        <div class="span12">
+<div class="row">
+        <div class="col-md-12">
                 <h2>{{ title|default:"Job Result" }}</h2>
         </div>
 </div><!--/row-->
 
 {% if job %}
-<div class="row-fluid">
-        <div class="span12">
+<div class="row">
+        <div class="col-md-12">
         <table class="table table-bordered table-hover">
         <tbody>
         <tr>
@@ -60,8 +60,8 @@ $(document).ready(function() {
 </div><!--/row-->
 {% endif %}
 
-<div class="row-fluid">
-<div class="span12">
+<div class="row">
+<div class="col-md-12">
 {% if compounds %}
     <h2>Hits</h2>
     <div class="btn-group">

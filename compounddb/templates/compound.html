@@ -10,24 +10,24 @@
 {% endblock %}
 
 {% block base_content %}
-<div class="row-fluid"> 
-<div class="span12">
+<div class="row"> 
+<div class="col-md-12">
 <h2>Compound '{{compound.cid}}'</h2>
 </div>
 </div><!--/row--> 
 
-<div class="row-fluid">
+<div class="row">
 
 
-<div class="span7">
+<div class="col-md-7">
 	<img class="img-rounded" src="/compounds/{{compound.id}}/png"/>
 </div>
 
-<div class="span5">
+<div class="col-md-5">
 	<table class="table table-striped">
 	<tbody>
-	<tr class="cid"><th>CID</th><td>{{compound.cid}}<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="edit"><i class="icon-pencil"></i></a></td></tr>
-	<tr class="name"><th>Name</th><td>{{compound.name}}<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="p" title="edit"><i class="icon-pencil"></i></td></tr>
+	<tr class="cid"><th>CID</th><td>{{compound.cid}}<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="edit"><i class="fas fa-pen"></i></a></td></tr>
+	<tr class="name"><th>Name</th><td>{{compound.name}}<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="p" title="edit"><i class="fas fa-pen"></i></td></tr>
 	<tr class="formula"><th>Formula</th><td>{{compound.formula}}</td></tr>
 	<tr class="weight"><th>Molecular Weight</th><td>{{compound.weight|floatformat:3}}</td></tr>
 	</tbody>
@@ -35,24 +35,24 @@
 </div><!--/span-->
 </div><!--/row-->
 
-<div class="row-fluid">
+<div class="row">
 
-<div class="span7">
-	<ul class="nav nav-tabs" id="myTab">
+<div class="col-md-7">
+	<ul class="navbar-nav nav-tabs" id="myTab">
 	  <li class="active"><a href="#smiles" data-toggle="tab">SMILES</a></li>
 	  <li><a href="#sdf" data-toggle="tab">SDF</a></li>
 	  <li><a href="#inchi" data-toggle="tab">InChI</a></li>
 	</ul>
 	 
 	<div class="tab-content">
-	  <div class="tab-pane active" id="smiles"><textarea class="field span12" rows="6" readonly="readonly">{{smiles}}</textarea></div>
-	  <div class="tab-pane" id="sdf"><textarea class="field span12" rows="24" readonly="readonly">{{sdf}}</textarea></div>
-	  <div class="tab-pane" id="inchi"><textarea class="field span12" rows="6" readonly="readonly">{{inchi}}i</textarea></div>
+	  <div class="tab-pane active" id="smiles"><textarea class="field col-md-12" rows="6" readonly="readonly">{{smiles}}</textarea></div>
+	  <div class="tab-pane" id="sdf"><textarea class="field col-md-12" rows="24" readonly="readonly">{{sdf}}</textarea></div>
+	  <div class="tab-pane" id="inchi"><textarea class="field col-md-12" rows="6" readonly="readonly">{{inchi}}i</textarea></div>
 	</div>
 	 
 </div><!--/span-->
 
-<div class="span5">
+<div class="col-md-5">
 <h2>Downloads</h2>
 <p><a class="btn" href="/compounds/{{compound.id}}/smiles/{{compound.id}}.smi">SMILES »</a></p>
 <p><a class="btn" href="/compounds/{{compound.id}}/sdf/{{compound.id}}.sdf">SDF »</a></p>

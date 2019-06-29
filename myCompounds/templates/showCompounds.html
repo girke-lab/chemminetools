@@ -5,7 +5,7 @@
 <script type="text/javascript">
 	var structures_loaded = false;
 	$(document).ready(function() {
-		$('.icon-trash').click(DeleteRow);
+		$('.fa-trash-alt').click(DeleteRow);
 		$("[data-toggle=tooltip]").tooltip();
 
 	$("#loadstructures").click(function () {
@@ -41,29 +41,33 @@
 {% endblock %} 
 
 {% block base_content %}
-<div class="row-fluid"> 
-<div class="span12">
+<div class="row"> 
+<div class="col-md-12">
 <h2>My Compounds</h2>
 </div>
 </div><!--/row--> 
 
 <!-- Modal -->
-<div id="deleteModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Are you sure?</h3>
-  </div>
-  <div class="modal-body">
-    <p>Are you sure you want to delete all of your compounds?</p>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">No</button>
-<a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
+<div id="deleteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="myModalLabel">Are you sure?</h3>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete all of your compounds?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn" data-dismiss="modal" aria-hidden="true">No</button>
+        <a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		{% if matches %}
 			<table border="0">
 			<tr>
@@ -80,10 +84,10 @@
 	</div> 
 </div><!--/row-->
 
-<div class="row-fluid">
+<div class="row">
 
 
-<div class="span12">
+<div class="col-md-12">
 {% if matches %}
 	<table class="table table-striped">
 	<thead>
@@ -102,9 +106,9 @@
 		<td>{{compound.name}}</td>
 		<td style="display:none" class="compoundImage" id="{{compound.id}}">  </td>
 		<td>{{compound.formula}}</td>
-		<td><i data-toggle="tooltip" placement="top" title="delete this compound" class="icon-trash"></i>
-		<a href="/eisearch/query/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
-		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="edit compound details"><i class="icon-pencil"></i></a>
+		<td><i data-toggle="tooltip" placement="top" title="Delete this compound" class="fas fa-trash-alt"></i>
+		<a href="/eisearch/query/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="Search similar compounds"><i class="fas fa-search"></i></a>
+		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="Edit compound details"><i class="fas fa-pen"></i></a>
 		</td>
 		</tr>
 	{% endfor %}
@@ -117,8 +121,8 @@
 
 
 </div><!--/row-->
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		<div class="pagination pagination-centered">
 		<ul>
 		{% if matches.has_previous %}
