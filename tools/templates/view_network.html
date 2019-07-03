@@ -42,15 +42,15 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block base_content %}
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		<h2>{{ title|default:"Job Result" }}</h2>
 	</div>
 </div><!--/row-->
 
 {% if job %}
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 	<table class="table table-bordered table-hover">
 	<tbody>
 	<tr>
@@ -67,25 +67,29 @@ $(document).ready(function() {
 </div><!--/row-->
 {% endif %}
 
-<div class="row-fluid">
-    <div class="span12" id="cy">
+<div class="row">
+  <div class="col-md-12" id="cy">
 
-<!-- Modal -->
-<div id="compoundModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-header">
-    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    <h3 id="myModalLabel">Compound Details</h3>
-  </div>
-  <div class="modal-body">
-<p id="cidLabel"></p>
-<img class="img-rounded" id="compoundImage" src="#"/>
-  </div>
-  <div class="modal-footer">
-    <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
-    <a id="compoundButtonLink" href="#"><button class="btn">Compound Page</button></a>
-  </div>
-</div>
+    <!-- Modal -->
+    <div id="compoundModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h3 id="myModalLabel">Compound Details</h3>
+          </div>
+          <div class="modal-body">
+            <p id="cidLabel"></p>
+            <img class="img-rounded" id="compoundImage" src="#"/>
+          </div>
+          <div class="modal-footer">
+            <button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+            <a id="compoundButtonLink" href="#"><button class="btn">Compound Page</button></a>
+          </div>
+        </div>
+      </div>
+    </div>
 
-	</div>
+  </div>
 </div><!--/row-->
 {% endblock %}

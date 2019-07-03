@@ -27,14 +27,14 @@ jQuery(document).ready(function() {
 {% endblock %}
 
 {% block base_content %}
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		{% autoescape off %}<h2>{{ title|default:"Job Result" }}</h2>{% endautoescape %}
 	</div>
 </div><!--/row-->
 
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		This page will automatically reload when the job is finished.
 		<br/><br/>
 		If you would like to browse away from this page, you can access your results later from the 'Past Jobs' link located in the left navigation menu.

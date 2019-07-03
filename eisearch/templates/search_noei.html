@@ -73,15 +73,15 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block base_content %}
-<div class="row-fluid">
-<div class="span12">
+<div class="row">
+<div class="col-md-12">
 <h2>Structural Similarity Search</h2>
 </div>
 </div><!--/row-->
 
 
-<div class="row-fluid">
-<div class="span12">
+<div class="row">
+<div class="col-md-12">
 
 <p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> 
 using the fingerprint algorithm.
@@ -96,9 +96,9 @@ As this connects directly to PubChem, it will include new compounds sooner than 
 </div>
 </div><!--/row-->
 
-<div class="row-fluid">
-<div class="span12">
-<ul class="nav nav-tabs">
+<div class="row">
+<div class="col-md-12">
+<ul class="navbar-nav nav-tabs">
 	<li class="active"><a href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
 	<li><a href="#draw" data-toggle="tab">Structural Drawing</a></li>
 	<li><a href="#sdf-input" data-toggle="tab">SDF Input</a></li>
@@ -110,7 +110,7 @@ As this connects directly to PubChem, it will include new compounds sooner than 
 {% csrf_token %}
 
     <label class="control-label" for="smiles">SMILES:</label>
-    <input id="smiles" type="text" name="smiles" class="field span12" value="{{smi}}"/>
+    <input id="smiles" type="text" name="smiles" class="field col-md-12" value="{{smi}}"/>
 
     <table>
         {{form}}
@@ -169,7 +169,7 @@ Please copy and paste your single-molecule SDF below. If multiple compounds are 
 <form action="." method="post" accept-charset="utf-8">
 {% csrf_token %}
 	<label class="control-label" for="sdf_box">SDF Content:</label>
-	<textarea id="sdf_box" name="sdf" class="field span12" rows="12"></textarea><br/>
+	<textarea id="sdf_box" name="sdf" class="field col-md-12" rows="12"></textarea><br/>
 
     <table>
         {{form}}
@@ -194,7 +194,7 @@ Please upload a single-molecule SDF below. If multiple compounds are found in th
 <form action="." method="post" enctype="multipart/form-data">
 {% csrf_token %}
 	<label class="control-label" for="sdf_file">SDF File:</label>
-	<input id="sdf_file" name="sdf" class="field span12" type="file"/>
+	<input id="sdf_file" name="sdf" class="field col-md-12" type="file"/>
 
     <table>
         {{form}}

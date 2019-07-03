@@ -33,14 +33,14 @@
 {% endblock %}
 
 {% block base_content %}
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		<h2>{{ title|default:"Input Form" }}</h2>
 	</div>
 </div><!--/row-->
 
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		{% if fromWorkbench %}
 		<p>Select a tool to process the <b>{{totalCompounds}}</b> compounds in your workbench. To modify the input compounds, add or delete compounds from your workbench.</p>
 		{% endif %}	
@@ -50,13 +50,13 @@
 	</div>
 </div><!--/row-->	
 
-<div class="row-fluid">
-	<div class="span12" id="description">
+<div class="row">
+	<div class="col-md-12" id="description">
 	</div>
 </div><!--/row-->
 
-<div class="row-fluid">
-	<div class="span12" style="display:none" id="hiddenOptions">
+<div class="row">
+	<div class="col-md-12" style="display:none" id="hiddenOptions">
 		<form action="." method="post" enctype="multipart/form-data">{% csrf_token %}
 		<div id="formContent">
 		</div>
