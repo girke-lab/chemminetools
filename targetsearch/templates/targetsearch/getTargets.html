@@ -45,8 +45,7 @@
 			<th>Component ID</th>
 			<th>Description</th>
 			<th>Organism</th>
-			<th>Mesh ID</th>
-			<th>Mesh Heading</th>
+			<th>Mesh Indication</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -60,14 +59,12 @@
 				<td>{{ match.component_id}}</td>
 				<td>{{ match.description}}</td>
 				<td>{{ match.organism}}</td>
-				<td>{{ match.mesh_id}}</td>
-				<td>{{ match.mesh_heading}}</td>
+				<td>{{ match.mesh_indication}}</td>
 			</tr>
 		{% empty %}
 			<tr>
 				<td>{{chembl_id}}</td>
 				<td>No matching targets.</td>
-				<td></td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -145,7 +142,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	$('.result-table').dataTable( {
-		dom: 'Bfrtip',
+		dom: 'Bfrltip',
 		buttons: ['csv'],
 		//columnDefs: [ //hide grouping column (chembl_id)
 	        	//{ "visible": false, "targets": 0}

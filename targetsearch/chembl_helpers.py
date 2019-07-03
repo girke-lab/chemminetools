@@ -52,15 +52,18 @@ def chemblTargetAccessionsByAnnotations(chemblIds):
     data = runQuery("""
             select distinct chembl_id,  accession,
                     mechanism_of_action, tid,component_id, description, 
-                    organism, mesh_id, mesh_heading
+                    organism, string_agg(mesh_id||':'|| mesh_heading,',') as mesh_indication
                 from chembl_id_lookup
                         join molecule_dictionary using(chembl_id)
                         join drug_mechanism using(molregno)
-                        join drug_indication using(molregno)
                         join target_components using(tid)
                         join component_sequences using(component_id)
+                        left join drug_indication using(molregno)
                 where 
                         chembl_id_lookup.chembl_id in %s
+                group by chembl_id,  accession,
+                    mechanism_of_action, tid,component_id, description, 
+                    organism
                 order by 1
             """,(chemblIds,))
     #return tupleArray2Dict(data)
