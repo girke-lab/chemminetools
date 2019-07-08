@@ -1,9 +1,0 @@
-{% extends "base.html" %}
-{% load cms_tags %}
-
-{% block base_content %}
-<ul>
-	<li><a href="{% url 'getTargets' %}">Find target accessions by compound IDs</a></li>
-	<li><a href="{% url 'getChembl' %}">Find compounds with bioactivity annotations by target protein IDs</a></li>
-</ul>
-{% endblock base_content %}

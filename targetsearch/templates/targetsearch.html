@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+
+
+{% block base_content %}
+	<div class="row-fluid">
+	<div class="span12">
+	{% if message %}
+	<span style="color: red">{{message}}</span>
+	{% endif %}
+	<form method="GET">
+		<div class="form-group">
+
+			Search by:
+			<button type="button" class="btn" onclick="byCompound()">Compound</button>
+			<button type="button" class="btn" onclick="byTarget()">Target Protein</button>
+
+			<br>
+			<br>
+			<div id="compound_search" >
+				
+				<label for="source_id">Database:</label>
+				<select id="source_id" name="source_id">
+					{% for id,name in sources.items %}
+						<option value="{{id}}">{{name}}</option>
+					{% endfor %}
+				</select>
+				<label for="chembl_id">Compound IDs:</label>
+			</div>
+			<div id="target_search" style="display:none">
+				<input type="checkbox" name="include_activity"> &nbsp;Include Activity Results (slow)</input>
+				<br>&nbsp;
+				<label for="chembl_id">Target Protein IDs:</label>
+			</div>
+			<textarea id="id" name="id" class="form-control" rows="10" placeholder="Enter space separated ID(s)"></textarea>
+		</div>
+		<div class="form-group">
+			<button type="submit" class="btn btn-primary">Search</button>
+		</div>
+		<input type="hidden" id="search_type" name="search_type" value="compound"></input>
+	</form>
+	</div>
+	</div>
+	{% if query_submit %}
+	<div class="row-fluid">
+	<div class="span12" >
+	<!--<h3>Matching Target Accession IDs ({{ chembl_id }}):</h3>-->
+	<h4>By Annotation</h4>
+	<table class="table table-striped result-table" style="display:none">
+	<thead>
+		<tr>
+			{% if search_type == 'compound' %}
+				<th>ChEMBL ID</th>
+				<th>Accession ID</th>
+			{% endif %}
+			{% if search_type == 'target' %}
+				<th>Accession ID</th>
+				<th>ChEMBL ID</th>
+			{% endif %}
+			<th>Mechanism of Action</th>
+			<th>Target ID</th>
+			<th>Component ID</th>
+			<th>Description</th>
+			<th>Organism</th>
+			<th>Mesh Indication</th>
+		</tr>
+	</thead>
+	<tbody>
+	{% for id in ids%}
+		{% for match in annotationMatches|dict_lookup:id %}
+			<tr>
+				{% if search_type == 'compound' %}
+					<td><a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ match.chembl_id }}/">{{ match.chembl_id }}</a></td>
+					<td><a target="_blank" href="https://www.uniprot.org/uniprot/{{match.accession}}">{{ match.accession}}</a></td>
+				{% endif %}
+				{% if search_type == 'target' %}
+					<td><a target="_blank" href="https://www.uniprot.org/uniprot/{{match.accession}}">{{ match.accession}}</a></td>
+					<td><a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ match.chembl_id }}/">{{ match.chembl_id }}</a></td>
+				{% endif %}
+				<td>{{ match.mechanism_of_action}}</td>
+				<td>{{ match.tid}}</td>
+				<td>{{ match.component_id}}</td>
+				<td>{{ match.description}}</td>
+				<td>{{ match.organism}}</td>
+				<td>{{ match.mesh_indication}}</td>
+			</tr>
+		{% empty %}
+			<tr>
+				<td>No matches for query {{id}}</td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		{% endfor %}
+	{% endfor %}
+	</tbody>
+	</table>
+
+	{% if activityMatches is not None %}
+		<h4>By Activity</h4>
+		<table class="table table-striped result-table" style="display:none">
+		<thead>
+			<tr>
+				{% if search_type == 'compound' %}
+					<th>ChEMBL ID</th>
+					<th>Accession ID</th>
+				{% endif %}
+				{% if search_type == 'target' %}
+					<th>Accession ID</th>
+					<th>ChEMBL ID</th>
+				{% endif %}
+
+				<th>Name</th>
+				<th>Activity ID</th>
+				<th>Assay ID</th>
+				<th>Description</th>
+				<th>Organism</th>
+				<th>Value</th>
+				<th>Units</th>
+				<th>Flag</th>
+				<th>Type</th>
+			</tr>
+		</thead>
+		<tbody>
+		{% for id in ids %}
+			{% for match in activityMatches|dict_lookup:id %}
+				<tr>	{% if search_type == 'compound' %}
+						<td><a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ match.chembl_id }}/">{{ match.chembl_id }}</a></td>
+						<td><a target="_blank" href="https://www.uniprot.org/uniprot/{{match.accession}}">{{ match.accession}}</a></td>
+					{% endif %}
+					{% if search_type == 'target' %}
+						<td><a target="_blank" href="https://www.uniprot.org/uniprot/{{match.accession}}">{{ match.accession}}</a></td>
+						<td><a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{ match.chembl_id }}/">{{ match.chembl_id }}</a></td>
+					{% endif %}
+					<td>{{ match.pref_name}}</td>
+					<td>{{ match.activity_id}}</td>
+					<td>{{ match.chembl_assay_id}}</td>
+					<td>{{ match.description}}</td>
+					<td>{{ match.organism}}</td>
+					<td>{{ match.standard_value}}</td>
+					<td>{{ match.standard_units}}</td>
+					<td>{{ match.standard_flag}}</td>
+					<td>{{ match.standard_type}}</td>
+				</tr>
+			{% empty %}
+				<tr>
+					<td>No matches for query {{id}}</td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+			{% endfor %}
+		{% endfor %}
+		</tbody>
+		</table>
+	{% endif %}
+	</div>
+	</div>
+	{% endif %}
+{% endblock base_content %}
+
+{% block js_content %}
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/rg-1.1.0/datatables.min.css"/>
+ 
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/rg-1.1.0/datatables.min.js"></script>
+
+<script type="text/javascript">
+	function byCompound(){
+		$("#compound_search").show();
+		$("#target_search").hide();
+		$("#search_type")[0].value="compound";
+	}
+	function byTarget(){
+		$("#compound_search").hide();
+		$("#target_search").show();
+		$("#search_type")[0].value="target";
+	}
+
+	$(document).ready(function() {
+		$('.result-table').dataTable( {
+			dom: 'Bfrltip',
+			buttons: ['csv'],
+			//columnDefs: [ //hide grouping column (chembl_id)
+				//{ "visible": false, "targets": 0}
+			//],
+			rowGroup:{
+				dataSrc: 0,
+			},
+			initComplete: function(){
+				$('.result-table').show();
+			},
+		 } );
+
+	} );
+</script>
+
+{% endblock %}
+
+

@@ -28,7 +28,18 @@ def runQuery(query,values):
     cur.execute(query,values)
     return cur.fetchall()
 
-def chemblTargetAccessionsByActivity(chemblIds):
+def byActivity(chemblIds=None,accessionIds=None):
+    if chemblIds is not None and accessionIds is None:
+        condition = "chembl_id_lookup.chembl_id in %s"
+        ids = chemblIds
+        groupByIndex = 0
+    elif chemblIds is None and accessionIds is not None:
+        condition = "chembl_id_lookup.entity_type='COMPOUND' AND accession in %s"
+        ids = accessionIds
+        groupByIndex = 1
+    else:
+        raise Exception("One of either 'chemblIds' or accessionIds' must be given")
+
     data = runQuery("""
             select distinct chembl_id_lookup.chembl_id, accession,
                     activities.molregno, pref_name, activity_id, assays.chembl_id AS chembl_assay_id, 
@@ -41,14 +52,24 @@ def chemblTargetAccessionsByActivity(chemblIds):
                         join assays using(assay_id)
                         join target_components using(tid)
                         join component_sequences using(component_id)
-                where 
-                        chembl_id_lookup.chembl_id in %s
-                order by 1
-            """,(chemblIds,))
-    #return tupleArray2Dict(data)
-    return groupBy(lambda t: t[0], data)
+                where """ + condition+
+                "order by 1 ",
+                (ids,))
+    return groupBy(lambda t: t[groupByIndex], data)
 
-def chemblTargetAccessionsByAnnotations(chemblIds):
+def byAnnotations(chemblIds=None,accessionIds=None):
+    if chemblIds is not None and accessionIds is None:
+        condition = "chembl_id_lookup.chembl_id in %s"
+        ids = chemblIds
+        groupByIndex = 0
+    elif chemblIds is None and accessionIds is not None:
+        condition = "accession in %s"
+        ids = accessionIds
+        groupByIndex = 1
+    else:
+        raise Exception("One of either 'chemblIds' or accessionIds' must be given")
+
+
     data = runQuery("""
             select distinct chembl_id,  accession,
                     mechanism_of_action, tid,component_id, description, 
@@ -59,30 +80,28 @@ def chemblTargetAccessionsByAnnotations(chemblIds):
                         join target_components using(tid)
                         join component_sequences using(component_id)
                         left join drug_indication using(molregno)
-                where 
-                        chembl_id_lookup.chembl_id in %s
+                where """+condition+"""
                 group by chembl_id,  accession,
                     mechanism_of_action, tid,component_id, description, 
                     organism
                 order by 1
-            """,(chemblIds,))
-    #return tupleArray2Dict(data)
-    return groupBy(lambda t: t[0], data)
+            """,(ids,))
+    return groupBy(lambda t: t[groupByIndex], data)
 
-def accessionToChembl(accessionIds):
-    data = runQuery("""
-            select distinct accession, chembl_id_lookup.chembl_id, chembl_id_lookup.entity_type
-                from chembl_id_lookup
-                        join activities on(entity_id = molregno)
-                        join assays using(assay_id)
-                        join target_components using(tid)
-                        join component_sequences using(component_id)
-                where
-                        accession in %s
-                order by 1
-            """,(accessionIds,))
-    #return tupleArray2Dict(data)
-    return groupBy(lambda t: t[0], data)
+#def accessionToChembl(accessionIds):
+#    data = runQuery("""
+#            select distinct accession, chembl_id_lookup.chembl_id, chembl_id_lookup.entity_type
+#                from chembl_id_lookup
+#                        join activities on(entity_id = molregno)
+#                        join assays using(assay_id)
+#                        join target_components using(tid)
+#                        join component_sequences using(component_id)
+#                where
+#                        accession in %s
+#                order by 1
+#            """,(accessionIds,))
+#    #return tupleArray2Dict(data)
+#    return groupBy(lambda t: t[0], data)
 
 def mapToChembl(unknownIds, sourceId):
     chemblIds = set()
