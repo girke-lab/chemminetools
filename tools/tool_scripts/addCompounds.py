@@ -29,7 +29,7 @@ import argparse
 from django.contrib.auth.models import User
 from django.conf import settings
 from compounddb.tools import parse_annotation, insert_single_compound
-from compounddb.models import Compound, SDFFile
+from compounddb.models import Compound, SDFFile, Tag
 MAX_COMPOUND_LIMIT = settings.MAX_COMPOUND_LIMIT
 MAX_SDF_LENGTH = settings.MAX_SDF_LENGTH
 
@@ -38,11 +38,13 @@ parser = \
                             )
 parser.add_argument('-u', '--user', help='numeric user id',
                     required=True)
+parser.add_argument('-t', '--tags', help='comma seperated string of tags',
+                    required=False)
 parser.add_argument('-o', '--outfile', help='output file',
                     required=True)
 args = vars(parser.parse_args())
 
-def addMyCompounds(sdf, user):
+def addMyCompounds(sdf, user,tags):
     sdffile = ''
     counter = 0
     linecounter = 0
@@ -98,9 +100,9 @@ def addMyCompounds(sdf, user):
                     raise Exception
                 try:
                     newid = insert_single_compound(moldata, sdffile,
-                            namekey, 'id', user)
+                            namekey, 'id', user,tags)
                 except:
-                    print("error while inserting compount: ")
+                    print("error while inserting compound: ")
                     print("Unexpected error:", sys.exc_info())
                     traceback.print_tb(sys.exc_info()[2])
                     message = \
@@ -128,8 +130,9 @@ def addMyCompounds(sdf, user):
 def main():
     sdf = sys.stdin.read()
     user = User.objects.get(id=args['user'])
+    tags = Tag.objects.filter(name__in=args['tags'].split(','))
 
-    output = addMyCompounds(sdf, user)
+    output = addMyCompounds(sdf, user,tags)
 
     f = open(args['outfile'], 'w')
     f.write(output)

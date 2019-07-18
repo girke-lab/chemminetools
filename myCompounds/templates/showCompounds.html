@@ -92,6 +92,7 @@
 	<th>Name</th>
 	<th style="display:none" class="compoundImageTitle">Structure</th>
 	<th>Formula</th>
+	<th>Tags</th>
 	<th>Options</th>
 	</tr>
 	</thead>
@@ -102,6 +103,11 @@
 		<td>{{compound.name}}</td>
 		<td style="display:none" class="compoundImage" id="{{compound.id}}">  </td>
 		<td>{{compound.formula}}</td>
+		<td>{%for tag in compound.tags.all %}
+			{{tag.name}}
+		    {% endfor %}
+		</td>
+			
 		<td><i data-toggle="tooltip" placement="top" title="delete this compound" class="icon-trash"></i>
 		<a href="/eisearch/query/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
 		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="edit compound details"><i class="icon-pencil"></i></a>

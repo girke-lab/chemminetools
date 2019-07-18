@@ -13,7 +13,7 @@ from compounddb import first_mol, InvalidInputError
 # from compounddb.views import get_library_by_name
 
 from compounddb.tools import parse_annotation, insert_single_compound
-from compounddb.models import Compound, SDFFile
+from compounddb.models import Compound, SDFFile,Tag
 from pubchem_rest_interface.Pubchem_pug import DownloadCIDs
 from django.contrib import messages
 import random
@@ -59,14 +59,30 @@ def showCompounds(request, resource):
 
 @guest_allowed
 def uploadCompound(request, resource = None, job_id = None):
+    allTags = Tag.allUserTagNames(request.user)
+
+
     if (request.method == 'GET') and (resource != u'job'):
         return render(request,'addCompounds.html',
-                                  dict(input_mode='smiles-input'))
+                                  dict(input_mode='smiles-input',
+                                      tags=allTags))
     else:
         sdf = None
         name = None
         compid = None
         smiles = None
+        compoundTags = []
+
+        if 'tags' in request.POST:
+            existingTags = set(allTags)
+            compoundTags = set(request.POST.getlist('tags'))
+            print("compound tags: "+str(compoundTags))
+
+            for newTag in compoundTags.difference(existingTags):
+                print("creating new tag: "+newTag+" for user "+request.user.username)
+                Tag.objects.create(name = newTag, user=request.user)
+
+
         if 'smiles' in request.POST:
             input_mode = 'smiles-input'
             sdf = u''
@@ -142,9 +158,11 @@ def uploadCompound(request, resource = None, job_id = None):
         if not sdf:
             return render('addCompounds.html',
                     dict(input_mode=input_mode,
-                    post_data=request.POST))
+                    post_data=request.POST,
+                    tags=compoundTags))
+        print("compound tags2: "+str(compoundTags))
         newJob = createJob(request.user, 'Upload Compounds', '',
-                           ['--user=' + str(request.user.id)], sdf)
+                           ['--user=' + str(request.user.id),"--tags="+(",".join(compoundTags))], sdf)
         time.sleep(2)
         return redirect(tools.views.view_job, job_id=newJob.id,
                         resource='')

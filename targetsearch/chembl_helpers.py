@@ -110,7 +110,9 @@ def mapToChembl(unknownIds, sourceId):
         #print("\n\nreq.json: "+str(req.json()))
         result = req.json()
         #print("got result: "+str(result))
-        if len(result) > 0 and ("src_compound_id" in result[0]) :
+        if "error" in result: 
+            raise Exception(result["error"])
+        if isinstance(result,list) and len(result) > 0 and ("src_compound_id" in result[0]) :
             chemblIds.add(result[0]["src_compound_id"])
 
     #print("final chembl ids: "+str(chemblIds))

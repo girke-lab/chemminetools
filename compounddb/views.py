@@ -6,7 +6,7 @@ from builtins import object
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template import RequestContext
-from compounddb.models import Compound
+from compounddb.models import Compound, Tag
 from guest.decorators import guest_allowed, login_required
 from django.contrib.auth import authenticate, login
 from django.views.decorators.cache import cache_page

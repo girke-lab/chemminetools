@@ -20,7 +20,7 @@ from django.forms import ModelForm
 from django.contrib import messages
 from django.utils.http import urlquote
 from guest.decorators import guest_allowed, login_required
-from compounddb.models import Compound
+from compounddb.models import Compound, Tag
 from tools.runapp import *
 from .models import *
 from sdftools.moleculeformats import batch_sdf_to_smiles
@@ -64,13 +64,15 @@ def launch_job(request, category=None):
             input = 'chemical/x-mdl-sdfile'
         elif application.input_type == 'upload':
             input = request.FILES['File Upload'].read().decode("utf-8")
-            #if not isinstance(input, str):
-                #input = str(input, 'utf-8')
-            #input = input.encode('ascii', 'ignore')
         else:
             input = ''
+        tagNames = []
+        if "tags" in request.POST:
+            print("found 'tags' parameter")
+            tagNames = request.POST.getlist("tags")
+        print("got tagNames: "+str(tagNames))
         newJob = createJob(request.user, application.name, optionsList,
-                           commandOptions, input)
+                           commandOptions, input,tagNames=tagNames)
         messages.success(request, 'Success: job launched.')
         return redirect(view_job, job_id=newJob.id, resource='')
     else:
@@ -104,8 +106,10 @@ def launch_job(request, category=None):
         fields = {}
         fields['application'] = ModelChoiceField(queryset=apps, empty_label='')
         form = type('%sForm' % 'choose application', (Form, ), fields)
+        allTags = Tag.allUserTagNames(request.user)
         return render(request,'submitForm.html', dict(title=title,
                                   form=form,
+                                  tags = allTags,
                                   fromWorkbench=fromWorkbench,
                                   totalCompounds=Compound.objects.filter(user=request.user).count()))
 

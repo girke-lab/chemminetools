@@ -4,7 +4,7 @@ from celery import shared_task
 import subprocess
 from tempfile import NamedTemporaryFile
 from django.conf import settings
-from compounddb.models import Compound
+from compounddb.models import Compound,Tag
 
 outputPath = settings.TOOLS_RESULTS
 projectDir = settings.PROJECT_DIR
@@ -16,10 +16,11 @@ def launch(
     input,
     job_id,
     user,
+    tagNames = [],
     ):
 
     if input == 'chemical/x-mdl-sdfile':
-        input = makeSDF(user)
+        input = makeSDF(user,tagNames)
     outputFileName = outputPath + '/job_' + str(job_id)
     command = [projectDir + '/tools/tool_scripts/' + appname,'--outfile=' + outputFileName] + commandOptions
     print('Running: ' + str(command) + '\n')
@@ -37,8 +38,15 @@ def launch(
         runningTask.kill()
         return False
 
-def makeSDF(user):
-    compoundList = Compound.objects.filter(user=user)
+def makeSDF(user,tagNames):
+    compoundList = None
+    print(" in makeSDF, given tag names: "+str(tagNames))
+    if "all" in tagNames or len(tagNames) == 0:
+        compoundList = Compound.objects.filter(user=user)
+    else:
+        tags = Tag.objects.filter(name__in=tagNames)
+        compoundList = Compound.objects.filter(user=user,tags__in=tags)
+        print("using tags, found "+str(len(compoundList))+" matching compounds")
     sdf = u''
     for compound in compoundList:
         sdf = sdf + compound.sdffile_set.all()[0].sdffile.rstrip() \

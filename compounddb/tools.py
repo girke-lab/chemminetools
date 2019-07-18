@@ -117,6 +117,7 @@ def insert_single_compound(
     namekey,
     idkey,
     user,
+    tags,
     ):
     """ insert single compound into database """
 
@@ -127,6 +128,7 @@ def insert_single_compound(
 
     # compound
 
+    print("tags: "+str(tags))
     c = Compound(
         cid=cid,
         name=name,
@@ -139,6 +141,8 @@ def insert_single_compound(
 
                     # sdf_file=s)
 
+    c.save()
+    c.tags = tags
     c.save()
     c_id = c.id
     root.warning('  -->new compound inserted: c_id=%s, cid=%s' % (c_id,

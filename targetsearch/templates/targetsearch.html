@@ -9,36 +9,69 @@
 	{% if message %}
 	<span style="color: red">{{message}}</span>
 	{% endif %}
-	<form method="GET">
-		<div class="form-group">
 
-			Search by:
-			<button type="button" class="btn" onclick="byCompound()">Compound</button>
-			<button type="button" class="btn" onclick="byTarget()">Target Protein</button>
+	<ul class="nav nav-tabs">
+	  <li {% if search_type == "compound" %} class="active"{% endif %}><a href="#compound_search" data-toggle="tab">Search By Compound</a></li>
+	  <li {% if search_type == "target" %} class="active"{% endif %}><a href="#target_search" data-toggle="tab">Search By Target</a></li>
+	</ul>
 
-			<br>
-			<br>
-			<div id="compound_search" >
-				
-				<label for="source_id">Database:</label>
-				<select id="source_id" name="source_id">
-					{% for id,name in sources.items %}
-						<option value="{{id}}">{{name}}</option>
-					{% endfor %}
-				</select>
-				<label for="chembl_id">Compound IDs:</label>
+	<div class="tab-content" style="overflow:visible">
+		<div class="tab-pane{% if search_type == "compound" %} active{% endif %}" id="compound_search">
+			<div class="row-fluid">
+				<div class="span12">
+					<form method="GET">
+						<div class="form-group">
+							<label for="source_id">Database:</label>
+							<select id="source_id" name="source_id">
+								{% for id,name in sources.items %}
+									<option value="{{id}}">{{name}}</option>
+								{% endfor %}
+							</select>
+							<br>
+
+							Import compound IDs from workbench: 
+							<select id="tags" name="tags" multiple placeholder="Compound Tags">
+								<option value="all">All</option>
+								{% for tag in tags %}
+									<option value="{{tag}}">{{tag}}</option>
+								{% endfor %}
+							</select>
+
+
+
+							<label for="chembl_id">Or enter compound IDs:</label>
+							<textarea  name="id" class="form-control" rows="10" placeholder="Enter space separated ID(s)"></textarea>
+							<br>
+							<button type="submit" class="btn btn-primary">Search</button>
+							<input type="hidden" id="search_type" name="search_type" value="compound"></input>
+						</div>
+					</form>
+
+				</div>
 			</div>
-			<div id="target_search" style="display:none">
-				<input type="checkbox" name="include_activity"> &nbsp;Include Activity Results (slow)</input>
-				<br>&nbsp;
-				<label for="chembl_id">Target Protein IDs:</label>
+		</div> <!-- ent tab-pane -->
+			<div class="tab-pane{% if search_type == "target" %} active{% endif %}" id="target_search">
+			<div class="row-fluid">
+				<div class="span12">
+					<form method="GET">
+						<div class="form-group">
+							<input type="checkbox" name="include_activity"> &nbsp;Include Activity Results (slow)</input>
+							<br>&nbsp;
+							<label for="chembl_id">Target Protein IDs:</label>
+							<textarea  name="id" class="form-control" rows="10" placeholder="Enter space separated ID(s)"></textarea>
+							<br>
+							<button type="submit" class="btn btn-primary">Search</button>
+							<input type="hidden" id="search_type" name="search_type" value="target"></input>
+						</div>
+					</form>
+				</div>
 			</div>
-			<textarea id="id" name="id" class="form-control" rows="10" placeholder="Enter space separated ID(s)"></textarea>
-		</div>
-		<div class="form-group">
-			<button type="submit" class="btn btn-primary">Search</button>
-		</div>
-		<input type="hidden" id="search_type" name="search_type" value="compound"></input>
+		</div> <!-- ent tab-pane -->
+	</div> <!-- end tab-content -->
+
+
+
+
 	</form>
 	</div>
 	</div>
@@ -173,21 +206,18 @@
 
 {% block js_content %}
 
+<!--selectize -->
+<link rel="stylesheet" href="/static/admin/selectize/css/selectize.bootstrap2.css" type="text/css">
+<script type="text/javascript" src="/static/admin/selectize/js/standalone/selectize.min.js"></script>
+
 <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/rg-1.1.0/datatables.min.css"/>
- 
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/rg-1.1.0/datatables.min.js"></script>
 
 <script type="text/javascript">
-	function byCompound(){
-		$("#compound_search").show();
-		$("#target_search").hide();
-		$("#search_type")[0].value="compound";
-	}
-	function byTarget(){
-		$("#compound_search").hide();
-		$("#target_search").show();
-		$("#search_type")[0].value="target";
-	}
+	jQuery("#tags").selectize({
+		plugins: ['remove_button'],
+	});
+
 
 	$(document).ready(function() {
 		$('.result-table').dataTable( {

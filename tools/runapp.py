@@ -36,8 +36,10 @@ def createJob(
     input,
     inputvar='',
     async=True,
+    tagNames = [],
     ):
 
+    print("in createJob, tagNames: "+str(tagNames))
     application = Application.objects.get(name=applicationName)
     newJob = Job(
         user=user,
@@ -49,7 +51,7 @@ def createJob(
         )
     newJob.save()
     result = launch.delay(application.script, commandOptions, input,
-                          newJob.id, user)
+                          newJob.id, user,tagNames)
     if not async:
         result.wait()
     newJob.task_id = result.id
@@ -161,6 +163,7 @@ def updateJob(user, job_id):
                 job.status = Job.FINISHED
             else:
                 job.status = Job.FAILED
+            print("result output: "+str(result.result))
             job.output = result.result
             result.forget()
             job.save()

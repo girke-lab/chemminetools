@@ -1,13 +1,22 @@
 {% extends "base.html" %}
 {% load cms_tags %}
 
+
 {% block js_content %}
+<!--selectize -->
+<link rel="stylesheet" href="/static/admin/selectize/css/selectize.bootstrap2.css" type="text/css">
+<script type="text/javascript" src="/static/admin/selectize/js/standalone/selectize.min.js"></script>
 <script type="text/javascript">
 
 	$(document).ready(function() {
 		$("#id_application").change(function () {
 			getDynamicForm();
 		});
+		jQuery("#tags").selectize({
+				plugins: ['remove_button'],
+				items: ["all"],
+			});
+
 	});
 	
 	function getDynamicForm() {
@@ -42,7 +51,7 @@
 <div class="row-fluid">
 	<div class="span12">
 		{% if fromWorkbench %}
-		<p>Select a tool to process the <b>{{totalCompounds}}</b> compounds in your workbench. To modify the input compounds, add or delete compounds from your workbench.</p>
+		<p>Select a tool to process the selected compounds from your workbench.</p>
 		{% endif %}	
 		<form action="." method="post">{% csrf_token %}
 		{{ form.as_p }}
@@ -51,16 +60,29 @@
 </div><!--/row-->	
 
 <div class="row-fluid">
-	<div class="span12" id="description">
-	</div>
 </div><!--/row-->
 
 <div class="row-fluid">
 	<div class="span12" style="display:none" id="hiddenOptions">
 		<form action="." method="post" enctype="multipart/form-data">{% csrf_token %}
-		<div id="formContent">
-		</div>
-		<input class="btn btn-primary" type="submit" value="Submit"/>
+			{% if fromWorkbench %}
+			<p>Select which set of compounds you want to operate on.
+			Only compounds with all selected tags will be used.</p>
+			<select id="tags" name="tags" multiple placeholder="Compound Tags">
+				<option value="all">All</option>
+				{% for tag in tags %}
+					<option value="{{tag}}">{{tag}}</option>
+				{% endfor %}
+			</select>
+			<p>&nbsp;
+			{% endif %}
+
+			<div  id="description"></div>
+			<p>&nbsp;
+
+			<div id="formContent"> </div>
+
+			<input class="btn btn-primary" type="submit" value="Submit"/>
 		</form>
 	</div>
 </div><!--/row-->
