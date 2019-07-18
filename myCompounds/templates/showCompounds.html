@@ -49,21 +49,21 @@
 
 <!-- Modal -->
 <div id="deleteModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3 id="myModalLabel">Are you sure?</h3>
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete all of your compounds?</p>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" data-dismiss="modal" aria-hidden="true">No</button>
-        <a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
-      </div>
-    </div>
-  </div>
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="myModalLabel">Are you sure?</h3>
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+			</div>
+			<div class="modal-body">
+				<p>Are you sure you want to delete all of your compounds?</p>
+			</div>
+			<div class="modal-footer">
+				<button class="btn btn-secondary" data-dismiss="modal" aria-hidden="true">No</button>
+				<a href="deleteAll"><button class="btn btn-danger">Delete All</button></a>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="row">
@@ -75,11 +75,11 @@
 			</tr>
 			</table>
 		{% endif %}
-		<div class="btn-group">
-		  <a href="#deleteModal" role="button" class="btn btn-danger" data-toggle="modal">Delete All</a>
-		  <button id="loadstructures" class="btn">Show Structures</button>
-		  <a href="/myCompounds/downloadSDF.sdf" download="myCompounds.sdf"><button class="btn">Download SDF</button></a>
-		  <a href="/myCompounds/downloadSMILES.smi" download="myCompounds.smi"><button class="btn">Download Smiles</button></a>
+		<div>
+		  <a href="#deleteModal" role="button" class="btn btn-outline-danger" data-toggle="modal">Delete All</a>
+		  <button id="loadstructures" class="btn btn-outline-primary">Show Structures</button>
+		  <a href="/myCompounds/downloadSDF.sdf" download="myCompounds.sdf"><button class="btn btn-outline-primary">Download SDF</button></a>
+		  <a href="/myCompounds/downloadSMILES.smi" download="myCompounds.smi"><button class="btn btn-outline-primary">Download Smiles</button></a>
 		</div>
 	</div> 
 </div><!--/row-->
@@ -123,19 +123,23 @@
 </div><!--/row-->
 <div class="row">
 	<div class="col-md-12">
-		<div class="pagination pagination-centered">
-		<ul>
-		{% if matches.has_previous %}
-			<li ><a href="?page={{matches.previous_page_number}}">Previous</a></li>
-		{% endif %}
-		{% for page in p.page_range %}
-		<li{% if matches.number == page %} class="active"{% endif %}><a href="?page={{page}}">{{page}}</a></li>
-		{% endfor %}
-		{% if matches.has_next%}
-			<li ><a href="?page={{matches.next_page_number}}">Next</a></li>
-		{% endif %}
-		</ul>
-		</div>
+		<nav>
+			<ul class="pagination justify-content-center">
+			{% if matches.has_previous %}
+				<li class="page-item"><a class="page-link" href="?page={{matches.previous_page_number}}">Previous</a></li>
+			{% else %}
+				<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>
+			{% endif %}
+			{% for page in p.page_range %}
+			<li class="page-item{% if matches.number == page %} active{% endif %}"><a class="page-link" href="?page={{page}}">{{page}}</a></li>
+			{% endfor %}
+			{% if matches.has_next%}
+				<li class="page-item"><a class="page-link" href="?page={{matches.next_page_number}}">Next</a></li>
+			{% else %}
+				<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Next</a></li>
+			{% endif %}
+			</ul>
+		</nav>
 	</div> 
 </div><!--/row-->
 {% endblock %}

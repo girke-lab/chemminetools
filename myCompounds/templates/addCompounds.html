@@ -50,16 +50,16 @@
 <div class="row">
 <div class="col-md-12">
 
-<ul class="navbar-nav nav-tabs">
-  <li {% if input_mode == "smiles-input" %} class="active"{% endif %}><a href="#smiles_tab" data-toggle="tab">Smiles Input</a></li>
-  <li {% if input_mode == "draw" %} class="active"{% endif %}><a href="#draw" data-toggle="tab">Draw a Molecule</a></li>
-  <li {% if input_mode == "sdf-input" %} class="active"{% endif %}><a href="#sdfinput" data-toggle="tab">SDF Input</a></li>
-  <li {% if input_mode == "sdf-upload" %} class="active"{% endif %}><a href="#sdfupload" data-toggle="tab">SDF Upload</a></li>
-  <li {% if input_mode == "pubchem" %} class="active"{% endif %}><a href="#pubchem" data-toggle="tab">PubChem Import</a></li>
+<ul class="nav nav-tabs">
+	<li class="nav-item"><a class="nav-link active" href="#smiles_tab" data-toggle="tab">Smiles Input</a></li>
+	<li class="nav-item"><a class="nav-link" href="#draw" data-toggle="tab">Draw a Molecule</a></li>
+	<li class="nav-item"><a class="nav-link" href="#sdfinput" data-toggle="tab">SDF Input</a></li>
+	<li class="nav-item"><a class="nav-link" href="#sdfupload" data-toggle="tab">SDF Upload</a></li>
+	<li class="nav-item"><a class="nav-link" href="#pubchem" data-toggle="tab">PubChem Import</a></li>
 </ul>
 
 <div class="tab-content">
-<div class="tab-pane{% if input_mode == "smiles-input" %} active{% endif %}" id="smiles_tab">
+<div class="tab-pane show active" id="smiles_tab">
 	<div class="row">
 	<div class="col-md-12">
 	<form action="." method="post" accept-charset="utf-8">
@@ -67,9 +67,9 @@
 	{% csrf_token %}
 		<label for="smiles">Enter smiles entry:</label><br />
 		<textarea rows="10" class="field col-md-12" id="smiles" name="smiles">{{post_data.smiles}}</textarea><br />
-		<div class="btn-group">
+		<div>
 			<button class="btn btn-primary" type="submit">Submit</button>
-			<button class="btn" id="use_sample">Use 30 Sample Compounds</button>
+			<button class="btn btn-secondary" id="use_sample">Use 30 Sample Compounds</button>
 		</div>
 	</fieldset>
 	</form>
@@ -90,7 +90,8 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
 	</div><!--/col-md--->
 	</div><!--/row-->
 </div><!--/tab-->
-<div class="tab-pane{% if input_mode == "draw" %} active{% endif %}" id="draw">
+
+<div class="tab-pane" id="draw">
         <p>
 	The center dot is a carbon atom. To add bonds, choose a bond type and click the central atom. To replace atoms, choose an element and click the atom you would like to replace.
         </p>
@@ -104,7 +105,8 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
         <button class="btn btn-primary" type="submit">Submit</button>
         </form>
 </div><!--/tab-->
-<div class="tab-pane{% if input_mode == "sdf-input" %} active{% endif %}" id="sdfinput">
+
+<div class="tab-pane" id="sdfinput">
 	<p>
 	Please copy and paste your SDF below.
 	</p>
@@ -115,7 +117,8 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
 	<button class="btn btn-primary" type="submit">Submit</button>
 	</form>
 </div><!--/tab-->
-<div class="tab-pane{% if input_mode == "sdf-upload" %} active{% endif %}" id="sdfupload">
+
+<div class="tab-pane" id="sdfupload">
 	<p>
 	Please upload an SDF below.
 	</p>
@@ -126,7 +129,8 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
 	<button class="btn btn-primary" type="submit">Submit</button>
 	</form>
 </div><!--/tab-->
-<div class="tab-pane{% if input_mode == "pubchem" %} active{% endif %}" id="pubchem">
+
+<div class="tab-pane" id="pubchem">
         <p>
         Please copy and paste your PubChem CIDs below (one per line).
         </p>

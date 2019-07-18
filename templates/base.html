@@ -12,16 +12,15 @@
 
     <link href="/static/admin/bootstrap-4.3.1-dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="/static/admin/fontawesome-free-5.9.0-web/css/all.css" rel="stylesheet">
-    {% render_block "css" %}
-    <style type="text/css">
-      body {
-        padding-top: 60px;
-        padding-bottom: 40px;
-      }
-      .sidebar-nav {
-        padding: 9px 0;
+    <style>
+      .cmtools-nav-header {
+        padding: .5rem 1rem;
+        display: block;
+        text-transform: uppercase;
       }
     </style>
+    
+    {% render_block "css" %}
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
@@ -34,45 +33,45 @@
 
   <body>
     {% cms_toolbar %}
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-      <a class "navbar-brand" href="/" style="color:red">ChemMine Tools</a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+    <header class="navbar sticky-top navbar-expand-lg navbar-dark bg-dark">
+      <a class="navbar-brand" href="/" style="color:red">ChemMine Tools</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
         <span class="navbar-toggler-icon"></span>
       </button>
       
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
           {% show_menu 0 100 0 1 %}
         </ul>
         <p class="navbar-text my-2 my-lg-0">
           {% if user.email %}
-            Logged in as <a href="/accounts/{{ user.username }}/">{{ user.email }}</a>. <a href="/accounts/signout/">Logout</a>
+            Logged in as <a href="/accounts/{{ user.username }}/">{{ user.email }}</a> | <a href="/accounts/signout/">Logout</a>
           {% else %}
             Optional: <a href="/accounts/signin/">Login</a> or <a href="/accounts/signup/">register</a> to save data.
           {% endif %}
         </p>
       </div>
-    </nav>
+    </header>
 
-    <div class="container-fluid">
+    <div class="container-fluid" style="padding-top: 1em;">
       <div class="row">
         <div class="col-md-3">
-          <nav class="nav flex-column">
-            <h4>Workbench</h4>
-            <a class="nav-link" href="/myCompounds/">My Compounds</a>
-            <a class="nav-link" href="/myCompounds/addCompounds/">Add Compounds</a>
+          <ul class="nav flex-column">
+            <li class="cmtools-nav-header">Workbench</li>
+            <li class="nav-link"><a href="/myCompounds/">My Compounds</a></li>
+            <li class="nav-link"><a href="/myCompounds/addCompounds/">Add Compounds</a></li>
             
-            <h4>Tools</h4>
-            <a class="nav-link" href="/tools/list_jobs/">Past Jobs</a>
-            <a class="nav-link" href="/tools/launch_job/Upload/">Upload Numeric Data</a>
-            <a class="nav-link" href="/tools/launch_job/Clustering/">Cluster</a>
-            <a class="nav-link" href="/tools/launch_job/Properties/">Physicochemical Properties</a>
-            <a class="nav-link" href="/similarity/">Similarity Workbench</a>
-            <a class="nav-link" href="/targetsearch/">Target Search</a>
+            <li class="cmtools-nav-header">Tools</li>
+            <li class="nav-link"><a href="/tools/list_jobs/">Past Jobs</a></li>
+            <li class="nav-link"><a href="/tools/launch_job/Upload/">Upload Numeric Data</a></li>
+            <li class="nav-link"><a href="/tools/launch_job/Clustering/">Cluster</a></li>
+            <li class="nav-link"><a href="/tools/launch_job/Properties/">Physicochemical Properties</a></li>
+            <li class="nav-link"><a href="/similarity/">Similarity Workbench</a></li>
+            <li class="nav-link"><a href="/targetsearch/">Target Search</a></li>
             
-            <h4>Search</h4>
-            <a class="nav-link" href="/eisearch/query/">PubChem Similarity Search</a>
-          </nav>
+            <li class="cmtools-nav-header">Search</li>
+            <li class="nav-link"><a href="/eisearch/query/">PubChem Similarity Search</a></li>
+          </ul>
         </div>
         
         <div class="col-md-9">
