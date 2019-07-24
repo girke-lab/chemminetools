@@ -28,7 +28,7 @@ class Compound(models.Model):
         tags = Tag.objects.filter(name__in=tagNames)
         if "all" in tags or (emptyMeansAll and len(tags)==0):
             return compound.objects.all()
-        else
+        else:
             return Compound.objects.filter(tags__in=tags)
 
     class Meta(object):
