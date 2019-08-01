@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load bootstrap_toolkit %}
+{% load bootstrap4 %}
 {% load cms_tags sekizai_tags %}
 {% load menu_tags %}
 <html lang="en">
@@ -17,6 +18,10 @@
         padding: .5rem 1rem;
         display: block;
         text-transform: uppercase;
+      }
+      
+      img {
+        max-width: 100%;
       }
     </style>
     
@@ -56,44 +61,37 @@
     <div class="container-fluid" style="padding-top: 1em;">
       <div class="row">
         <div class="col-md-3">
-          <ul class="nav flex-column">
-            <li class="cmtools-nav-header">Workbench</li>
-            <li class="nav-link"><a href="/myCompounds/">My Compounds</a></li>
-            <li class="nav-link"><a href="/myCompounds/addCompounds/">Add Compounds</a></li>
-            
-            <li class="cmtools-nav-header">Tools</li>
-            <li class="nav-link"><a href="/tools/list_jobs/">Past Jobs</a></li>
-            <li class="nav-link"><a href="/tools/launch_job/Upload/">Upload Numeric Data</a></li>
-            <li class="nav-link"><a href="/tools/launch_job/Clustering/">Cluster</a></li>
-            <li class="nav-link"><a href="/tools/launch_job/Properties/">Physicochemical Properties</a></li>
-            <li class="nav-link"><a href="/similarity/">Similarity Workbench</a></li>
-            <li class="nav-link"><a href="/targetsearch/">Target Search</a></li>
-            
-            <li class="cmtools-nav-header">Search</li>
-            <li class="nav-link"><a href="/eisearch/query/">PubChem Similarity Search</a></li>
-          </ul>
+          <div class="card bg-light">
+            <div class="card-body">
+              <ul class="nav flex-column">
+                <li class="cmtools-nav-header">Workbench</li>
+                <li class="nav-link"><a href="/myCompounds/">My Compounds</a></li>
+                <li class="nav-link"><a href="/myCompounds/addCompounds/">Add Compounds</a></li>
+                
+                <li class="cmtools-nav-header">Tools</li>
+                <li class="nav-link"><a href="/tools/list_jobs/">Past Jobs</a></li>
+                <li class="nav-link"><a href="/tools/launch_job/Upload/">Upload Numeric Data</a></li>
+                <li class="nav-link"><a href="/tools/launch_job/Clustering/">Cluster</a></li>
+                <li class="nav-link"><a href="/tools/launch_job/Properties/">Physicochemical Properties</a></li>
+                <li class="nav-link"><a href="/similarity/">Similarity Workbench</a></li>
+                <li class="nav-link"><a href="/targetsearch/">Target Search</a></li>
+                
+                <li class="cmtools-nav-header">Search</li>
+                <li class="nav-link"><a href="/eisearch/query/">PubChem Similarity Search</a></li>
+              </ul>
+            </div>
+          </div>
         </div>
         
         <div class="col-md-9">
 
-{% if messages %}
-    {% for message in messages %}
-	<div class="row">
-		<div class="col-md-12">
-			<div class="alert alert-block fade in {{ message.tags }}">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-				{% autoescape off %}{{ message }}{% endautoescape %}
-			</div>
-		</div>
-	</div>
-    {% endfor %}
-{% endif %}
+{% bootstrap_messages %}
 
-	{% placeholder base_content %}
-      {% block base_content %}{% endblock %}
-	{% placeholder content %}
-      {% block content %}{% endblock %}
-        </div><!--/span-->
+{% placeholder base_content %}
+{% block base_content %}{% endblock %}
+{% placeholder content %}
+{% block content %}{% endblock %}
+        </div><!--/col-md-9-->
       </div><!--/row-->
 
       <hr>

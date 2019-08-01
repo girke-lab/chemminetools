@@ -83,17 +83,14 @@ $(document).ready(function() {
 <div class="row">
 <div class="col-md-12">
 
-<p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> 
-or the ChEMBL database, 
-using one of two algorithm and database options:
+<p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> or the ChEMBL database, using one of two algorithm and database options:
 <ul>
-<li><b>Fingerprint algorithm:</b> Searches a "cleaned up" version of the PubChem Compound database
-(excluding some very similar compounds and some salts) by connecting to the PubChem web interface
-using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.
-</li>
-<li><b>EI algorithm:</b> Searches the ChEMBL Compound database using the 
-	EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>)
-with an <a href="/help/#theory">atom pair (AP) similarity</a> measure. </li>
+	<li>
+		<b>Fingerprint algorithm:</b> Searches a "cleaned up" version of the PubChem Compound database (excluding some very similar compounds and some salts) by connecting to the PubChem web interface using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.
+	</li>
+	<li>
+		<b>EI algorithm:</b> Searches the ChEMBL Compound database using the EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>) with an <a href="/help/#theory">atom pair (AP) similarity</a> measure.
+	</li>
 </ul>
 </p>
 </div>
@@ -101,124 +98,133 @@ with an <a href="/help/#theory">atom pair (AP) similarity</a> measure. </li>
 
 <div class="row">
 <div class="col-md-12">
-<ul class="navbar-nav nav-tabs">
-	<li class="active"><a href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
-	<li><a href="#draw" data-toggle="tab">Structural Drawing</a></li>
-	<li><a href="#sdf-input" data-toggle="tab">SDF Input</a></li>
-	<li><a href="#sdf-upload" data-toggle="tab">SDF Upload</a></li>
+
+<ul class="nav nav-tabs">
+	<li class="nav-item"><a class="nav-link active" href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
+	<li class="nav-item"><a class="nav-link" href="#draw" data-toggle="tab">Structural Drawing</a></li>
+	<li class="nav-item"><a class="nav-link" href="#sdf-input" data-toggle="tab">SDF Input</a></li>
+	<li class="nav-item"><a class="nav-link" href="#sdf-upload" data-toggle="tab">SDF Upload</a></li>
 </ul>
+
 <div class="tab-content">
-<div class="tab-pane active" id="smiles-input">
+<div class="tab-pane show active" id="smiles-input">
 <form action="." method="post" accept-charset="utf-8">
 {% csrf_token %}
+	<label class="control-label" for="smiles">SMILES:</label>
+	<input id="smiles" type="text" name="smiles" class="field col-md-12" value="{{smi}}"/>
 
-    <label class="control-label" for="smiles">SMILES:</label>
-    <input id="smiles" type="text" name="smiles" class="field col-md-12" value="{{smi}}"/>
-
-    <table>
-        {{form}}
-        <tr><td>
-		Algorithm and database:
-        </td><td>
-            <select name="algorithm" id="algorithm">
-            <option value="fp">Fingerprint algorithm (PubChem)</option>
-            <option value="ei">EI algorithm (ChEMBL)</option>
-            </select>
-        </td></tr>
-        <tr><th>
-        </th><td>
-                <div class="btn-group">
-                    <button class="btn btn-primary" type="submit">Search</button>
-                    <button class="btn" id="loadexample">Load an example query</button>
-                    <button class="btn" type="reset">Clear entry field</button>
-                </div>
-        </td></tr>
-    </table>
-	
+	<table>
+		{{form}}
+		<tr>
+			<th>Algorithm and database:</th>
+			<td>
+				<select name="algorithm" id="algorithm">
+				<option value="fp">Fingerprint algorithm (PubChem)</option>
+				<option value="ei">EI algorithm (ChEMBL)</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div>
+					<button class="btn btn-primary" type="submit">Search</button>
+					<button class="btn btn-secondary" id="loadexample">Load an example query</button>
+					<button class="btn btn-secondary" type="reset">Clear entry field</button>
+				</div>
+			</td>
+		</tr>
+	</table>
 </form>
 </div>
 
 <div class="tab-pane" id="draw">
-        <p>
-        The center dot is a carbon atom. To add bonds, choose a bond type and click the central atom. To replace atoms, choose an element and click the atom you would like to replace.
-        </p>
-        <canvas id="sketcher"></canvas>
-        <form id="drawform" action="." method="post" accept-charset="utf-8">
-        {% csrf_token %}
-        <input type="hidden" name="sdf" value="{{post_data.sdf}}"/><br/>
-        <input type="hidden" name="draw" value="1"/>
+	<p>The center dot is a carbon atom. To add bonds, choose a bond type and click the central atom. To replace atoms, choose an element and click the atom you would like to replace.</p>
+	<canvas id="sketcher"></canvas>
+	<form id="drawform" action="." method="post" accept-charset="utf-8">
+		{% csrf_token %}
+		<input type="hidden" name="sdf" value="{{post_data.sdf}}"/><br/>
+		<input type="hidden" name="draw" value="1"/>
 
-    <table>
-        {{form}}
-        <tr><td>
-		Algorithm and database:
-        </td><td>
-            <select name="algorithm" id="algorithm">
-            <option value="fp">Fingerprint algorithm (PubChem)</option>
-            <option value="ei">EI algorithm (ChEMBL)</option>
-            </select>
-        </td></tr>
-        <tr><th>
-        </th><td>
-                <button class="btn btn-primary" type="submit">Search</button>
-        </td></tr>
-    </table>
-
-</form>
+		<table>
+			{{form}}
+			<tr>
+				<th>Algorithm and database:</th>
+				<td>
+					<select name="algorithm" id="algorithm">
+					<option value="fp">Fingerprint algorithm (PubChem)</option>
+					<option value="ei">EI algorithm (ChEMBL)</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<button class="btn btn-primary" type="submit">Search</button>
+				</td>
+			</tr>
+		</table>
+	</form>
 </div>
 
 <div class="tab-pane" id="sdf-input">
-<p>
-Please copy and paste your single-molecule SDF below. If multiple compounds are supplied, only the first one will be used.
-</p>
-<form action="." method="post" accept-charset="utf-8">
-{% csrf_token %}
-	<label class="control-label" for="sdf_box">SDF Content:</label>
-	<textarea id="sdf_box" name="sdf" class="field col-md-12" rows="12"></textarea><br/>
+	<p>Please copy and paste your single-molecule SDF below. If multiple compounds are supplied, only the first one will be used.</p>
+	<form action="." method="post" accept-charset="utf-8">
+		{% csrf_token %}
+		<label class="control-label" for="sdf_box">SDF Content:</label>
+		<textarea id="sdf_box" name="sdf" class="field col-md-12" rows="12"></textarea><br/>
 
-    <table>
-        {{form}}
-        <tr><td>
-		Algorithm and database:
-        </td><td>
-            <select name="algorithm" id="algorithm">
-            <option value="fp">Fingerprint algorithm (PubChem)</option>
-            <option value="ei">EI algorithm (ChEMBL)</option>
-            </select>
-        </td></tr>
-        <tr><th>
-        </th><td>
-                <button class="btn btn-primary" type="submit">Search</button>
-        </td></tr>
-    </table>
-</form>
+		<table>
+			{{form}}
+			<tr>
+				<th>Algorithm and database:</th>
+				<td>
+					<select name="algorithm" id="algorithm">
+					<option value="fp">Fingerprint algorithm (PubChem)</option>
+					<option value="ei">EI algorithm (ChEMBL)</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<button class="btn btn-primary" type="submit">Search</button>
+				</td>
+			</tr>
+		</table>
+	</form>
 </div>
+
 <div class="tab-pane" id="sdf-upload">
-<p>
-Please upload a single-molecule SDF below. If multiple compounds are found in the SDF, only the first one will be used.
-</p>
-<form action="." method="post" enctype="multipart/form-data">
-{% csrf_token %}
-	<label class="control-label" for="sdf_file">SDF File:</label>
-	<input id="sdf_file" name="sdf" class="field col-md-12" type="file"/>
+	<p>Please upload a single-molecule SDF below. If multiple compounds are found in the SDF, only the first one will be used.</p>
+	<form action="." method="post" enctype="multipart/form-data">
+		{% csrf_token %}
+		<!--
+		<label class="control-label" for="sdf_file">SDF File:</label>
+		<input id="sdf_file" name="sdf" class="field col-md-12" type="file"/>
+		-->
 
-    <table>
-        {{form}}
-        <tr><td>
-		Algorithm and database:
-        </td><td>
-            <select name="algorithm" id="algorithm">
-            <option value="fp">Fingerprint algorithm (PubChem)</option>
-            <option value="ei">EI algorithm (ChEMBL)</option>
-            </select>
-        </td></tr>
-        <tr><th>
-        </th><td>
-                <button class="btn btn-primary" type="submit">Search</button>
-        </td></tr>
-    </table>
-</form>
+		<table>
+			<tr>
+				<th><label for="sdf_file">SDF File:</label></th>
+				<td><input id="sdf_file" name="sdf" class="form-control-file" type="file"/></td>
+			</tr>
+			{{form}}
+			<tr>
+				<th>Algorithm and database:</th>
+				<td>
+					<select name="algorithm" id="algorithm">
+					<option value="fp">Fingerprint algorithm (PubChem)</option>
+					<option value="ei">EI algorithm (ChEMBL)</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="2">
+					<button class="btn btn-primary" type="submit">Search</button>
+				</td>
+			</tr>
+		</table>
+	</form>
 </div>
+
 </div>
 
 </div>
