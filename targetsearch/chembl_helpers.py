@@ -3,14 +3,6 @@ import requests
 from psycopg2.extras import NamedTupleCursor
 
 
-def tupleArray2Dict(tuples):
-    dict = {}
-    for tuple in tuples:
-        a = dict.get(tuple[0],[])
-        a.append(tuple[1])
-        dict[tuple[0]] = a
-    return dict
-
 def groupBy(keyFn, tuples):
     dict = {}
     for tuple in tuples:
@@ -28,6 +20,14 @@ def runQuery(query,values):
     cur.execute(query,values)
     return cur.fetchall()
 
+def get_chembl_sdfs(chemblIds):
+    data = runQuery("""
+      SELECT chembl_id||molfile 
+      FROM chembl_id_lookup JOIN
+           compound_structures ON(entity_id=molregno)
+      WHERE chembl_id_lookup.chembl_id IN %s""",(chemblIds,))
+    return [row[0] for row in data]
+        
 def byActivity(chemblIds=None,accessionIds=None):
     if chemblIds is not None and accessionIds is None:
         condition = "chembl_id_lookup.chembl_id in %s"
@@ -87,21 +87,6 @@ def byAnnotations(chemblIds=None,accessionIds=None):
                 order by 1
             """,(ids,))
     return groupBy(lambda t: t[groupByIndex], data)
-
-#def accessionToChembl(accessionIds):
-#    data = runQuery("""
-#            select distinct accession, chembl_id_lookup.chembl_id, chembl_id_lookup.entity_type
-#                from chembl_id_lookup
-#                        join activities on(entity_id = molregno)
-#                        join assays using(assay_id)
-#                        join target_components using(tid)
-#                        join component_sequences using(component_id)
-#                where
-#                        accession in %s
-#                order by 1
-#            """,(accessionIds,))
-#    #return tupleArray2Dict(data)
-#    return groupBy(lambda t: t[0], data)
 
 def mapToChembl(unknownIds, sourceId):
     chemblIds = set()

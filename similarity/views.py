@@ -10,7 +10,7 @@ from compounddb import first_mol, InvalidInputError
 
 from compounddb.tools import parse_annotation, insert_single_compound
 from compounddb.models import Compound, SDFFile,Tag
-from pubchem_rest_interface.Pubchem_pug import DownloadCIDs
+#from pubchem_rest_interface.Pubchem_pug import DownloadCIDs
 from django.contrib import messages
 
 
@@ -33,16 +33,14 @@ def showCompoundGrid(request ):
 
     matches = None
     givenTags = []
-    allTags = [tag.name for tag in Tag.objects.filter(user = request.user)]
+    allTags = Tag.allUserTagNames(request.user)
 
     if 'tags' in request.POST:
         givenTags = request.POST.getlist("tags")
-
-    if "all" in givenTags or len(givenTags) == 0: 
-        matches = Compound.objects.filter(user=request.user)
     else:
-        tags = Tag.objects.filter(name__in = givenTags)
-        matches = Compound.objects.filter(user=request.user,tags__in=tags)
+        givenTags = ["all"]
+    matches = Compound.byTagNames(givenTags,request.user)
+
 
     return render(request,'compoundGrid.html', dict(matches=matches,tags=allTags,currentTags=givenTags))
 

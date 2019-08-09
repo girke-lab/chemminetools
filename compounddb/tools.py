@@ -128,6 +128,7 @@ def insert_single_compound(
 
     # compound
 
+    print("cid: "+str(cid)+", name: "+str(name))
     print("tags: "+str(tags))
     c = Compound(
         cid=cid,

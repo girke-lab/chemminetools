@@ -10,8 +10,23 @@ class Tag(models.Model):
     name = models.CharField(max_length=256)
     user = models.ForeignKey(User, db_index=True)
 
+    # this is only valid in django 2.2
+    #class Meta:
+    #    constraints = [
+    #        models.UniqueConstraint(fields= ['name','user']) ]
+
     def allUserTagNames(user):
-        return [tag.name for tag in Tag.objects.filter(user = user)]
+        return {tag.name for tag in Tag.objects.filter(user = user)}
+
+    def ensureAllExist(tagNames,user):
+        existingTags = Tag.allUserTagNames(user)
+        givenTags = set(tagNames)
+
+        for newTag in givenTags.difference(existingTags):
+            print("creating new tag: "+newTag+" for user "+user.username)
+            Tag.objects.create(name = newTag, user=user)
+
+
 
 class Compound(models.Model):
 
@@ -24,12 +39,12 @@ class Compound(models.Model):
     user = models.ForeignKey(User, db_index=True)
     tags = models.ManyToManyField(Tag, db_index=True)
 
-    def byTagNames(tagNames,emptyMeansAll=False):
-        tags = Tag.objects.filter(name__in=tagNames)
-        if "all" in tags or (emptyMeansAll and len(tags)==0):
-            return compound.objects.all()
+    def byTagNames(tagNames,user):
+        if "all" in tagNames:
+            return Compound.objects.filter(user=user)
         else:
-            return Compound.objects.filter(tags__in=tags)
+            tags = Tag.objects.filter(name__in=tagNames)
+            return Compound.objects.filter(user=user,tags__in=tags).distinct("id")
 
     class Meta(object):
 

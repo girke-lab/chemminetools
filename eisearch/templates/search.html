@@ -8,39 +8,64 @@
 {% endblock %}
 
 {% block js_content %}
-<script type="text/javascript">
-function do_example(){
-  $("#smiles").get(0).value = 'CC(=O)OC1=CC=CC=C1C(=O)O';
-  $(".examplehelp").fadeIn(1000);
-}
 
-$(document).ready(function() {
-$("#loadexample").click(function() {
-do_example();
-return false;
-});
-$("#smiles").after("<span class=\"red examplehelp\" style=\"position:relative;left:100px;display:none\" ><br/>&uarr;<br/>example SMILES string inserted<br/><span>");
-
-var here = document.location.toString();
-if (here.match('#')) {
-  var anchor = here.split('#')[1];
-  if (anchor == 'example')
-    $("#loadexample").hide().click();
-}
-});
-</script>
+<!-- AlertifyJS -->
+<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/alertify.min.js"></script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/alertify.min.css"/>
+<!--selectize -->
+<link rel="stylesheet" href="/static/admin/selectize/css/selectize.bootstrap2.css" type="text/css">
+<script type="text/javascript" src="/static/admin/selectize/js/standalone/selectize.min.js"></script>
 
 <script type="text/javascript">
-$(document).ready(function() {
-	$("#drawform").submit(function() {
-		$(this).get(0).sdf.value = document.applet.molFile();
-		if(!document.applet.smiles().replace(' ', '').length()) {
-			alert("You need to draw a query structure.");
+	function do_example(){
+	  $("#smiles").get(0).value = 'CC(=O)OC1=CC=CC=C1C(=O)O';
+	  $(".examplehelp").fadeIn(1000);
+	}
+
+	$(document).ready(function() {
+		$("#loadexample").click(function() {
+		do_example();
 			return false;
+		});
+		$("#smiles").after("<span class=\"red examplehelp\" style=\"position:relative;left:100px;display:none\" ><br/>&uarr;<br/>example SMILES string inserted<br/><span>");
+
+		var here = document.location.toString();
+		if (here.match('#')) {
+		  var anchor = here.split('#')[1];
+		  if (anchor == 'example')
+		    $("#loadexample").hide().click();
 		}
-		return true;
+		$("#tags").selectize({
+			plugins: ['remove_button'],
+			items: {% if currentTags %} {{currentTags|safe}}
+				{% else %} [] {% endif %},
+			onChange: function(value){
+				setCompoundCount(value);
+			},
+		});
+		$("#drawform").submit(function() {
+			$(this).get(0).sdf.value = document.applet.molFile();
+			if(!document.applet.smiles().replace(' ', '').length()) {
+				alert("You need to draw a query structure.");
+				return false;
+			}
+			return true;
+		});
+
+
 	});
-});
+	function setCompoundCount(tags){
+		if(tags != null && tags != [])
+			$.get("/compounds/withTags/"+tags.join(",")+"/count").
+				then(function(result){
+					$("#compound_count").html(result);
+				}).fail(function(){
+					alertify.error("failed to update compound count");
+				});
+		else
+			$("#compound_count").html(0);
+	}
+	
 </script>
 
 <!--these are required by the ChemDoodle Web Components library-->
@@ -102,13 +127,51 @@ with an <a href="/help/#theory">atom pair (AP) similarity</a> measure. </li>
 <div class="row-fluid">
 <div class="span12">
 <ul class="nav nav-tabs">
-	<li class="active"><a href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
+	<li class="active"><a href="#workbench-input" data-toggle="tab">Workbench</a></li>
+	<li ><a href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
 	<li><a href="#draw" data-toggle="tab">Structural Drawing</a></li>
 	<li><a href="#sdf-input" data-toggle="tab">SDF Input</a></li>
 	<li><a href="#sdf-upload" data-toggle="tab">SDF Upload</a></li>
 </ul>
 <div class="tab-content">
-<div class="tab-pane active" id="smiles-input">
+
+<div class="tab-pane active" id="workbench-input">
+<form action="." method="post" accept-charset="utf-8">
+{% csrf_token %}
+
+	<div style="margin-top:10px"></div>
+
+	<span id="compound_count">0</span> compounds selected.
+	<select id="tags" name="tags" multiple placeholder="Compound Tags" style="display:none">
+		<option value="all">All</option>
+		{% for tag in tags %}
+			<option value="{{tag}}">{{tag}}</option>
+		{% endfor %}
+	</select>
+
+    <table>
+        {{form}}
+        <tr><td>
+		Algorithm and database:
+        </td><td>
+            <select name="algorithm" id="algorithm">
+	    <!--<option value="fp">Fingerprint algorithm (PubChem)</option>-->
+            <option value="ei">EI algorithm (ChEMBL)</option>
+            </select>
+        </td></tr>
+        <tr><th>
+        </th><td>
+                <div class="btn-group">
+                    <button class="btn btn-primary" type="submit">Search</button>
+                </div>
+        </td></tr>
+    </table>
+	
+</form>
+</div>
+
+
+<div class="tab-pane " id="smiles-input">
 <form action="." method="post" accept-charset="utf-8">
 {% csrf_token %}
 

@@ -30,6 +30,10 @@
 							<br>
 
 							Import compound IDs from workbench: 
+
+							<div style="margin-top:10px"></div>
+
+							<span id="compound_count">0</span> compounds selected.
 							<select id="tags" name="tags" multiple placeholder="Compound Tags">
 								<option value="all">All</option>
 								{% for tag in tags %}
@@ -206,6 +210,9 @@
 
 {% block js_content %}
 
+<!-- AlertifyJS -->
+<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/alertify.min.js"></script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/alertify.min.css"/>
 <!--selectize -->
 <link rel="stylesheet" href="/static/admin/selectize/css/selectize.bootstrap2.css" type="text/css">
 <script type="text/javascript" src="/static/admin/selectize/js/standalone/selectize.min.js"></script>
@@ -214,11 +221,6 @@
 <script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/b-html5-1.5.6/rg-1.1.0/datatables.min.js"></script>
 
 <script type="text/javascript">
-	jQuery("#tags").selectize({
-		plugins: ['remove_button'],
-	});
-
-
 	$(document).ready(function() {
 		$('.result-table').dataTable( {
 			dom: 'Bfrltip',
@@ -233,8 +235,27 @@
 				$('.result-table').show();
 			},
 		 } );
+		jQuery("#tags").selectize({
+			plugins: ['remove_button'],
+			onChange: function(value){
+				setCompoundCount(value);
+			},
+		});
 
+		
 	} );
+	function setCompoundCount(tags){
+			if(tags != null && tags != [])
+				$.get("/compounds/withTags/"+tags.join(",")+"/count").
+					then(function(result){
+						$("#compound_count").html(result);
+					}).fail(function(){
+						alertify.error("failed to update compound count");
+					});
+			else
+				$("#compound_count").html(0);
+		}
+
 </script>
 
 {% endblock %}

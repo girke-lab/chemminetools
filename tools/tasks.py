@@ -41,12 +41,8 @@ def launch(
 def makeSDF(user,tagNames):
     compoundList = None
     print(" in makeSDF, given tag names: "+str(tagNames))
-    if "all" in tagNames or len(tagNames) == 0:
-        compoundList = Compound.objects.filter(user=user)
-    else:
-        tags = Tag.objects.filter(name__in=tagNames)
-        compoundList = Compound.objects.filter(user=user,tags__in=tags)
-        print("using tags, found "+str(len(compoundList))+" matching compounds")
+    compoundList = Compound.byTagNames(tagNames,user)
+
     sdf = u''
     for compound in compoundList:
         sdf = sdf + compound.sdffile_set.all()[0].sdffile.rstrip() \

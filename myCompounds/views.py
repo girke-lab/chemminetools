@@ -29,6 +29,9 @@ from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
 from django.conf import settings
 from tools.runapp import createJob, updateJob
 from django.utils.http import urlquote
+from targetsearch.chembl_helpers import get_chembl_sdfs
+
+
 
 
 @guest_allowed
@@ -36,7 +39,10 @@ def showCompounds(request, resource):
 
     # perform query for existing myCompounds
 
-    (page, matches) = getMyCompounds(request)
+    allTags = Tag.allUserTagNames(request.user)
+
+    #(page, matches) = getMyCompounds(request)
+    matches = Compound.objects.filter(user=request.user)
     #print("page count: "+str(page.count))
     #print("page num pages: "+str(page.num_pages))
     if resource:
@@ -54,8 +60,7 @@ def showCompounds(request, resource):
         for match in matches:
             match.smiles = re.match(r"^(\S+)", match.smiles).group(1)
             match.smiles = urlquote(match.smiles)
-    return render(request,'showCompounds.html', dict(p=page, matches=matches))
-
+    return render(request,'showCompounds.html', dict(matches=matches,tags=allTags))
 
 @guest_allowed
 def uploadCompound(request, resource = None, job_id = None):
@@ -72,15 +77,20 @@ def uploadCompound(request, resource = None, job_id = None):
         compid = None
         smiles = None
         compoundTags = []
+        input_mode='smiles-input'
 
         if 'tags' in request.POST:
-            existingTags = set(allTags)
-            compoundTags = set(request.POST.getlist('tags'))
-            print("compound tags: "+str(compoundTags))
 
-            for newTag in compoundTags.difference(existingTags):
-                print("creating new tag: "+newTag+" for user "+request.user.username)
-                Tag.objects.create(name = newTag, user=request.user)
+            compoundTags = set(request.POST.getlist('tags'))
+
+            Tag.ensureAllExist(compoundTags,request.user)
+
+            #existingTags = set(allTags)
+            #print("compound tags: "+str(compoundTags))
+
+            #for newTag in compoundTags.difference(existingTags):
+            #    print("creating new tag: "+newTag+" for user "+request.user.username)
+            #    Tag.objects.create(name = newTag, user=request.user)
 
 
         if 'smiles' in request.POST:
@@ -143,7 +153,7 @@ def uploadCompound(request, resource = None, job_id = None):
 
             if len(filteredCIDs) > 0:
                 try:
-                    sdf = DownloadCIDs(filteredCIDs)
+                    sdf = DownloadCIDs(cids)
                 except:
                     print("Unexpected error:", sys.exc_info())
                     traceback.print_tb(sys.exc_info()[2])
@@ -154,13 +164,31 @@ def uploadCompound(request, resource = None, job_id = None):
             else:
                 messages.error(request, 'Error: No valid CIDs entered!')
                 sdf = None
+        elif 'chembl' in request.POST:
+            cids = tuple(request.POST['chembl'].split())
+
+            if len(cids) > 0:
+                try:
+                    sdfs = get_chembl_sdfs(cids)
+                    sdf = "\n$$$$\n".join(sdfs)+"\n$$$$\n"
+                except:
+                    print("Unexpected error:", sys.exc_info())
+                    traceback.print_tb(sys.exc_info()[2])
+                    messages.error(request,
+                                   'Invalid CIDs or no response from ChEMBL!'
+                                   )
+                    sdf = None
+            else:
+                print("no chembl cids given")
+                messages.error(request, 'Error: No valid ChEMBL CIDs entered!')
+                sdf = None
+
 
         if not sdf:
             return render('addCompounds.html',
                     dict(input_mode=input_mode,
                     post_data=request.POST,
                     tags=compoundTags))
-        print("compound tags2: "+str(compoundTags))
         newJob = createJob(request.user, 'Upload Compounds', '',
                            ['--user=' + str(request.user.id),"--tags="+(",".join(compoundTags))], sdf)
         time.sleep(2)

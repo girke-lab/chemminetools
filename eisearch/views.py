@@ -19,6 +19,9 @@ from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from eisearch import first_mol
 import traceback
+from compounddb.models import Compound, SDFFile,Tag
+import csv
+import functools
 
 @guest_allowed
 def search(request):
@@ -30,13 +33,25 @@ def search(request):
             smi = str(request.GET['smi'])
             smi = urlunquote(smi)
         form = AppFormSet()
+        allTags = Tag.allUserTagNames(request.user)
         return render(request,'search.html', dict(mode='form',
-            smi=smi, form=form))
+            smi=smi, form=form,
+            tags=allTags))
     else:
         sdf = None
         smiles = None
         compid = u'query'
-        if 'smiles' in request.POST:
+        if 'tags' in request.POST:
+            givenTags = request.POST.getlist("tags")
+            compoundList = Compound.byTagNames(givenTags,request.user)
+            if len(compoundList) == 0:
+                messages.error(request,"Error: No compounds found with selected tags")
+            else:
+                sdf = u''
+                for compound in compoundList:
+                    sdf = sdf + compound.sdffile_set.all()[0].sdffile.rstrip() + '\n'
+                smiles = sdf_to_smiles(sdf)
+        elif 'smiles' in request.POST:
             input_mode = 'smiles-input'
             sdf = u''
             try:
@@ -105,17 +120,20 @@ def getStructures(request, job_id, format):
     try:
         job = updateJob(request.user, job_id)
         f = open(job.output, 'r')
-        result = f.read()
-        f.close() 
-        result = '\n'.join(re.findall(r'^\S+', result, re.MULTILINE))
+        csvinput = csv.reader(f,delimiter=' ')
+        #read each line, extrace the second column, and combine all values 
+        #into a new-line separated string
+        targetIds = "\n".join([line[1] for line in csvinput])
+        print("targetIds: "+str(targetIds))
+        f.close()
+        #result = '\n'.join(re.findall(r'^\S+', result, re.MULTILINE))
     except Job.DoesNotExist:
         print(traceback.format_exc())
         raise Http404
-    newJob = createJob(request.user, 'pubchemID2SDF', '', [], result,
+    newJob = createJob(request.user, 'chemblID2SMILES', '', [], targetIds,
                        format, async=False) 
     if format == 'smiles':
         filename = 'search_result.smi'
     else:
         filename = 'search_result.sdf' 
     return redirect(tools.views.view_job, job_id=newJob.id,resource='other',filename=filename)
-    #return redirect('/tools/view_job/'+str(newJob.id),resource='other',filename=filename)

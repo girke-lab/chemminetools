@@ -2,9 +2,21 @@
 {% load cms_tags %}
 
 {% block js_content %}
+<!--selectize -->
+<link rel="stylesheet" href="/static/admin/selectize/css/selectize.bootstrap2.css" type="text/css">
+<script type="text/javascript" src="/static/admin/selectize/js/standalone/selectize.min.js"></script>
+
+<!-- AlertifyJS -->
+<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/alertify.min.js"></script>
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/alertify.min.css"/>
+
 <script type="text/javascript">
 var structures_loaded = false;
+var selectedTags = [];
 
+$.ajaxSetup({
+	  headers: { "X-CSRFToken": '{{csrf_token}}' }
+});
 $(document).ready(function() {
 	$("#loadstructures").click(function () {
 		if (!structures_loaded) {
@@ -12,8 +24,12 @@ $(document).ready(function() {
 			var buf = $(this).text();
 			$(".compoundImageTitle").show();
 			$(".compoundImage").show();
+			$(".queryCompoundImage").show();
 			$(".compoundImage").each(function() {
-				$(this).html('<img width="100" class="img-rounded" src="http://pubchem.ncbi.nlm.nih.gov/image/imgsrv.fcgi?cid='+ $(this).attr('id') + '"/>');
+				$(this).html('<img width="100" class="img-rounded" src="https://www.ebi.ac.uk/chembl/api/data/image/'+$(this).attr('id') +'.svg"/>');
+			});
+			$(".queryCompoundImage").each(function() {
+				$(this).html('<img width="100" class="img-rounded" src="/compounds/cid/'+$(this).attr('id') +'/png"/>');
 			});
 			structures_loaded = true;
 		} else {
@@ -21,12 +37,50 @@ $(document).ready(function() {
 			structures_loaded = false;
 			$(".compoundImage").hide();
 			$(".compoundImageTitle").hide();
+			$(".queryCompoundImage").hide();
 			$(".compoundImage").each(function() {
 				$(this).html('');
 			});
 		}
 	});
+	jQuery("#tags").selectize({
+			plugins: ['remove_button'],
+			create:true,
+			onChange: function(value){
+				console.log("selected tags: ",value);
+				selectedTags = value;
+			}
+		});
+
+
 });	
+
+
+function sendToWorkbench(){
+	var data,ids;
+	console.log("sending to workbench");
+	ids = jQuery(".compound").map(function(){ return this.id;}).get();
+	data = {
+		chembl: ids.join(" "),
+		tags: selectedTags
+	};
+	console.log("posting data: ",data);
+	jQuery.ajax({
+		type:"POST",
+		url:"/myCompounds/addCompounds",
+		data: data,
+		traditional:true,
+	}).then(function(result){
+			console.log("result: ",result);
+			if(result.job_id != null){
+				window.location.href="/tools/view_job/"+result.job_id+"/";
+			}
+
+		}).fail(function(result){
+			alertify.error("failed to send compounds to workbench");
+		});
+
+}
 		
 </script>
 {% endblock %}
@@ -50,10 +104,10 @@ $(document).ready(function() {
                 <th>Options</th>
                 <td>{{ job.options }}</td>
         </tr>
-        <tr>
+      <!--  <tr>
                 <th>Query Structure</th>
                 <td><img width="200" src="/similarity/renderer/{{query}}"/></td>
-        </tr>
+      </tr> -->
         </tbody>
         </table>
         </div>
@@ -64,8 +118,18 @@ $(document).ready(function() {
 <div class="span12">
 {% if compounds %}
     <h2>Hits</h2>
+
+    Tag this set and save it to your workbench:
+    <select id="tags" name="tags" multiple placeholder="Compound Tags">
+	{% for tag in tags %}
+		<option value="{{tag}}">{{tag}}</option>
+	{% endfor %}
+    </select>
+    <button type="button" class="btn btn-primary" onclick="sendToWorkbench()">Send to Workbench</button>
+    <br>
+  
+
     <div class="btn-group">
-    <a href="/eisearch/getStructures/{{job.id}}/workbench"><button type="button" class="btn btn-primary">Send to Workbench</button></a>
     <a href="/eisearch/getStructures/{{job.id}}/sdf"><button type="button" class="btn">Download SDF</button></a>
     <a href="/eisearch/getStructures/{{job.id}}/smiles"><button type="button" class="btn">Download SMILES</button></a>
     <button id="loadstructures" class="btn">Show Structures</button>
@@ -73,20 +137,24 @@ $(document).ready(function() {
 
     <table class="table table-striped table-bordered compounds">
     <thead>
-    <tr>
-    <th style="display:none" class="compoundImageTitle">Structure</th>
-    <th>CID</th>
-    <th>Similarity</th>
-    <th>More Info</th>
-    <tr>
+	    <tr>
+		    <th style="display:none" class="compoundImageTitle">Query Structure</th>
+		    <th>Query</th>
+		    <th style="display:none" class="compoundImageTitle">Structure</th>
+		    <th>CID</th>
+		    <th>Similarity</th>
+		    <th>More Info</th>
+	    <tr>
     </thead>
     <tbody>
     {% for compound in compounds %}
-        <tr class="compound">
-            <td style="display:none" class="compoundImage" id="{{compound.0}}">  </td>
+        <tr class="compound" id="{{compound.1}}">
+            <td style="display:none" class="queryCompoundImage" id="{{compound.0}}">  </td>
             <td>{{compound.0}}</td>
-            <td>{{compound.1|floatformat:"2"}}</td>
-            <td><a href="http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid={{compound.0}}">PubChem Link</a></td>
+            <td style="display:none" class="compoundImage" id="{{compound.1}}">  </td>
+            <td>{{compound.1}}</td>
+            <td>{{compound.2|floatformat:"2"}}</td>
+            <td><a href="https://www.ebi.ac.uk/chembl/compound_report_card/{{compound.1}}">ChEMBL Link</a></td>
         </tr>
     {% endfor %}
     </tbody>

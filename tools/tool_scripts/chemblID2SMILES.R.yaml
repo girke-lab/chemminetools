@@ -1,0 +1,10 @@
+%YAML 1.2
+---
+# this description registers a ChemmineTools app in the database
+# load with command: loader -i thisfile.yaml
+name: chemblID2SMILES
+category: Search 
+script: chemblID2SMILES.R
+input_type: text/properties.table 
+output_type: text/properties.table
+description: Takes chembl ID numbers and returns table with SMILES. Tags can also be given via the '--tags' option and they will be output with each compound in the output.

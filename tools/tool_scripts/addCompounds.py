@@ -130,7 +130,9 @@ def addMyCompounds(sdf, user,tags):
 def main():
     sdf = sys.stdin.read()
     user = User.objects.get(id=args['user'])
-    tags = Tag.objects.filter(name__in=args['tags'].split(','))
+    tags = []
+    if 'tags' in args and args['tags'] is not None:
+        tags = Tag.objects.filter(user=user,name__in=args['tags'].split(','))
 
     output = addMyCompounds(sdf, user,tags)
 

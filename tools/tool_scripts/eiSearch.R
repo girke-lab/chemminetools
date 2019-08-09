@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # requires: ChemmineR,R.utils
-# use: ./eiSearch.R --outfile=output.txt --simCutoff=0.3 --numResults=10 < input.sdf
+# use: ./eiSearch.R --outfile=output.txt --similarity=0.3 --compounds=10 < input.sdf
 
 library(eiR)
 library(R.utils)
@@ -26,7 +26,7 @@ if(! exists("debug_mode")){
 }
 
 #print(paste("outfile: ",outfile,"simCutoff: ",simCutoff,
-#				"numResults: ",numResults,"num read in input: ",length(sdfInput)))
+				#"numResults: ",numResults,"num read in input: ",length(sdfInput)))
 
 cleanUp <- function(input){
      input <- gsub("[^a-zA-Z_0-9 -]", " ", input, perl=TRUE) # remove weird chars
@@ -39,18 +39,20 @@ cids <- sdfid(sdfInput)
 cids <- cleanUp(cids)
 sdfInput <- sdfInput[! duplicated(cids)]
 
-results = eiQuery(1,sdfInput,conn=dbConn,dir=basedir)
+results = eiQuery(1,sdfInput,conn=dbConn,dir=basedir,asSimilarity=TRUE,K=numResults)
 
 #print(results)
-filtered = results[results$distance < 1-simCutoff,]
-pubchemCids = unlist(lapply(filtered$target,
-			    function(chemblName){
-				    cid = pubchemName2CID(chemblName)
-				    if(is.na(cid)) # return CHEMBL name if translation to pubchem CID fails
-					    chemblName
-				    else 
-					    cid[1]
-			    }))
+filtered = results[results$similarity > simCutoff,]
+#pubchemCids = unlist(lapply(filtered$target,
+#			    function(chemblName){
+#				    cid = pubchemName2CID(chemblName)
+#				    if(is.na(cid)) # return CHEMBL name if translation to pubchem CID fails
+#					    chemblName
+#				    else 
+#					    cid[1]
+#			    }))
 			    
-results = data.frame(target=pubchemCids,similarities = 1 - filtered$distance)
+results = data.frame(query = filtered$query,
+		     target=filtered$target,
+		     similarities = filtered$similarity)
 write.table(results,file=outfile,quote=FALSE,row.names=FALSE,col.names=FALSE)

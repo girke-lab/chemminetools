@@ -68,9 +68,8 @@ def launch_job(request, category=None):
             input = ''
         tagNames = []
         if "tags" in request.POST:
-            print("found 'tags' parameter")
             tagNames = request.POST.getlist("tags")
-        print("got tagNames: "+str(tagNames))
+        #print("got tagNames: "+str(tagNames))
         newJob = createJob(request.user, application.name, optionsList,
                            commandOptions, input,tagNames=tagNames)
         messages.success(request, 'Success: job launched.')
@@ -139,9 +138,9 @@ def view_job(
                              content_type=job.application.output_type)
     if request.is_ajax():
         if job.status == Job.RUNNING:
-            response = dict(status='RUNNING')
+            response = dict(status='RUNNING',job_id=job_id)
         else:
-            response = dict(status='DONE')
+            response = dict(status='DONE',job_id=job_id)
         return HttpResponse(dumps(response), 'text/json')
     if job.status == Job.FINISHED:
         finalResult = job.output
@@ -173,9 +172,10 @@ def view_job(
             for line in csvinput:
                 csvOutput.append(line)
             f.close()
+            allTags = Tag.allUserTagNames(request.user)
             return render(request,'eiresult.html',
                     dict(title=str(job.application) + ' Results',
-                    job=job, compounds=csvOutput, query=job.input))
+                    job=job,tags=allTags, compounds=csvOutput, query=job.input))
         if job.application.output_type == 'text/fp.search.result':
             f = open(job.output, 'r')
             csvinput = csv.reader(f, delimiter=' ')

@@ -39,7 +39,6 @@ def createJob(
     tagNames = [],
     ):
 
-    print("in createJob, tagNames: "+str(tagNames))
     application = Application.objects.get(name=applicationName)
     newJob = Job(
         user=user,
@@ -163,7 +162,6 @@ def updateJob(user, job_id):
                 job.status = Job.FINISHED
             else:
                 job.status = Job.FAILED
-            print("result output: "+str(result.result))
             job.output = result.result
             result.forget()
             job.save()

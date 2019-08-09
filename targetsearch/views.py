@@ -37,7 +37,7 @@ def search(request):
             source_id = request.GET['source_id']
             
             if 'tags' in request.GET:
-                ids =ids + tuple( [compound.cid for compound in  Compound.byTagNames(request.GET.getlist("tags"))])
+                ids =ids + tuple( [compound.cid for compound in  Compound.byTagNames(request.GET.getlist("tags"),request.user)])
 
             try:
                 if source_id != "1" : # not CHEMBL

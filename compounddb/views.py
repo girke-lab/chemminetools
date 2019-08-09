@@ -18,6 +18,7 @@ import re
 from simplejson import dumps
 import tempfile
 import os
+import json
 
 
 class compoundForm(ModelForm):
@@ -33,10 +34,14 @@ class compoundForm(ModelForm):
 @guest_allowed
 @cache_page(60 * 120)
 @vary_on_cookie
-def render_image(request, id, filename):
+def render_image(request, filename,id=None,cid=None ):
+    compound = None
     try:
-        compound = Compound.objects.get(id__iexact=id,
-                user=request.user)
+        if id is not None:
+            compound = Compound.objects.get(id__iexact=id, user=request.user)
+        elif cid is not None:
+            compound = Compound.objects.get(cid__iexact=cid, user=request.user)
+
     except Compound.DoesNotExist:
         raise Http404
     if compound.weight > 2000:
@@ -124,3 +129,60 @@ def compound_detail(
 
     return render(request,'compound.html', dict(compound=compound,
                               sdf=sdf, smiles=smiles, inchi=inchi))
+@guest_allowed
+def tagCompounds(request,action):
+    if request.is_ajax() and request.method == 'POST':
+        rawJson = request.body
+        data = json.loads(rawJson.decode("utf-8"))
+        compoundIds = []
+        tags = []
+        try:
+            tags = data["tags"]
+            compoundIds = [int(id) for id in data["ids"]]
+        except:
+            print("failed to parse json for tags and compound ids: "+str(rawJson))
+            return HttpResponse("failed to parse JSON",status=404)
+
+        #print("adding tags "+str(tags)+" to compounds "+str(compoundIds))
+
+        Tag.ensureAllExist(tags,request.user)
+
+        tagObjects = Tag.objects.filter(user=request.user,name__in=tags)
+        compounds = Compound.objects.filter(user=request.user,id__in=compoundIds)
+        for compound in compounds:
+            if action == 'add':
+                compound.tags.add(*tagObjects)
+            elif action == 'remove':
+                compound.tags.remove(*tagObjects)
+            else:
+                return HttpResponse("Unknown action given",status=404)
+            compound.save()
+    
+
+    return HttpResponse('')
+
+@guest_allowed
+def batchOperation(request,action):
+    #print("batch operation, action: "+action)
+    if request.method == "POST" and action == "delete" :
+        compoundsNotFound=[]
+        compoundIds = request.POST.getlist("id[]")
+        #print("deleteing compounds "+str(compoundIds))
+        for compoundId in compoundIds:
+            try:
+                compound = Compound.objects.get(id__iexact=compoundId, user=request.user)
+                compound.delete()
+                #print("compound deleted")
+            except Compound.DoesNotExist:
+                print("compound "+str(compoundId)+" not found")
+                compoundsNotFound.append(compoundId)
+        if len(compoundsNotFound) != 0:
+            return HttpResponse("Not all compounds could be deleted: "+str(compoundsNotFound),status=404)
+
+    return HttpResponse('')
+
+@guest_allowed
+def countCompoundsWithTags(request,tags):
+    return HttpResponse(Compound.byTagNames(tags.split(","),request.user).count())
+
+
