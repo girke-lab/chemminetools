@@ -38,26 +38,26 @@
 <div class="row">
 
 <div class="col-md-7">
-	<ul class="navbar-nav nav-tabs" id="myTab">
-	  <li class="active"><a href="#smiles" data-toggle="tab">SMILES</a></li>
-	  <li><a href="#sdf" data-toggle="tab">SDF</a></li>
-	  <li><a href="#inchi" data-toggle="tab">InChI</a></li>
+	<ul class="nav nav-tabs" id="myTab">
+		<li class="nav-item"><a class="nav-link active" href="#smiles" data-toggle="tab">SMILES</a></li>
+		<li class="nav-item"><a class="nav-link" href="#sdf" data-toggle="tab">SDF</a></li>
+		<li class="nav-item"><a class="nav-link" href="#inchi" data-toggle="tab">InChI</a></li>
 	</ul>
-	 
+	
 	<div class="tab-content">
-	  <div class="tab-pane active" id="smiles"><textarea class="field col-md-12" rows="6" readonly="readonly">{{smiles}}</textarea></div>
-	  <div class="tab-pane" id="sdf"><textarea class="field col-md-12" rows="24" readonly="readonly">{{sdf}}</textarea></div>
-	  <div class="tab-pane" id="inchi"><textarea class="field col-md-12" rows="6" readonly="readonly">{{inchi}}i</textarea></div>
+		<div class="tab-pane show active" id="smiles"><textarea class="field col-md-12" rows="6" readonly="readonly">{{smiles}}</textarea></div>
+		<div class="tab-pane" id="sdf"><textarea class="field col-md-12" rows="24" readonly="readonly">{{sdf}}</textarea></div>
+		<div class="tab-pane" id="inchi"><textarea class="field col-md-12" rows="6" readonly="readonly">{{inchi}}</textarea></div>
 	</div>
-	 
+	
 </div><!--/span-->
 
 <div class="col-md-5">
-<h2>Downloads</h2>
-<p><a class="btn" href="/compounds/{{compound.id}}/smiles/{{compound.id}}.smi">SMILES »</a></p>
-<p><a class="btn" href="/compounds/{{compound.id}}/sdf/{{compound.id}}.sdf">SDF »</a></p>
-<p><a class="btn" href="/compounds/{{compound.id}}/inchi/{{compound.id}}.inchi">InChI »</a></p>
-<p><a class="btn" href="/compounds/{{compound.id}}/png/{{compound.id}}.png">PNG (image) »</a></p>
+	<h3>Downloads</h3>
+	<p><a class="btn btn-outline-primary" href="/compounds/{{compound.id}}/smiles/{{compound.id}}.smi">SMILES »</a></p>
+	<p><a class="btn btn-outline-primary" href="/compounds/{{compound.id}}/sdf/{{compound.id}}.sdf">SDF »</a></p>
+	<p><a class="btn btn-outline-primary" href="/compounds/{{compound.id}}/inchi/{{compound.id}}.inchi">InChI »</a></p>
+	<p><a class="btn btn-outline-primary" href="/compounds/{{compound.id}}/png/{{compound.id}}.png">PNG (image) »</a></p>
 </div><!--/span-->
 
 </div><!--/row-->
