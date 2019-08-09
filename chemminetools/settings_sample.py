@@ -202,6 +202,7 @@ INSTALLED_APPS = (
     'djangocms_googlemap',
     'sekizai',
     'bootstrap_toolkit',
+    'bootstrap4',
     'guest',
     'compounddb',
     'myCompounds',
