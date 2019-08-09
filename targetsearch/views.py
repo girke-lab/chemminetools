@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
+from django.contrib import messages
 
 from .chembl_helpers import (
     byActivity,
@@ -87,6 +88,13 @@ def readSources():
             sources[int(key)] = val
     return sources
 
-
+def bs4test(request):
+    messages.debug(request, 'This is a test debug message')
+    messages.info(request, 'This is a test info message')
+    messages.info(request, 'This is another test info message')
+    messages.success(request, 'This is a test success message')
+    messages.warning(request, 'This is a test warning message')
+    messages.error(request, 'This is a test error message')
+    return render(request, 'targetsearch/bs4test.html')
 
 

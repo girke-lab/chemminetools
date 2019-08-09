@@ -10,8 +10,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <link href="/static/admin/bootstrap/css/bootstrap.css" rel="stylesheet">
-    <link href="/static/admin/bootstrap/css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="/static/admin/bootstrap-4.3.1-dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/admin/fontawesome-free-5.9.0-web/css/all.css" rel="stylesheet">
     {% render_block "css" %}
     <style type="text/css">
       body {
@@ -34,41 +34,35 @@
 
   <body>
     {% cms_toolbar %}
-    <div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container-fluid">
-          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </a>
-          <a class="brand" href="/" style="color:red">ChemMine Tools</a>
-          <div class="nav-collapse collapse">
-            <p class="navbar-text pull-right">
-            {% if user.email %}
-              Logged in as <a href="/accounts/{{ user.username }}/">{{ user.email }}</a>. <a href="/accounts/signout/">logout</a>
-            {% else %}
-              Optional: <a href="/accounts/signin/">login</a> or <a href="/accounts/signup/">register</a>
-                to save data.
-            {% endif %}
-            </p>
-            <ul class="nav">
-		{% show_menu 0 100 0 1 %}
-            </ul>
-          </div><!--/.nav-collapse -->
-        </div>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <a class "navbar-brand" href="/" style="color:red">ChemMine Tools</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+          {% show_menu 0 100 0 1 %}
+        </ul>
+        <p class="navbar-text my-2 my-lg-0">
+          {% if user.email %}
+            Logged in as <a href="/accounts/{{ user.username }}/">{{ user.email }}</a>. <a href="/accounts/signout/">Logout</a>
+          {% else %}
+            Optional: <a href="/accounts/signin/">Login</a> or <a href="/accounts/signup/">register</a> to save data.
+          {% endif %}
+        </p>
       </div>
-    </div>
+    </nav>
 
-        <div class="span9">
+        <div class="col-md-9">
 
 
 		<h2>	Site down for maintainance.</h2>
 		Should be back up at 9pm PDT
 {% if messages %}
     {% for message in messages %}
-	<div class="row-fluid">
-		<div class="span12">
+	<div class="row">
+		<div class="col-md-12">
 			<div class="alert alert-block fade in {{ message.tags }}">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 				{% autoescape off %}{{ message }}{% endautoescape %}
@@ -87,14 +81,16 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 {% render_block "js" %}
-    <script src="/static/admin/jquery.js"></script>
-    <script src="/static/admin/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/admin/jquery-3.4.1.min.js"></script>
+    <script src="/static/admin/popper-1.15.0.min.js"></script>
+    <script src="/static/admin/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
     {% block js_content %}{% endblock %}
 <script type="text/javascript">
 	$(document).ready(function() {
 		$(".alert").alert()
 	});
 </script>
+<!--
 <script>
 	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 	    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -105,6 +101,7 @@
 		    ga('send', 'pageview');
 
 </script>
+-->
   </body>
 </html>
 

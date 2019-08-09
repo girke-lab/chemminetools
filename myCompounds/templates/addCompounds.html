@@ -51,32 +51,32 @@
 {% endblock %} 
 
 {% block base_content %}
-<div class="row-fluid"> 
-	<div class="span12">
+<div class="row"> 
+	<div class="col-md-12">
 		<h2>Add Compounds</h2>
 	</div><!--/span-->
 </div><!--/row--> 
 
-<div class="row-fluid">
-<div class="span12">
+<div class="row">
+<div class="col-md-12">
 
 <ul class="nav nav-tabs">
-  <li {% if input_mode == "smiles-input" %} class="active"{% endif %}><a href="#smiles_tab" data-toggle="tab">Smiles Input</a></li>
-  <li {% if input_mode == "draw" %} class="active"{% endif %}><a href="#draw" data-toggle="tab">Draw a Molecule</a></li>
-  <li {% if input_mode == "sdf-input" %} class="active"{% endif %}><a href="#sdfinput" data-toggle="tab">SDF Input</a></li>
-  <li {% if input_mode == "sdf-upload" %} class="active"{% endif %}><a href="#sdfupload" data-toggle="tab">SDF Upload</a></li>
-  <li {% if input_mode == "pubchem" %} class="active"{% endif %}><a href="#pubchem" data-toggle="tab">PubChem Import</a></li>
+	<li class="nav-item"><a class="nav-link active" href="#smiles_tab" data-toggle="tab">SMILES Input</a></li>
+	<li class="nav-item"><a class="nav-link" href="#draw" data-toggle="tab">Draw a Molecule</a></li>
+	<li class="nav-item"><a class="nav-link" href="#sdfinput" data-toggle="tab">SDF Input</a></li>
+	<li class="nav-item"><a class="nav-link" href="#sdfupload" data-toggle="tab">SDF Upload</a></li>
+	<li class="nav-item"><a class="nav-link" href="#pubchem" data-toggle="tab">PubChem Import</a></li>
 </ul>
 
-<div class="tab-content" style="overflow:visible">
-<div class="tab-pane{% if input_mode == "smiles-input" %} active{% endif %}" id="smiles_tab">
-	<div class="row-fluid">
-	<div class="span12">
+<div class="tab-content"  style="overflow:visible">
+<div class="tab-pane show {% if input_mode == "smiles-input" %} active{% endif %}" id="smiles_tab">
+	<div class="row">
+	<div class="col-md-12">
 	<form action="." method="post" accept-charset="utf-8">
 	<fieldset>
 	{% csrf_token %}
 		<label for="smiles">Enter smiles entry:</label><br />
-		<textarea rows="10" class="field span12" id="smiles" name="smiles">{{post_data.smiles}}</textarea><br />
+		<textarea rows="10" class="field col-md-12" id="smiles" name="smiles">{{post_data.smiles}}</textarea><br />
 
 		<div class="tags-container" style="display:none">
 			<label for="tags">Tags</label>
@@ -89,15 +89,15 @@
 
 		<div class="btn-group">
 			<button class="btn btn-primary" type="submit">Submit</button>
-			<button class="btn" id="use_sample">Use 30 Sample Compounds</button>
+			<button class="btn btn-secondary" id="use_sample">Use 30 Sample Compounds</button>
 		</div>
 	</fieldset>
 
 	</form>
 	</div><!--/span-->
 	</div><!--/row-->
-	<div class="row-fluid">
-	<div class="span12">
+	<div class="row">
+	<div class="col-md-12">
 	<div class="box">
 		<div class="title">Expected Format</div>
 	<pre>smiles1 cid1
@@ -108,10 +108,11 @@ smiles2 cid2</pre>
 	<pre>C(Nc1cc(OC)ccc1OC)(c1cc(I)ccc1)=O ChemBridge_DiverSet_20k
 N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
 	</div>
-	</div><!--/span-->
+	</div><!--/col-md--->
 	</div><!--/row-->
 </div><!--/tab-->
-<div class="tab-pane{% if input_mode == "draw" %} active{% endif %}" id="draw">
+
+<div class="tab-pane" id="draw">
         <p>
 	The center dot is a carbon atom. To add bonds, choose a bond type and click the central atom. To replace atoms, choose an element and click the atom you would like to replace.
         </p>
@@ -135,14 +136,15 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
         <button class="btn btn-primary" type="submit">Submit</button>
         </form>
 </div><!--/tab-->
-<div class="tab-pane{% if input_mode == "sdf-input" %} active{% endif %}" id="sdfinput">
+
+<div class="tab-pane" id="sdfinput">
 	<p>
 	Please copy and paste your SDF below.
 	</p>
 	<form action="." method="post" accept-charset="utf-8">
 	{% csrf_token %}
 	<label for="sdf_box">SDF Content:</label><br/>
-	<textarea id="sdf_box" name="sdf" class="field span12" rows="12">{{post_data.sdf}}</textarea><br/>
+	<textarea id="sdf_box" name="sdf" class="field col-md-12" rows="12">{{post_data.sdf}}</textarea><br/>
 	<div class="tags-container" style="display:none">
 		<label for="tags">Tags</label>
 		<select class="tags" id="tags" name="tags" multiple placeholder="Compound Tags" >
@@ -156,7 +158,8 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
 	<button class="btn btn-primary" type="submit">Submit</button>
 	</form>
 </div><!--/tab-->
-<div class="tab-pane{% if input_mode == "sdf-upload" %} active{% endif %}" id="sdfupload">
+
+<div class="tab-pane" id="sdfupload">
 	<p>
 	Please upload an SDF below.
 	</p>
@@ -177,14 +180,15 @@ N1(C(SC(\C1=O)=C\c1cc(OC)c(cc1)OCCCCC)=S)CC(=O)OC Sample_2</pre>
 	<button class="btn btn-primary" type="submit">Submit</button>
 	</form>
 </div><!--/tab-->
-<div class="tab-pane{% if input_mode == "pubchem" %} active{% endif %}" id="pubchem">
+
+<div class="tab-pane" id="pubchem">
         <p>
         Please copy and paste your PubChem CIDs below (one per line).
         </p>
         <form action="." method="post" accept-charset="utf-8">
 	{% csrf_token %}
         <label for="pubchem">CIDs:</label><br/>
-        <textarea id="pubchem" name="pubchem" class="field span4" rows="20"></textarea><br/>
+        <textarea id="pubchem" name="pubchem" class="field col-md-4" rows="20"></textarea><br/>
 	<div class="tags-container" style="display:none">
 		<label for="tags">Tags</label>
 		<select class="tags" id="tags" name="tags" multiple placeholder="Compound Tags" >

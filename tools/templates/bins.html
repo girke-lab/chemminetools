@@ -37,15 +37,15 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block base_content %}
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		<h2>{{ title|default:"Job Result" }}</h2>
 	</div><!--/span-->
 </div><!--/row-->
 
 {% if job %}
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 	<table class="table table-bordered table-hover">
 	<tbody>
 	<tr>
@@ -66,30 +66,30 @@ $(document).ready(function() {
 </div><!--/row-->
 {% endif %}
 
-<div class="row-fluid">
-<div class="span12">
+<div class="row">
+<div class="col-md-12">
 
 <p>
 <button id="loadstructures" class="btn">Show Example Structures</button>
 </p>
 
-<div class="accordion" id="accordion2">
+<div class="panel-group" id="accordion2">
 {% for bin, compounds in bins.items %}
-	<div class="accordion-group">
-		<div class="accordion-heading">
+	<div class="panel">
+		<div class="panel-heading">
 			<a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapse{{bin}}">
 				Bin: <b>{{bin}}</b> Size: <b>{{compounds|length}}</b> 
 				<img style="display:none" class="compoundImage" id="{{compounds|first}}" width="150" src=""/> 
 				</a>
 		</div>
-		<div id="collapse{{bin}}" class="accordion-body collapse">
-			<div class="accordion-inner">
+		<div id="collapse{{bin}}" class="panel-collapse collapse">
+			<div class="panel-body">
 				<b>Members:</b> {% for cid in compounds %}<a data-container="body" data-toggle="popover" data-placement="left" title="{{cid}}" data-content="" class="cidLink">{{cid}}</a> {% endfor %}
 			</div>
 		</div>
 	</div>
 {% endfor %}
-</div><!--/accordion-->
+</div><!--/panel-group-->
 
 </div><!--/span-->
 </div><!--/row-->

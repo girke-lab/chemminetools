@@ -12,7 +12,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
 	$('#example').dataTable( {
-		"sDom": "<'row'<'span6'l><'span6'f>r>t<'row'<'span6'i><'span6'p>>",
+		"sDom": "<'row'<'col-md-6'l><'col-md-6'f>r>t<'row'<'col-md-6'i><'col-md-6'p>>",
 		"sScrollX": "100%",
 		"bScrollCollapse": true
          } );
@@ -22,15 +22,15 @@ $(document).ready(function() {
 {% endblock %}
 
 {% block base_content %}
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		<h2>{{ title|default:"Job Result" }}</h2>
 	</div>
 </div><!--/row-->
 
 {% if job %}
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 	<table class="table table-bordered table-hover">
 	<tbody>
 	<tr>
@@ -43,7 +43,7 @@ $(document).ready(function() {
 	</tr>
 	<tr>
 		<th>Results</th>
-		<td><a class="btn" href="download/table{{job.id}}.csv">Download CSV »</a></td>
+		<td><a class="btn btn-primary" href="download/table{{job.id}}.csv">Download CSV »</a></td>
 	</tr>
 	<tr>
 		<th>Next Steps</th>
@@ -55,11 +55,11 @@ $(document).ready(function() {
 </div><!--/row-->
 {% endif %}
 
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 
 	{% if csv %}
-	<table class="table table-condensed table-striped table-bordered span12" id="example">
+	<table class="table table-condensed table-striped table-bordered col-md-12" id="example">
 	{% for row in csv %}
 		{% if forloop.first %}
 			<thead>

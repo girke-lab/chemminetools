@@ -34,7 +34,7 @@
 		$.ajaxSetup({
 			  headers: { "X-CSRFToken": '{{csrf_token}}' }
 		});
-		$('.icon-trash').click(DeleteRow);
+		$('.fa-trash-alt').click(DeleteRow);
 		$("[data-toggle=tooltip]").tooltip();
 
 		$("#tags").selectize({
@@ -197,25 +197,25 @@
 {% endblock %} 
 
 {% block base_content %}
-<div class="row-fluid"> 
-<div class="span12">
+<div class="row"> 
+<div class="col-md-12">
 <h2>My Compounds</h2>
 </div>
 </div><!--/row--> 
-<div class="row-fluid">
-	<div class="span12">
+<div class="row">
+	<div class="col-md-12">
 		<div class="btn-group" id="top_buttons">
-		  <button id="loadstructures" class="btn">Show Structures</button>
-		  <a href="/myCompounds/downloadSDF.sdf" download="myCompounds.sdf"><button class="btn">Download SDF</button></a>
-		  <a href="/myCompounds/downloadSMILES.smi" download="myCompounds.smi"><button class="btn">Download Smiles</button></a>
+		  <button id="loadstructures" class="btn btn-outline-primary">Show Structures</button>
+		  <a href="/myCompounds/downloadSDF.sdf" download="myCompounds.sdf"><button class="btn btn-outline-primary">Download SDF</button></a>
+		  <a href="/myCompounds/downloadSMILES.smi" download="myCompounds.smi"><button class="btn btn-outline-primary">Download Smiles</button></a>
 		</div>
 	</div> 
 </div><!--/row-->
 
-<div class="row-fluid">
+<div class="row">
 
 
-<div class="span12">
+<div class="col-md-12">
 <p>&nbsp;
 {% if matches %}
 	<table class="table xxtable-striped" >
@@ -241,9 +241,9 @@
 		    {% endfor %}
 		</td>
 			
-		<td><!--<i data-toggle="tooltip" placement="top" title="delete this compound" class="icon-trash"></i>-->
-		<a href="/eisearch/query/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="search similar compounds"><i class="icon-search"></i></a>
-		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="edit compound details"><i class="icon-pencil"></i></a>
+		<td><!--<i data-toggle="tooltip" placement="top" title="Delete this compound" class="fas fa-trash-alt"></i>-->
+		<a href="/eisearch/query/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="Search similar compounds"><i class="fas fa-search"></i></a>
+		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="Edit compound details"><i class="fas fa-pen"></i></a>
 		</td>
 		</tr>
 	{% endfor %}
@@ -256,35 +256,18 @@
 
 
 </div><!--/row-->
-<div class="row-fluid">
-	<div style="display:none">
-		<div id="tag_input" >
-			<label class="control-label" for="tags">Compound Tags:</label>
-			<select id="tags" name="tags" multiple placeholder="Compound Tags" style="display:none">
-				{% for tag in tags %}
-					<option value="{{tag}}">{{tag}}</option>
-				{% endfor %}
-			</select>
+<div class="row">
+	<div class="col-md-12">
+		<div style="display:none">
+			<div id="tag_input" >
+				<label class="control-label" for="tags">Compound Tags:</label>
+				<select id="tags" name="tags" multiple placeholder="Compound Tags" style="display:none">
+					{% for tag in tags %}
+						<option value="{{tag}}">{{tag}}</option>
+					{% endfor %}
+				</select>
+			</div>
 		</div>
 	</div>
-
-
-	<!--
-	<div class="span12">
-		<div class="pagination pagination-centered">
-		<ul>
-		{% if matches.has_previous %}
-			<li ><a href="?page={{matches.previous_page_number}}">Previous</a></li>
-		{% endif %}
-		{% for page in p.page_range %}
-		<li{% if matches.number == page %} class="active"{% endif %}><a href="?page={{page}}">{{page}}</a></li>
-		{% endfor %}
-		{% if matches.has_next%}
-			<li ><a href="?page={{matches.next_page_number}}">Next</a></li>
-		{% endif %}
-		</ul>
-		</div>
-	</div> 
-	-->
 </div><!--/row-->
 {% endblock %}
