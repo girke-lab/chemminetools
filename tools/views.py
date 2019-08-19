@@ -169,13 +169,23 @@ def view_job(
             f = open(job.output, 'r')
             csvinput = csv.reader(f, delimiter=' ')
             csvOutput = []
+            queryColumnEmpty=True
             for line in csvinput:
+                if line[0] != "":
+                    queryColumnEmpty =False
+                print("csv line: "+str(line))
                 csvOutput.append(line)
+            print("query column empty? "+str(queryColumnEmpty))
             f.close()
             allTags = Tag.allUserTagNames(request.user)
+            print("job input: "+str(job.input))
+            if queryColumnEmpty:
+                singleQuery = job.input
+            else:
+                singleQuery = None
             return render(request,'eiresult.html',
                     dict(title=str(job.application) + ' Results',
-                    job=job,tags=allTags, compounds=csvOutput, query=job.input))
+                    job=job,tags=allTags, compounds=csvOutput, singleQuery=singleQuery))
         if job.application.output_type == 'text/fp.search.result':
             f = open(job.output, 'r')
             csvinput = csv.reader(f, delimiter=' ')

@@ -2,20 +2,10 @@
 {% load cms_tags %}
 
 {% block js_content %}
-<!--selectize -->
-<link rel="stylesheet" href="/static/admin/selectize/css/selectize.bootstrap2.css" type="text/css">
-<script type="text/javascript" src="/static/admin/selectize/js/standalone/selectize.min.js"></script>
 
-
-<!-- DataTables -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/sl-1.3.0/datatables.min.css"/>
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.6/sl-1.3.0/datatables.min.js"></script>
-
-<!-- AlertifyJS -->
-<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/alertify.min.js"></script>
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/alertify.min.css"/>
-<!--<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/themes/bootstrap.min.css"/>-->
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/themes/default.min.css"/>
+{% include "selectize.html" %}
+{% include "dataTables.html" %}
+{% include "alertify.html" %}
 
 <style>
 	.spaceAfter {
@@ -47,12 +37,6 @@
 		table = $('.table').DataTable( {
 			dom: '<"row-fluid spaceAfter" Bi>frltip',
 			buttons: {
-				dom: {
-				    button: {
-					className: 'btn'
-				    },
-				},
-
 				buttons: ['selectAll','selectNone',
 					createTagAddRemoveButton("add"),
 					createTagAddRemoveButton("remove"),
@@ -218,7 +202,7 @@
 <div class="col-md-12">
 <p>&nbsp;
 {% if matches %}
-	<table class="table xxtable-striped" >
+	<table class="table table-sm" >
 	<thead>
 	<tr>
 	<th>CID</th>
@@ -237,7 +221,7 @@
 		<td style="display:none" class="compoundImage" id="{{compound.id}}">  </td>
 		<td>{{compound.formula}}</td>
 		<td>{%for tag in compound.tags.all %}
-			{{tag.name}}
+			{{tag.name}},
 		    {% endfor %}
 		</td>
 			

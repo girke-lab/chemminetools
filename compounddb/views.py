@@ -35,15 +35,9 @@ class compoundForm(ModelForm):
 @cache_page(60 * 120)
 @vary_on_cookie
 def render_image(request, filename,id=None,cid=None ):
-    compound = None
-    try:
-        if id is not None:
-            compound = Compound.objects.get(id__iexact=id, user=request.user)
-        elif cid is not None:
-            compound = Compound.objects.get(cid__iexact=cid, user=request.user)
 
-    except Compound.DoesNotExist:
-        raise Http404
+    compound = get_compound(request.user,id,cid)
+
     if compound.weight > 2000:
         raise Http404
     smiles = re.match(r"^(\S+)", compound.smiles).group(1)
@@ -76,20 +70,34 @@ def cid_lookup(request):
     else:
         raise Http404
 
+def get_compound(user,id=None,cid=None):
+    compound = None
+    try:
+        if id is not None:
+            compound = Compound.objects.get(id__iexact=id, user=user)
+        elif cid is not None:
+            compound = Compound.objects.get(cid__iexact=cid, user=user)
+
+    except Compound.DoesNotExist:
+        raise Http404
+    return compound
+
 
 @guest_allowed
 def compound_detail(
     request,
-    id,
     resource,
     filename,
+    id=None,
+    cid=None,
     ):
 
-    try:
-        compound = Compound.objects.get(id__iexact=id,
-                user=request.user)
-    except Compound.DoesNotExist:
-        raise Http404
+    compound = get_compound(request.user,id,cid)
+    #try:
+    #    compound = Compound.objects.get(id__iexact=id,
+    #            user=request.user)
+    #except Compound.DoesNotExist:
+    #    raise Http404
 
     if request.method == 'POST':
         form = compoundForm(request.POST)

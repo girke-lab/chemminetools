@@ -2,9 +2,8 @@
 {% load cms_tags %}
 
 {% block js_content %}
-<!--selectize -->
-<link rel="stylesheet" href="/static/admin/selectize/css/selectize.bootstrap2.css" type="text/css">
-<script type="text/javascript" src="/static/admin/selectize/js/standalone/selectize.min.js"></script>
+
+{% include "selectize.html" %}
 
 <script type="text/javascript">
 	var selectedCompounds = [];

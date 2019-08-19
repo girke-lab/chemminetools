@@ -2,6 +2,7 @@ $(document).ready(function() {
 	$("[data-toggle=popover]").popover({trigger: 'manual', html: true,});
 	var currentElementId = false;
 	$("[data-toggle=popover]").hover(function () {
+		console.log("hover popoer");
 		var cid = $(this).html();
 		var thisCompound = $(this);
 		currentElementId = thisCompound;

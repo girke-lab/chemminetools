@@ -2,13 +2,9 @@
 {% load cms_tags %}
 
 {% block js_content %}
-<!--selectize -->
-<link rel="stylesheet" href="/static/admin/selectize/css/selectize.bootstrap2.css" type="text/css">
-<script type="text/javascript" src="/static/admin/selectize/js/standalone/selectize.min.js"></script>
 
-<!-- AlertifyJS -->
-<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/alertify.min.js"></script>
-<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.4/build/css/alertify.min.css"/>
+{% include "selectize.html" %}
+{% include "alertify.html" %}
 
 <script type="text/javascript">
 var structures_loaded = false;
@@ -24,13 +20,23 @@ $(document).ready(function() {
 			var buf = $(this).text();
 			$(".compoundImageTitle").show();
 			$(".compoundImage").show();
-			$(".queryCompoundImage").show();
 			$(".compoundImage").each(function() {
-				$(this).html('<img width="100" class="img-rounded" src="https://www.ebi.ac.uk/chembl/api/data/image/'+$(this).attr('id') +'.svg"/>');
+				var id = $(this).attr('id');
+				$(this).html('<img width="100" class="img-rounded" src="https://www.ebi.ac.uk/chembl/api/data/image/'+id +'.svg"/>');
 			});
+
+			{% if not  singleQuery %}
+			$(".queryCompoundImageTitle").show();
+			$(".queryCompoundImage").show();
 			$(".queryCompoundImage").each(function() {
-				$(this).html('<img width="100" class="img-rounded" src="/compounds/cid/'+$(this).attr('id') +'/png"/>');
+				var id = $(this).attr('id');
+				console.log("id=",id);
+				if(id != null && id !== "" )
+					$(this).html('<img width="100" class="img-rounded" src="/compounds/cid/'+id +'/png"/>');
 			});
+			{% endif %}
+
+
 			structures_loaded = true;
 		} else {
 			$(this).html('Show Structures');
@@ -104,10 +110,12 @@ function sendToWorkbench(){
                 <th>Options</th>
                 <td>{{ job.options }}</td>
         </tr>
-      <!--  <tr>
+	{% if singleQuery %}
+        <tr>
                 <th>Query Structure</th>
-                <td><img width="200" src="/similarity/renderer/{{query}}"/></td>
-      </tr> -->
+                <td><img width="200" src="/similarity/renderer/{{singleQuery}}"/></td>
+        </tr>
+	{% endif %}
         </tbody>
         </table>
         </div>
@@ -120,13 +128,18 @@ function sendToWorkbench(){
     <h2>Hits</h2>
 
     Tag this set and save it to your workbench:
-    <select id="tags" name="tags" multiple placeholder="Compound Tags">
-	{% for tag in tags %}
-		<option value="{{tag}}">{{tag}}</option>
-	{% endfor %}
-    </select>
-    <button type="button" class="btn btn-outline-primary" onclick="sendToWorkbench()">Send to Workbench</button>
-    <br>
+    <div class="form-row mb-3">
+	    <div class="col-md-10">
+		    <select id="tags" name="tags" multiple placeholder="Compound Tags">
+			{% for tag in tags %}
+				<option value="{{tag}}">{{tag}}</option>
+			{% endfor %}
+		    </select>
+	    </div>
+	    <div class="cold-md-2">
+		    <button type="button" class="btn btn-outline-primary" onclick="sendToWorkbench()">Send to Workbench</button>
+	    </div>
+    </div>
   
 
     <div class="btn-group">
@@ -138,7 +151,7 @@ function sendToWorkbench(){
     <table class="table table-striped table-bordered compounds">
     <thead>
 	    <tr>
-		    <th style="display:none" class="compoundImageTitle">Query Structure</th>
+		    <th style="display:none" class="queryCompoundImageTitle">Query Structure</th>
 		    <th>Query</th>
 		    <th style="display:none" class="compoundImageTitle">Structure</th>
 		    <th>CID</th>

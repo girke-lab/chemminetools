@@ -6,16 +6,18 @@
 {% endblock %}
 
 {% block js_content %}
-<script type="text/javascript" src="/static/admin/jquery.dataTables.min.js"></script>
-<script type="text/javascript" src="/static/admin/dt_bootstrap/dataTables.bootstrap.js"></script>
-<script src="/static/admin/cidpopups.js"></script>
+{% include "dataTables.html" %}
+<!--<script src="/static/admin/cidpopups.js"></script>-->
 <script type="text/javascript">
 $(document).ready(function() {
-	$('#example').dataTable( {
-		"sDom": "<'row'<'col-md-6'l><'col-md-6'f>r>t<'row'<'col-md-6'i><'col-md-6'p>>",
-		"sScrollX": "100%",
-		"bScrollCollapse": true
-         } );
+	$('#data').dataTable( { } );
+ 	$('[data-toggle="popover"]').popover({
+			html:true,
+			trigger: "hover",
+			container:"body",
+			placement: "left",
+		});
+
 } );
 </script>
 
@@ -59,7 +61,7 @@ $(document).ready(function() {
 	<div class="col-md-12">
 
 	{% if csv %}
-	<table class="table table-condensed table-striped table-bordered col-md-12" id="example">
+	<table class="table table-sm table-striped " id="data">
 	{% for row in csv %}
 		{% if forloop.first %}
 			<thead>
@@ -70,7 +72,14 @@ $(document).ready(function() {
 		{% else %}
 			<tr>
 			{% for cell in row %}
-				<td>{% if forloop.first %}<a data-container="body" data-toggle="popover" data-placement="top" title="{{cell}}" data-content="" class="cidLink">{{cell}}</a>{% else %}{{cell}}{% endif %}</td>
+				<td>
+					{% if forloop.first %}
+						<a data-toggle="popover" title="{{cell}}" data-content="<img src='/compounds/cid/{{cell}}/png'></img>" href="/compounds/cid/{{cell}}/" >{{cell}}</a> 
+						<!--<a data-container="body" data-toggle="popover" data-placement="top" title="{{cell}}" data-content="" class="cidLink">{{cell}}</a>-->
+					{% else %}
+						{{cell}}
+					{% endif %}
+				</td>
 			{% endfor %}
 			</tr>
 			{% if forloop.last %}
