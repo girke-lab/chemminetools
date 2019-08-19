@@ -27,6 +27,13 @@ def get_chembl_sdfs(chemblIds):
            compound_structures ON(entity_id=molregno)
       WHERE chembl_id_lookup.chembl_id IN %s""",(chemblIds,))
     return [row[0] for row in data]
+def get_chembl_smiles(chemblIds):
+    data = runQuery("""
+      SELECT canonical_smiles||' '||chembl_id
+      FROM chembl_id_lookup JOIN
+           compound_structures ON(entity_id=molregno)
+      WHERE chembl_id_lookup.chembl_id IN %s""",(chemblIds,))
+    return [row[0] for row in data]
         
 def byActivity(chemblIds=None,accessionIds=None):
     if chemblIds is not None and accessionIds is None:

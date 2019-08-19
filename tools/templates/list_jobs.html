@@ -17,8 +17,7 @@
 		$('.fa-trash-alt').click(DeleteRow);
 		$("[data-toggle=tooltip]").tooltip();
 		oTable = $('#jobTable').dataTable( {
-			//"bSort": false,
-			//"sDom": "<'row'<'col-md-6'l><'col-md-6'f>r>t<'row'<'col-md-6'i><'col-md-6'p>>"
+			order: [[1,"desc"]],
 		} );
 	});
 

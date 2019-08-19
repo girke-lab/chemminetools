@@ -6,4 +6,5 @@ from .views import *
 from django.conf.urls import *
 
 urlpatterns = [url(r'^addCompounds/?(?P<resource>\w*)/?(?P<job_id>\d*)/?$', uploadCompound),
+               url(r'^download/(?P<outputFormat>(sdf|smi))$', downloadCompounds),
                url(r'^(?P<resource>\S*)$', showCompounds)]

@@ -87,6 +87,31 @@ function sendToWorkbench(){
 		});
 
 }
+
+function postData(url, fields,fieldName) {
+    var $form = $('<form>', {
+        action: url,
+        method: 'post'
+    });
+    jQuery( "{% csrf_token %}").appendTo($form);
+    $.each(fields, function(key, val) {
+         $('<input>').attr({
+             type: "hidden",
+             name: fieldName || key,
+             value: val
+         }).appendTo($form);
+    });
+
+    console.log("submitting...",$form);
+    $form.appendTo('body').submit();
+}
+function download(format){
+	var ids;
+	console.log("downloading");
+	ids = jQuery(".compound").map(function(){ return this.id;}).get();
+	console.log("ids: ",ids);
+	postData("/myCompounds/download/"+format,ids,"chembl_id");
+}
 		
 </script>
 {% endblock %}
@@ -143,8 +168,8 @@ function sendToWorkbench(){
   
 
     <div class="btn-group">
-    <a href="/eisearch/getStructures/{{job.id}}/sdf"><button type="button" class="btn btn-outline-secondary">Download SDF</button></a>
-    <a href="/eisearch/getStructures/{{job.id}}/smiles"><button type="button" class="btn btn-outline-secondary">Download SMILES</button></a>
+    <button type="button" class="btn btn-outline-secondary" onclick="download('sdf')">Download SDF</button>
+    <button type="button" class="btn btn-outline-secondary" onclick="download('smi')">Download SMILES</button>
     <button id="loadstructures" class="btn btn-outline-secondary">Show Structures</button>
     </div>
 

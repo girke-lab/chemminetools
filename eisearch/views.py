@@ -123,14 +123,14 @@ def getStructures(request, job_id, format):
         csvinput = csv.reader(f,delimiter=' ')
         #read each line, extrace the second column, and combine all values 
         #into a new-line separated string
-        targetIds = "\n".join([line[1] for line in csvinput])
+        targetIds = "\n".join([line[0] for line in csvinput])
         print("targetIds: "+str(targetIds))
         f.close()
         #result = '\n'.join(re.findall(r'^\S+', result, re.MULTILINE))
     except Job.DoesNotExist:
         print(traceback.format_exc())
         raise Http404
-    newJob = createJob(request.user, 'chemblID2SMILES', '', [], targetIds,
+    newJob = createJob(request.user, 'pubchemID2SDF', '', [], targetIds,
                        format, async=False) 
     if format == 'smiles':
         filename = 'search_result.smi'

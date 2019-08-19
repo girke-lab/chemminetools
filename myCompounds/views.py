@@ -29,7 +29,7 @@ from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
 from django.conf import settings
 from tools.runapp import createJob, updateJob
 from django.utils.http import urlquote
-from targetsearch.chembl_helpers import get_chembl_sdfs
+from targetsearch.chembl_helpers import get_chembl_sdfs,get_chembl_smiles
 
 
 
@@ -39,7 +39,6 @@ def showCompounds(request, resource):
 
     # perform query for existing myCompounds
 
-    allTags = Tag.allUserTagNames(request.user)
 
     #(page, matches) = getMyCompounds(request)
     matches = Compound.objects.filter(user=request.user)
@@ -60,7 +59,68 @@ def showCompounds(request, resource):
         for match in matches:
             match.smiles = re.match(r"^(\S+)", match.smiles).group(1)
             match.smiles = urlquote(match.smiles)
+    allTags = Tag.allUserTagNames(request.user)
     return render(request,'showCompounds.html', dict(matches=matches,tags=allTags))
+
+@guest_allowed
+def downloadCompounds(request, outputFormat):
+    params = None
+    compounds = None
+    if request.method == "GET":
+        params = request.GET
+    elif request.method == "POST":
+        params = request.POST
+    else:
+        return HttpResponse("dowload only supported via GET or POST",status=501)
+        
+    if 'chembl_id' in params: #tested
+        cids = params.getlist('chembl_id')
+        try:
+            if outputFormat == "sdf":
+                sdfs = get_chembl_sdfs(tuple(cids))
+                sdf = "\n$$$$\n".join(sdfs)+"\n$$$$\n"
+                return fileDownloadResponse(sdf,"chembl.sdf")
+            elif outputFormat == "smi":
+                smiles = get_chembl_smiles(tuple(cids))
+                data = "\n".join(smiles)+"\n"
+                return fileDownloadResponse(data,"chembl.smi")
+        except:
+            print("Unexpected error:", sys.exc_info())
+            traceback.print_tb(sys.exc_info()[2])
+            return HttpResponse("Failed to fetch ChEMBL compounds",status=500)
+    elif 'cid' in params or 'tag' in params: # NOT YET TESTED
+        if 'cid' in params:
+            cids = params.getlist('cid')
+            compounds=Compound.objects.filter(user=request.user, cid__in=cids)
+        else:
+            tagNames= params.getlist('tag')
+            tags = Tag.objects.filter(user=request.user, name__in=tagNames)
+            compounds=Compound.objects.filter(user=request.user, tags__in=tags)
+
+        if outputFormat == "sdf":
+            sdf ="\n".join( 
+                    [ compound.sdffile_set.all()[0].sdffile.rstrip() for compound in compounds])+"\n"
+            return fileDownloadResponse(sdf,"download.sdf")
+        elif outputFormat == "smi":
+            smiles ="\n".join( 
+                    [ compound.smiles.rstrip() for compound in compounds])+"\n"
+            return fileDownloadResponse(smiles,"download.smi")
+    elif 'pubchem_id' in params: # NOT YET TESTED
+        cids = params.getlist('pubchem_id')
+        job = createJob(request.user,'pubchemID2SDF','',[],cids,outputFormat,async=False)
+        return redirect(tools.views.view_job,job_id=job.id,resource="other",filename="download."+outputFormat)
+    else:
+        return HttpResponse("unknown search paramaters",status=400)
+    
+
+def fileDownloadResponse(content,filename):
+    response = HttpResponse(content,content_type="application/force-download")
+    response["Content-Disposition"]="attachement; filename=\""+filename+"\""
+    return response
+
+
+   
+
 
 @guest_allowed
 def uploadCompound(request, resource = None, job_id = None):

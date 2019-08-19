@@ -51,7 +51,7 @@
 
 	});
 	function setCompoundCount(tags){
-		if(tags != null && tags != [])
+		if(tags != null && tags.length !== 0)
 			$.get("/compounds/withTags/"+tags.join(",")+"/count").
 				then(function(result){
 					$("#compound_count").html(result);
