@@ -210,7 +210,7 @@ INSTALLED_APPS = (
     'tools',
     'similarity',
     'ChemmineR',
-    'eisearch',
+    'structure_search',
     'pubchem_rest_interface',
     'django_cron',
     'filer',

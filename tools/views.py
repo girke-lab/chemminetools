@@ -173,9 +173,9 @@ def view_job(
             for line in csvinput:
                 if line[0] != "":
                     queryColumnEmpty =False
-                print("csv line: "+str(line))
+                #print("csv line: "+str(line))
                 csvOutput.append(line)
-            print("query column empty? "+str(queryColumnEmpty))
+            #print("query column empty? "+str(queryColumnEmpty))
             f.close()
             allTags = Tag.allUserTagNames(request.user)
             print("job input: "+str(job.input))
@@ -183,19 +183,35 @@ def view_job(
                 singleQuery = job.input
             else:
                 singleQuery = None
-            return render(request,'eiresult.html',
+            return render(request,'structure_search_result.html',
                     dict(title=str(job.application) + ' Results',
-                    job=job,tags=allTags, compounds=csvOutput, singleQuery=singleQuery))
+                    job=job,tags=allTags, compounds=csvOutput, 
+                    singleQuery=singleQuery,resultType="ei"))
         if job.application.output_type == 'text/fp.search.result':
             f = open(job.output, 'r')
             csvinput = csv.reader(f, delimiter=' ')
             csvOutput = []
+            queryColumnEmpty=True
             for line in csvinput:
+                if line[0] != "":
+                    queryColumnEmpty =False
+                print("csv line: "+str(line))
                 csvOutput.append(line)
+            print("query column empty? "+str(queryColumnEmpty))
             f.close()
-            return render(request,'fpresult.html',
+
+            allTags = Tag.allUserTagNames(request.user)
+
+            if queryColumnEmpty:
+                singleQuery = job.input
+            else:
+                singleQuery = None
+
+            return render(request,'structure_search_result.html',
                     dict(title=str(job.application) + ' Results',
-                    job=job, compounds=csvOutput, query=job.input))
+                    job=job, compounds=csvOutput, 
+                    singleQuery=singleQuery,tags=allTags,
+                    resultType="fp"))
         elif job.application.output_type == 'text/sdf.upload':
             f = open(job.output, 'r')
             message = f.read()

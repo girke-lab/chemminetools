@@ -14,10 +14,10 @@ from django.utils.http import urlunquote, urlquote
 from tools.models import Application, Job
 from tools.runapp import updateJob, createJob, getAppForm, parseToolForm
 import tools
-import eisearch
+import structure_search 
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
-from eisearch import first_mol
+from structure_search import first_mol
 import traceback
 from compounddb.models import Compound, SDFFile,Tag
 import csv
@@ -100,7 +100,7 @@ def search(request):
             messages.error(request, "Invalid form options!")
         if not sdf:
             print("no sdf found")
-            return redirect(eisearch.views.search)
+            return redirect(structure_search.views.search)
         smiles = re.search(r'(\S+)', smiles).group(1)
         smiles = urlquote(smiles)
         if request.POST['algorithm'] == u'fp':

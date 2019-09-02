@@ -24,7 +24,7 @@ import os
 import tempfile
 from django.views.decorators.cache import cache_page
 from simplejson import dumps,loads
-from similarityworkbench import funcs
+from similarity import funcs
 
 @guest_allowed
 def showCompoundGrid(request ):

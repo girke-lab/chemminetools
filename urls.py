@@ -16,13 +16,14 @@ admin.autodiscover()
 print('\n before urls in general')
 urlpatterns =[
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^eisearch/', include('eisearch.urls')),
+    url(r'^eisearch/', include('structure_search.urls')),
+    url(r'^structure_search/', include('structure_search.urls')),
     url(r'^accounts/', include('userena.urls')),
     url(r'^compounds/', include('compounddb.urls')),
     url(r'^my[Cc]ompounds/', include('myCompounds.urls')),
     url(r'^tools/', include('tools.urls')),
     url(r'^drugbank/', include('drugbank.urls')),
-    url(r'^search/?',  RedirectView.as_view(url='/eisearch/query/')), 
+    url(r'^search/?',  RedirectView.as_view(url='/structure_search/query/')), 
     url(r'^similarity/', include('similarity.urls')),
     url(r'^ChemmineR/', include('ChemmineR.urls')),
     url(r'^robots\.txt/?$', TemplateView.as_view(template_name='robots.txt')),
