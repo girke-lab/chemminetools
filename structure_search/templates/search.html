@@ -83,6 +83,16 @@
                         jQuery("#smiles").get(0).value = sample_smi;
                         return false;
                 });
+		$("#id_application").change(function(event){
+			var value = event.target.value;
+			jQuery.get(".?application_id="+value).
+				then(function(result){
+					$(".form_container").html(result);
+					$("#options").show();
+				});	
+
+
+		});
         });
 
         $("#drawform").submit(function() {
@@ -107,8 +117,9 @@
 <p>Search is performed against the <a href="http://pubchem.ncbi.nlm.nih.gov">PubChem Compound Database</a> or the ChEMBL database, using one of two algorithm and database options:
 <ul>
 	<li>
-		<b>Fingerprint algorithm:</b> Searches a "cleaned up" version of the PubChem Compound database (excluding some very similar compounds and some salts) by connecting to the PubChem web interface using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.
-	</li>
+		<b>Fingerprint algorithm (PubChem):</b> Searches a "cleaned up" version of the PubChem Compound database (excluding some very similar compounds and some salts) by connecting to the PubChem web interface using the <a href="http://pubchem.ncbi.nlm.nih.gov/help.html#fingerprints">PubChem Fingerprint similarity</a> measure.
+		<b>Fingerprint algorithm (ChEMBL):</b> Searches the ChEMBL database.
+
 	<li>
 		<b>EI algorithm:</b> Searches the ChEMBL Compound database using the EI Search algorithm (<a href="http://bioinformatics.oxfordjournals.org/content/26/7/953.abstract">Cao et. al. 2010</a>) with an <a href="/help/#theory">atom pair (AP) similarity</a> measure.
 	</li>
@@ -118,6 +129,21 @@
 </div><!--/row-->
 
 <div class="row">
+<div class="col-md-12">
+	{{appsForm.as_p}}
+	<!--
+	Algorithm and database:
+	<select name="algorithm" id="algorithm">
+	    <option value="fp">Fingerprint algorithm (PubChem)</option>
+	    <option value="fp-chembl">Fingerprint algorithm (ChEMBL)</option>
+            <option value="ei">EI algorithm (ChEMBL)</option>
+        </select>
+	-->
+
+</div>
+</div>
+
+<div class="row" style="display:none" id="options">
 <div class="col-md-12">
 
 <ul class="nav nav-tabs">
@@ -144,18 +170,9 @@
 		{% endfor %}
 	</select>
 
+    <div class="form_container"></div>
     <table>
-        {{form}}
-        <tr><td>
-		Algorithm and database:
-        </td><td>
-            <select name="algorithm" id="algorithm">
-	    <option value="fp">Fingerprint algorithm (PubChem)</option>
-            <option value="ei">EI algorithm (ChEMBL)</option>
-            </select>
-        </td></tr>
-        <tr><th>
-        </th><td>
+        <tr> <td>
                 <div class="btn-group">
                     <button class="btn btn-primary" type="submit">Search</button>
                 </div>
@@ -172,17 +189,8 @@
 	<label class="control-label" for="smiles">SMILES:</label>
 	<input id="smiles" type="text" name="smiles" class="field col-md-12" value="{{smi}}"/>
 
+	<div class="form_container"></div>
 	<table>
-		{{form}}
-		<tr>
-			<th>Algorithm and database:</th>
-			<td>
-				<select name="algorithm" id="algorithm">
-				<option value="fp">Fingerprint algorithm (PubChem)</option>
-				<option value="ei">EI algorithm (ChEMBL)</option>
-				</select>
-			</td>
-		</tr>
 		<tr>
 			<td colspan="2">
 				<div>
@@ -204,17 +212,8 @@
 		<input type="hidden" name="sdf" value="{{post_data.sdf}}"/><br/>
 		<input type="hidden" name="draw" value="1"/>
 
+		<div class="form_container"></div>
 		<table>
-			{{form}}
-			<tr>
-				<th>Algorithm and database:</th>
-				<td>
-					<select name="algorithm" id="algorithm">
-					<option value="fp">Fingerprint algorithm (PubChem)</option>
-					<option value="ei">EI algorithm (ChEMBL)</option>
-					</select>
-				</td>
-			</tr>
 			<tr>
 				<td colspan="2">
 					<button class="btn btn-primary" type="submit">Search</button>
@@ -231,17 +230,8 @@
 		<label class="control-label" for="sdf_box">SDF Content:</label>
 		<textarea id="sdf_box" name="sdf" class="field col-md-12" rows="12"></textarea><br/>
 
+		<div class="form_container"></div>
 		<table>
-			{{form}}
-			<tr>
-				<th>Algorithm and database:</th>
-				<td>
-					<select name="algorithm" id="algorithm">
-					<option value="fp">Fingerprint algorithm (PubChem)</option>
-					<option value="ei">EI algorithm (ChEMBL)</option>
-					</select>
-				</td>
-			</tr>
 			<tr>
 				<td colspan="2">
 					<button class="btn btn-primary" type="submit">Search</button>
@@ -265,15 +255,7 @@
 				<th><label for="sdf_file">SDF File:</label></th>
 				<td><input id="sdf_file" name="sdf" class="form-control-file" type="file"/></td>
 			</tr>
-			{{form}}
-			<tr>
-				<th>Algorithm and database:</th>
-				<td>
-					<select name="algorithm" id="algorithm">
-					<option value="fp">Fingerprint algorithm (PubChem)</option>
-					<option value="ei">EI algorithm (ChEMBL)</option>
-					</select>
-				</td>
+			<tr class="form_container">
 			</tr>
 			<tr>
 				<td colspan="2">

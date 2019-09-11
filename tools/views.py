@@ -78,10 +78,8 @@ def launch_job(request, category=None):
         if category:
             fromWorkbench = False
             try:
-                category = \
-                    ApplicationCategories.objects.get(name=category)
-                compoundCount = \
-                    Compound.objects.filter(user=request.user).count()
+                category = ApplicationCategories.objects.get(name=category)
+                compoundCount = Compound.objects.filter(user=request.user).count()
                 if category.name != 'Upload':
                     fromWorkbench = True
                 if category.name == 'Clustering' and compoundCount < 3:

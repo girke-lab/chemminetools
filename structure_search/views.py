@@ -11,7 +11,7 @@ from django.contrib import messages
 from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
 from django.utils.http import urlunquote, urlquote
-from tools.models import Application, Job
+from tools.models import Application, Job, ApplicationCategories
 from tools.runapp import updateJob, createJob, getAppForm, parseToolForm
 import tools
 import structure_search 
@@ -23,24 +23,50 @@ from compounddb.models import Compound, SDFFile,Tag
 import csv
 import functools
 
+from django.forms import Form,  ModelChoiceField
+
 @guest_allowed
 def search(request):
-    application = Application.objects.get(name='EI Search')
-    AppFormSet = getAppForm(application.id, request.user)
-    if request.method != 'POST':
+    #application = Application.objects.get(name='EI Search')
+    #AppFormSet = getAppForm(application.id, request.user)
+
+    if request.is_ajax():
+        print("got ajax request ")
+        if 'application_id' in request.GET:
+            form = getAppForm(request.GET['application_id'], request.user)()
+            return HttpResponse(str(form))
+        else:
+            return HttpResponse("",status_code=404)
+    elif request.method != 'POST':
         smi = ''
         if 'smi' in request.GET:
             smi = str(request.GET['smi'])
             smi = urlunquote(smi)
-        form = AppFormSet()
         allTags = Tag.allUserTagNames(request.user)
+
+
+        fields = {}
+        category = ApplicationCategories.objects.get(name="Search")
+        apps = Application.objects.filter(category=category).exclude(name__exact="pubchemID2SDF")
+        fields['application'] = ModelChoiceField(queryset=apps, empty_label='')
+        form = type('%sForm' % 'choose application', (Form, ), fields)
+
+
         return render(request,'search.html', dict(mode='form',
-            smi=smi, form=form,
-            tags=allTags))
+            smi=smi, appsForm=form, tags=allTags))
     else:
         sdf = None
         smiles = None
         compid = u'query'
+        form = None
+        application = None
+        application_id = None
+
+        if 'application' in request.POST:
+            application_id = request.POST['application']
+            application = Application.objects.get(id= application_id)
+
+
         if 'tags' in request.POST:
             givenTags = request.POST.getlist("tags")
             compoundList = Compound.byTagNames(givenTags,request.user)
@@ -92,8 +118,12 @@ def search(request):
                     print(traceback.format_exc())
                     messages.error(request, 'Invalid input SDF!')
                     sdf = None
-        form = AppFormSet(request.POST)
-        if form.is_valid():
+
+        if application_id != None:
+            AppFormSet = getAppForm(request.POST['application'], request.user)
+            form = AppFormSet(request.POST)
+
+        if form != None and form.is_valid():
             commandOptions, optionsList = parseToolForm(form) 
         else:
             sdf = None
@@ -103,12 +133,20 @@ def search(request):
             return redirect(structure_search.views.search)
         smiles = re.search(r'(\S+)', smiles).group(1)
         smiles = urlquote(smiles)
-        if request.POST['algorithm'] == u'fp':
-            newJob = createJob(request.user, 'Fingerprint Search', optionsList, 
-                               commandOptions, sdf, smiles)
-        else:
-            newJob = createJob(request.user, 'EI Search', optionsList, 
-                               commandOptions, sdf, smiles)
+
+
+        #print("command options: "+str(commandOptions))
+
+        #if algorithm == u'fp':
+        if application.name == "PubChem Fingerprint Search":
+            newJob = createJob(request.user, application.name, optionsList, commandOptions, sdf, smiles)
+        #elif algorithm == "fp-chembl" :
+        elif application.name == "ChEMBL Fingerprint Search":
+            newJob = createJob(request.user, application.name, optionsList, commandOptions, sdf, smiles)
+        #elif algorithm == "ei":
+        elif application.name == "EI Search":
+            newJob = createJob(request.user, application.name, optionsList, commandOptions, sdf, smiles)
+
         time.sleep(1)
         return redirect(tools.views.view_job, job_id=newJob.id,resource='')
 
