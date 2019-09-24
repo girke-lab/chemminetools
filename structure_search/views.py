@@ -27,11 +27,7 @@ from django.forms import Form,  ModelChoiceField
 
 @guest_allowed
 def search(request):
-    #application = Application.objects.get(name='EI Search')
-    #AppFormSet = getAppForm(application.id, request.user)
-
     if request.is_ajax():
-        print("got ajax request ")
         if 'application_id' in request.GET:
             form = getAppForm(request.GET['application_id'], request.user)()
             return HttpResponse(str(form))

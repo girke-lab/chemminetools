@@ -147,8 +147,8 @@
 <div class="col-md-12">
 
 <ul class="nav nav-tabs">
-	<li class="nav-item"><a class="nav-link active" href="#workbench-input" data-toggle="tab">Workbench</a></li>
-	<li class="nav-item"><a class="nav-link" href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
+	<li class="nav-item"><a class="nav-link {% if smi == '' %} active {%endif%}" href="#workbench-input" data-toggle="tab">Workbench</a></li>
+	<li class="nav-item"><a class="nav-link {% if smi != '' %} active {%endif%}" href="#smiles-input" data-toggle="tab">SMILES Input</a></li>
 	<li class="nav-item"><a class="nav-link" href="#draw" data-toggle="tab">Structural Drawing</a></li>
 	<li class="nav-item"><a class="nav-link" href="#sdf-input" data-toggle="tab">SDF Input</a></li>
 	<li class="nav-item"><a class="nav-link" href="#sdf-upload" data-toggle="tab">SDF Upload</a></li>
@@ -156,7 +156,7 @@
 
 <div class="tab-content">
 
-<div class="tab-pane active" id="workbench-input">
+<div class="tab-pane {% if smi == '' %} active {%endif%}" id="workbench-input">
 <form action="." method="post" accept-charset="utf-8">
 {% csrf_token %}
 
@@ -183,7 +183,7 @@
 </div>
 
 
-<div class="tab-pane " id="smiles-input">
+<div class="tab-pane {% if smi != '' %} active {%endif%}" id="smiles-input">
 <form action="." method="post" accept-charset="utf-8">
 {% csrf_token %}
 	<label class="control-label" for="smiles">SMILES:</label>
