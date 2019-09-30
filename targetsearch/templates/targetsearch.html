@@ -5,16 +5,16 @@
 
 {% block base_content %}
 	<div class="row-fluid">
-	<div class="span12">
+	<div class="col-md-12">
 	{% if message %}
 	<span style="color: red">{{message}}</span>
 	{% endif %}
 
 	<ul class="nav nav-tabs">
-	  <li class=" nav-item ">
+	  <li class="nav-item">
 		  <a class="nav-link  {% if search_type == "compound" %} active {% endif %}" href="#compound_search" data-toggle="tab">Search By Compound</a>
 	  </li>
-	  <li class=" nav-item  ">
+	  <li class="nav-item">
 		  <a class="nav-link {% if search_type == "target" %} active {% endif %}" href="#target_search" data-toggle="tab">Search By Target</a>
 	  </li>
 	</ul>
@@ -22,7 +22,7 @@
 	<div class="tab-content" style="overflow:visible">
 		<div class="tab-pane{% if search_type == "compound" %} active{% endif %}" id="compound_search">
 			<div class="row-fluid">
-				<div class="span12">
+				<div class="col-md-12">
 					<form method="GET">
 						<div class="form-group mt-3">
 							<label for="source_id">Database:</label>
@@ -60,7 +60,7 @@
 		</div> <!-- ent tab-pane -->
 			<div class="tab-pane{% if search_type == "target" %} active{% endif %}" id="target_search">
 			<div class="row-fluid">
-				<div class="span12">
+				<div class="col-md-12">
 					<form method="GET">
 						<div class="form-group mt-3">
 							<input type="checkbox" name="include_activity"> &nbsp;Include Activity Results (slow)</input>
@@ -85,7 +85,7 @@
 	</div>
 	{% if query_submit %}
 	<div class="row-fluid">
-	<div class="span12" >
+	<div class="col-md-12">
 	<!--<h3>Matching Target Accession IDs ({{ chembl_id }}):</h3>-->
 	<h4>By Annotation</h4>
 	<table class="table table-striped result-table" style="display:none">

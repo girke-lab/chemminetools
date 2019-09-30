@@ -7,6 +7,8 @@ from django.contrib import messages
 from .chembl_helpers import (
     byActivity,
     byAnnotations,
+    AnnotationSearch,
+    ActivitySearch,
     mapToChembl
     )
 
@@ -89,12 +91,22 @@ def readSources():
     return sources
 
 def bs4test(request):
-    messages.debug(request, 'This is a test debug message')
-    messages.info(request, 'This is a test info message')
-    messages.info(request, 'This is another test info message')
-    messages.success(request, 'This is a test success message')
-    messages.warning(request, 'This is a test warning message')
-    messages.error(request, 'This is a test error message')
-    return render(request, 'targetsearch/bs4test.html')
+    if 'id_type' in request.GET:
+        id_type = request.GET['id_type']
+    if 'ids' in request.GET:
+        ids = list(request.GET['ids'].split())
+    
+    context = {
+        'annotation_column_names': [ c.name for c in AnnotationSearch.sql_cols_list ],
+        'annotation_column_desc' : [ c.desc for c in AnnotationSearch.sql_cols_list ],
+        'annotation_column_visible' : [ c.visible for c in AnnotationSearch.sql_cols_list ],
+        'annotation_matches': AnnotationSearch.search(id_type, ids),
+        'activity_column_names': [ c.name for c in ActivitySearch.sql_cols_list ],
+        'activity_column_desc': [ c.desc for c in ActivitySearch.sql_cols_list ],
+        'activity_column_visible': [ c.visible for c in ActivitySearch.sql_cols_list ],
+        'activity_matches': ActivitySearch.search(id_type, ids),
+        }
+    
+    return render(request, 'targetsearch/bs4test.html', context)
 
 
