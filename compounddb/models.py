@@ -3,7 +3,7 @@
 
 from builtins import object
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,AnonymousUser
 
 
 class Tag(models.Model):
@@ -16,6 +16,8 @@ class Tag(models.Model):
     #        models.UniqueConstraint(fields= ['name','user']) ]
 
     def allUserTagNames(user):
+        if user.id == None:  # user is AnonymousUser
+            return set()
         return {tag.name for tag in Tag.objects.filter(user = user)}
 
     def ensureAllExist(tagNames,user):
