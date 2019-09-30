@@ -133,14 +133,11 @@ def search(request):
 
         #print("command options: "+str(commandOptions))
 
-        #if algorithm == u'fp':
         if application.name == "PubChem Fingerprint Search":
             newJob = createJob(request.user, application.name, optionsList, commandOptions, sdf, smiles)
-        #elif algorithm == "fp-chembl" :
         elif application.name == "ChEMBL Fingerprint Search":
             newJob = createJob(request.user, application.name, optionsList, commandOptions, sdf, smiles)
-        #elif algorithm == "ei":
-        elif application.name == "EI Search":
+        elif application.name == "ChEMBL EI Search":
             newJob = createJob(request.user, application.name, optionsList, commandOptions, sdf, smiles)
 
         time.sleep(1)

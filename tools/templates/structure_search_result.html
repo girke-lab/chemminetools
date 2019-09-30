@@ -195,7 +195,6 @@ function download(format){
 		    {% if resultType == "ei" %}
 			    <th>Similarity</th>
 		    {% endif %}
-		    <th>More Info</th>
 	    <tr>
     </thead>
     <tbody>
@@ -203,15 +202,15 @@ function download(format){
         <tr class="compound" id="{{compound.1}}">
             <td style="display:none" class="queryCompoundImage" id="{{compound.0}}">  </td>
             <td>{{compound.0}}</td>
+
             <td style="display:none" class="compoundImage" id="{{compound.1}}">  </td>
-            <td>{{compound.1}}</td>
 	    {% if resultType == "ei" %}
-		    <td>{{compound.2|floatformat:"2"}}</td>
+		    <td><a href="https://www.ebi.ac.uk/chembl/compound_report_card/{{compound.1}}">{{compound.1}}</a></td>
+	    {% else %}
+		    <td><a href="http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid={{compound.1}}">{{compound.1}}</a></td>
 	    {% endif %}
 	    {% if resultType == "ei" %}
-		    <td><a href="https://www.ebi.ac.uk/chembl/compound_report_card/{{compound.1}}">ChEMBL Link</a></td>
-	    {% else %}
-		    <td><a href="http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid={{compound.1}}">PubChem Link</a></td>
+		    <td>{{compound.2|floatformat:"2"}}</td>
 	    {% endif %}
         </tr>
     {% endfor %}

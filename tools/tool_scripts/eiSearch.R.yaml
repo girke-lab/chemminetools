@@ -2,7 +2,7 @@
 ---
 # this description registers a ChemmineTools app in the database
 # load with command: loader -i thisfile.yaml
-name: EI Search 
+name: ChEMBL EI Search 
 category: Search 
 script: eiSearch.R
 input_type: chemical/x-mdl-sdfile
