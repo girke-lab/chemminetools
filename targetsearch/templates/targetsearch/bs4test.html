@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<title>Bootstrap 4 Test</title>
+<!-- load bootstrap4 -->
+{% load bootstrap4 %}
+<!-- end load bootstrap4 -->
+
+<!-- bootstrap_css -->
+<!-- {% bootstrap_css %} -->
+	<link href="/static/admin/bootstrap-4.3.1-dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/static/admin/fontawesome-free-5.9.0-web/css/all.css" rel="stylesheet">
+<!-- end bootstrap_css -->
+
+<!-- bootstrap_javascript -->
+<!-- {% bootstrap_javascript jquery='full' %} -->
+<!-- end bootstrap_javascript -->
+
+	<style>
+		img.autosize {
+			max-width: 100%;
+		}
+		
+		a.toggle-vis {
+			color: blue !important;
+			cursor: pointer;
+		}
+	</style>
+</head>
+
+<body>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			<h4>By Annotation</h4>
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalAnnotation">Show/Hide Columns</button>
+			<table class="table table-striped" id="annotation-table">
+				<thead>
+					<tr>
+						{% for c in annotation_column_names %}
+						<th>{{c}}</th>
+						{% endfor %}
+					</tr>
+				</thead>
+				<tbody>
+					{% for match in annotation_matches %}
+					<tr>
+						{% for c in annotation_column_names %}
+							<td>{{ match|dict_lookup:c }}</td>
+						{% endfor %}
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-md-12">
+			<h4>By Activity</h4>
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalActivity">Show/Hide Columns</button>
+			<table class="table table-striped" id="activity-table">
+				<thead>
+					<tr>
+						{% for c in activity_column_names %}
+						<th>{{c}}</th>
+						{% endfor %}
+					</tr>
+				</thead>
+				<tbody>
+					{% for match in activity_matches %}
+					<tr>
+						{% for c in activity_column_names %}
+							<td>{{ match|dict_lookup:c }}</td>
+						{% endfor %}
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div> <!-- container-fluid -->
+
+<!-- Column select modal windows -->
+<div class="modal fade" id="columnSelectModalAnnotation" tabindex="-1" role="dialog" aria-labelledBy="csmAnnotationTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="csmAnnotationTitle">Column Select - Annotation</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<button type="button" class="btn btn-primary" id="btn-annotation-select-all">Select All</button>
+				<button type="button" class="btn btn-primary" id="btn-annotation-deselect-all">Deselect All</button>
+				<button type="button" class="btn btn-primary" id="btn-annotation-defaults">Restore Defaults</button>
+				<fieldset>
+					{% for c in annotation_column_names %}
+					<div>
+						<input type="checkbox" class="toggle-vis chkbox-annotation" name="annotation-column" id="{{c}}" value="{{forloop.counter0}}" checked>
+						<label for="{{c}}" data-toggle="tooltip" data-placement="top" title="DERP">{{c}}</label>
+					</div>
+					{% endfor %}
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="columnSelectModalActivity" tabindex="-1" role="dialog" aria-labelledBy="csmActivityTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="csmActivityTitle">Column Select - Activity</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<button type="button" class="btn btn-primary" id="btn-activity-select-all">Select All</button>
+				<button type="button" class="btn btn-primary" id="btn-activity-deselect-all">Deselect All</button>
+				<button type="button" class="btn btn-primary" id="btn-activity-defaults">Restore Defaults</button>
+				<fieldset>
+					{% for c in activity_column_names %}
+					<div>
+						<input type="checkbox" class="toggle-vis chkbox-activity" name="activity-column" id="{{c}}" value="{{forloop.counter0}}" checked>
+						<label for="{{c}}">{{c}}</label>
+					</div>
+					{% endfor %}
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script src="/static/admin/jquery-3.4.1.min.js"></script>
+<script src="/static/admin/popper-1.15.0.min.js"></script>
+<script src="/static/admin/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+{% include "dataTables.html" %}
+<script type="text/javascript">
+	function selectAll(table_obj, chkbox_class, is_visible) {
+		table_obj.columns().visible(is_visible);
+		$(chkbox_class).prop('checked', is_visible);
+	}
+	
+	function selectDefaults(table_obj, chkbox_class, default_cols) {
+		table_obj.columns().visible(false);
+		table_obj.columns(default_cols).visible(true);
+	}
+	
+	$(document).ready(function() {
+		var annotation_table = $('#annotation-table').DataTable({
+			dom: 'Bfrltip',
+			buttons: ['csv'],
+		});
+		
+		var activity_table = $('#activity-table').DataTable({
+			dom: 'Bfrltip',
+			buttons: ['csv'],
+		});
+		
+		$('input.toggle-vis').on('change', function(e) {
+			if ( $(this).attr('name') == 'annotation-column' ) {
+				var column = annotation_table.column( $(this).attr('value') );
+			} else if ( $(this).attr('name') == 'activity-column' ) {
+				var column = activity_table.column( $(this).attr('value') );
+			}
+			column.visible( $(this).prop('checked') );
+		});
+		
+		$('#btn-annotation-select-all').on('click', function(e) {
+			selectAll(annotation_table, '.chkbox-annotation', true);
+		});
+		
+		$('#btn-annotation-deselect-all').on('click', function(e) {
+			selectAll(annotation_table, '.chkbox-annotation', false);
+		});
+		
+		$('#btn-annotation-defaults').on('click', function(e) {
+			//annotation_table.columns().visible(false);
+			//annotation_table.columns({{ annotation_column_defaults }}).visible(true);
+			selectDefaults(annotation_table, '.chkbox-annotation', {{ annotation_column_defaults }});
+		});
+		
+		$('#btn-activity-select-all').on('click', function(e) {
+			selectAll(activity_table, '.chkbox-activity', true);
+		});
+		
+		$('#btn-activity-deselect-all').on('click', function(e) {
+			selectAll(activity_table, '.chkbox-activity', false);
+		});
+		
+		$('#btn-activity-defaults').on('click', function(e) {
+			//activity_table.columns().visible(false);
+			//activity_table.columns({{ activity_column_defaults }}).visible(true);
+			selectDefaults(activity_table, '.chkbox-activity', {{ activity_column_defaults }});
+		});
+	});
+</script>
+</body>
+
+</html>
