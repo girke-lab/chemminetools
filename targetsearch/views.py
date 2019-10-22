@@ -152,7 +152,8 @@ def newTS(request):
     
     # Generate content
     try:
-        if source_id != '1': # Skip conversion if not ChEMBL
+        # Only attempt conversion for compound search. Skip if already ChEMBL.
+        if id_type == 'compound' and source_id != '1':
             ids = list(mapToChembl(ids, source_id))
         
         if len(ids) != 0:
