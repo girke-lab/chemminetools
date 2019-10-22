@@ -129,11 +129,13 @@ def newTS(request):
     activity_list = None
     activity_matches = None
     allTags = Tag.allUserTagNames(request.user)
+    sourceDbs = readSources()
     
     # Default GET request variables
     id_type = 'compound'
     ids = list()
     include_activity = False
+    source_id = 1
     
     # Retrieve GET request variables
     if 'id_type' in request.GET:
@@ -145,12 +147,17 @@ def newTS(request):
     if 'tags' in request.GET:
         for c in [compound.cid for compound in Compound.byTagNames(request.GET.getlist("tags"),request.user)]:
             ids.append(c)
+    if 'source_id' in request.GET:
+        source_id = request.GET['source_id']
     
     # Generate content
-    if len(ids) != 0:
-        query_submit = True
+    try:
+        if source_id != '1': # Skip conversion if not ChEMBL
+            ids = list(mapToChembl(ids, source_id))
         
-        try:
+        if len(ids) != 0:
+            query_submit = True
+            
             annotation_list = AnnotationWithMeshSearch.annotation_list
             annotation_matches = AnnotationWithMeshSearch.search(id_type, ids)
             activity_list = ActivitySearch.activity_list
@@ -160,8 +167,8 @@ def newTS(request):
                 activity_matches = None
             else:
                 activity_matches = ActivitySearch.search(id_type, ids)
-        except Exception as e:
-            message = str(e)
+    except Exception as e:
+        message = str(e)
     
     context = {
         'query_submit' : query_submit,
@@ -172,6 +179,7 @@ def newTS(request):
         'activity_list' : activity_list,
         'activity_matches' : activity_matches,
         'tags' : allTags,
+        'sources' : sourceDbs,
         }
     
     return render(request, 'targetsearch/new_ts.html', context)

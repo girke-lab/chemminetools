@@ -283,7 +283,7 @@ class AnnotationWithMeshSearch:
                             'sql': "string_agg(mesh_id||':'||mesh_heading,',')",
                             'name': 'MeSH Indication',
                             'desc': "Aggregated list of MeSH identifiers and heading terms",
-                            'visible': True,
+                            'visible': False,
                             'url': None,
                             })
     

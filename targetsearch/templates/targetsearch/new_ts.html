@@ -23,7 +23,12 @@
 						<div class="col-md-12">
 							<form method="GET">
 								<div class="form-group mt-3">
-									<!-- TODO: Database selector -->
+									<label for="source-id-select">Database:</label>
+									<select id="source-id-select" name="source_id">
+									{% for id,name in sources.items %}
+										<option value="{{id}}">{{name}}</option>
+									{% endfor %}
+									</select>
 									<p>Import compound IDs from workbench:</p>
 									<span id="compound_count">0</span> compounds selected.
 									<select id="tags" name="tags" multiple placeholder="Compound Tags">
