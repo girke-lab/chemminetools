@@ -119,7 +119,7 @@ def bs4test(request):
     
     return render(request, 'targetsearch/bs4test.html', context)
 
-
+@lockdown()
 def newTS(request):
     # Default local variables
     query_submit = False
@@ -128,6 +128,7 @@ def newTS(request):
     annotation_matches = None
     activity_list = None
     activity_matches = None
+    allTags = Tag.allUserTagNames(request.user)
     
     # Default GET request variables
     id_type = 'compound'
@@ -141,9 +142,12 @@ def newTS(request):
         ids = list(request.GET['ids'].split())
     if 'include_activity' in request.GET:
         include_activity = True
+    if 'tags' in request.GET:
+        for c in [compound.cid for compound in Compound.byTagNames(request.GET.getlist("tags"),request.user)]:
+            ids.append(c)
     
     # Generate content
-    if id_type != None and len(ids) != 0:
+    if len(ids) != 0:
         query_submit = True
         
         try:
@@ -164,9 +168,10 @@ def newTS(request):
         'message' : message,
         'id_type' : id_type,
         'annotation_list' : annotation_list,
-        'annotation_matches': annotation_matches,
+        'annotation_matches' : annotation_matches,
         'activity_list' : activity_list,
-        'activity_matches': activity_matches,
+        'activity_matches' : activity_matches,
+        'tags' : allTags,
         }
     
     return render(request, 'targetsearch/new_ts.html', context)

@@ -8,5 +8,4 @@ from .views import *
 urlpatterns = [
         url(r'^$', search, name='search'),
         url(r'^new', newTS, name='newTS'),
-        url(r'^bs4test', bs4test, name='bs4test'),
         ]

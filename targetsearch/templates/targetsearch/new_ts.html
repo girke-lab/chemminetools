@@ -24,12 +24,18 @@
 							<form method="GET">
 								<div class="form-group mt-3">
 									<!-- TODO: Database selector -->
-									<!-- TODO: Import compounds from workbench -->
-									<label>Enter compound IDs:
-										<textarea name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
-									</label>
+									<p>Import compound IDs from workbench:</p>
+									<span id="compound_count">0</span> compounds selected.
+									<select id="tags" name="tags" multiple placeholder="Compound Tags">
+										<option value="all">All</option>
+										{% for tag in tags %}
+											<option value="{{tag}}">{{tag}}</option>
+										{% endfor %}
+									</select>
+									<label for="compound-ids">Or enter compound IDs:</label>
+									<textarea id="compound-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
 									<br>
-									<input type="hidden" name="id_type" value="compound"></input>
+									<input type="hidden" name="id_type" value="compound">
 									<button type="submit" class="btn btn-primary">Search</button>
 								</div>
 							</form>
@@ -42,13 +48,13 @@
 						<div class="col-md-12">
 							<form method="GET">
 								<div class="form-group mt-3">
-									<input type="checkbox" name="include_activity">&nbsp;Include Activity Results (slow)</input>
+									<input id="include-activity-chkbox" type="checkbox" name="include_activity">
+									<label for="include-activity-chkbox">&nbsp;Include Activity Results (slow)</label>
 									<p></p>
-									<label>Target Protein IDs:
-										<textarea name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
-									</label>
+									<label for="target-ids">Target Protein IDs:</label>
+									<textarea id="target-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
 									<br>
-									<input type="hidden" name="id_type" value="target"></input>
+									<input type="hidden" name="id_type" value="target">
 									<button type="submit" class="btn btn-primary">Search</button>
 								</div>
 							</form>
@@ -77,7 +83,7 @@
 					{% for match in annotation_matches %}
 					<tr>
 						{% for col in annotation_list %}
-							{% dict_lookup3 match col.id as cell_value %}
+							{% dict_lookup match col.id as cell_value %}
 							{% if col.url is None %}
 								<td>{{ cell_value }}</td>
 							{% else %}
@@ -107,7 +113,7 @@
 					{% for match in activity_matches %}
 					<tr>
 						{% for col in activity_list %}
-							{% dict_lookup3 match col.id as cell_value %}
+							{% dict_lookup match col.id as cell_value %}
 							{% if col.url is None %}
 								<td>{{ cell_value }}</td>
 							{% else %}
@@ -219,7 +225,26 @@
 		});
 	}
 	
+	function setCompoundCount(tags) {
+		if(tags != null && tags.length !== 0)
+			$.get("/compounds/withTags/"+tags.join(",")+"/count").
+				then(function(result){
+					$("#compound_count").html(result);
+				}).fail(function(){
+					alertify.error("failed to update compound count");
+				});
+		else
+			$("#compound_count").html(0);
+	}
+	
 	$(document).ready(function() {
+		jQuery("#tags").selectize({
+			plugins: ['remove_button'],
+			onChange: function(value){
+				setCompoundCount(value);
+			},
+		});
+		
 		var annotation_table = $('#annotation-table').DataTable({
 			dom: 'Bfrltip',
 			buttons: ['csv'],
@@ -264,10 +289,7 @@
 		});
 		
 		selectDefaults2(annotation_table, 'chkbox-annotation');
-		
-		{% if activity_matches is not None %}
-			selectDefaults2(activity_table, 'chkbox-activity');
-		{% endif %}
+		selectDefaults2(activity_table, 'chkbox-activity');
 	});
 </script>
 
