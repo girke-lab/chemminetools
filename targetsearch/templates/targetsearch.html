@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 {% load cms_tags %}
-
-
+{% load targetsearch_extras %}
 
 {% block base_content %}
-	<div class="row-fluid">
+	<div class="container-fluid">
+	<div class="row">
 	<div class="col-md-12">
 	{% if message %}
 	<span style="color: red">{{message}}</span>
@@ -21,7 +21,8 @@
 
 	<div class="tab-content" style="overflow:visible">
 		<div class="tab-pane{% if search_type == "compound" %} active{% endif %}" id="compound_search">
-			<div class="row-fluid">
+		<div class="container-fluid">
+			<div class="row">
 				<div class="col-md-12">
 					<form method="GET">
 						<div class="form-group mt-3">
@@ -57,9 +58,11 @@
 
 				</div>
 			</div>
+        </div>
 		</div> <!-- ent tab-pane -->
 			<div class="tab-pane{% if search_type == "target" %} active{% endif %}" id="target_search">
-			<div class="row-fluid">
+			<div class="container-fluid">
+			<div class="row">
 				<div class="col-md-12">
 					<form method="GET">
 						<div class="form-group mt-3">
@@ -73,18 +76,15 @@
 						</div>
 					</form>
 				</div>
+            </div>
 			</div>
 		</div> <!-- ent tab-pane -->
 	</div> <!-- end tab-content -->
 
-
-
-
-	</form>
 	</div>
 	</div>
 	{% if query_submit %}
-	<div class="row-fluid">
+	<div class="row">
 	<div class="col-md-12">
 	<!--<h3>Matching Target Accession IDs ({{ chembl_id }}):</h3>-->
 	<h4>By Annotation</h4>
@@ -207,6 +207,7 @@
 		</tbody>
 		</table>
 	{% endif %}
+	</div>
 	</div>
 	</div>
 	{% endif %}

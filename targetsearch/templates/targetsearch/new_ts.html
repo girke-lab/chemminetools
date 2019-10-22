@@ -1,37 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-	<title>Bootstrap 4 Test</title>
-<!-- load bootstrap4 -->
-{% load bootstrap4 %}
-<!-- end load bootstrap4 -->
-
-<!-- bootstrap_css -->
-<!-- {% bootstrap_css %} -->
-	<link href="/static/admin/bootstrap-4.3.1-dist/css/bootstrap.min.css" rel="stylesheet">
-	<link href="/static/admin/fontawesome-free-5.9.0-web/css/all.css" rel="stylesheet">
-<!-- end bootstrap_css -->
-
-<!-- bootstrap_javascript -->
-<!-- {% bootstrap_javascript jquery='full' %} -->
-<!-- end bootstrap_javascript -->
+{% extends "base.html" %}
+{% load cms_tags %}
 {% load targetsearch_extras %}
 
-	<style>
-		img.autosize {
-			max-width: 100%;
-		}
-		
-		a.toggle-vis {
-			color: blue !important;
-			cursor: pointer;
-		}
-	</style>
-</head>
-
-<body>
+{% block base_content %}
 <div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			{% if message %}<span style="color: red">{{message}}</span>{% endif %}
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link{% if id_type == "compound" %} active{% endif %}" href="#compound_search" data-toggle="tab">Search By Compound</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link{% if id_type == "target" %} active{% endif %}" href="#target_search" data-toggle="tab">Search By Target</a>
+				</li>
+			</ul>
+
+			<div class="tab-content" style="overflow: visible">
+
+				<div class="tab-pane{% if id_type == "compound" %} active{% endif %}" id="compound_search">
+					<div class="container-fluid">
+						<div class="col-md-12">
+							<form method="GET">
+								<div class="form-group mt-3">
+									<!-- TODO: Database selector -->
+									<!-- TODO: Import compounds from workbench -->
+									<label>Enter compound IDs:
+										<textarea name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+									</label>
+									<br>
+									<input type="hidden" name="id_type" value="compound"></input>
+									<button type="submit" class="btn btn-primary">Search</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="tab-pane{% if id_type == "target" %} active{% endif %}" id="target_search">
+					<div class="container-fluid">
+						<div class="col-md-12">
+							<form method="GET">
+								<div class="form-group mt-3">
+									<input type="checkbox" name="include_activity">&nbsp;Include Activity Results (slow)</input>
+									<p></p>
+									<label>Target Protein IDs:
+										<textarea name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+									</label>
+									<br>
+									<input type="hidden" name="id_type" value="target"></input>
+									<button type="submit" class="btn btn-primary">Search</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+			</div><!-- end tab-content -->
+		</div>
+	</div><!-- end row (form tabs)-->
+
+	{% if query_submit %}
 	<div class="row">
 		<div class="col-md-12">
 			<h4>By Annotation</h4>
@@ -48,7 +77,7 @@
 					{% for match in annotation_matches %}
 					<tr>
 						{% for col in annotation_list %}
-							{% dict_lookup2 match col.id as cell_value %}
+							{% dict_lookup3 match col.id as cell_value %}
 							{% if col.url is None %}
 								<td>{{ cell_value }}</td>
 							{% else %}
@@ -60,8 +89,8 @@
 				</tbody>
 			</table>
 		</div>
-	</div>
-	
+	</div><!-- end row (annotation result table)-->
+	{% if activity_matches is not None %}
 	<div class="row">
 		<div class="col-md-12">
 			<h4>By Activity</h4>
@@ -78,7 +107,7 @@
 					{% for match in activity_matches %}
 					<tr>
 						{% for col in activity_list %}
-							{% dict_lookup2 match col.id as cell_value %}
+							{% dict_lookup3 match col.id as cell_value %}
 							{% if col.url is None %}
 								<td>{{ cell_value }}</td>
 							{% else %}
@@ -90,8 +119,10 @@
 				</tbody>
 			</table>
 		</div>
-	</div>
-</div> <!-- container-fluid -->
+	</div><!-- end row (activity result table -->
+	{% endif %}
+	{% endif %}
+</div><!-- end container-fluid -->
 
 <!-- Column select modal windows -->
 <div class="modal fade" id="columnSelectModalAnnotation" tabindex="-1" role="dialog" aria-labelledBy="csmAnnotationTitle" aria-hidden="true">
@@ -123,6 +154,7 @@
 	</div>
 </div>
 
+{% if activity_matches is not None %}
 <div class="modal fade" id="columnSelectModalActivity" tabindex="-1" role="dialog" aria-labelledBy="csmActivityTitle" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document">
 		<div class="modal-content">
@@ -151,10 +183,16 @@
 		</div>
 	</div>
 </div>
-<script src="/static/admin/jquery-3.4.1.min.js"></script>
-<script src="/static/admin/popper-1.15.0.min.js"></script>
-<script src="/static/admin/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
+{% endif %}
+
+{% endblock base_content %}
+
+{% block js_content %}
+
+{% include "selectize.html" %}
 {% include "dataTables.html" %}
+{% include "alertify.html" %}
+
 <script type="text/javascript">
 	function selectAll(table_obj, chkbox_class, is_visible) {
 		table_obj.columns().visible(is_visible);
@@ -210,8 +248,6 @@
 		});
 		
 		$('#btn-annotation-defaults').on('click', function(e) {
-			//annotation_table.columns().visible(false);
-			//annotation_table.columns({{ annotation_column_defaults }}).visible(true);
 			selectDefaults2(annotation_table, 'chkbox-annotation');
 		});
 		
@@ -224,15 +260,15 @@
 		});
 		
 		$('#btn-activity-defaults').on('click', function(e) {
-			//activity_table.columns().visible(false);
-			//activity_table.columns({{ activity_column_defaults }}).visible(true);
 			selectDefaults2(activity_table, 'chkbox-activity');
 		});
 		
 		selectDefaults2(annotation_table, 'chkbox-annotation');
-		selectDefaults2(activity_table, 'chkbox-activity');
+		
+		{% if activity_matches is not None %}
+			selectDefaults2(activity_table, 'chkbox-activity');
+		{% endif %}
 	});
 </script>
-</body>
 
-</html>
+{% endblock %}
