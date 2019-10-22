@@ -1,4 +1,4 @@
-Django==1.4.5
+Django==1.11.23
 PIL==1.1.7
 PyXML==0.8.4
 PyYAML==3.10
