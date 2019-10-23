@@ -17,3 +17,6 @@ static_production
 vagrant
 __pycache__
 *.bak
+*.sdf
+*.gz
+notes
