@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+{% load targetsearch_extras %}
+
+{% block base_content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			{% if message %}<span style="color: red">{{message}}</span>{% endif %}
+			<ul class="nav nav-tabs">
+				<li class="nav-item">
+					<a class="nav-link{% if id_type == "compound" %} active{% endif %}" href="#compound_search" data-toggle="tab">Search By Compound</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link{% if id_type == "target" %} active{% endif %}" href="#target_search" data-toggle="tab">Search By Target</a>
+				</li>
+			</ul>
+
+			<div class="tab-content" style="overflow: visible">
+
+				<div class="tab-pane{% if id_type == "compound" %} active{% endif %}" id="compound_search">
+					<div class="container-fluid">
+						<div class="col-md-12">
+							<form method="GET">
+								<div class="form-group mt-3">
+									<label for="source-id-select">Database:</label>
+									<select id="source-id-select" name="source_id">
+									{% for id,name in sources.items %}
+										<option value="{{id}}">{{name}}</option>
+									{% endfor %}
+									</select>
+									<p>Import compound IDs from workbench:</p>
+									<span id="compound_count">0</span> compounds selected.
+									<select id="tags" name="tags" multiple placeholder="Compound Tags">
+										<option value="all">All</option>
+										{% for tag in tags %}
+											<option value="{{tag}}">{{tag}}</option>
+										{% endfor %}
+									</select>
+									<label for="compound-ids">Or enter compound IDs:</label>
+									<textarea id="compound-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+									<br>
+									<input type="hidden" name="id_type" value="compound">
+									<button type="submit" class="btn btn-primary">Search</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+				<div class="tab-pane{% if id_type == "target" %} active{% endif %}" id="target_search">
+					<div class="container-fluid">
+						<div class="col-md-12">
+							<form method="GET">
+								<div class="form-group mt-3">
+									<input id="include-activity-chkbox" type="checkbox" name="include_activity">
+									<label for="include-activity-chkbox">&nbsp;Include Activity Results (slow)</label>
+									<p></p>
+									<label for="target-ids">Target Protein IDs:</label>
+									<textarea id="target-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+									<br>
+									<input type="hidden" name="id_type" value="target">
+									<button type="submit" class="btn btn-primary">Search</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+
+			</div><!-- end tab-content -->
+		</div>
+	</div><!-- end row (form tabs)-->
+
+	{% if query_submit %}
+	<div class="row">
+		<div class="col-md-12">
+			<h4>By Annotation</h4>
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalAnnotation">Show/Hide Columns</button>
+			<table class="table table-striped" id="annotation-table">
+				<thead>
+					<tr>
+						{% for col in annotation_list %}
+						<th>{{col.name}}</th>
+						{% endfor %}
+					</tr>
+				</thead>
+				<tbody>
+					{% for match in annotation_matches %}
+					<tr>
+						{% for col in annotation_list %}
+							{% dict_lookup match col.id as cell_value %}
+							{% if col.url is None %}
+								<td>{{ cell_value }}</td>
+							{% else %}
+								<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
+							{% endif %}
+						{% endfor %}
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div><!-- end row (annotation result table)-->
+	{% if activity_matches is not None %}
+	<div class="row">
+		<div class="col-md-12">
+			<h4>By Activity</h4>
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalActivity">Show/Hide Columns</button>
+			<table class="table table-striped" id="activity-table">
+				<thead>
+					<tr>
+						{% for col in activity_list %}
+						<th>{{col.name}}</th>
+						{% endfor %}
+					</tr>
+				</thead>
+				<tbody>
+					{% for match in activity_matches %}
+					<tr>
+						{% for col in activity_list %}
+							{% dict_lookup match col.id as cell_value %}
+							{% if col.url is None %}
+								<td>{{ cell_value }}</td>
+							{% else %}
+								<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
+							{% endif %}
+						{% endfor %}
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div><!-- end row (activity result table -->
+	{% endif %}
+	{% endif %}
+</div><!-- end container-fluid -->
+
+<!-- Column select modal windows -->
+<div class="modal fade" id="columnSelectModalAnnotation" tabindex="-1" role="dialog" aria-labelledBy="csmAnnotationTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="csmAnnotationTitle">Column Select - Annotation</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<button type="button" class="btn btn-primary" id="btn-annotation-select-all">Select All</button>
+				<button type="button" class="btn btn-primary" id="btn-annotation-deselect-all">Deselect All</button>
+				<button type="button" class="btn btn-primary" id="btn-annotation-defaults">Restore Defaults</button>
+				<fieldset>
+					{% for col in annotation_list %}
+					<div>
+						<input type="checkbox" class="toggle-vis chkbox-annotation{% if col.visible %} chkbox-annotation-default{% endif %}" name="annotation-column" id="{{col.id}}" value="{{forloop.counter0}}">
+						<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}</label>
+					</div>
+					{% endfor %}
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{% if activity_matches is not None %}
+<div class="modal fade" id="columnSelectModalActivity" tabindex="-1" role="dialog" aria-labelledBy="csmActivityTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="csmActivityTitle">Column Select - Activity</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<button type="button" class="btn btn-primary" id="btn-activity-select-all">Select All</button>
+				<button type="button" class="btn btn-primary" id="btn-activity-deselect-all">Deselect All</button>
+				<button type="button" class="btn btn-primary" id="btn-activity-defaults">Restore Defaults</button>
+				<fieldset>
+					{% for col in activity_list %}
+					<div>
+						<input type="checkbox" class="toggle-vis chkbox-activity{% if col.visible %} chkbox-activity-default{% endif %}" name="activity-column" id="{{col.id}}" value="{{forloop.counter0}}">
+						<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}</label>
+					</div>
+					{% endfor %}
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+
+{% endblock base_content %}
+
+{% block js_content %}
+
+{% include "selectize.html" %}
+{% include "dataTables.html" %}
+{% include "alertify.html" %}
+
+<script type="text/javascript">
+	function selectAll(table_obj, chkbox_class, is_visible) {
+		table_obj.columns().visible(is_visible);
+		$(chkbox_class).prop('checked', is_visible);
+	}
+	
+	function selectDefaults(table_obj, chkbox_class, default_cols) {
+		table_obj.columns().visible(false);
+		table_obj.columns(default_cols).visible(true);
+	}
+	
+	function selectDefaults2(table_obj, chkbox_class) {
+		// Hide all columns and clear all checkboxes
+		table_obj.columns().visible(false);
+		$('.' + chkbox_class).prop('checked', false);
+		
+		// Iterate through all checkboxes. If a checkbox is classed as a "default"
+		// checkbox, check it and unhide the associated column
+		$('.' + chkbox_class).each(function() {
+			if ( $(this).hasClass(chkbox_class + "-default") ) {
+				table_obj.column( $(this).attr('value') ).visible(true);
+				$(this).prop('checked', true);
+			}
+		});
+	}
+	
+	function setCompoundCount(tags) {
+		if(tags != null && tags.length !== 0)
+			$.get("/compounds/withTags/"+tags.join(",")+"/count").
+				then(function(result){
+					$("#compound_count").html(result);
+				}).fail(function(){
+					alertify.error("failed to update compound count");
+				});
+		else
+			$("#compound_count").html(0);
+	}
+	
+	$(document).ready(function() {
+		jQuery("#tags").selectize({
+			plugins: ['remove_button'],
+			onChange: function(value){
+				setCompoundCount(value);
+			},
+		});
+		
+		var annotation_table = $('#annotation-table').DataTable({
+			dom: 'Bfrltip',
+			buttons: ['csv'],
+		});
+		
+		var activity_table = $('#activity-table').DataTable({
+			dom: 'Bfrltip',
+			buttons: ['csv'],
+		});
+		
+		$('input.toggle-vis').on('change', function(e) {
+			if ( $(this).attr('name') == 'annotation-column' ) {
+				var column = annotation_table.column( $(this).attr('value') );
+			} else if ( $(this).attr('name') == 'activity-column' ) {
+				var column = activity_table.column( $(this).attr('value') );
+			}
+			column.visible( $(this).prop('checked') );
+		});
+		
+		$('#btn-annotation-select-all').on('click', function(e) {
+			selectAll(annotation_table, '.chkbox-annotation', true);
+		});
+		
+		$('#btn-annotation-deselect-all').on('click', function(e) {
+			selectAll(annotation_table, '.chkbox-annotation', false);
+		});
+		
+		$('#btn-annotation-defaults').on('click', function(e) {
+			selectDefaults2(annotation_table, 'chkbox-annotation');
+		});
+		
+		$('#btn-activity-select-all').on('click', function(e) {
+			selectAll(activity_table, '.chkbox-activity', true);
+		});
+		
+		$('#btn-activity-deselect-all').on('click', function(e) {
+			selectAll(activity_table, '.chkbox-activity', false);
+		});
+		
+		$('#btn-activity-defaults').on('click', function(e) {
+			selectDefaults2(activity_table, 'chkbox-activity');
+		});
+		
+		selectDefaults2(annotation_table, 'chkbox-annotation');
+		selectDefaults2(activity_table, 'chkbox-activity');
+	});
+</script>
+
+{% endblock %}

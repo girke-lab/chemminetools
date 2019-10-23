@@ -1,7 +1,10 @@
 import psycopg2
 import psycopg2.sql as sql
 import requests
+import json
+import os
 from psycopg2.extras import NamedTupleCursor
+from django.conf import settings
 
 class OutputColumn:
     def __init__(self, sql, desc, visible=False, name=None):
@@ -138,93 +141,78 @@ def byAnnotations(chemblIds=None,accessionIds=None):
             """,(ids,))
     return groupBy(lambda t: t[groupByIndex], data)
 
+class MeshIndicationSearch:
+    """Class containing MeSH indication search functions and related data"""
+    
+    mesh_ind_sql = ['chembl_id_lookup.chembl_id',
+                    'component_sequences.accession',
+                    'drug_mechanism.mechanism_of_action',
+                    'drug_mechanism.tid',
+                    'component_sequences.component_id',
+                    'component_sequences.description',
+                    'component_sequences.organism',
+                    ]
+    
+    mesh_ind_list = list()
+    for m in mesh_ind_sql:
+        m_id = m.replace('.', '__')
+        m_sql = m
+        mesh_ind_list.append({'id': m_id,
+                              'sql': m_sql})
+    
+    mesh_ind_group_str = 'GROUP BY ' + ', '.join(mesh_ind_sql)
+    
+    def search(id_type, ids):
+        """Search for MeSH indications. Basically the original limited-column search.
+        
+        The idea is to compare the limited columns from the original search with
+        corresponding columns in the new AnnotationSearch, and add in the appropriate
+        MeSH indication.
+        
+        Arguments:
+        id_type -- String describing type of ID. Must be one of:
+                'compound', 'target'
+        ids -- Python list of IDs to query
+        """
+        
+        # Adjust query condition based on ID type
+        if id_type == 'compound':
+            condition = 'chembl_id_lookup.chembl_id = ANY(%s)'
+            #groupByIndex = AnnotationSearch.cols_fqn_list.index('chembl_id_lookup.chembl_id')
+            #groupByIndex = 'chembl_id_lookup__chembl_id'
+        elif id_type == 'target':
+            condition = 'component_sequences.accession = ANY(%s)'
+            #groupByIndex = AnnotationSearch.cols_fqn_list.index('component_sequences.accession')
+            #groupByIndex = 'component_sequences__accession'
+        else:
+            raise Exception("MeshIndicationSearch: id_type should be either 'compound' or 'target'")
+        
+        query = sql.SQL("""SELECT DISTINCT {cols},
+                        STRING_AGG(mesh_id||':'||mesh_heading,',') AS mesh_indication
+                        FROM chembl_id_lookup
+                        JOIN molecule_dictionary USING(chembl_id)
+                        JOIN drug_mechanism USING(molregno)
+                        JOIN target_components USING(tid)
+                        JOIN component_sequences USING(component_id)
+                        LEFT JOIN drug_indication USING(molregno)
+                        WHERE {condition}
+                        {group}
+                        ORDER BY 1""")\
+                    .format(cols=sql.SQL(', ').join(sql.SQL("{} AS {}".format(c['sql'], c['id'])) for c in MeshIndicationSearch.mesh_ind_list),
+                    condition=sql.SQL(condition),
+                    group=sql.SQL(MeshIndicationSearch.mesh_ind_group_str))
+        
+        data = runQuery2(query, (ids,))
+        data = [ d._asdict() for d in data ]
+        #return groupBy(lambda t: t[groupByIndex], data)
+        return data
+
 class AnnotationSearch:
     """Class containing annotation search functions and related data"""
     
-    # List of expected database output columns. Update as needed.
-    # Should be a list of tuples containing:
-    # (str sql, bool visible, str desc)
-    # Last update: ChEMBLdb 25
-    # NOTE that although OutputColumn expects this data in the order
-    # (sql, desc, visible, name), here "visible" comes right after "sql" for
-    # easier readability, since "desc" can get quite long.
-    cols_fqn_list = [
-        ('chembl_id_lookup.chembl_id', True, "ChEMBL identifier"),
-        ('chembl_id_lookup.entity_type', False, "Type of entity (e.g., COMPOUND, ASSAY, TARGET)"),
-        ('chembl_id_lookup.entity_id', False, "Primary key for that entity in corresponding table (e.g., molregno for compounds, tid for targets)"),
-        ('chembl_id_lookup.status', False, "Indicates whether the status of the entity within the database - ACTIVE, INACTIVE (downgraded), OBS (obsolete/removed)."),
-        ('molecule_dictionary.molregno', False, "Internal Primary Key for the molecule"),
-        ('molecule_dictionary.pref_name', False, "Preferred name for the molecule"),
-        ('molecule_dictionary.max_phase', False, "Maximum phase of development reached for the compound (4 = approved). Null where max phase has not yet been assigned."),
-        ('molecule_dictionary.therapeutic_flag', False, "Indicates that a drug has a therapeutic application (as opposed to e.g., an imaging agent, additive etc)."),
-        ('molecule_dictionary.dosed_ingredient', False, "Indicates that the drug is dosed in this form (e.g., a particular salt)"),
-        ('molecule_dictionary.structure_type', False, "Indications whether the molecule has a small molecule structure or a protein sequence (MOL indicates an entry in the compound_structures table, SEQ indications an entry in the protein_therapeutics table, NONE indicates an entry in neither table, e.g., structure unknown)"),
-        ('molecule_dictionary.chebi_par_id', False, "Preferred ChEBI ID for the compound (where different from assigned)"),
-        ('molecule_dictionary.molecule_type', False, "Type of molecule (Small molecule, Protein, Antibody, Oligosaccharide, Oligonucleotide, Cell, Unknown)"),
-        ('molecule_dictionary.first_approval', False, "Earliest known approval year for the molecule"),
-        ('molecule_dictionary.oral', False, "Indicates whether the drug is known to be administered orally."),
-        ('molecule_dictionary.parenteral', False, "Indicates whether the drug is known to be administered parenterally"),
-        ('molecule_dictionary.topical', False, "Indicates whether the drug is known to be administered topically."),
-        ('molecule_dictionary.black_box_warning', False, "Indicates that the drug has a black box warning"),
-        ('molecule_dictionary.natural_product', False, "Indicates whether the compound is natural product-derived (currently curated only for drugs)"),
-        ('molecule_dictionary.first_in_class', False, "Indicates whether this is known to be the first compound of its class (e.g., acting on a particular target)."),
-        ('molecule_dictionary.chirality', False, "Shows whether a drug is dosed as a racemic mixture (0), single stereoisomer (1) or is an achiral molecule (2)"),
-        ('molecule_dictionary.prodrug', False, "Indicates that the molecule is a pro-drug (see molecule hierarchy for active component, where known)"),
-        ('molecule_dictionary.inorganic_flag', False, "Indicates whether the molecule is inorganic (i.e., containing only metal atoms and <2 carbon atoms)"),
-        ('molecule_dictionary.usan_year', False, "The year in which the application for a USAN/INN name was made"),
-        ('molecule_dictionary.availability_type', False, "The availability type for the drug (0 = discontinued, 1 = prescription only, 2 = over the counter)"),
-        ('molecule_dictionary.usan_stem', False, "Where the compound has been assigned a USAN name, this indicates the stem, as described in the USAN_STEM table."),
-        ('molecule_dictionary.polymer_flag', False, "Indicates whether a molecule is a small molecule polymer (e.g., polistyrex)"),
-        ('molecule_dictionary.usan_substem', False, "Where the compound has been assigned a USAN name, this indicates the substem"),
-        ('molecule_dictionary.usan_stem_definition', False, "Definition of the USAN stem"),
-        ('molecule_dictionary.indication_class', False, "Indication class(es) assigned to a drug in the USP dictionary"),
-        ('molecule_dictionary.withdrawn_flag', False, "Flag indicating whether the drug has been withdrawn in at least one country (not necessarily in the US)"),
-        ('molecule_dictionary.withdrawn_year', False, "Year the drug was first withdrawn in any country"),
-        ('molecule_dictionary.withdrawn_country', False, "List of countries/regions where the drug has been withdrawn"),
-        ('molecule_dictionary.withdrawn_reason', False, "Reasons for withdrawl (e.g., safety)"),
-        ('molecule_dictionary.withdrawn_class', False, "High level categories for the withdrawn reason (e.g., Cardiotoxicity, Hepatotoxicity)"),
-        ('drug_mechanism.mec_id', False, "Primary key for each drug mechanism of action"),
-        ('drug_mechanism.record_id', False, "Record_id for the drug (foreign key to compound_records table)"),
-        ('drug_mechanism.mechanism_of_action', True, "Description of the mechanism of action e.g., 'Phosphodiesterase 5 inhibitor'"),
-        ('drug_mechanism.tid', True, "Target associated with this mechanism of action (foreign key to target_dictionary table)"),
-        ('drug_mechanism.site_id', False, "Binding site for the drug within the target (where known) - foreign key to binding_sites table"),
-        ('drug_mechanism.action_type', False, "Type of action of the drug on the target e.g., agonist/antagonist etc (foreign key to action_type table)"),
-        ('drug_mechanism.direct_interaction', False, "Flag to show whether the molecule is believed to interact directly with the target (1 = yes, 0 = no)"),
-        ('drug_mechanism.molecular_mechanism', False, "Flag to show whether the mechanism of action describes the molecular target of the drug, rather than a higher-level physiological mechanism e.g., vasodilator (1 = yes, 0 = no)"),
-        ('drug_mechanism.disease_efficacy', False, "Flag to show whether the target assigned is believed to play a role in the efficacy of the drug in the indication(s) for which it is approved (1 = yes, 0 = no)"),
-        ('drug_mechanism.mechanism_comment', False, "Additional comments regarding the mechanism of action"),
-        ('drug_mechanism.selectivity_comment', False, "Additional comments regarding the selectivity of the drug"),
-        ('drug_mechanism.binding_site_comment', False, "Additional comments regarding the binding site of the drug"),
-        ('component_sequences.component_id', True, "Primary key. Unique identifier for the component."),
-        ('target_components.targcomp_id', False, "Primary key."),
-        ('target_components.homologue', False, "Indicates that the given component is a homologue of the correct component (e.g., from a different species) when set to 1. This may be the case if the sequence for the correct protein/nucleic acid cannot be found in sequence databases. A value of 2 indicates that the sequence given is a representative of a species group, e.g., an E. coli protein to represent the target of a broad-spectrum antibiotic."),
-        ('component_sequences.component_type', False, "Type of molecular component represented (e.g., 'PROTEIN','DNA','RNA')."),
-        ('component_sequences.accession', True, "Accession for the sequence in the source database from which it was taken (e.g., UniProt accession for proteins)."),
-        ('component_sequences.sequence', False, "A representative sequence for the molecular component, as given in the source sequence database (not necessarily the exact sequence used in the assay)."),
-        ('component_sequences.sequence_md5sum', False, "MD5 checksum of the sequence."),
-        ('component_sequences.description', True, "Description/name for the molecular component, usually taken from the source sequence database."),
-        ('component_sequences.tax_id', False, "NCBI tax ID for the sequence in the source database (i.e., species that the protein/nucleic acid sequence comes from)."),
-        ('component_sequences.organism', True, "Name of the organism the sequence comes from."),
-        ('component_sequences.db_source', False, "The name of the source sequence database from which sequences/accessions are taken. For UniProt proteins, this field indicates whether the sequence is from SWISS-PROT or TREMBL."),
-        ('component_sequences.db_version', False, "The version of the source sequence database from which sequences/accession were last updated."),
-        ('drug_indication.drugind_id', False, "Primary key"),
-        ('drug_indication.record_id', False, "Foreign key to compound_records table. Links to the drug record to which this indication applies"),
-        ('drug_indication.max_phase_for_ind', False, "The maximum phase of development that the drug is known to have reached for this particular indication"),
-        ('drug_indication.mesh_id', True, "Medical Subject Headings (MeSH) disease identifier corresponding to the indication"),
-        ('drug_indication.mesh_heading', True, "Medical Subject Heading term for the MeSH disease ID"),
-        ('drug_indication.efo_id', False, "Experimental Factor Ontology (EFO) disease identifier corresponding to the indication"),
-        ('drug_indication.efo_term', False, "Experimental Factor Ontology term for the EFO ID"),
-        ]
+    with open(os.path.join(settings.PROJECT_DIR, 'targetsearch/annotation_list.json')) as f:
+        annotation_list = json.load(f)
     
-    # List of OutputColumn objects
-    sql_cols_list = [ OutputColumn(sql, desc, visible) for sql, visible, desc in cols_fqn_list ]
-
-    # Add any custom SELECT fragments here
-    # e.g. string_agg(mesh_id||':'||mesh_heading,',') AS mesh_indication :
-    sql_cols_list.append(OutputColumn("string_agg(mesh_id||':'||mesh_heading,',')",
-                                      "Aggregated list of MeSH identifiers and heading terms.",
-                                      visible=True, name='mesh_indication'))
-
     # List of GROUP BY fields. For string_agg.
     sql_group_list = [
         'chembl_id_lookup.chembl_id',
@@ -239,10 +227,9 @@ class AnnotationSearch:
         'target_components.targcomp_id',
         'drug_indication.drugind_id',
         ]
-    if len(sql_group_list) == 0:
-        sql_group_str = ''
-    else:
-        sql_group_str = 'GROUP BY ' + ', '.join(sql_group_list)
+    
+    #sql_group_str = ''
+    sql_group_str = 'GROUP BY ' + ', '.join(sql_group_list)
     
     def search(id_type, ids):
         """Search for targets by annotations, returning all database columns.
@@ -254,21 +241,21 @@ class AnnotationSearch:
         
         Arguments:
         id_type -- String describing type of ID. Must be one of:
-                'chembl', 'accession'
+                'compound', 'target'
         ids -- Python list of IDs to query
         """
         
         # Adjust query condition based on ID type
-        if id_type == 'chembl':
+        if id_type == 'compound':
             condition = 'chembl_id_lookup.chembl_id = ANY(%s)'
             #groupByIndex = AnnotationSearch.cols_fqn_list.index('chembl_id_lookup.chembl_id')
-            groupByIndex = 'chembl_id_lookup__chembl_id'
-        elif id_type == 'accession':
+            #groupByIndex = 'chembl_id_lookup__chembl_id'
+        elif id_type == 'target':
             condition = 'component_sequences.accession = ANY(%s)'
             #groupByIndex = AnnotationSearch.cols_fqn_list.index('component_sequences.accession')
-            groupByIndex = 'component_sequences__accession'
+            #groupByIndex = 'component_sequences__accession'
         else:
-            raise Exception("id_type should be either 'chembl' or 'accession'")
+            raise Exception("AnnotationSearch: id_type should be either 'compound' or 'target'")
         
         query = sql.SQL("""SELECT DISTINCT {cols} FROM chembl_id_lookup
                         JOIN molecule_dictionary USING(chembl_id)
@@ -279,7 +266,7 @@ class AnnotationSearch:
                         WHERE {condition}
                         {group}
                         ORDER BY 1""")\
-                .format(cols=sql.SQL(', ').join(sql.SQL(str(c)) for c in AnnotationSearch.sql_cols_list),
+                .format(cols=sql.SQL(', ').join(sql.SQL("{} AS {}".format(c['sql'], c['id'])) for c in AnnotationSearch.annotation_list),
                         condition=sql.SQL(condition),
                         group=sql.SQL(AnnotationSearch.sql_group_str))
         
@@ -288,112 +275,43 @@ class AnnotationSearch:
         #return groupBy(lambda t: t[groupByIndex], data)
         return data
 
+class AnnotationWithMeshSearch:
+    """Special class for adding MeSH indication data to annotation search"""
+    
+    annotation_list = AnnotationSearch.annotation_list.copy()
+    annotation_list.append({'id': 'annotation__mesh_indication',
+                            'sql': "string_agg(mesh_id||':'||mesh_heading,',')",
+                            'name': 'MeSH Indication',
+                            'desc': "Aggregated list of MeSH identifiers and heading terms",
+                            'visible': False,
+                            'url': None,
+                            })
+    
+    def search(id_type, ids):
+        annotation_data = AnnotationSearch.search(id_type, ids)
+        mesh_ind_data = MeshIndicationSearch.search(id_type, ids)
+        
+        for a in annotation_data:
+            mesh_ind = None
+            for m in mesh_ind_data:
+                if  a['annotation__chembl_id_lookup__chembl_id'] == m['chembl_id_lookup__chembl_id'] and \
+                    a['annotation__component_sequences__accession'] == m['component_sequences__accession'] and \
+                    a['annotation__drug_mechanism__mechanism_of_action'] == m['drug_mechanism__mechanism_of_action'] and \
+                    a['annotation__drug_mechanism__tid'] == m['drug_mechanism__tid'] and \
+                    a['annotation__component_sequences__component_id'] == m['component_sequences__component_id'] and \
+                    a['annotation__component_sequences__description'] == m['component_sequences__description'] and \
+                    a['annotation__component_sequences__organism'] == m['component_sequences__organism']:
+                        mesh_ind = m['mesh_indication']
+                        break
+            a['annotation__mesh_indication'] = mesh_ind
+        
+        return annotation_data
+
 class ActivitySearch:
     """Class containing activity search functions and related data"""
     
-    # List of expected database output columns. Update as needed.
-    # Last update: ChEMBLdb 25
-    cols_fqn_list = [
-        ('chembl_id_lookup.chembl_id', True, ""),
-        ('chembl_id_lookup.entity_type', False, ""),
-        ('chembl_id_lookup.entity_id', False, ""),
-        ('chembl_id_lookup.status', False, ""),
-        ('activities.activity_id', True, ""),
-        ('activities.doc_id', False, ""),
-        ('activities.record_id', False, ""),
-        ('activities.standard_relation', False, ""),
-        ('activities.standard_value', True, ""),
-        ('activities.standard_units', True, ""),
-        ('activities.standard_flag', True, ""),
-        ('activities.standard_type', True, ""),
-        ('activities.activity_comment', False, ""),
-        ('activities.data_validity_comment', False, ""),
-        ('activities.potential_duplicate', False, ""),
-        ('activities.pchembl_value', False, ""),
-        ('activities.bao_endpoint', False, ""),
-        ('activities.uo_units', False, ""),
-        ('activities.qudt_units', False, ""),
-        ('activities.toid', False, ""),
-        ('activities.upper_value', False, ""),
-        ('activities.standard_upper_value', False, ""),
-        ('activities.src_id', False, ""),
-        ('activities.type', False, ""),
-        ('activities.relation', False, ""),
-        ('activities.value', False, ""),
-        ('activities.units', False, ""),
-        ('activities.text_value', False, ""),
-        ('activities.standard_text_value', False, ""),
-        ('molecule_dictionary.molregno', True, ""),
-        ('molecule_dictionary.pref_name', True, ""),
-        ('molecule_dictionary.chembl_id', False, ""),
-        ('molecule_dictionary.max_phase', False, ""),
-        ('molecule_dictionary.therapeutic_flag', False, ""),
-        ('molecule_dictionary.dosed_ingredient', False, ""),
-        ('molecule_dictionary.structure_type', False, ""),
-        ('molecule_dictionary.chebi_par_id', False, ""),
-        ('molecule_dictionary.molecule_type', False, ""),
-        ('molecule_dictionary.first_approval', False, ""),
-        ('molecule_dictionary.oral', False, ""),
-        ('molecule_dictionary.parenteral', False, ""),
-        ('molecule_dictionary.topical', False, ""),
-        ('molecule_dictionary.black_box_warning', False, ""),
-        ('molecule_dictionary.natural_product', False, ""),
-        ('molecule_dictionary.first_in_class', False, ""),
-        ('molecule_dictionary.chirality', False, ""),
-        ('molecule_dictionary.prodrug', False, ""),
-        ('molecule_dictionary.inorganic_flag', False, ""),
-        ('molecule_dictionary.usan_year', False, ""),
-        ('molecule_dictionary.availability_type', False, ""),
-        ('molecule_dictionary.usan_stem', False, ""),
-        ('molecule_dictionary.polymer_flag', False, ""),
-        ('molecule_dictionary.usan_substem', False, ""),
-        ('molecule_dictionary.usan_stem_definition', False, ""),
-        ('molecule_dictionary.indication_class', False, ""),
-        ('molecule_dictionary.withdrawn_flag', False, ""),
-        ('molecule_dictionary.withdrawn_year', False, ""),
-        ('molecule_dictionary.withdrawn_country', False, ""),
-        ('molecule_dictionary.withdrawn_reason', False, ""),
-        ('molecule_dictionary.withdrawn_class', False, ""),
-        ('assays.assay_id', False, ""),
-        ('assays.doc_id', False, ""),
-        ('assays.description', False, ""),
-        ('assays.assay_type', False, ""),
-        ('assays.assay_test_type', False, ""),
-        ('assays.assay_category', False, ""),
-        ('assays.assay_organism', False, ""),
-        ('assays.assay_tax_id', False, ""),
-        ('assays.assay_strain', False, ""),
-        ('assays.assay_tissue', False, ""),
-        ('assays.assay_cell_type', False, ""),
-        ('assays.assay_subcellular_fraction', False, ""),
-        ('assays.tid', False, ""),
-        ('assays.relationship_type', False, ""),
-        ('assays.confidence_score', False, ""),
-        ('assays.curated_by', False, ""),
-        ('assays.src_id', False, ""),
-        ('assays.src_assay_id', False, ""),
-        ('assays.chembl_id', True, ""),
-        ('assays.cell_id', False, ""),
-        ('assays.bao_format', False, ""),
-        ('assays.tissue_id', False, ""),
-        ('assays.variant_id', False, ""),
-        ('assays.aidx', False, ""),
-        ('target_components.targcomp_id', False, ""),
-        ('target_components.homologue', False, ""),
-        ('component_sequences.component_id', False, ""),
-        ('component_sequences.component_type', False, ""),
-        ('component_sequences.accession', True, ""),
-        ('component_sequences.sequence', False, ""),
-        ('component_sequences.sequence_md5sum', False, ""),
-        ('component_sequences.description', True, ""),
-        ('component_sequences.tax_id', False, ""),
-        ('component_sequences.organism', True, ""),
-        ('component_sequences.db_source', False, ""),
-        ('component_sequences.db_version', False, ""),
-        ]
-    
-    # List of OutputColumn objects
-    sql_cols_list = [ OutputColumn(sql, desc, visible) for sql, visible, desc in cols_fqn_list ]
+    with open(os.path.join(settings.PROJECT_DIR, 'targetsearch/activity_list.json')) as f:
+        activity_list = json.load(f)
     
     def search(id_type, ids):
         """Search for targets by activity, returning all database columns.
@@ -405,21 +323,21 @@ class ActivitySearch:
         
         Arguments:
         id_type -- String describing type of ID. Must be one of:
-                'chembl', 'accession'
+                'compound', 'target'
         ids -- Python list of IDs to query
         """
         
         # Adjust query condition based on ID type
-        if id_type == 'chembl':
+        if id_type == 'compound':
             condition = 'chembl_id_lookup.chembl_id = ANY(%s)'
             #groupByIndex = AnnotationSearch.cols_fqn_list.index('chembl_id_lookup.chembl_id')
-            groupByIndex = 'chembl_id_lookup__chembl_id'
-        elif id_type == 'accession':
+            #groupByIndex = 'chembl_id_lookup__chembl_id'
+        elif id_type == 'target':
             condition = "chembl_id_lookup.entity_type='COMPOUND' AND component_sequences.accession = ANY(%s)"
             #groupByIndex = AnnotationSearch.cols_fqn_list.index('component_sequences.accession')
-            groupByIndex = 'component_sequences__accession'
+            #groupByIndex = 'component_sequences__accession'
         else:
-            raise Exception("id_type should be either 'chembl' or 'accession'")
+            raise Exception("ActivitySearch: id_type should be either 'compound' or 'target'")
         
         query = sql.SQL("""SELECT {cols} FROM chembl_id_lookup
                         JOIN activities ON(entity_id = molregno)
@@ -429,7 +347,7 @@ class ActivitySearch:
                         JOIN component_sequences USING(component_id)
                         WHERE {condition}
                         ORDER BY 1""")\
-                .format(cols=sql.SQL(', ').join(sql.SQL(str(c)) for c in ActivitySearch.sql_cols_list),
+                .format(cols=sql.SQL(', ').join(sql.SQL("{} AS {}".format(c['sql'], c['id'])) for c in ActivitySearch.activity_list),
                         condition=sql.SQL(condition))
         
         data = runQuery2(query, (ids,))

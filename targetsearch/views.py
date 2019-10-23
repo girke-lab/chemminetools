@@ -7,7 +7,7 @@ from django.contrib import messages
 from .chembl_helpers import (
     byActivity,
     byAnnotations,
-    AnnotationSearch,
+    AnnotationWithMeshSearch,
     ActivitySearch,
     mapToChembl
     )
@@ -96,17 +96,92 @@ def bs4test(request):
     if 'ids' in request.GET:
         ids = list(request.GET['ids'].split())
     
+    #annotation_column_defaults = list()
+    #l = AnnotationWithMeshSearch.annotation_list
+    #for i in range(0, len(l)):
+    #    if l[i]['visible']:
+    #        annotation_column_defaults.append(i)
+    
+    #activity_column_defaults = list()
+    #l = ActivitySearch.activity_list
+    #for i in range(0, len(l)):
+    #    if l[i]['visible']:
+    #        activity_column_defaults.append(i)
+    
     context = {
-        'annotation_column_names': [ c.name for c in AnnotationSearch.sql_cols_list ],
-        'annotation_column_desc' : [ c.desc for c in AnnotationSearch.sql_cols_list ],
-        'annotation_column_visible' : [ c.visible for c in AnnotationSearch.sql_cols_list ],
-        'annotation_matches': AnnotationSearch.search(id_type, ids),
-        'activity_column_names': [ c.name for c in ActivitySearch.sql_cols_list ],
-        'activity_column_desc': [ c.desc for c in ActivitySearch.sql_cols_list ],
-        'activity_column_visible': [ c.visible for c in ActivitySearch.sql_cols_list ],
+        'annotation_list' : AnnotationWithMeshSearch.annotation_list,
+        #'annotation_column_defaults' : str(annotation_column_defaults),
+        'annotation_matches': AnnotationWithMeshSearch.search(id_type, ids),
+        'activity_list' : ActivitySearch.activity_list,
+        #'activity_column_defaults': str(activity_column_defaults),
         'activity_matches': ActivitySearch.search(id_type, ids),
         }
     
     return render(request, 'targetsearch/bs4test.html', context)
 
-
+@lockdown()
+def newTS(request):
+    # Default local variables
+    query_submit = False
+    message = None
+    annotation_list = None
+    annotation_matches = None
+    activity_list = None
+    activity_matches = None
+    allTags = Tag.allUserTagNames(request.user)
+    sourceDbs = readSources()
+    
+    # Default GET request variables
+    id_type = 'compound'
+    ids = list()
+    include_activity = False
+    source_id = 1
+    
+    # Retrieve GET request variables
+    if 'id_type' in request.GET:
+        id_type = request.GET['id_type']
+    if 'ids' in request.GET:
+        ids = list(request.GET['ids'].split())
+    if 'include_activity' in request.GET:
+        include_activity = True
+    if 'tags' in request.GET:
+        for c in [compound.cid for compound in Compound.byTagNames(request.GET.getlist("tags"),request.user)]:
+            ids.append(c)
+    if 'source_id' in request.GET:
+        source_id = request.GET['source_id']
+    
+    # Generate content
+    try:
+        # Only attempt conversion for compound search. Skip if already ChEMBL.
+        if id_type == 'compound' and source_id != '1':
+            ids = list(mapToChembl(ids, source_id))
+        
+        if len(ids) != 0:
+            query_submit = True
+            
+            annotation_list = AnnotationWithMeshSearch.annotation_list
+            annotation_matches = AnnotationWithMeshSearch.search(id_type, ids)
+            activity_list = ActivitySearch.activity_list
+            
+            # Exclude ActivitySearch from search-by-target by default
+            if id_type == 'target' and not include_activity:
+                activity_matches = None
+            else:
+                activity_matches = ActivitySearch.search(id_type, ids)
+    except Exception as e:
+        message = str(e)
+    
+    context = {
+        'query_submit' : query_submit,
+        'message' : message,
+        'id_type' : id_type,
+        'annotation_list' : annotation_list,
+        'annotation_matches' : annotation_matches,
+        'activity_list' : activity_list,
+        'activity_matches' : activity_matches,
+        'tags' : allTags,
+        'sources' : sourceDbs,
+        }
+    
+    return render(request, 'targetsearch/new_ts.html', context)
+    
