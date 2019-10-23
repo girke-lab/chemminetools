@@ -54,7 +54,7 @@ buildIndex = function(sdfFile){
 #	message("running eiInit from ",sdfFile)
 #	eiInit(sdfFile,conn=eiConn,updateByName=TRUE)
 	message("eiInit done. starting eiMakeDb")
-	runId=eiMakeDb(100,200,conn=eiConn)
+	runId=eiMakeDb(200,100,conn=eiConn)
 	message("eiMakeDb done")
 	#eiPerformanceTest(runId,conn=eiConn)
 }
@@ -63,4 +63,4 @@ buildIndex = function(sdfFile){
 sdfFile = "chembl.sdf"
 #buildSDF(sdfFile)
 
-#buildIndex(sdfFile)
+buildIndex(sdfFile)
