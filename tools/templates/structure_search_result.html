@@ -105,7 +105,7 @@ function postData(url, fields,fieldName) {
         action: url,
         method: 'post'
     });
-    jQuery( "{% csrf_token %}").appendTo($form);
+    jQuery( '{% csrf_token %}').appendTo($form);
     $.each(fields, function(key, val) {
          $('<input>').attr({
              type: "hidden",

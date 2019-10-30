@@ -9,13 +9,13 @@ from django.conf import settings
 #from django.views.generic.simple import direct_to_template
 from django.views.generic import TemplateView
 from django.views.generic import RedirectView
-from django.contrib.auth.views import login, logout
+#from django.contrib.auth.views import login, logout
 
 
 admin.autodiscover()
 print('\n before urls in general')
 urlpatterns =[
-    url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/', admin.site.urls),
     url(r'^eisearch/', include('structure_search.urls')),
     url(r'^structure_search/', include('structure_search.urls')),
     url(r'^accounts/', include('userena.urls')),

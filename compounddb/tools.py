@@ -143,7 +143,7 @@ def insert_single_compound(
                     # sdf_file=s)
 
     c.save()
-    c.tags = tags
+    c.tags.set(tags)
     c.save()
     c_id = c.id
     root.warning('  -->new compound inserted: c_id=%s, cid=%s' % (c_id,

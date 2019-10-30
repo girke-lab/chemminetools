@@ -20,7 +20,7 @@ class ApplicationCategories(models.Model):
 class Application(models.Model):
 
     name = models.CharField(max_length=250, unique=True)
-    category = models.ForeignKey(ApplicationCategories)
+    category = models.ForeignKey(ApplicationCategories,on_delete=models.CASCADE)
     script = models.CharField(max_length=250, unique=True)
     input_type = models.CharField(max_length=250)
     output_type = models.CharField(max_length=250)
@@ -38,7 +38,7 @@ class ApplicationOptions(models.Model):
 
     name = models.CharField(max_length=255)
     realName = models.CharField(max_length=255)
-    application = models.ForeignKey(Application)
+    application = models.ForeignKey(Application,on_delete=models.CASCADE)
 
     class Meta(object):
 
@@ -50,7 +50,7 @@ class ApplicationOptions(models.Model):
 
 class ApplicationOptionsList(models.Model):
 
-    category = models.ForeignKey(ApplicationOptions)
+    category = models.ForeignKey(ApplicationOptions,on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     realName = models.CharField(max_length=255)
 
@@ -69,7 +69,7 @@ class Job(models.Model):
                       (FAILED, 'Failed'))
     user = models.ForeignKey(User, blank=True, null=True,
                              on_delete=models.SET_NULL)
-    application = models.ForeignKey(Application)
+    application = models.ForeignKey(Application,on_delete=models.CASCADE)
     start_time = models.DateTimeField(auto_now_add=True)
     status = models.SmallIntegerField(default=RUNNING,
             choices=STATUS_CHOICES)

@@ -8,7 +8,7 @@ from django.contrib.auth.models import User,AnonymousUser
 
 class Tag(models.Model):
     name = models.CharField(max_length=256)
-    user = models.ForeignKey(User, db_index=True)
+    user = models.ForeignKey(User, db_index=True,on_delete=models.CASCADE)
 
     # this is only valid in django 2.2
     #class Meta:
@@ -38,7 +38,7 @@ class Compound(models.Model):
     weight = models.DecimalField(max_digits=10, decimal_places=2)
     inchi = models.TextField()
     smiles = models.TextField()
-    user = models.ForeignKey(User, db_index=True)
+    user = models.ForeignKey(User, db_index=True,on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag, db_index=True)
 
     def byTagNames(tagNames,user):
@@ -60,7 +60,7 @@ class Compound(models.Model):
 class SDFFile(models.Model):
 
     sdffile = models.TextField()
-    compound = models.ForeignKey(Compound)
+    compound = models.ForeignKey(Compound,on_delete=models.CASCADE)
 
     def __unicode__(self):
         return '%s' % self.id
