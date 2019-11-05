@@ -28,14 +28,7 @@ def groupBy(keyFn, row_data):
 
     return temp_dict
 
-def runQuery(query,values):
-    conn = psycopg2.connect(host = "chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com",
-            user="chembl",dbname="chembl",password="chembl1889")
-    cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
-    cur.execute(query,values)
-    return cur.fetchall()
-
-def runQuery2(query, values):
+def runQuery(query, values):
     dbhost = 'chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com'
     dbname = 'chembl_25'
     dbuser = 'chembl'
@@ -61,66 +54,6 @@ def get_chembl_smiles(chemblIds):
            compound_structures ON(entity_id=molregno)
       WHERE chembl_id_lookup.chembl_id IN %s""",(chemblIds,))
     return [row[0] for row in data]
-        
-def byActivity(chemblIds=None,accessionIds=None):
-    if chemblIds is not None and accessionIds is None:
-        condition = "chembl_id_lookup.chembl_id in %s"
-        ids = chemblIds
-        groupByIndex = 0
-    elif chemblIds is None and accessionIds is not None:
-        condition = "chembl_id_lookup.entity_type='COMPOUND' AND accession in %s"
-        ids = accessionIds
-        groupByIndex = 1
-    else:
-        raise Exception("One of either 'chemblIds' or accessionIds' must be given")
-
-    data = runQuery("""
-            select distinct chembl_id_lookup.chembl_id, accession,
-                    activities.molregno, pref_name, activity_id, assays.chembl_id AS chembl_assay_id, 
-                    component_sequences.description, organism, 
-                    activities.standard_value, activities.standard_units, 
-                    activities.standard_flag, activities.standard_type
-                from chembl_id_lookup
-                        join activities on(entity_id = molregno)
-                        join molecule_dictionary using(molregno)
-                        join assays using(assay_id)
-                        join target_components using(tid)
-                        join component_sequences using(component_id)
-                where """ + condition+
-                "order by 1 ",
-                (ids,))
-    return groupBy(lambda t: t[groupByIndex], data)
-
-def byAnnotations(chemblIds=None,accessionIds=None):
-    if chemblIds is not None and accessionIds is None:
-        condition = "chembl_id_lookup.chembl_id in %s"
-        ids = chemblIds
-        groupByIndex = 0
-    elif chemblIds is None and accessionIds is not None:
-        condition = "accession in %s"
-        ids = accessionIds
-        groupByIndex = 1
-    else:
-        raise Exception("One of either 'chemblIds' or accessionIds' must be given")
-
-
-    data = runQuery("""
-            select distinct chembl_id,  accession,
-                    mechanism_of_action, tid,component_id, description, 
-                    organism, string_agg(mesh_id||':'|| mesh_heading,',') as mesh_indication
-                from chembl_id_lookup
-                        join molecule_dictionary using(chembl_id)
-                        join drug_mechanism using(molregno)
-                        join target_components using(tid)
-                        join component_sequences using(component_id)
-                        left join drug_indication using(molregno)
-                where """+condition+"""
-                group by chembl_id,  accession,
-                    mechanism_of_action, tid,component_id, description, 
-                    organism
-                order by 1
-            """,(ids,))
-    return groupBy(lambda t: t[groupByIndex], data)
 
 class MeshIndicationSearch:
     """Class containing MeSH indication search functions and related data"""
@@ -179,7 +112,7 @@ class MeshIndicationSearch:
                     condition=sql.SQL(condition),
                     group=sql.SQL(MeshIndicationSearch.mesh_ind_group_str))
         
-        data = runQuery2(query, (ids,))
+        data = runQuery(query, (ids,))
         data = [ d._asdict() for d in data ]
         return data
 
@@ -243,7 +176,7 @@ class AnnotationSearch:
                 .format(cols=sql.SQL(', ').join(sql.SQL("{} AS {}".format(c['sql'], c['id'])) for c in self.annotation_list),
                         condition=sql.SQL(self.condition))
         
-        data = runQuery2(query, (ids,))
+        data = runQuery(query, (ids,))
         data = [ d._asdict() for d in data ]
         return data
     
@@ -372,7 +305,7 @@ class ActivitySearch:
                 .format(cols=sql.SQL(', ').join(sql.SQL("{} AS {}".format(c['sql'], c['id'])) for c in self.activity_list),
                         condition=sql.SQL(self.condition))
         
-        data = runQuery2(query, (ids,))
+        data = runQuery(query, (ids,))
         data = [ d._asdict() for d in data ]
         return data
     
