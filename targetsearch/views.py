@@ -90,35 +90,6 @@ def readSources():
             sources[int(key)] = val
     return sources
 
-def bs4test(request):
-    if 'id_type' in request.GET:
-        id_type = request.GET['id_type']
-    if 'ids' in request.GET:
-        ids = list(request.GET['ids'].split())
-    
-    #annotation_column_defaults = list()
-    #l = AnnotationWithMeshSearch.annotation_list
-    #for i in range(0, len(l)):
-    #    if l[i]['visible']:
-    #        annotation_column_defaults.append(i)
-    
-    #activity_column_defaults = list()
-    #l = ActivitySearch.activity_list
-    #for i in range(0, len(l)):
-    #    if l[i]['visible']:
-    #        activity_column_defaults.append(i)
-    
-    context = {
-        'annotation_list' : AnnotationWithMeshSearch.annotation_list,
-        #'annotation_column_defaults' : str(annotation_column_defaults),
-        'annotation_matches': AnnotationWithMeshSearch.search(id_type, ids),
-        'activity_list' : ActivitySearch.activity_list,
-        #'activity_column_defaults': str(activity_column_defaults),
-        'activity_matches': ActivitySearch.search(id_type, ids),
-        }
-    
-    return render(request, 'targetsearch/bs4test.html', context)
-
 @lockdown()
 def newTS(request):
     # Default local variables
@@ -159,15 +130,18 @@ def newTS(request):
         if len(ids) != 0:
             query_submit = True
             
-            annotation_list = AnnotationWithMeshSearch.annotation_list
-            annotation_matches = AnnotationWithMeshSearch.search(id_type, ids)
-            activity_list = ActivitySearch.activity_list
+            myAnnotationSearch = AnnotationWithMeshSearch(id_type)
+            annotation_list = myAnnotationSearch.annotation_list
+            annotation_matches = myAnnotationSearch.search_grouped(ids)
+            
+            myActivitySearch = ActivitySearch(id_type)
+            activity_list = myActivitySearch.activity_list
             
             # Exclude ActivitySearch from search-by-target by default
             if id_type == 'target' and not include_activity:
                 activity_matches = None
             else:
-                activity_matches = ActivitySearch.search(id_type, ids)
+                activity_matches = myActivitySearch.search_grouped(ids)
     except Exception as e:
         message = str(e)
     
@@ -177,11 +151,12 @@ def newTS(request):
         'id_type' : id_type,
         'annotation_list' : annotation_list,
         'annotation_matches' : annotation_matches,
+        'annotation_child_rows': True,
         'activity_list' : activity_list,
         'activity_matches' : activity_matches,
+        'activity_child_rows' : False,
         'tags' : allTags,
         'sources' : sourceDbs,
         }
     
     return render(request, 'targetsearch/new_ts.html', context)
-    
