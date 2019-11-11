@@ -30,7 +30,7 @@ def groupBy(keyFn, row_data):
 
 def runQuery(query, values):
     dbhost = 'chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com'
-    dbname = 'chembl_25'
+    dbname = 'chembl'
     dbuser = 'chembl'
     dbpass = 'chembl1889'
     
