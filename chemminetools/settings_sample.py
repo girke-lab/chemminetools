@@ -118,7 +118,7 @@ SECRET_KEY = 'd_ce0eja3qgm0b-3u487kf++d+m14satsx-b1l-niq=-e@wt#0'
 #TEMPLATE_LOADERS = ('django.template.loaders.filesystem.Loader',
                     #'django.template.loaders.app_directories.Loader')
 
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = (
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -272,7 +272,8 @@ MAX_COMPOUND_LIMIT = 10000  # compounds allowed per upload
 MAX_SDF_LENGTH = 10000  # lines per SDF allowed
 
 # user auth settings
-ANONYMOUS_USER_ID = -1
+#deprecated ANONYMOUS_USER_ID = -1
+ANONYMOUS_USER_NAME = 'AnonymousUser'
 USERENA_DEFAULT_PRIVACY = 'closed'
 USERENA_WITHOUT_USERNAMES = True 
 USERENA_REDIRECT_ON_SIGNOUT = "/"
