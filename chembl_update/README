@@ -1,0 +1,23 @@
+
+1) Download new ChEMBL db file and load into PostgreSQL
+	./update_chembl.sh <chembl version number> 
+1a)after this runs, the old database will be left as "chembl_old", you should drop this database when done with the whole update
+
+2) Generate eiR index
+2a) create the loading database:
+	CREATE DATABASE eisearch_chembl_loading owner=ei_updater;
+2b) run: update_eiR.R
+	This will pull all the SDF definitions out of the chembl database loaded in step 1
+	and then build an eiR index on it. Building the index will require at least 8GB of 
+	RAM, so the VM type may need to be modified before running this.
+	Index files will be created in /srv/shared_jobs/development/eir_index/data
+
+2c) Copy index files into place. This step will break the live ei search until step 2d is also complete.
+	cp -a /srv/shared_jobs/development/eir_index/data/ to /srv/shared_jobs/production/eir_index/
+2d) in postgresql, run:
+	ALTER DATABASE eisearch_chembl RENAME TO eisearch_chembl_old;
+	ALTER DATABASE eisearch_chembl_loading RENAME TO eisearch_chembl;
+
+2e) when all is working:
+	DROP DATABASE eisearch_chembl_old;
+	

@@ -6,6 +6,7 @@ library(eiR)
 library(R.utils)
 library(RPostgreSQL)
 
+indexDir = "/srv/shared_jobs/development/eir_index"
 
 eiConn = dbConnect(dbDriver('PostgreSQL'),dbname='eisearch_chembl_loading',host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='ei_updater',password='kj48nb3n2khlsdfbb')
 chemblConn = dbConnect(dbDriver('PostgreSQL'),dbname='chembl',host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='chembl',password='chembl1889')
@@ -39,28 +40,25 @@ buildSDF  = function(outputFile){
 
 			#cat(paste(rows[i,1],rows[i,2],"$$$$\n",sep="\n"),file=fileConn,append=TRUE)
 		}
-		message("current count: ",count)
 		cid(sdfset) = sdfid(sdfset)
 		sdfset = sdfset[which(validSDF(sdfset))];
-		message("done validating")
 		write.SDF(sdfset,file=fileConn)
-		message("done writing")
+		message("current count: ",count)
 	},10000)
 	close(fileConn)
 }
 buildIndex = function(sdfFile){
-#	message("initializing database")
-#	initDb(eiConn)
-#	message("running eiInit from ",sdfFile)
-#	eiInit(sdfFile,conn=eiConn,updateByName=TRUE)
+	message("initializing database")
+	initDb(eiConn)
+	message("running eiInit from ",sdfFile)
+	eiInit(sdfFile,dir=indexDir,conn=eiConn,updateByName=TRUE)
 	message("eiInit done. starting eiMakeDb")
-	runId=eiMakeDb(200,100,conn=eiConn)
+	runId=eiMakeDb(200,100,dir=indexDir,conn=eiConn)
 	message("eiMakeDb done")
 	#eiPerformanceTest(runId,conn=eiConn)
 }
 
 
 sdfFile = "chembl.sdf"
-#buildSDF(sdfFile)
-
+buildSDF(sdfFile)
 buildIndex(sdfFile)
