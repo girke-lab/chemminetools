@@ -2,6 +2,12 @@
 {% load cms_tags %}
 {% load targetsearch_extras %}
 
+{% block extra_styles %}
+td.details-control {
+	cursor: pointer;
+}
+{% endblock extra_styles %}
+
 {% block base_content %}
 <div class="container-fluid">
 	<div class="row">
@@ -75,27 +81,36 @@
 	<div class="row">
 		<div class="col-md-12">
 			<h4>By Annotation</h4>
-			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalAnnotation">Show/Hide Columns</button>
+			<div class="btn-toolbar" role="toolbar" aria-label="Button toolbar for annotation table">
+				<div class="btn-group mr-2" role="group">
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalAnnotation">Show/Hide Columns</button>
+				</div>
+				<div class="btn-group" id="csv-buttons-annotation" role="group"></div>
+			</div>
 			<table class="table table-striped" id="annotation-table">
 				<thead>
 					<tr>
+						<th><!-- Toggle child row --></th>
 						{% for col in annotation_list %}
 						<th>{{col.name}}</th>
 						{% endfor %}
 					</tr>
 				</thead>
 				<tbody>
-					{% for match in annotation_matches %}
-					<tr>
-						{% for col in annotation_list %}
-							{% dict_lookup match col.id as cell_value %}
-							{% if col.url is None %}
-								<td>{{ cell_value }}</td>
-							{% else %}
-								<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
-							{% endif %}
+					{% for key, rows in annotation_matches.items %}
+						{% for row in rows %}
+						<tr>
+							<td class="details-control"><i class="fas fa-angle-right dropdown"></i></td>
+							{% for col in annotation_list %}
+								{% dict_lookup row col.id as cell_value %}
+								{% if col.url is None %}
+									<td>{{ cell_value }}</td>
+								{% else %}
+									<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
+								{% endif %}
+							{% endfor %}
+						</tr>
 						{% endfor %}
-					</tr>
 					{% endfor %}
 				</tbody>
 			</table>
@@ -105,32 +120,41 @@
 	<div class="row">
 		<div class="col-md-12">
 			<h4>By Activity</h4>
-			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalActivity">Show/Hide Columns</button>
+			<div class="btn-toolbar" role="toolbar" aria-label="Button toolbar for activity table">
+				<div class="btn-group mr-2" role="group">
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalActivity">Show/Hide Columns</button>
+				</div>
+				<div class="btn-group" id="csv-buttons-activity" role="group"></div>
+			</div>
 			<table class="table table-striped" id="activity-table">
 				<thead>
 					<tr>
+						<th><!-- Toggle child row --></th>
 						{% for col in activity_list %}
 						<th>{{col.name}}</th>
 						{% endfor %}
 					</tr>
 				</thead>
 				<tbody>
-					{% for match in activity_matches %}
-					<tr>
-						{% for col in activity_list %}
-							{% dict_lookup match col.id as cell_value %}
-							{% if col.url is None %}
-								<td>{{ cell_value }}</td>
-							{% else %}
-								<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
-							{% endif %}
+					{% for key, rows in activity_matches.items %}
+						{% for row in rows %}
+						<tr>
+							<td class="details-control"><i class="fas fa-angle-right dropdown"></i></td>
+							{% for col in activity_list %}
+								{% dict_lookup row col.id as cell_value %}
+								{% if col.url is None %}
+									<td>{{ cell_value }}</td>
+								{% else %}
+									<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
+								{% endif %}
+							{% endfor %}
+						</tr>
 						{% endfor %}
-					</tr>
 					{% endfor %}
 				</tbody>
 			</table>
 		</div>
-	</div><!-- end row (activity result table -->
+	</div><!-- end row (activity result table) -->
 	{% endif %}
 	{% endif %}
 </div><!-- end container-fluid -->
@@ -150,9 +174,12 @@
 				<button type="button" class="btn btn-primary" id="btn-annotation-deselect-all">Deselect All</button>
 				<button type="button" class="btn btn-primary" id="btn-annotation-defaults">Restore Defaults</button>
 				<fieldset>
+					<div style="display: none;">
+						<input type="checkbox" class="toggle-vis chkbox-annotation{% if annotation_child_rows %} chkbox-annotation-default{% endif %}" name="annotation-column" id="annotation__child_row_dropdown" value="0">
+					</div>
 					{% for col in annotation_list %}
 					<div>
-						<input type="checkbox" class="toggle-vis chkbox-annotation{% if col.visible %} chkbox-annotation-default{% endif %}" name="annotation-column" id="{{col.id}}" value="{{forloop.counter0}}">
+						<input type="checkbox" class="toggle-vis chkbox-annotation{% if col.visible %} chkbox-annotation-default{% endif %}" name="annotation-column" id="{{col.id}}" value="{{forloop.counter}}">
 						<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}</label>
 					</div>
 					{% endfor %}
@@ -180,9 +207,12 @@
 				<button type="button" class="btn btn-primary" id="btn-activity-deselect-all">Deselect All</button>
 				<button type="button" class="btn btn-primary" id="btn-activity-defaults">Restore Defaults</button>
 				<fieldset>
+					<div style="display: none;">
+						<input type="checkbox" class="toggle-vis chkbox-activity{% if activity_child_rows %} chkbox-activity-default{% endif %}" name="activity-column" id="activity__child_row_dropdown" value="0">
+					</div>
 					{% for col in activity_list %}
 					<div>
-						<input type="checkbox" class="toggle-vis chkbox-activity{% if col.visible %} chkbox-activity-default{% endif %}" name="activity-column" id="{{col.id}}" value="{{forloop.counter0}}">
+						<input type="checkbox" class="toggle-vis chkbox-activity{% if col.visible %} chkbox-activity-default{% endif %}" name="activity-column" id="{{col.id}}" value="{{forloop.counter}}">
 						<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}</label>
 					</div>
 					{% endfor %}
@@ -205,17 +235,18 @@
 {% include "alertify.html" %}
 
 <script type="text/javascript">
+	// Shows or hides all columns for a table
 	function selectAll(table_obj, chkbox_class, is_visible) {
-		table_obj.columns().visible(is_visible);
-		$(chkbox_class).prop('checked', is_visible);
+		// Use columnExportSelector to leave the child row dropdown column alone
+		table_obj.columns(
+			function(index, data, node ) {
+				return columnExportSelector(table_obj, 'all', index);
+			}
+		).visible(is_visible);
+		$('.' + chkbox_class).prop('checked', is_visible);
 	}
 	
-	function selectDefaults(table_obj, chkbox_class, default_cols) {
-		table_obj.columns().visible(false);
-		table_obj.columns(default_cols).visible(true);
-	}
-	
-	function selectDefaults2(table_obj, chkbox_class) {
+	function selectDefaults(table_obj, chkbox_class) {
 		// Hide all columns and clear all checkboxes
 		table_obj.columns().visible(false);
 		$('.' + chkbox_class).prop('checked', false);
@@ -242,6 +273,65 @@
 			$("#compound_count").html(0);
 	}
 	
+	function childRow(table_name, row_data) {
+		var inner_data = '';
+		if (table_name == 'annotation_table') {
+			{% for col in annotation_list %}
+				{% if col.childrow %}
+				inner_data += '<tr><td>{{col.name}}</td><td>'+ row_data[ {{forloop.counter}} ] +'</td></tr>';
+				{% endif %}
+			{% endfor %}
+			if (inner_data == '') {
+				inner_data = '<tr><td>No data</td></tr>';
+			}
+		} else if (table_name == 'activity_table') {
+			{% for col in activity_list %}
+				{% if col.childrow %}
+				inner_data += '<tr><td>{{col.name}}</td><td>'+ row_data[ {{forloop.counter}} ] +'</td></tr>';
+				{% endif %}
+			{% endfor %}
+			if (inner_data == '') {
+				inner_data = '<tr><td>No data</td></tr>';
+			}
+		} else {
+			console.log("childRow: Check your values. You shouldn't see this.");
+			inner_data = '<tr><td>No data</td></tr>';
+		}
+		
+		return '<table>' + inner_data + '</table>';
+	}
+	
+	function toggleChildRow(table_name, table_obj, td_obj) {
+		var tr = td_obj.closest('tr');
+		var icon = td_obj.children('i.dropdown');
+		var row = table_obj.row(tr);
+		
+		if (row.child.isShown()) {
+			row.child.hide();
+			tr.removeClass('shown');
+			icon.removeClass('fa-angle-down');
+			icon.addClass('fa-angle-right');
+		} else {
+			row.child( childRow(table_name, row.data()) ).show();
+			tr.addClass('shown');
+			icon.removeClass('fa-angle-right');
+			icon.addClass('fa-angle-down');
+		}
+	}
+	
+	function columnExportSelector(table, export_type, index) {
+		// In no circumstance do we export the child-row column
+		if (index == 0) return false;
+		
+		if (export_type == "all") {
+			return true;
+		} else if (export_type == "visible") {
+			return table.column(index).visible();
+		}
+		
+		console.log("columnExportSelector: Check your values. You shouldn't see this.");
+	}
+	
 	$(document).ready(function() {
 		jQuery("#tags").selectize({
 			plugins: ['remove_button'],
@@ -251,14 +341,69 @@
 		});
 		
 		var annotation_table = $('#annotation-table').DataTable({
-			dom: 'Bfrltip',
-			buttons: ['csv'],
+			dom: 'frltip',
+			rowGroup: { dataSrc: 1, },
+			columnDefs: {
+				targets: 0,
+				orderable: false,
+			},
+			buttons: [
+				{
+					extend: 'csv',
+					filename: 'annotation-table',
+					text: 'Save to CSV (All Columns)',
+					exportOptions: {
+						columns: function(index, data, node) {
+							return columnExportSelector(annotation_table, 'all', index);
+						}
+					},
+				},
+				{
+					extend: 'csv',
+					filename: 'annotation-table',
+					text: 'Save to CSV (Visible Columns)',
+					exportOptions: {
+						columns: function(index, data, node) {
+							return columnExportSelector(annotation_table, 'visible', index);
+						}
+					},
+				},
+			],
 		});
 		
 		var activity_table = $('#activity-table').DataTable({
-			dom: 'Bfrltip',
-			buttons: ['csv'],
+			dom: 'frltip',
+			rowGroup: { dataSrc: 1, },
+			columnDefs: {
+				targets: 0,
+				orderable: false,
+			},
+			buttons: [
+				{
+					extend: 'csv',
+					filename: 'activity-table',
+					text: 'Save to CSV (All Columns)',
+					exportOptions: {
+						columns: function(index, data, node) {
+							return columnExportSelector(activity_table, 'all', index);
+						}
+					},
+				},
+				{
+					extend: 'csv',
+					filename: 'activity-table',
+					text: 'Save to CSV (Visible Columns)',
+					exportOptions: {
+						columns: function(index, data, node) {
+							return columnExportSelector(activity_table, 'visible', index);
+						}
+					},
+				},
+			],
 		});
+		
+		annotation_table.buttons().container().appendTo( $('#csv-buttons-annotation') );
+		activity_table.buttons().container().appendTo( $('#csv-buttons-activity') );
 		
 		$('input.toggle-vis').on('change', function(e) {
 			if ( $(this).attr('name') == 'annotation-column' ) {
@@ -270,32 +415,40 @@
 		});
 		
 		$('#btn-annotation-select-all').on('click', function(e) {
-			selectAll(annotation_table, '.chkbox-annotation', true);
+			selectAll(annotation_table, 'chkbox-annotation', true);
 		});
 		
 		$('#btn-annotation-deselect-all').on('click', function(e) {
-			selectAll(annotation_table, '.chkbox-annotation', false);
+			selectAll(annotation_table, 'chkbox-annotation', false);
 		});
 		
 		$('#btn-annotation-defaults').on('click', function(e) {
-			selectDefaults2(annotation_table, 'chkbox-annotation');
+			selectDefaults(annotation_table, 'chkbox-annotation');
 		});
 		
 		$('#btn-activity-select-all').on('click', function(e) {
-			selectAll(activity_table, '.chkbox-activity', true);
+			selectAll(activity_table, 'chkbox-activity', true);
 		});
 		
 		$('#btn-activity-deselect-all').on('click', function(e) {
-			selectAll(activity_table, '.chkbox-activity', false);
+			selectAll(activity_table, 'chkbox-activity', false);
 		});
 		
 		$('#btn-activity-defaults').on('click', function(e) {
-			selectDefaults2(activity_table, 'chkbox-activity');
+			selectDefaults(activity_table, 'chkbox-activity');
 		});
 		
-		selectDefaults2(annotation_table, 'chkbox-annotation');
-		selectDefaults2(activity_table, 'chkbox-activity');
+		$('#annotation-table tbody').on('click', 'td.details-control', function() {
+			toggleChildRow('annotation_table', annotation_table, $(this));
+		});
+		
+		$('#activity-table tbody').on('click', 'td.details-control', function() {
+			toggleChildRow('activity_table', activity_table, $(this));
+		});
+		
+		selectDefaults(annotation_table, 'chkbox-annotation');
+		selectDefaults(activity_table, 'chkbox-activity');
 	});
 </script>
 
-{% endblock %}
+{% endblock js_content %}

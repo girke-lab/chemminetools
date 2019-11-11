@@ -7,5 +7,4 @@ from .views import *
 
 urlpatterns = [
         url(r'^$', newTS, name='newTS'),
-        url(r'^old', search, name='search'),
         ]
