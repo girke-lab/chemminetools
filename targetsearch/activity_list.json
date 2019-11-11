@@ -2,10 +2,11 @@
   {
     "id": "activity__chembl_id_lookup__chembl_id",
     "sql": "chembl_id_lookup.chembl_id",
-    "name": "Chembl Id",
+    "name": "ChEMBL ID",
     "desc": "ChEMBL identifier",
     "visible": true,
-    "url": "https://www.ebi.ac.uk/chembl/compound_report_card/%s/"
+    "url": "https://www.ebi.ac.uk/chembl/compound_report_card/%s/",
+    "childrow": false
   },
   {
     "id": "activity__chembl_id_lookup__entity_type",
@@ -13,15 +14,17 @@
     "name": "Entity Type",
     "desc": "Type of entity (e.g., COMPOUND, ASSAY, TARGET)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__chembl_id_lookup__entity_id",
     "sql": "chembl_id_lookup.entity_id",
-    "name": "Entity Id",
+    "name": "Entity ID",
     "desc": "Primary key for that entity in corresponding table (e.g., molregno for compounds, tid for targets)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__chembl_id_lookup__status",
@@ -29,31 +32,35 @@
     "name": "Status",
     "desc": "Indicates whether the status of the entity within the database - ACTIVE, INACTIVE (downgraded), OBS (obsolete/removed).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__activity_id",
     "sql": "activities.activity_id",
-    "name": "Activity Id",
+    "name": "Activity ID",
     "desc": "Unique ID for the activity row",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__doc_id",
     "sql": "activities.doc_id",
-    "name": "Doc Id",
+    "name": "Document ID",
     "desc": "Foreign key to documents table (for quick lookup of publication details - can also link to documents through compound_records or assays table)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__record_id",
     "sql": "activities.record_id",
-    "name": "Record Id",
+    "name": "Record ID",
     "desc": "Foreign key to the compound_records table (containing information on the compound tested)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__standard_relation",
@@ -61,7 +68,8 @@
     "name": "Standard Relation",
     "desc": "Symbol constraining the activity value (e.g. >, <, =)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__standard_value",
@@ -69,7 +77,8 @@
     "name": "Standard Value",
     "desc": "Same as PUBLISHED_VALUE but transformed to common units: e.g. mM concentrations converted to nM.",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__standard_units",
@@ -77,7 +86,8 @@
     "name": "Standard Units",
     "desc": "Selected 'Standard' units for data type: e.g. concentrations are in nM.",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__standard_flag",
@@ -85,7 +95,8 @@
     "name": "Standard Flag",
     "desc": "Shows whether the standardised columns have been curated/set (1) or just default to the published data (0).",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__standard_type",
@@ -93,7 +104,8 @@
     "name": "Standard Type",
     "desc": "Standardised version of the published_activity_type (e.g. IC50 rather than Ic-50/Ic50/ic50/ic-50)",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__activity_comment",
@@ -101,7 +113,8 @@
     "name": "Activity Comment",
     "desc": "Previously used to report non-numeric activities i.e. 'Slighty active', 'Not determined'. STANDARD_TEXT_VALUE will be used for this in future, and this will be just for additional comments.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__data_validity_comment",
@@ -109,7 +122,8 @@
     "name": "Data Validity Comment",
     "desc": "Comment reflecting whether the values for this activity measurement are likely to be correct - one of 'Manually validated' (checked original paper and value is correct), 'Potential author error' (value looks incorrect but is as reported in the original paper), 'Outside typical range' (value seems too high/low to be correct e.g., negative IC50 value), 'Non standard unit type' (units look incorrect for this activity type).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__potential_duplicate",
@@ -117,47 +131,53 @@
     "name": "Potential Duplicate",
     "desc": "When set to 1, indicates that the value is likely to be a repeat citation of a value reported in a previous ChEMBL paper, rather than a new, independent measurement. Note: value of zero does not guarantee that the measurement is novel/independent though",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__pchembl_value",
     "sql": "activities.pchembl_value",
-    "name": "Pchembl Value",
+    "name": "pChEMBL Value",
     "desc": "Negative log of selected concentration-response activity values (IC50/EC50/XC50/AC50/Ki/Kd/Potency)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__bao_endpoint",
     "sql": "activities.bao_endpoint",
-    "name": "Bao Endpoint",
+    "name": "BAO Endpoint",
     "desc": "ID for the corresponding result type in BioAssay Ontology (based on standard_type)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__uo_units",
     "sql": "activities.uo_units",
-    "name": "Uo Units",
+    "name": "UO Units",
     "desc": "ID for the corresponding unit in Unit Ontology (based on standard_units)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__qudt_units",
     "sql": "activities.qudt_units",
-    "name": "Qudt Units",
+    "name": "QUDT Units",
     "desc": "ID for the corresponding unit in QUDT Ontology (based on standard_units)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__toid",
     "sql": "activities.toid",
-    "name": "Toid",
+    "name": "TOID",
     "desc": "The Test Occasion Identifier, used to group together related activity measurements",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__upper_value",
@@ -165,7 +185,8 @@
     "name": "Upper Value",
     "desc": "Where the activity is a range, this represents the highest value of the range (numerically), while the PUBLISHED_VALUE column represents the lower value",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__standard_upper_value",
@@ -173,15 +194,17 @@
     "name": "Standard Upper Value",
     "desc": "Where the activity is a range, this represents the standardised version of the highest value of the range (with the lower value represented by STANDARD_VALUE)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__src_id",
     "sql": "activities.src_id",
-    "name": "Src Id",
+    "name": "Source ID",
     "desc": "Foreign key to source table, indicating the source of the activity value",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__type",
@@ -189,7 +212,8 @@
     "name": "Type",
     "desc": "Type of end-point measurement: e.g. IC50, LD50, %inhibition etc, as it appears in the original dataset",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__relation",
@@ -197,7 +221,8 @@
     "name": "Relation",
     "desc": "Symbol constraining the activity value (e.g. >, <, =), as it appears in the original dataset",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__value",
@@ -205,7 +230,8 @@
     "name": "Value",
     "desc": "Datapoint value as it appears in the original dataset.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__units",
@@ -213,7 +239,8 @@
     "name": "Units",
     "desc": "Units of measurement as they appear in the original dataset",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__text_value",
@@ -221,7 +248,8 @@
     "name": "Text Value",
     "desc": "Non-numeric value for measurement as in original dataset",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__activities__standard_text_value",
@@ -229,7 +257,8 @@
     "name": "Standard Text Value",
     "desc": "Standardized version of non-numeric measurement",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__molregno",
@@ -237,23 +266,26 @@
     "name": "Molregno",
     "desc": "Internal Primary Key for the molecule",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__pref_name",
     "sql": "molecule_dictionary.pref_name",
-    "name": "Pref Name",
+    "name": "Preferred Name",
     "desc": "Preferred name for the molecule",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__chembl_id",
     "sql": "molecule_dictionary.chembl_id",
-    "name": "Chembl Id",
+    "name": "ChEMBL ID",
     "desc": "ChEMBL identifier for this compound (for use on web interface etc)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__max_phase",
@@ -261,7 +293,8 @@
     "name": "Max Phase",
     "desc": "Maximum phase of development reached for the compound (4 = approved). Null where max phase has not yet been assigned.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__therapeutic_flag",
@@ -269,7 +302,8 @@
     "name": "Therapeutic Flag",
     "desc": "Indicates that a drug has a therapeutic application (as opposed to e.g., an imaging agent, additive etc).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__dosed_ingredient",
@@ -277,7 +311,8 @@
     "name": "Dosed Ingredient",
     "desc": "Indicates that the drug is dosed in this form (e.g., a particular salt)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__structure_type",
@@ -285,15 +320,17 @@
     "name": "Structure Type",
     "desc": "Indications whether the molecule has a small molecule structure or a protein sequence (MOL indicates an entry in the compound_structures table, SEQ indications an entry in the protein_therapeutics table, NONE indicates an entry in neither table, e.g., structure unknown)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__chebi_par_id",
     "sql": "molecule_dictionary.chebi_par_id",
-    "name": "Chebi Par Id",
+    "name": "ChEBI Par ID",
     "desc": "Preferred ChEBI ID for the compound (where different from assigned)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__molecule_type",
@@ -301,7 +338,8 @@
     "name": "Molecule Type",
     "desc": "Type of molecule (Small molecule, Protein, Antibody, Oligosaccharide, Oligonucleotide, Cell, Unknown)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__first_approval",
@@ -309,7 +347,8 @@
     "name": "First Approval",
     "desc": "Earliest known approval year for the molecule",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__oral",
@@ -317,7 +356,8 @@
     "name": "Oral",
     "desc": "Indicates whether the drug is known to be administered orally.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__parenteral",
@@ -325,7 +365,8 @@
     "name": "Parenteral",
     "desc": "Indicates whether the drug is known to be administered parenterally",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__topical",
@@ -333,7 +374,8 @@
     "name": "Topical",
     "desc": "Indicates whether the drug is known to be administered topically.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__black_box_warning",
@@ -341,7 +383,8 @@
     "name": "Black Box Warning",
     "desc": "Indicates that the drug has a black box warning",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__natural_product",
@@ -349,7 +392,8 @@
     "name": "Natural Product",
     "desc": "Indicates whether the compound is natural product-derived (currently curated only for drugs)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__first_in_class",
@@ -357,7 +401,8 @@
     "name": "First In Class",
     "desc": "Indicates whether this is known to be the first compound of its class (e.g., acting on a particular target).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__chirality",
@@ -365,7 +410,8 @@
     "name": "Chirality",
     "desc": "Shows whether a drug is dosed as a racemic mixture (0), single stereoisomer (1) or is an achiral molecule (2)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__prodrug",
@@ -373,7 +419,8 @@
     "name": "Prodrug",
     "desc": "Indicates that the molecule is a pro-drug (see molecule hierarchy for active component, where known)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__inorganic_flag",
@@ -381,15 +428,17 @@
     "name": "Inorganic Flag",
     "desc": "Indicates whether the molecule is inorganic (i.e., containing only metal atoms and <2 carbon atoms)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__usan_year",
     "sql": "molecule_dictionary.usan_year",
-    "name": "Usan Year",
+    "name": "USAN Year",
     "desc": "The year in which the application for a USAN/INN name was made",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__availability_type",
@@ -397,15 +446,17 @@
     "name": "Availability Type",
     "desc": "The availability type for the drug (0 = discontinued, 1 = prescription only, 2 = over the counter)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__usan_stem",
     "sql": "molecule_dictionary.usan_stem",
-    "name": "Usan Stem",
+    "name": "USAN Stem",
     "desc": "Where the compound has been assigned a USAN name, this indicates the stem, as described in the USAN_STEM table.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__polymer_flag",
@@ -413,23 +464,26 @@
     "name": "Polymer Flag",
     "desc": "Indicates whether a molecule is a small molecule polymer (e.g., polistyrex)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__usan_substem",
     "sql": "molecule_dictionary.usan_substem",
-    "name": "Usan Substem",
+    "name": "USAN Substem",
     "desc": "Where the compound has been assigned a USAN name, this indicates the substem",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__usan_stem_definition",
     "sql": "molecule_dictionary.usan_stem_definition",
-    "name": "Usan Stem Definition",
+    "name": "USAN Stem Definition",
     "desc": "Definition of the USAN stem",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__indication_class",
@@ -437,7 +491,8 @@
     "name": "Indication Class",
     "desc": "Indication class(es) assigned to a drug in the USP dictionary",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__withdrawn_flag",
@@ -445,7 +500,8 @@
     "name": "Withdrawn Flag",
     "desc": "Flag indicating whether the drug has been withdrawn in at least one country (not necessarily in the US)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__withdrawn_year",
@@ -453,7 +509,8 @@
     "name": "Withdrawn Year",
     "desc": "Year the drug was first withdrawn in any country",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__withdrawn_country",
@@ -461,7 +518,8 @@
     "name": "Withdrawn Country",
     "desc": "List of countries/regions where the drug has been withdrawn",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__withdrawn_reason",
@@ -469,7 +527,8 @@
     "name": "Withdrawn Reason",
     "desc": "Reasons for withdrawl (e.g., safety)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__molecule_dictionary__withdrawn_class",
@@ -477,23 +536,26 @@
     "name": "Withdrawn Class",
     "desc": "High level categories for the withdrawn reason (e.g., Cardiotoxicity, Hepatotoxicity)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_id",
     "sql": "assays.assay_id",
-    "name": "Assay Id",
+    "name": "Assay ID",
     "desc": "Unique ID for the assay",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__doc_id",
     "sql": "assays.doc_id",
-    "name": "Doc Id",
+    "name": "Document ID",
     "desc": "Foreign key to documents table",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__description",
@@ -501,7 +563,8 @@
     "name": "Description",
     "desc": "Description of the reported assay",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_type",
@@ -509,7 +572,8 @@
     "name": "Assay Type",
     "desc": "Assay classification, e.g. B=Binding assay, A=ADME assay, F=Functional assay",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_test_type",
@@ -517,7 +581,8 @@
     "name": "Assay Test Type",
     "desc": "Type of assay system (i.e., in vivo or in vitro)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_category",
@@ -525,7 +590,8 @@
     "name": "Assay Category",
     "desc": "screening, confirmatory (ie: dose-response), summary, panel or other.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_organism",
@@ -533,15 +599,17 @@
     "name": "Assay Organism",
     "desc": "Name of the organism for the assay system (e.g., the organism, tissue or cell line in which an assay was performed). May differ from the target organism (e.g., for a human protein expressed in non-human cells, or pathogen-infected human cells).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_tax_id",
     "sql": "assays.assay_tax_id",
-    "name": "Assay Tax Id",
+    "name": "Assay Tax ID",
     "desc": "NCBI tax ID for the assay organism.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_strain",
@@ -549,7 +617,8 @@
     "name": "Assay Strain",
     "desc": "Name of specific strain of the assay organism used (where known)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_tissue",
@@ -557,7 +626,8 @@
     "name": "Assay Tissue",
     "desc": "Name of tissue used in the assay system (e.g., for tissue-based assays) or from which the assay system was derived (e.g., for cell/subcellular fraction-based assays).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_cell_type",
@@ -565,7 +635,8 @@
     "name": "Assay Cell Type",
     "desc": "Name of cell type or cell line used in the assay system (e.g., for cell-based assays).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__assay_subcellular_fraction",
@@ -573,15 +644,17 @@
     "name": "Assay Subcellular Fraction",
     "desc": "Name of subcellular fraction used in the assay system (e.g., microsomes, mitochondria).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__tid",
     "sql": "assays.tid",
-    "name": "Tid",
+    "name": "Target ID",
     "desc": "Target identifier to which this assay has been mapped. Foreign key to target_dictionary. From ChEMBL_15 onwards, an assay will have only a single target assigned.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__relationship_type",
@@ -589,7 +662,8 @@
     "name": "Relationship Type",
     "desc": "Flag indicating of the relationship between the reported target in the source document and the assigned target from TARGET_DICTIONARY. Foreign key to RELATIONSHIP_TYPE table.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__confidence_score",
@@ -597,7 +671,8 @@
     "name": "Confidence Score",
     "desc": "Confidence score, indicating how accurately the assigned target(s) represents the actually assay target. Foreign key to CONFIDENCE_SCORE table. 0 means uncurated/unassigned, 1 = low confidence to 9 = high confidence.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__curated_by",
@@ -605,79 +680,89 @@
     "name": "Curated By",
     "desc": "Indicates the level of curation of the target assignment. Foreign key to curation_lookup table.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__src_id",
     "sql": "assays.src_id",
-    "name": "Src Id",
+    "name": "Source ID",
     "desc": "Foreign key to source table",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__src_assay_id",
     "sql": "assays.src_assay_id",
-    "name": "Src Assay Id",
+    "name": "Source Assay ID",
     "desc": "Identifier for the assay in the source database/deposition (e.g., pubchem AID)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__chembl_id",
     "sql": "assays.chembl_id",
-    "name": "Chembl Id",
+    "name": "Assay ChEMBL ID",
     "desc": "ChEMBL identifier for this assay (for use on web interface etc)",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__cell_id",
     "sql": "assays.cell_id",
-    "name": "Cell Id",
+    "name": "Cell ID",
     "desc": "Foreign key to cell dictionary. The cell type or cell line used in the assay",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__bao_format",
     "sql": "assays.bao_format",
-    "name": "Bao Format",
+    "name": "BAO Format",
     "desc": "ID for the corresponding format type in BioAssay Ontology (e.g., cell-based, biochemical, organism-based etc)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__tissue_id",
     "sql": "assays.tissue_id",
-    "name": "Tissue Id",
+    "name": "Tissue ID",
     "desc": "ID for the corresponding tissue/anatomy in Uberon. Foreign key to tissue_dictionary",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__variant_id",
     "sql": "assays.variant_id",
-    "name": "Variant Id",
+    "name": "Variant ID",
     "desc": "Foreign key to variant_sequences table. Indicates the mutant/variant version of the target used in the assay (where known/applicable)",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__assays__aidx",
     "sql": "assays.aidx",
-    "name": "Aidx",
+    "name": "AIDX",
     "desc": "The Depositor Defined Assay Identifier",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__target_components__targcomp_id",
     "sql": "target_components.targcomp_id",
-    "name": "Targcomp Id",
+    "name": "Target Component ID",
     "desc": "Primary key.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__target_components__homologue",
@@ -685,15 +770,17 @@
     "name": "Homologue",
     "desc": "Indicates that the given component is a homologue of the correct component (e.g., from a different species) when set to 1. This may be the case if the sequence for the correct protein/nucleic acid cannot be found in sequence databases. A value of 2 indicates that the sequence given is a representative of a species group, e.g., an E. coli protein to represent the target of a broad-spectrum antibiotic.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__component_id",
     "sql": "component_sequences.component_id",
-    "name": "Component Id",
+    "name": "Component ID",
     "desc": "Primary key. Unique identifier for the component.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__component_type",
@@ -701,15 +788,17 @@
     "name": "Component Type",
     "desc": "Type of molecular component represented (e.g., 'PROTEIN','DNA','RNA').",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__accession",
     "sql": "component_sequences.accession",
-    "name": "Accession",
+    "name": "Accession ID",
     "desc": "Accession for the sequence in the source database from which it was taken (e.g., UniProt accession for proteins).",
     "visible": true,
-    "url": "https://www.uniprot.org/uniprot/%s"
+    "url": "https://www.uniprot.org/uniprot/%s",
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__sequence",
@@ -717,15 +806,17 @@
     "name": "Sequence",
     "desc": "A representative sequence for the molecular component, as given in the source sequence database (not necessarily the exact sequence used in the assay).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__sequence_md5sum",
     "sql": "component_sequences.sequence_md5sum",
-    "name": "Sequence Md5Sum",
+    "name": "Sequence MD5sum",
     "desc": "MD5 checksum of the sequence.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__description",
@@ -733,15 +824,17 @@
     "name": "Description",
     "desc": "Description/name for the molecular component, usually taken from the source sequence database.",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__tax_id",
     "sql": "component_sequences.tax_id",
-    "name": "Tax Id",
+    "name": "Tax ID",
     "desc": "NCBI tax ID for the sequence in the source database (i.e., species that the protein/nucleic acid sequence comes from).",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__organism",
@@ -749,22 +842,25 @@
     "name": "Organism",
     "desc": "Name of the organism the sequence comes from.",
     "visible": true,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__db_source",
     "sql": "component_sequences.db_source",
-    "name": "Db Source",
+    "name": "DB Source",
     "desc": "The name of the source sequence database from which sequences/accessions are taken. For UniProt proteins, this field indicates whether the sequence is from SWISS-PROT or TREMBL.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   },
   {
     "id": "activity__component_sequences__db_version",
     "sql": "component_sequences.db_version",
-    "name": "Db Version",
+    "name": "DB Version",
     "desc": "The version of the source sequence database from which sequences/accession were last updated.",
     "visible": false,
-    "url": null
+    "url": null,
+    "childrow": false
   }
 ]
