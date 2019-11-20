@@ -329,6 +329,20 @@ def mapToChembl(unknownIds, sourceId):
 
     return tuple(chemblIds)
 
+def mapToUniprot(unknownIds, sourceId):
+    url = "https://www.uniprot.org/uploadlists/"
+    params = {
+            "from": sourceId,
+            "to": "ACC",
+            "format": "tab",
+            "query": " ".join(unknownIds)
+            }
+
+    results = requests.get(url,params=params).text
+    return tuple([ line.split("\t")[1]  for line in results.splitlines() if  "From\tTo" not in line])
+
+
+
 def getUniChemSources():
     sources = {}
     sourceReq = requests.get("https://www.ebi.ac.uk/unichem/rest/src_ids/")

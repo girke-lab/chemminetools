@@ -37,8 +37,8 @@ td.details-control {
 								<div class="form-group mt-3">
 									<label for="source-id-select">Database:</label>
 									<select id="source-id-select" name="source_id">
-									{% for id,name in sources.items %}
-										<option value="{{id}}">{{name}}</option>
+									{% for id,name in compoundDbs.items|order_by:1 %}
+										<option value="{{id}}" {% if defaultCompoundDb == id %}selected {% endif %} >{{name}}</option>
 									{% endfor %}
 									</select>
 									<p>Import compound IDs from workbench:</p>
@@ -68,6 +68,14 @@ td.details-control {
 									<input id="include-activity-chkbox" type="checkbox" name="include_activity">
 									<label for="include-activity-chkbox">&nbsp;Include Activity Results (slow)</label>
 									<p></p>
+									<label for="source-id-select">Database:</label>
+									<select id="source-id-select" name="source_id">
+									{% for id,name in proteinDbs.items|order_by:1 %}
+										<option value="{{id}}" {% if defaultProteinDb == id %}selected {% endif %} >{{name}}</option>
+									{% endfor %}
+									</select>
+									<br/>
+
 									<label for="target-ids">Target Protein IDs:</label>
 									<textarea id="target-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
 									<br>
