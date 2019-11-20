@@ -76,7 +76,23 @@ def newTS(request):
                 activity_matches = None
             else:
                 activity_matches = myActivitySearch.search_grouped(ids)
+
+            #extract table name for grouping columns
+            for col in annotation_list:
+                try:
+                    col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
+                except:
+                    col["table"] = ""
+            for col in activity_list:
+                try:
+                    col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
+                except:
+                    col["table"] = ""
+
+
+
     except Exception as e:
+        print("exception in newTS: "+str(e))
         message = str(e)
     
     context = {

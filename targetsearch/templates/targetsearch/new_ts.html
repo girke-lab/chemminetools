@@ -6,6 +6,12 @@
 td.details-control {
 	cursor: pointer;
 }
+.column-set {
+	border: 1px solid #ccc;
+	border-radius: 16px;
+	padding: 0.01em 16px;
+	margin: 1em;
+}
 {% endblock extra_styles %}
 
 {% block base_content %}
@@ -161,7 +167,7 @@ td.details-control {
 
 <!-- Column select modal windows -->
 <div class="modal fade" id="columnSelectModalAnnotation" tabindex="-1" role="dialog" aria-labelledBy="csmAnnotationTitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="csmAnnotationTitle">Column Select - Annotation</h5>
@@ -173,16 +179,39 @@ td.details-control {
 				<button type="button" class="btn btn-primary" id="btn-annotation-select-all">Select All</button>
 				<button type="button" class="btn btn-primary" id="btn-annotation-deselect-all">Deselect All</button>
 				<button type="button" class="btn btn-primary" id="btn-annotation-defaults">Restore Defaults</button>
+
+
 				<fieldset>
 					<div style="display: none;">
-						<input type="checkbox" class="toggle-vis chkbox-annotation{% if annotation_child_rows %} chkbox-annotation-default{% endif %}" name="annotation-column" id="annotation__child_row_dropdown" value="0">
+						<input type="checkbox" class="toggle-vis chkbox-annotation{% if annotation_child_rows %} chkbox-annotation-default{% endif %}" 
+							name="annotation-column" id="annotation__child_row_dropdown" value="0">
 					</div>
+					<div class="">
 					{% for col in annotation_list %}
-					<div>
-						<input type="checkbox" class="toggle-vis chkbox-annotation{% if col.visible %} chkbox-annotation-default{% endif %}" name="annotation-column" id="{{col.id}}" value="{{forloop.counter}}">
-						<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}</label>
-					</div>
+
+						{% ifchanged col.table %}
+							</div>
+							<div class="bg-light column-set" id="column_set_{{forloop.counter}}" >
+								<div>
+									<h5 style="display:inline-block">{{col.table|capfirst}}</h5>
+									<span  style="margin:1rem">
+										Select 
+										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.annotation_table,'column_set_{{forloop.counter}}',true)">All</a>
+										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.annotation_table,'column_set_{{forloop.counter}}',false)">None</a>
+									</span>
+								</div>
+					 	{% endifchanged %}
+
+
+
+						<span style="width: 18rem; display: inline-block;">
+							<input type="checkbox" class="toggle-vis chkbox-annotation{% if col.visible %} chkbox-annotation-default{% endif %}" 
+								name="annotation-column" id="{{col.id}}" value="{{forloop.counter}}"/>
+							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}
+							
+						</span>
 					{% endfor %}
+					</div>
 				</fieldset>
 			</div>
 			<div class="modal-footer">
@@ -194,7 +223,7 @@ td.details-control {
 
 {% if activity_matches is not None %}
 <div class="modal fade" id="columnSelectModalActivity" tabindex="-1" role="dialog" aria-labelledBy="csmActivityTitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h5 class="modal-title" id="csmActivityTitle">Column Select - Activity</h5>
@@ -210,12 +239,29 @@ td.details-control {
 					<div style="display: none;">
 						<input type="checkbox" class="toggle-vis chkbox-activity{% if activity_child_rows %} chkbox-activity-default{% endif %}" name="activity-column" id="activity__child_row_dropdown" value="0">
 					</div>
+					<div class="">
 					{% for col in activity_list %}
-					<div>
-						<input type="checkbox" class="toggle-vis chkbox-activity{% if col.visible %} chkbox-activity-default{% endif %}" name="activity-column" id="{{col.id}}" value="{{forloop.counter}}">
-						<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}</label>
-					</div>
+
+						{% ifchanged col.table %}
+							</div>
+							<div class="bg-light column-set" id="column_set_{{forloop.counter}}" >
+								<div>
+									<h5 style="display:inline-block">{{col.table|capfirst}}</h5>
+									<span  style="margin:1rem">
+										Select 
+										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.activity_table,'column_set_{{forloop.counter}}',true)">All</a>
+										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.activity_table,'column_set_{{forloop.counter}}',false)">None</a>
+									</span>
+								</div>
+					 	{% endifchanged %}
+
+						<span style="width: 18rem; display: inline-block;">
+							<input type="checkbox" class="toggle-vis chkbox-activity{% if col.visible %} chkbox-activity-default{% endif %}" 
+								name="activity-column" id="{{col.id}}" value="{{forloop.counter}}">
+							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}</label>
+						</span>
 					{% endfor %}
+					</div>
 				</fieldset>
 			</div>
 			<div class="modal-footer">
@@ -235,6 +281,8 @@ td.details-control {
 {% include "alertify.html" %}
 
 <script type="text/javascript">
+	var targetSearch = {};// namespace for public variables
+
 	// Shows or hides all columns for a table
 	function selectAll(table_obj, chkbox_class, is_visible) {
 		// Use columnExportSelector to leave the child row dropdown column alone
@@ -331,6 +379,13 @@ td.details-control {
 		
 		console.log("columnExportSelector: Check your values. You shouldn't see this.");
 	}
+	function toggleTableColumns(table_obj,setId, state) {
+		$("#"+setId+" input").each(function(){
+			table_obj.column( $(this).attr('value') ).visible(state);
+			$(this).prop('checked', state);
+		});
+		return false;
+	}
 	
 	$(document).ready(function() {
 		jQuery("#tags").selectize({
@@ -401,6 +456,9 @@ td.details-control {
 				},
 			],
 		});
+
+		targetSearch.annotation_table = annotation_table;
+		targetSearch.activity_table = activity_table;
 		
 		annotation_table.buttons().container().appendTo( $('#csv-buttons-annotation') );
 		activity_table.buttons().container().appendTo( $('#csv-buttons-activity') );
