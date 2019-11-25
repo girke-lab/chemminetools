@@ -116,6 +116,25 @@ class MeshIndicationSearch:
         data = [ d._asdict() for d in data ]
         return data
 
+class DrugIndicationSearch:
+    """Class containing drug indication search functions and related data"""
+    
+    def __init__(self):
+        """Initialize a DrugIndicationSearch instance."""
+        
+        with open(os.path.join(settings.PROJECT_DIR, 'targetsearch/drugind_list.json')) as f:
+            self.drugind_list = json.load(f)
+    
+    def search(self, molregno):
+        """Search for drug indications by molregno (compound_structures primary key)"""
+        
+        query = sql.SQL("""SELECT {cols} FROM drug_indication WHERE molregno = %s""")\
+                .format(cols=sql.SQL(', ').join(sql.SQL("{} AS {}".format(c['sql'], c['id'])) for c in self.drugind_list))
+        
+        data = runQuery(query, (molregno,))
+        data = [ d._asdict() for d in data ]
+        return data
+
 class AnnotationSearch:
     """Class containing annotation search functions and related data"""
     
@@ -170,7 +189,6 @@ class AnnotationSearch:
                         JOIN drug_mechanism USING(molregno)
                         JOIN target_components USING(tid)
                         JOIN component_sequences USING(component_id)
-                        LEFT JOIN drug_indication USING(molregno)
                         WHERE {condition}
                         ORDER BY 1""")\
                 .format(cols=sql.SQL(', ').join(sql.SQL("{} AS {}".format(c['sql'], c['id'])) for c in self.annotation_list),

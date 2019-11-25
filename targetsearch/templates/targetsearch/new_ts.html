@@ -300,6 +300,10 @@ td.details-control {
 		
 		return '<table>' + inner_data + '</table>';
 	}
+	/*
+	function drugIndTable(molregno) {
+		
+	}*/
 	
 	function toggleChildRow(table_name, table_obj, td_obj) {
 		var tr = td_obj.closest('tr');
@@ -312,10 +316,22 @@ td.details-control {
 			icon.removeClass('fa-angle-down');
 			icon.addClass('fa-angle-right');
 		} else {
-			row.child( childRow(table_name, row.data()) ).show();
-			tr.addClass('shown');
-			icon.removeClass('fa-angle-right');
-			icon.addClass('fa-angle-down');
+			//row.child( childRow(table_name, row.data()) ).show();
+			if (row.child() && row.child().length) {
+				row.child.show();
+				tr.addClass('shown');
+				icon.removeClass('fa-angle-right');
+				icon.addClass('fa-angle-down');
+			} else {
+				row.child('<div class="childrow">Loading data...</div>').show();
+				tr.addClass('shown');
+				icon.removeClass('fa-angle-right');
+				icon.addClass('fa-angle-down');
+				
+				var div = row.child().find('div.childrow');
+				var molregno = row.data()[5];
+				div.load("{% url 'drugIndTable' %}", "molregno="+molregno);
+			}
 		}
 	}
 	

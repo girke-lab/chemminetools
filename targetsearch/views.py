@@ -1,12 +1,13 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+#from django.http import HttpResponse
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from django.contrib import messages
 
 from .chembl_helpers import (
-    AnnotationWithMeshSearch,
+    AnnotationSearch,
     ActivitySearch,
+    DrugIndicationSearch,
     mapToChembl
     )
 
@@ -64,7 +65,7 @@ def newTS(request):
         if len(ids) != 0:
             query_submit = True
             
-            myAnnotationSearch = AnnotationWithMeshSearch(id_type)
+            myAnnotationSearch = AnnotationSearch(id_type)
             annotation_list = myAnnotationSearch.annotation_list
             annotation_matches = myAnnotationSearch.search_grouped(ids)
             
@@ -94,3 +95,74 @@ def newTS(request):
         }
     
     return render(request, 'targetsearch/new_ts.html', context)
+
+from django.http import JsonResponse
+
+def drugIndAjax(request):
+    if 'molregno' in request.GET:
+        molregno = request.GET['molregno']
+    else:
+        error = { 'error' : 'Missing molregno in GET variables' }
+        return JsonResponse(error)
+    
+    data = [
+        {
+            'drugind_id' : 24234,
+            'record_id' : 1344812,
+            'max_phase_for_ind' : 3,
+            'mesh_id' : 'D003324',
+            'mesh_heading' : 'Coronary Heart Disease',
+            'efo_id' : 'EFO:0000378',
+            'efo_term' : 'coronary heart disease',
+        },
+        {
+            'drugind_id' : 24236,
+            'record_id' : 1344812,
+            'max_phase_for_ind' : 4,
+            'mesh_id' : 'D008881',
+            'mesh_heading' : 'Migrane Disorders',
+            'efo_id' : 'EFO:0003821',
+            'efo_term' : 'migrane disorder',
+        },
+        {
+            'drugind_id' : 25848,
+            'record_id' : 1344812,
+            'max_phase_for_ind' : 3,
+            'mesh_id' : 'D010300',
+            'mesh_heading' : 'Parkinson Disease',
+            'efo_id' : 'EFO:0002508',
+            'efo_term' : "Parkinson's disease",
+        },
+    ]
+    
+    return JsonResponse({'data' : data})
+
+def drugIndTable(request):
+    error = None
+    table_info = None
+    table_data = None
+    
+    molregno = None
+    
+    if 'molregno' in request.GET:
+        molregno = request.GET['molregno']
+    else:
+        error = "Error: Missing molregno in GET variables"
+    
+    try:
+        if molregno != None:
+            myDrugIndSearch = DrugIndicationSearch()
+            table_info = myDrugIndSearch.drugind_list
+            table_data = myDrugIndSearch.search(molregno)
+    except:
+        error = str(e)
+    
+    context = {
+        'error' : error,
+        'header' : True,
+        'footer' : False,
+        'table_info' : table_info,
+        'table_data' : table_data,
+    }
+    
+    return render(request, 'targetsearch/table.html', context)
