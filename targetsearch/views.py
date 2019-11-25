@@ -8,7 +8,8 @@ from .chembl_helpers import (
     AnnotationSearch,
     ActivitySearch,
     DrugIndicationSearch,
-    mapToChembl
+    mapToChembl,
+    mapToUniprot
     )
 
 from django.conf import settings
@@ -16,13 +17,13 @@ from django.conf import settings
 import os
 import csv
 
-def readSources():
+def readSources(type):
     sources = {}
-    filename = os.path.join(settings.PROJECT_DIR,"unichem_sources.txt")
+    filename = os.path.join(settings.PROJECT_DIR,type+"_sources.txt")
     with open(filename) as f:
         for line in f:
             (key, val) = line.split("\t")
-            sources[int(key)] = val
+            sources[key.strip()] = val.strip()
     return sources
 
 @lockdown()
@@ -35,7 +36,10 @@ def newTS(request):
     activity_list = None
     activity_matches = None
     allTags = Tag.allUserTagNames(request.user)
-    sourceDbs = readSources()
+    compoundDbs = readSources("unichem")
+    proteinDbs= readSources("uniprot")
+    defaultCompoundDb = "1"
+    defaultProteinDb = "ACC+ID"
     
     # Default GET request variables
     id_type = 'compound'
@@ -61,6 +65,8 @@ def newTS(request):
         # Only attempt conversion for compound search. Skip if already ChEMBL.
         if id_type == 'compound' and source_id != '1':
             ids = list(mapToChembl(ids, source_id))
+        if id_type == 'target' and source_id != 'ACC':
+            ids = list(mapToUniprot(ids, source_id))
         
         if len(ids) != 0:
             query_submit = True
@@ -77,7 +83,23 @@ def newTS(request):
                 activity_matches = None
             else:
                 activity_matches = myActivitySearch.search_grouped(ids)
+
+            #extract table name for grouping columns
+            for col in annotation_list:
+                try:
+                    col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
+                except:
+                    col["table"] = ""
+            for col in activity_list:
+                try:
+                    col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
+                except:
+                    col["table"] = ""
+
+
+
     except Exception as e:
+        print("exception in newTS: "+str(e))
         message = str(e)
     
     context = {
@@ -91,7 +113,10 @@ def newTS(request):
         'activity_matches' : activity_matches,
         'activity_child_rows' : False,
         'tags' : allTags,
-        'sources' : sourceDbs,
+        'compoundDbs' : compoundDbs,
+        'defaultCompoundDb': defaultCompoundDb,
+        'proteinDbs': proteinDbs,
+        'defaultProteinDb': defaultProteinDb
         }
     
     return render(request, 'targetsearch/new_ts.html', context)
