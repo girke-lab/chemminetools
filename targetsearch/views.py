@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from django.contrib import messages
@@ -11,7 +11,8 @@ from .chembl_helpers import (
     AnnotationWithMeshSearch,
     ActivitySearch,
     mapToChembl,
-    mapToUniprot
+    mapToUniprot,
+    compoundNameAutocomplete
     )
 
 from django.conf import settings
@@ -123,3 +124,7 @@ def newTS(request):
         }
     
     return render(request, 'targetsearch/new_ts.html', context)
+def compoundNames(request,query):
+    names = compoundNameAutocomplete(query)
+    data = [ {'chembl_id': n.chembl_id, 'name': n.synonyms} for n in names]
+    return JsonResponse(data,safe=False)

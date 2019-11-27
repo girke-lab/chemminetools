@@ -375,6 +375,15 @@ def getUniChemSources():
 
     return sources;
 
+def compoundNameAutocomplete(nameQuery): 
+    sqlQuery = sql.SQL("""
+               SELECT DISTINCT chembl_id, synonyms 
+               FROM molecule_synonyms 
+                JOIN molecule_dictionary USING(molregno) 
+                WHERE synonyms ilike %s """)
+	
+    return runQuery(sqlQuery,("%"+nameQuery+"%",))
+
 
 #getUniChemSources()
 #mapToChembl(['DB00829','DB00945'],2)
