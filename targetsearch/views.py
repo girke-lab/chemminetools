@@ -3,6 +3,9 @@ from django.http import HttpResponse
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from django.contrib import messages
+import sys
+import traceback
+
 
 from .chembl_helpers import (
     AnnotationWithMeshSearch,
@@ -98,7 +101,8 @@ def newTS(request):
 
 
     except Exception as e:
-        print("exception in newTS: "+str(e))
+        print("exception in newTS:", sys.exc_info())
+        traceback.print_tb(sys.exc_info()[2])
         message = str(e)
     
     context = {

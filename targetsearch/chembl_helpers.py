@@ -55,6 +55,16 @@ def get_chembl_smiles(chemblIds):
       WHERE chembl_id_lookup.chembl_id IN %s""",(chemblIds,))
     return [row[0] for row in data]
 
+def batchQuery(runQuery,ids, batchSize=1000):
+    finalResult = [] 
+    print("batching "+str(len(ids))+" ids")
+    
+    for i in range(0,len(ids),batchSize):
+        print("batch "+str(i)+" : "+str(i+batchSize))
+        batchResult = runQuery(ids[i:i+batchSize])
+        finalResult = finalResult + batchResult
+    return finalResult
+
 class MeshIndicationSearch:
     """Class containing MeSH indication search functions and related data"""
     
@@ -77,6 +87,9 @@ class MeshIndicationSearch:
     mesh_ind_group_str = 'GROUP BY ' + ', '.join(mesh_ind_sql)
     
     def search(id_type, ids):
+        return batchQuery(lambda idBatch: MeshIndicationSearch.__search(id_type,idBatch),ids)
+
+    def __search(id_type, ids):
         """Search for MeSH indications. Basically the original limited-column search.
         
         The idea is to compare the limited columns from the original search with
@@ -154,6 +167,8 @@ class AnnotationSearch:
                 break
     
     def search(self, ids):
+        return batchQuery(lambda idBatch: self.__search(idBatch),ids)
+    def __search(self, ids):
         """Search for targets by annotations, returning all database columns.
         
         By returning all columns, we allow the user to decide which columns are
@@ -222,6 +237,8 @@ class AnnotationWithMeshSearch:
                                      })
     
     def search(self, ids):
+        return batchQuery(lambda idBatch: self.__search(idBatch),ids)
+    def __search(self, ids):
         annotation_data = self.myAnnotationSearch.search(ids)
         mesh_ind_data = MeshIndicationSearch.search(self.id_type, ids)
         
@@ -283,6 +300,8 @@ class ActivitySearch:
                 break
     
     def search(self, ids):
+        return batchQuery(lambda idBatch: self.__search(idBatch),ids)
+    def __search(self, ids):
         """Search for targets by activity, returning all database columns.
         
         By returning all columns, we allow the user to decide which columns are
