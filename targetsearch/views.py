@@ -30,7 +30,6 @@ def readSources(type):
             sources[key.strip()] = val.strip()
     return sources
 
-@lockdown()
 def newTS(request):
     # Default local variables
     query_submit = False
