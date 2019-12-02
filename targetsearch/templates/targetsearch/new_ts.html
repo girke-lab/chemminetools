@@ -41,17 +41,40 @@ td.details-control {
 										<option value="{{id}}" {% if defaultCompoundDb == id %}selected {% endif %} >{{name}}</option>
 									{% endfor %}
 									</select>
-									<p>Import compound IDs from workbench:</p>
-									<span id="compound_count">0</span> compounds selected.
-									<select id="tags" name="tags" multiple placeholder="Compound Tags">
-										<option value="all">All</option>
-										{% for tag in tags %}
-											<option value="{{tag}}">{{tag}}</option>
-										{% endfor %}
-									</select>
-									<label for="compound-ids">Or enter compound IDs:</label>
-									<textarea id="compound-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
-									<br>
+									<ul class="nav nav-tabs">
+									  <li class="nav-item">
+										<a class="nav-link active" href="#workbench" data-toggle="tab">Workbench</a>
+									  </li>
+									  <li class="nav-item">
+										<a class="nav-link" href="#compoundids" data-toggle="tab">Compound IDs</a>
+									  </li>
+									</ul>
+									<div class='tab-content'>
+										<div id="workbench" class='tab-pane active'>
+											 <div class="card text-white bg-secondary my-3 p-2">
+												<h6 class='card-title'>Import compound IDs from workbench</h6>
+												<p><span id="compound_count">0</span> compounds selected.</p>
+												<select id="tags" name="tags" multiple placeholder="Compound Tags">
+													<option value="all">All</option>
+													{% for tag in tags %}
+														<option value="{{tag}}">{{tag}}</option>
+													{% endfor %}
+												</select>
+											</div>
+
+										</div>
+										<div id="compoundids" class='tab-pane '>
+											<div class="card text-white bg-secondary my-3 p-2">
+												<h6 class='card-title' for="compound-ids">Enter compound IDs</h6>
+												<p>Use the 'Compound Name Search' box to search for compounds by name, or
+												enter compound ids into box below.</p>
+												
+												<select id="compound_autocomplete"  placeholder="Compound Name Search"> </select>
+												<textarea id="compound-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+											</div>
+
+										</div>
+									</div>
 									<input type="hidden" name="id_type" value="compound">
 									<button type="submit" class="btn btn-primary">Search</button>
 								</div>
@@ -418,6 +441,26 @@ td.details-control {
 				setCompoundCount(value);
 			},
 		});
+        jQuery("#compound_autocomplete").selectize({
+            valueField: "chembl_id",
+            labelField: "name",
+            searchField: ["name"],
+            load: function(query,callback){
+                jQuery.get("compoundNames/"+query).
+                    then(function(result){
+                        console.log("got back suggestions: ",result);
+                        callback(result);
+                    });
+            },
+            onChange:function(value){
+				if(value == null || value === "")
+					return;
+                console.log("new compound selected: ",value);
+                var compoundArea= jQuery("#compound-ids");
+                compoundArea.val(compoundArea.val() + "\n"+value);
+
+            },
+        });
 		
 		var annotation_table = $('#annotation-table').DataTable({
 			dom: 'frltip',

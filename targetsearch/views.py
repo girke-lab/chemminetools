@@ -1,15 +1,19 @@
 from django.shortcuts import render
-#from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from django.contrib import messages
+import sys
+import traceback
+
 
 from .chembl_helpers import (
     AnnotationSearch,
     ActivitySearch,
     DrugIndicationSearch,
     mapToChembl,
-    mapToUniprot
+    mapToUniprot,
+    compoundNameAutocomplete
     )
 
 from django.conf import settings
@@ -99,7 +103,8 @@ def newTS(request):
 
 
     except Exception as e:
-        print("exception in newTS: "+str(e))
+        print("exception in newTS:", sys.exc_info())
+        traceback.print_tb(sys.exc_info()[2])
         message = str(e)
     
     context = {
@@ -120,47 +125,6 @@ def newTS(request):
         }
     
     return render(request, 'targetsearch/new_ts.html', context)
-
-from django.http import JsonResponse
-
-def drugIndAjax(request):
-    if 'molregno' in request.GET:
-        molregno = request.GET['molregno']
-    else:
-        error = { 'error' : 'Missing molregno in GET variables' }
-        return JsonResponse(error)
-    
-    data = [
-        {
-            'drugind_id' : 24234,
-            'record_id' : 1344812,
-            'max_phase_for_ind' : 3,
-            'mesh_id' : 'D003324',
-            'mesh_heading' : 'Coronary Heart Disease',
-            'efo_id' : 'EFO:0000378',
-            'efo_term' : 'coronary heart disease',
-        },
-        {
-            'drugind_id' : 24236,
-            'record_id' : 1344812,
-            'max_phase_for_ind' : 4,
-            'mesh_id' : 'D008881',
-            'mesh_heading' : 'Migrane Disorders',
-            'efo_id' : 'EFO:0003821',
-            'efo_term' : 'migrane disorder',
-        },
-        {
-            'drugind_id' : 25848,
-            'record_id' : 1344812,
-            'max_phase_for_ind' : 3,
-            'mesh_id' : 'D010300',
-            'mesh_heading' : 'Parkinson Disease',
-            'efo_id' : 'EFO:0002508',
-            'efo_term' : "Parkinson's disease",
-        },
-    ]
-    
-    return JsonResponse({'data' : data})
 
 def drugIndTable(request):
     error = None
@@ -191,3 +155,8 @@ def drugIndTable(request):
     }
     
     return render(request, 'targetsearch/table.html', context)
+
+def compoundNames(request,query):
+    names = compoundNameAutocomplete(query)
+    data = [ {'chembl_id': n.chembl_id, 'name': n.synonyms} for n in names]
+    return JsonResponse(data,safe=False)
