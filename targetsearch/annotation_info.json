@@ -2,523 +2,467 @@
   {
     "id": "annotation__chembl_id_lookup__chembl_id",
     "sql": "chembl_id_lookup.chembl_id",
+    "table": "ChEMBL ID Lookup",
     "name": "ChEMBL ID",
     "desc": "ChEMBL identifier",
     "visible": true,
-    "url": "https://www.ebi.ac.uk/chembl/compound_report_card/%s/",
-    "childrow": false
+    "url": "https://www.ebi.ac.uk/chembl/compound_report_card/%s/"
   },
   {
     "id": "annotation__chembl_id_lookup__entity_type",
     "sql": "chembl_id_lookup.entity_type",
+    "table": "ChEMBL ID Lookup",
     "name": "Entity Type",
     "desc": "Type of entity (e.g., COMPOUND, ASSAY, TARGET)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__chembl_id_lookup__entity_id",
     "sql": "chembl_id_lookup.entity_id",
+    "table": "ChEMBL ID Lookup",
     "name": "Entity ID",
     "desc": "Primary key for that entity in corresponding table (e.g., molregno for compounds, tid for targets)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__chembl_id_lookup__status",
     "sql": "chembl_id_lookup.status",
+    "table": "ChEMBL ID Lookup",
     "name": "Status",
     "desc": "Indicates whether the status of the entity within the database - ACTIVE, INACTIVE (downgraded), OBS (obsolete/removed).",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__molregno",
     "sql": "molecule_dictionary.molregno",
+    "table": "Molecule Dictionary",
     "name": "Molregno",
     "desc": "Internal Primary Key for the molecule",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__pref_name",
     "sql": "molecule_dictionary.pref_name",
+    "table": "Molecule Dictionary",
     "name": "Preferred Name",
     "desc": "Preferred name for the molecule",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__max_phase",
     "sql": "molecule_dictionary.max_phase",
+    "table": "Molecule Dictionary",
     "name": "Max Phase",
     "desc": "Maximum phase of development reached for the compound (4 = approved). Null where max phase has not yet been assigned.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__therapeutic_flag",
     "sql": "molecule_dictionary.therapeutic_flag",
+    "table": "Molecule Dictionary",
     "name": "Therapeutic Flag",
     "desc": "Indicates that a drug has a therapeutic application (as opposed to e.g., an imaging agent, additive etc).",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__dosed_ingredient",
     "sql": "molecule_dictionary.dosed_ingredient",
+    "table": "Molecule Dictionary",
     "name": "Dosed Ingredient",
     "desc": "Indicates that the drug is dosed in this form (e.g., a particular salt)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__structure_type",
     "sql": "molecule_dictionary.structure_type",
+    "table": "Molecule Dictionary",
     "name": "Structure Type",
     "desc": "Indications whether the molecule has a small molecule structure or a protein sequence (MOL indicates an entry in the compound_structures table, SEQ indications an entry in the protein_therapeutics table, NONE indicates an entry in neither table, e.g., structure unknown)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__chebi_par_id",
     "sql": "molecule_dictionary.chebi_par_id",
+    "table": "Molecule Dictionary",
     "name": "ChEBI Par ID",
     "desc": "Preferred ChEBI ID for the compound (where different from assigned)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__molecule_type",
     "sql": "molecule_dictionary.molecule_type",
+    "table": "Molecule Dictionary",
     "name": "Molecule Type",
     "desc": "Type of molecule (Small molecule, Protein, Antibody, Oligosaccharide, Oligonucleotide, Cell, Unknown)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__first_approval",
     "sql": "molecule_dictionary.first_approval",
+    "table": "Molecule Dictionary",
     "name": "First Approval",
     "desc": "Earliest known approval year for the molecule",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__oral",
     "sql": "molecule_dictionary.oral",
+    "table": "Molecule Dictionary",
     "name": "Oral",
     "desc": "Indicates whether the drug is known to be administered orally.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__parenteral",
     "sql": "molecule_dictionary.parenteral",
+    "table": "Molecule Dictionary",
     "name": "Parenteral",
     "desc": "Indicates whether the drug is known to be administered parenterally",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__topical",
     "sql": "molecule_dictionary.topical",
+    "table": "Molecule Dictionary",
     "name": "Topical",
     "desc": "Indicates whether the drug is known to be administered topically.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__black_box_warning",
     "sql": "molecule_dictionary.black_box_warning",
+    "table": "Molecule Dictionary",
     "name": "Black Box Warning",
     "desc": "Indicates that the drug has a black box warning",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__natural_product",
     "sql": "molecule_dictionary.natural_product",
+    "table": "Molecule Dictionary",
     "name": "Natural Product",
     "desc": "Indicates whether the compound is natural product-derived (currently curated only for drugs)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__first_in_class",
     "sql": "molecule_dictionary.first_in_class",
+    "table": "Molecule Dictionary",
     "name": "First In Class",
     "desc": "Indicates whether this is known to be the first compound of its class (e.g., acting on a particular target).",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__chirality",
     "sql": "molecule_dictionary.chirality",
+    "table": "Molecule Dictionary",
     "name": "Chirality",
     "desc": "Shows whether a drug is dosed as a racemic mixture (0), single stereoisomer (1) or is an achiral molecule (2)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__prodrug",
     "sql": "molecule_dictionary.prodrug",
+    "table": "Molecule Dictionary",
     "name": "Prodrug",
     "desc": "Indicates that the molecule is a pro-drug (see molecule hierarchy for active component, where known)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__inorganic_flag",
     "sql": "molecule_dictionary.inorganic_flag",
+    "table": "Molecule Dictionary",
     "name": "Inorganic Flag",
     "desc": "Indicates whether the molecule is inorganic (i.e., containing only metal atoms and <2 carbon atoms)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__usan_year",
     "sql": "molecule_dictionary.usan_year",
+    "table": "Molecule Dictionary",
     "name": "USAN Year",
     "desc": "The year in which the application for a USAN/INN name was made",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__availability_type",
     "sql": "molecule_dictionary.availability_type",
+    "table": "Molecule Dictionary",
     "name": "Availability Type",
     "desc": "The availability type for the drug (0 = discontinued, 1 = prescription only, 2 = over the counter)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__usan_stem",
     "sql": "molecule_dictionary.usan_stem",
+    "table": "Molecule Dictionary",
     "name": "USAN Stem",
     "desc": "Where the compound has been assigned a USAN name, this indicates the stem, as described in the USAN_STEM table.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__polymer_flag",
     "sql": "molecule_dictionary.polymer_flag",
+    "table": "Molecule Dictionary",
     "name": "Polymer Flag",
     "desc": "Indicates whether a molecule is a small molecule polymer (e.g., polistyrex)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__usan_substem",
     "sql": "molecule_dictionary.usan_substem",
+    "table": "Molecule Dictionary",
     "name": "USAN Substem",
     "desc": "Where the compound has been assigned a USAN name, this indicates the substem",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__usan_stem_definition",
     "sql": "molecule_dictionary.usan_stem_definition",
+    "table": "Molecule Dictionary",
     "name": "USAN Stem Definition",
     "desc": "Definition of the USAN stem",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__indication_class",
     "sql": "molecule_dictionary.indication_class",
+    "table": "Molecule Dictionary",
     "name": "Indication Class",
     "desc": "Indication class(es) assigned to a drug in the USP dictionary",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__withdrawn_flag",
     "sql": "molecule_dictionary.withdrawn_flag",
+    "table": "Molecule Dictionary",
     "name": "Withdrawn Flag",
     "desc": "Flag indicating whether the drug has been withdrawn in at least one country (not necessarily in the US)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__withdrawn_year",
     "sql": "molecule_dictionary.withdrawn_year",
+    "table": "Molecule Dictionary",
     "name": "Withdrawn Year",
     "desc": "Year the drug was first withdrawn in any country",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__withdrawn_country",
     "sql": "molecule_dictionary.withdrawn_country",
+    "table": "Molecule Dictionary",
     "name": "Withdrawn Country",
     "desc": "List of countries/regions where the drug has been withdrawn",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__withdrawn_reason",
     "sql": "molecule_dictionary.withdrawn_reason",
+    "table": "Molecule Dictionary",
     "name": "Withdrawn Reason",
     "desc": "Reasons for withdrawl (e.g., safety)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__molecule_dictionary__withdrawn_class",
     "sql": "molecule_dictionary.withdrawn_class",
+    "table": "Molecule Dictionary",
     "name": "Withdrawn Class",
     "desc": "High level categories for the withdrawn reason (e.g., Cardiotoxicity, Hepatotoxicity)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__mec_id",
     "sql": "drug_mechanism.mec_id",
+    "table": "Drug Mechanism",
     "name": "Drug Mechanism ID",
     "desc": "Primary key for each drug mechanism of action",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__record_id",
     "sql": "drug_mechanism.record_id",
+    "table": "Drug Mechanism",
     "name": "Record ID",
     "desc": "Record_id for the drug (foreign key to compound_records table)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__mechanism_of_action",
     "sql": "drug_mechanism.mechanism_of_action",
+    "table": "Drug Mechanism",
     "name": "Mechanism Of Action",
     "desc": "Description of the mechanism of action e.g., 'Phosphodiesterase 5 inhibitor'",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "annotation__drug_mechanism__tid",
     "sql": "drug_mechanism.tid",
+    "table": "Drug Mechanism",
     "name": "Target ID",
     "desc": "Target associated with this mechanism of action (foreign key to target_dictionary table)",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "annotation__drug_mechanism__site_id",
     "sql": "drug_mechanism.site_id",
+    "table": "Drug Mechanism",
     "name": "Site ID",
     "desc": "Binding site for the drug within the target (where known) - foreign key to binding_sites table",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__action_type",
     "sql": "drug_mechanism.action_type",
+    "table": "Drug Mechanism",
     "name": "Action Type",
     "desc": "Type of action of the drug on the target e.g., agonist/antagonist etc (foreign key to action_type table)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__direct_interaction",
     "sql": "drug_mechanism.direct_interaction",
+    "table": "Drug Mechanism",
     "name": "Direct Interaction",
     "desc": "Flag to show whether the molecule is believed to interact directly with the target (1 = yes, 0 = no)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__molecular_mechanism",
     "sql": "drug_mechanism.molecular_mechanism",
+    "table": "Drug Mechanism",
     "name": "Molecular Mechanism",
     "desc": "Flag to show whether the mechanism of action describes the molecular target of the drug, rather than a higher-level physiological mechanism e.g., vasodilator (1 = yes, 0 = no)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__disease_efficacy",
     "sql": "drug_mechanism.disease_efficacy",
+    "table": "Drug Mechanism",
     "name": "Disease Efficacy",
     "desc": "Flag to show whether the target assigned is believed to play a role in the efficacy of the drug in the indication(s) for which it is approved (1 = yes, 0 = no)",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__mechanism_comment",
     "sql": "drug_mechanism.mechanism_comment",
+    "table": "Drug Mechanism",
     "name": "Mechanism Comment",
     "desc": "Additional comments regarding the mechanism of action",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__selectivity_comment",
     "sql": "drug_mechanism.selectivity_comment",
+    "table": "Drug Mechanism",
     "name": "Selectivity Comment",
     "desc": "Additional comments regarding the selectivity of the drug",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__drug_mechanism__binding_site_comment",
     "sql": "drug_mechanism.binding_site_comment",
+    "table": "Drug Mechanism",
     "name": "Binding Site Comment",
     "desc": "Additional comments regarding the binding site of the drug",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__component_sequences__component_id",
     "sql": "component_sequences.component_id",
+    "table": "Component Sequences",
     "name": "Component ID",
     "desc": "Primary key. Unique identifier for the component.",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "annotation__target_components__targcomp_id",
     "sql": "target_components.targcomp_id",
+    "table": "Target Components",
     "name": "Target Component ID",
     "desc": "Primary key.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__target_components__homologue",
     "sql": "target_components.homologue",
+    "table": "Target Components",
     "name": "Homologue",
     "desc": "Indicates that the given component is a homologue of the correct component (e.g., from a different species) when set to 1. This may be the case if the sequence for the correct protein/nucleic acid cannot be found in sequence databases. A value of 2 indicates that the sequence given is a representative of a species group, e.g., an E. coli protein to represent the target of a broad-spectrum antibiotic.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__component_sequences__component_type",
     "sql": "component_sequences.component_type",
+    "table": "Component Sequences",
     "name": "Component Type",
     "desc": "Type of molecular component represented (e.g., 'PROTEIN','DNA','RNA').",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__component_sequences__accession",
     "sql": "component_sequences.accession",
+    "table": "Component Sequences",
     "name": "Accession ID",
     "desc": "Accession for the sequence in the source database from which it was taken (e.g., UniProt accession for proteins).",
     "visible": true,
-    "url": "https://www.uniprot.org/uniprot/%s",
-    "childrow": false
+    "url": "https://www.uniprot.org/uniprot/%s"
   },
   {
     "id": "annotation__component_sequences__sequence",
     "sql": "component_sequences.sequence",
+    "table": "Component Sequences",
     "name": "Sequence",
     "desc": "A representative sequence for the molecular component, as given in the source sequence database (not necessarily the exact sequence used in the assay).",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__component_sequences__sequence_md5sum",
     "sql": "component_sequences.sequence_md5sum",
+    "table": "Component Sequences",
     "name": "Sequence MD5sum",
     "desc": "MD5 checksum of the sequence.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__component_sequences__description",
     "sql": "component_sequences.description",
+    "table": "Component Sequences",
     "name": "Description",
     "desc": "Description/name for the molecular component, usually taken from the source sequence database.",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "annotation__component_sequences__tax_id",
     "sql": "component_sequences.tax_id",
+    "table": "Component Sequences",
     "name": "Tax ID",
     "desc": "NCBI tax ID for the sequence in the source database (i.e., species that the protein/nucleic acid sequence comes from).",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__component_sequences__organism",
     "sql": "component_sequences.organism",
+    "table": "Component Sequences",
     "name": "Organism",
     "desc": "Name of the organism the sequence comes from.",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "annotation__component_sequences__db_source",
     "sql": "component_sequences.db_source",
+    "table": "Component Sequences",
     "name": "DB Source",
     "desc": "The name of the source sequence database from which sequences/accessions are taken. For UniProt proteins, this field indicates whether the sequence is from SWISS-PROT or TREMBL.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   },
   {
     "id": "annotation__component_sequences__db_version",
     "sql": "component_sequences.db_version",
+    "table": "Component Sequences",
     "name": "DB Version",
     "desc": "The version of the source sequence database from which sequences/accession were last updated.",
-    "visible": false,
-    "url": null,
-    "childrow": false
+    "visible": false
   }
 ]

@@ -128,7 +128,7 @@ td.details-control {
 				<thead>
 					<tr>
 						<th><!-- Toggle child row --></th>
-						{% for col in annotation_list %}
+						{% for col in annotation_info %}
 						<th>{{col.name}}</th>
 						{% endfor %}
 					</tr>
@@ -138,12 +138,14 @@ td.details-control {
 						{% for row in rows %}
 						<tr>
 							<td class="details-control"><i class="fas fa-angle-right dropdown"></i></td>
-							{% for col in annotation_list %}
+							{% for col in annotation_info %}
 								{% dict_lookup row col.id as cell_value %}
-								{% if col.url is None %}
-									<td>{{ cell_value }}</td>
-								{% else %}
+								{% if 'html' in col.keys %}
+									<td>{% html_format col.html cell_value %}</td>
+								{% elif 'url' in col.keys %}
 									<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
+								{% else %}
+									<td>{{ cell_value }}</td>
 								{% endif %}
 							{% endfor %}
 						</tr>
@@ -167,7 +169,7 @@ td.details-control {
 				<thead>
 					<tr>
 						<th><!-- Toggle child row --></th>
-						{% for col in activity_list %}
+						{% for col in activity_info %}
 						<th>{{col.name}}</th>
 						{% endfor %}
 					</tr>
@@ -177,12 +179,14 @@ td.details-control {
 						{% for row in rows %}
 						<tr>
 							<td class="details-control"><i class="fas fa-angle-right dropdown"></i></td>
-							{% for col in activity_list %}
+							{% for col in activity_info %}
 								{% dict_lookup row col.id as cell_value %}
-								{% if col.url is None %}
-									<td>{{ cell_value }}</td>
-								{% else %}
+								{% if 'html' in col.keys %}
+									<td>{% html_format col.html cell_value %}</td>
+								{% elif 'url' in col.keys %}
 									<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
+								{% else %}
+									<td>{{ cell_value }}</td>
 								{% endif %}
 							{% endfor %}
 						</tr>
@@ -218,13 +222,13 @@ td.details-control {
 							name="annotation-column" id="annotation__child_row_dropdown" value="0">
 					</div>
 					<div class="">
-					{% for col in annotation_list %}
+					{% for col in annotation_info %}
 
 						{% ifchanged col.table %}
 							</div>
 							<div class="bg-light column-set" id="column_set_{{forloop.counter}}" >
 								<div>
-									<h5 style="display:inline-block">{{col.table|capfirst}}</h5>
+									<h5 style="display:inline-block">{{col.table}}</h5>
 									<span  style="margin:1rem">
 										Select 
 										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.annotation_table,'column_set_{{forloop.counter}}',true)">All</a>
@@ -271,7 +275,7 @@ td.details-control {
 						<input type="checkbox" class="toggle-vis chkbox-activity{% if activity_child_rows %} chkbox-activity-default{% endif %}" name="activity-column" id="activity__child_row_dropdown" value="0">
 					</div>
 					<div class="">
-					{% for col in activity_list %}
+					{% for col in activity_info %}
 
 						{% ifchanged col.table %}
 							</div>
@@ -302,6 +306,23 @@ td.details-control {
 	</div>
 </div>
 {% endif %}
+
+<!-- Drug Indication modal windows -->
+{% for molregno, table in drugind_tables.items %}
+<div class="modal fade" id="drugIndModal_{{molregno}}" tabindex="-1" role="dialog" aria-labelledBy="drugInd_{{molregno}}_title" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="drugIndModal_{{molregno}}_title">Drug Indications for COMPOUND</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div id="drugIndDiv_{{molregno}}" class="modal-body">{{table}}</div>
+		</div>
+	</div>
+</div>
+{% endfor %}
 
 {% endblock base_content %}
 
@@ -355,7 +376,7 @@ td.details-control {
 	function childRow(table_name, row_data) {
 		var inner_data = '';
 		if (table_name == 'annotation_table') {
-			{% for col in annotation_list %}
+			{% for col in annotation_info %}
 				{% if col.childrow %}
 				inner_data += '<tr><td>{{col.name}}</td><td>'+ row_data[ {{forloop.counter}} ] +'</td></tr>';
 				{% endif %}
@@ -364,7 +385,7 @@ td.details-control {
 				inner_data = '<tr><td>No data</td></tr>';
 			}
 		} else if (table_name == 'activity_table') {
-			{% for col in activity_list %}
+			{% for col in activity_info %}
 				{% if col.childrow %}
 				inner_data += '<tr><td>{{col.name}}</td><td>'+ row_data[ {{forloop.counter}} ] +'</td></tr>';
 				{% endif %}
@@ -379,10 +400,12 @@ td.details-control {
 		
 		return '<table>' + inner_data + '</table>';
 	}
-	/*
+	
 	function drugIndTable(molregno) {
-		
-	}*/
+		{% for key, data in drugind_tables.items %}
+		if (molregno == '{{key}}') return '{{data|escapejs}}';
+		{% endfor %}
+	}
 	
 	function toggleChildRow(table_name, table_obj, td_obj) {
 		var tr = td_obj.closest('tr');
@@ -390,27 +413,17 @@ td.details-control {
 		var row = table_obj.row(tr);
 		
 		if (row.child.isShown()) {
-			row.child.hide();
+			row.child.remove();
 			tr.removeClass('shown');
 			icon.removeClass('fa-angle-down');
 			icon.addClass('fa-angle-right');
 		} else {
-			//row.child( childRow(table_name, row.data()) ).show();
-			if (row.child() && row.child().length) {
-				row.child.show();
-				tr.addClass('shown');
-				icon.removeClass('fa-angle-right');
-				icon.addClass('fa-angle-down');
-			} else {
-				row.child('<div class="childrow">Loading data...</div>').show();
-				tr.addClass('shown');
-				icon.removeClass('fa-angle-right');
-				icon.addClass('fa-angle-down');
-				
-				var div = row.child().find('div.childrow');
-				var molregno = row.data()[5];
-				div.load("{% url 'drugIndTable' %}", "molregno="+molregno);
-			}
+			{% find_col_by_key annotation_info 'sql' 'molecule_dictionary.molregno' as molregno_col %}
+			var molregno_col = {{molregno_col}} + 1; // Add 1 to account for dropdown column
+			row.child( drugIndTable(row.data()[molregno_col]) ).show();
+			tr.addClass('shown');
+			icon.removeClass('fa-angle-right');
+			icon.addClass('fa-angle-down');
 		}
 	}
 	
@@ -523,6 +536,19 @@ td.details-control {
 				},
 			],
 		});
+		
+		{% for molregno in drugind_tables.keys %}
+		var drugind_table_{{molregno}} = $('#drugIndDiv_{{molregno}}').find('table').DataTable({
+			dom: 'Bfrltip',
+			buttons: [
+				{
+					extend: 'csv',
+					filename: 'drugind-table-{{molregno}}',
+					text: 'Save to CSV (All Columns)',
+				},
+			],
+		});
+		{% endfor %}
 
 		targetSearch.annotation_table = annotation_table;
 		targetSearch.activity_table = activity_table;

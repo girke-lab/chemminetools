@@ -1,7 +1,7 @@
 {% load targetsearch_extras %}
 {% if error %}<p>{{error}}</p>{% endif %}
 {% if table_info %}
-<table>
+<table class="{{table_class}}">
 	{% if header %}
 	<thead>
 		<tr>

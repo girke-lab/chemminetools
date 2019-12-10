@@ -2,64 +2,57 @@
   {
     "id": "drug_indication__drugind_id",
     "sql": "drug_indication.drugind_id",
+    "table": "Drug Indication",
     "name": "Drug Indication ID",
     "desc": "Primary key",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "drug_indication__record_id",
     "sql": "drug_indication.record_id",
+    "table": "Drug Indication",
     "name": "Record ID",
     "desc": "Foreign key to compound_records table. Links to the drug record to which this indication applies",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "drug_indication__max_phase_for_ind",
     "sql": "drug_indication.max_phase_for_ind",
+    "table": "Drug Indication",
     "name": "Max Phase For Indication",
     "desc": "The maximum phase of development that the drug is known to have reached for this particular indication",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "drug_indication__mesh_id",
     "sql": "drug_indication.mesh_id",
+    "table": "Drug Indication",
     "name": "MeSH ID",
     "desc": "Medical Subject Headings (MeSH) disease identifier corresponding to the indication",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "drug_indication__mesh_heading",
     "sql": "drug_indication.mesh_heading",
+    "table": "Drug Indication",
     "name": "MeSH Heading",
     "desc": "Medical Subject Heading term for the MeSH disease ID",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "drug_indication__efo_id",
     "sql": "drug_indication.efo_id",
+    "table": "Drug Indication",
     "name": "EFO ID",
     "desc": "Experimental Factor Ontology (EFO) disease identifier corresponding to the indication",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   },
   {
     "id": "drug_indication__efo_term",
     "sql": "drug_indication.efo_term",
+    "table": "Drug Indication",
     "name": "EFO Term",
     "desc": "Experimental Factor Ontology term for the EFO ID",
-    "visible": true,
-    "url": null,
-    "childrow": false
+    "visible": true
   }
 ]
