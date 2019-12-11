@@ -3,6 +3,7 @@ from django.http import HttpResponse,JsonResponse
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from django.contrib import messages
+from collections import OrderedDict
 import sys
 import traceback
 
@@ -43,6 +44,7 @@ def newTS(request):
     proteinDbs= readSources("uniprot")
     defaultCompoundDb = "1"
     defaultProteinDb = "ACC+ID"
+    groupingCol = 1
     
     # Default GET request variables
     id_type = 'compound'
@@ -66,17 +68,26 @@ def newTS(request):
     # Generate content
     try:
         # Only attempt conversion for compound search. Skip if already ChEMBL.
+        idMapping={}
         if id_type == 'compound' and source_id != '1':
-            ids = list(mapToChembl(ids, source_id))
-        if id_type == 'target' and source_id != 'ACC':
-            ids = list(mapToUniprot(ids, source_id))
-        
+            idMapping= mapToChembl(ids, source_id)
+            ids = list(idMapping.keys())
+        elif id_type == 'target' and source_id != 'ACC':
+            idMapping= mapToUniprot(ids, source_id)
+            ids = list(idMapping.keys())
+
         if len(ids) != 0:
             query_submit = True
+            queryIdCol = {
+                    "name":"Query ID",
+                    "sql" :"",
+                    "id":"query_id"
+                    }
             
             myAnnotationSearch = AnnotationWithMeshSearch(id_type)
             annotation_list = myAnnotationSearch.annotation_list
             annotation_matches = myAnnotationSearch.search_grouped(ids)
+                
             
             myActivitySearch = ActivitySearch(id_type)
             activity_list = myActivitySearch.activity_list
@@ -86,6 +97,24 @@ def newTS(request):
                 activity_matches = None
             else:
                 activity_matches = myActivitySearch.search_grouped(ids)
+
+            def addQueryCol(matches) :
+                for key, rowGroup in matches.items():
+                    queryKey = idMapping[key]
+                    for i in range(len(rowGroup)):
+                        matches[key][i] = OrderedDict([("query_id",queryKey)] + [ item for item in rowGroup[i].items()] )
+
+
+            if len(idMapping) != 0:
+                groupingCol = 2
+                annotation_list.insert(0,queryIdCol)
+                activity_list.insert(0,queryIdCol)
+                
+                addQueryCol(annotation_matches)
+                if activity_matches != None:
+                    addQueryCol(activity_matches)
+                                           
+
 
             #extract table name for grouping columns
             for col in annotation_list:
@@ -120,7 +149,8 @@ def newTS(request):
         'compoundDbs' : compoundDbs,
         'defaultCompoundDb': defaultCompoundDb,
         'proteinDbs': proteinDbs,
-        'defaultProteinDb': defaultProteinDb
+        'defaultProteinDb': defaultProteinDb,
+        'groupingCol' : groupingCol
         }
     
     return render(request, 'targetsearch/new_ts.html', context)

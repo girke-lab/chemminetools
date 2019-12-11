@@ -57,10 +57,7 @@ def get_chembl_smiles(chemblIds):
 
 def batchQuery(runQuery,ids, batchSize=1000):
     finalResult = [] 
-    print("batching "+str(len(ids))+" ids")
-    
     for i in range(0,len(ids),batchSize):
-        print("batch "+str(i)+" : "+str(i+batchSize))
         batchResult = runQuery(ids[i:i+batchSize])
         finalResult = finalResult + batchResult
     return finalResult
@@ -333,7 +330,7 @@ class ActivitySearch:
         return groupBy(lambda t: t[self.groupByIndex], data)
 
 def mapToChembl(unknownIds, sourceId):
-    chemblIds = set()
+    chemblIds = {}
     for unknownId in unknownIds:
         req = requests.get("https://www.ebi.ac.uk/unichem/rest/src_compound_id/"+unknownId+"/"+str(sourceId)+"/1")
         #print("\n\nreq.json: "+str(req.json()))
@@ -342,11 +339,11 @@ def mapToChembl(unknownIds, sourceId):
         if "error" in result: 
             raise Exception(result["error"])
         if isinstance(result,list) and len(result) > 0 and ("src_compound_id" in result[0]) :
-            chemblIds.add(result[0]["src_compound_id"])
+            chemblIds[result[0]["src_compound_id"] ] = unknownId
 
     #print("final chembl ids: "+str(chemblIds))
 
-    return tuple(chemblIds)
+    return chemblIds
 
 def mapToUniprot(unknownIds, sourceId):
     url = "https://www.uniprot.org/uploadlists/"
@@ -358,7 +355,15 @@ def mapToUniprot(unknownIds, sourceId):
             }
 
     results = requests.get(url,params=params).text
-    return tuple([ line.split("\t")[1]  for line in results.splitlines() if  "From\tTo" not in line])
+    uniprotIds = {}
+    for line in results.splitlines():
+        if  "From\tTo" not in line:
+            row = line.split("\t")
+            uniprotIds[row[1]]=row[0]
+
+    return uniprotIds
+
+    #return { line.split("\t") for line in results.splitlines() }
 
 
 

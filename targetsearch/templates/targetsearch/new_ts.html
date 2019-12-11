@@ -448,7 +448,7 @@ td.details-control {
 		
 		var annotation_table = $('#annotation-table').DataTable({
 			dom: 'frltip',
-			rowGroup: { dataSrc: 1, },
+			rowGroup: { dataSrc: {{groupingCol}}, },
 			columnDefs: {
 				targets: 0,
 				orderable: false,
@@ -479,7 +479,7 @@ td.details-control {
 		
 		var activity_table = $('#activity-table').DataTable({
 			dom: 'frltip',
-			rowGroup: { dataSrc: 1, },
+			rowGroup: { dataSrc: {{groupingCol}}, },
 			columnDefs: {
 				targets: 0,
 				orderable: false,

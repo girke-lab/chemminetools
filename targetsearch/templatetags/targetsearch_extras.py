@@ -5,6 +5,8 @@ from django import template
 register = template.Library()
 
 def dict_lookup(d, k):
+    #print("d: "+str(d))
+    #print("k: "+str(k))
     return d.get(k)
 
 register.filter(dict_lookup)
