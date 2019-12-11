@@ -114,26 +114,27 @@ def newTS(request):
 
             if len(idMapping) != 0:
                 groupingCol = 2
-                annotation_list.insert(0,queryIdCol)
-                activity_list.insert(0,queryIdCol)
+                annotation_info.insert(0,queryIdCol)
                 
                 addQueryCol(annotation_matches)
                 if activity_matches != None:
+                    activity_info.insert(0,queryIdCol)
                     addQueryCol(activity_matches)
                                            
 
 
             #extract table name for grouping columns
-            for col in annotation_list:
+            for col in annotation_info:
                 try:
                     col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
                 except:
                     col["table"] = ""
-            for col in activity_list:
-                try:
-                    col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
-                except:
-                    col["table"] = ""
+            if activity_info != None:
+                for col in activity_info:
+                    try:
+                        col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
+                    except:
+                        col["table"] = ""
 
     
     except Exception as e:
