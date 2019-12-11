@@ -8,5 +8,6 @@ from .views import *
 
 urlpatterns = [
         url(r'^$', newTS, name='newTS'),
+        url(r'^drugIndTable$', drugIndTable, name='drugIndTable'),
         path('compoundNames/<query>',compoundNames),
         ]

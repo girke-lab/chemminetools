@@ -1,0 +1,35 @@
+{% load targetsearch_extras %}
+{% if error %}<p>{{error}}</p>{% endif %}
+{% if table_info %}
+<table class="{{table_class}}">
+	{% if header %}
+	<thead>
+		<tr>
+			{% for h in table_info %}
+			<th>{{h.name}}</th>
+			{% endfor %}
+		</tr>
+	</thead>
+	{% endif %}
+	{% if table_data %}
+	<tbody>
+		{% for row in table_data %}
+		<tr>
+			{% for col in table_info %}
+				<td>{% dict_lookup row col.id %}</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+	</tbody>
+	{% endif %}
+	{% if footer %}
+	<tfoot>
+		<tr>
+			{% for h in table_info %}
+			<th>{{h.name}}</th>
+			{% endfor %}
+		</tr>
+	</tfoot>
+	{% endif %}
+</table>
+{% endif %}
