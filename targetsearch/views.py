@@ -80,6 +80,7 @@ def newTS(request):
             myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, ids)            
             annotation_info = myAnnotationSearch.table_info
             annotation_matches = myAnnotationSearch.get_grouped_results()
+            molregno_to_chembl = myAnnotationSearch.molregno_to_chembl
             
             # Generate Drug Indication child tables
             drugind_tables = dict()
@@ -106,7 +107,8 @@ def newTS(request):
         'id_type' : id_type,
         'annotation_info' : annotation_info,
         'annotation_matches' : annotation_matches,
-        'annotation_child_rows': False,
+        'annotation_child_rows' : False,
+        'molregno_to_chembl' : molregno_to_chembl,
         'drugind_tables' : drugind_tables,
         'activity_info' : activity_info,
         'activity_matches' : activity_matches,

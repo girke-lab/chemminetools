@@ -309,11 +309,12 @@ td.details-control {
 
 <!-- Drug Indication modal windows -->
 {% for molregno, table in drugind_tables.items %}
+{% dict_lookup molregno_to_chembl molregno as chembl_id %}
 <div class="modal fade" id="drugIndModal_{{molregno}}" tabindex="-1" role="dialog" aria-labelledBy="drugInd_{{molregno}}_title" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="drugIndModal_{{molregno}}_title">Drug Indications for COMPOUND</h5>
+				<h5 class="modal-title" id="drugIndModal_{{molregno}}_title">Drug Indications for {{chembl_id}}</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
@@ -538,12 +539,13 @@ td.details-control {
 		});
 		
 		{% for molregno in drugind_tables.keys %}
+		{% dict_lookup molregno_to_chembl molregno as chembl_id %}
 		var drugind_table_{{molregno}} = $('#drugIndDiv_{{molregno}}').find('table').DataTable({
 			dom: 'Bfrltip',
 			buttons: [
 				{
 					extend: 'csv',
-					filename: 'drugind-table-{{molregno}}',
+					filename: 'drugind-table-{{chembl_id}}',
 					text: 'Save to CSV (All Columns)',
 				},
 			],
