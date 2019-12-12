@@ -28,7 +28,8 @@ def order_by(l, orderByIndex):
 def find_col_by_key(info, key, value):
     """Given a list of dicts 'info', return the index for the first instance in
     which info[key] = value."""
-    for i in range(0, len(info)):
-        if info[i].get(key) == value:
-            return i
+    if info != None:
+        for i in range(0, len(info)):
+            if info[i].get(key) == value:
+                return i
     return None

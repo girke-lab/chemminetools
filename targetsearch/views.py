@@ -38,6 +38,7 @@ def newTS(request):
     message = None
     annotation_info = None
     annotation_matches = None
+    molregno_to_chembl = None
     drugind_tables = None
     activity_info = None
     activity_matches = None
