@@ -195,9 +195,22 @@ class AnnotationSearch(SearchBase):
         super().run_batch_query(query, ids)
         
         # Extract molregno from query_data
-        self.molregno_set = set()
+        # TODO: self.molregno_to_chembl is a quick-and-dirty way of getting the
+        # ChEMBL ID to the Drug Indication HTML table. Figure a more elegant
+        # way of doing this...
+        temp_molregno_set = set()
         for r in self.query_data:
-            self.molregno_set.add(r.annotation__molecule_dictionary__molregno)
+            pair = (r.annotation__chembl_id_lookup__chembl_id, r.annotation__molecule_dictionary__molregno)
+            temp_molregno_set.add(pair)
+        
+        self.molregno_set = set()
+        self.molregno_to_chembl = dict()
+        #for r in self.query_data:
+        #    self.molregno_set.add(r.annotation__molecule_dictionary__molregno)
+        for chembl, molregno in temp_molregno_set:
+            #chembl, molregno = pair
+            self.molregno_set.add(molregno)
+            self.molregno_to_chembl[molregno] = chembl
 
 class AnnotationWithDrugIndSearch(AnnotationSearch):
     """Special class for adding drug indication data to Annotation Search"""
