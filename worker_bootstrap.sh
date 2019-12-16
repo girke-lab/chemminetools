@@ -58,8 +58,8 @@ cp chemminetools/settings_sample.py chemminetools/settings.py
 
 # manually install packages in /usr/local/lib/python2.7/dist-packages:
 cd /tmp
-wget http://biocluster.ucr.edu/~khoran/guest.tgz
-wget http://biocluster.ucr.edu/~khoran/gyroid_utils.tgz
+wget http://cluster.hpcc.ucr.edu/~khoran/guest.tgz
+wget http://cluster.hpcc.ucr.edu/~khoran/gyroid_utils.tgz
 tar xfz gyroid_utils.tgz -C /usr/local/lib/python3.5/dist-packages/
 tar xfz guest.tgz -C /usr/local/lib/python3.5/dist-packages/
 rm -rf guest.tgz gyroid_utils.tgz
@@ -89,5 +89,5 @@ update-rc.d celeryd defaults 98 02
 cp /srv/chemminetools/celery_config /etc/default/celeryd
 
 # start celery now
-/etc/init.d/celeryd start
+systemctl start celeryd
 

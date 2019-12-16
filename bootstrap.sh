@@ -57,7 +57,7 @@ djangocms_picture djangocms_link djangocms_file djangocms_googlemap django_cron=
 python-memcached future configparser django-ckeditor django-lockdown django-bootstrap4
 
 # create symbolic link for /srv/chemminetools
-ln -s /vagrant /srv/chemminetools
+#ln -s /vagrant /srv/chemminetools
 
 # copy config file
 cd /srv/chemminetools
@@ -71,8 +71,8 @@ sudo -u postgres createdb -E utf8 -O chemminetools chemminetools -T template0 --
 
 # manually install packages in /usr/local/lib/python2.7/dist-packages:
 cd /tmp
-wget http://biocluster.ucr.edu/~khoran/guest.tgz
-wget http://biocluster.ucr.edu/~khoran/gyroid_utils.tgz
+wget http://cluster.hpcc.ucr.edu/~khoran/guest.tgz
+wget http://cluster.hpcc.ucr.edu/~khoran/gyroid_utils.tgz
 tar xfz gyroid_utils.tgz -C /usr/local/lib/python3.5/dist-packages/
 tar xfz guest.tgz -C /usr/local/lib/python3.5/dist-packages/
 rm -rf guest.tgz gyroid_utils.tgz
@@ -123,14 +123,14 @@ cp /srv/chemminetools/celery_config /etc/default/celeryd
 cp /srv/chemminetools/udev_rule /etc/udev/rules.d/50-vagrant-mount.rules
 
 # start celery now
-/etc/init.d/celeryd start
+systemctl start celeryd
 
 # restart apache
-/etc/init.d/apache2 restart
+systemctl restart apache2
 
 # setup and start nginx pubchem proxy
 cp /srv/chemminetools/nginx_config /etc/nginx/sites-enabled/default
-/etc/init.d/nginx restart
+systemctl restart nginx
 
 #setup rabbitmq for remote connections
 rabbitmqctl add_user remote_worker askfj4l3nbb43
