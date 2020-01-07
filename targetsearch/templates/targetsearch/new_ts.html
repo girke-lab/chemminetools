@@ -242,7 +242,7 @@ td.details-control {
 						<span style="width: 18rem; display: inline-block;">
 							<input type="checkbox" class="toggle-vis chkbox-annotation{% if col.visible %} chkbox-annotation-default{% endif %}" 
 								name="annotation-column" id="{{col.id}}" value="{{forloop.counter}}"/>
-							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}
+							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="{% if col.sql %}[ {{col.sql}} ] {% endif %}{{col.desc}}">{{col.name}}
 							
 						</span>
 					{% endfor %}
@@ -293,7 +293,7 @@ td.details-control {
 						<span style="width: 18rem; display: inline-block;">
 							<input type="checkbox" class="toggle-vis chkbox-activity{% if col.visible %} chkbox-activity-default{% endif %}" 
 								name="activity-column" id="{{col.id}}" value="{{forloop.counter}}">
-							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="[ {{col.sql}} ] {{col.desc}}">{{col.name}}</label>
+							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="{% if col.sql %}[ {{col.sql}} ] {% endif %}{{col.desc}}">{{col.name}}</label>
 						</span>
 					{% endfor %}
 					</div>

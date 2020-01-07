@@ -83,9 +83,12 @@ def newTS(request):
         if len(ids) != 0:
             query_submit = True
             queryIdCol = {
-                    "name":"Query ID",
-                    "sql" :"",
-                    "id":"query_id"
+                    "id": "query_id",
+                    "sql": None,
+                    "table": "Query ID",
+                    "name": "Query ID",
+                    "desc": "Original compound ID prior to ChEMBL conversion",
+                    "visible": True,
                     }
             
             myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, ids)            
@@ -123,21 +126,19 @@ def newTS(request):
                     activity_info.insert(0,queryIdCol)
                     addQueryCol(activity_matches)
                                            
-
-
-            #extract table name for grouping columns
-            for col in annotation_info:
-                try:
-                    col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
-                except:
-                    col["table"] = ""
-            if activity_info != None:
-                for col in activity_info:
-                    try:
-                        col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
-                    except:
-                        col["table"] = ""
-
+            # No longer necessary as we have table names in the JSON files
+            # Commented out to prevent necromance by Git. Delete after everyone merges
+            #for col in annotation_info:
+            #    try:
+            #        col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
+            #    except:
+            #        col["table"] = ""
+            #if activity_info != None:
+            #    for col in activity_info:
+            #        try:
+            #            col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
+            #        except:
+            #            col["table"] = ""
     
     except Exception as e:
         print("exception in newTS:", sys.exc_info())

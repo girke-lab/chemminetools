@@ -236,7 +236,7 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
         new_table_info = [
             {
             'id': 'annotation__drugind_summary__mesh_indications',
-            'sql': '',
+            'sql': None,
             'table': 'Drug Indication Summary',
             'name': 'MeSH Indications',
             'desc': 'Concatenated list of MeSH indications.',
@@ -244,7 +244,7 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
             },
             {
             'id': 'annotation__drugind_summary__efo_indications',
-            'sql': '',
+            'sql': None,
             'table': 'Drug Indication Summary',
             'name': 'EFO Indications',
             'desc': 'Concatenated list of EFO indications.',
@@ -252,7 +252,7 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
             },
             {
             'id': 'annotation__drugind_summary__show_drugind_table',
-            'sql': '',
+            'sql': None,
             'table': 'Drug Indication Summary',
             'name': 'Drug Indication Table',
             'desc': 'Button to view Drug Indication table modal.',
