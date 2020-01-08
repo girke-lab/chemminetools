@@ -48,7 +48,7 @@ def newTS(request):
     proteinDbs= readSources("uniprot")
     defaultCompoundDb = "1"
     defaultProteinDb = "ACC+ID"
-    groupingCol = 1
+    groupingCol = 0
     
     # Default GET request variables
     id_type = 'compound'
@@ -96,7 +96,7 @@ def newTS(request):
             annotation_matches = myAnnotationSearch.get_grouped_results()
             molregno_to_chembl = myAnnotationSearch.molregno_to_chembl
             
-            # Generate Drug Indication child tables
+            # Generate Drug Indication tables
             drugind_tables = dict()
             for molregno, drugind_obj in myAnnotationSearch.drugind_objs.items():
                 drugind_tables[molregno] = tableHtml(drugind_obj, table_class="table table-striped")
@@ -118,7 +118,7 @@ def newTS(request):
 
 
             if len(idMapping) != 0:
-                groupingCol = 2
+                groupingCol += 1
                 annotation_info.insert(0,queryIdCol)
                 
                 addQueryCol(annotation_matches)
@@ -151,12 +151,10 @@ def newTS(request):
         'id_type' : id_type,
         'annotation_info' : annotation_info,
         'annotation_matches' : annotation_matches,
-        'annotation_child_rows' : False,
         'molregno_to_chembl' : molregno_to_chembl,
         'drugind_tables' : drugind_tables,
         'activity_info' : activity_info,
         'activity_matches' : activity_matches,
-        'activity_child_rows' : False,
         'tags' : allTags,
         'compoundDbs' : compoundDbs,
         'defaultCompoundDb': defaultCompoundDb,

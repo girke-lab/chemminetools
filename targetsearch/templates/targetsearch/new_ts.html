@@ -3,9 +3,6 @@
 {% load targetsearch_extras %}
 
 {% block extra_styles %}
-td.details-control {
-	cursor: pointer;
-}
 .column-set {
 	border: 1px solid #ccc;
 	border-radius: 16px;
@@ -127,7 +124,6 @@ td.details-control {
 			<table class="table table-striped" id="annotation-table">
 				<thead>
 					<tr>
-						<th><!-- Toggle child row --></th>
 						{% for col in annotation_info %}
 						<th>{{col.name}}</th>
 						{% endfor %}
@@ -137,7 +133,6 @@ td.details-control {
 					{% for key, rows in annotation_matches.items %}
 						{% for row in rows %}
 						<tr>
-							<td class="details-control"><i class="fas fa-angle-right dropdown"></i></td>
 							{% for col in annotation_info %}
 								{% dict_lookup row col.id as cell_value %}
 								{% if 'html' in col.keys %}
@@ -168,7 +163,6 @@ td.details-control {
 			<table class="table table-striped" id="activity-table">
 				<thead>
 					<tr>
-						<th><!-- Toggle child row --></th>
 						{% for col in activity_info %}
 						<th>{{col.name}}</th>
 						{% endfor %}
@@ -178,7 +172,6 @@ td.details-control {
 					{% for key, rows in activity_matches.items %}
 						{% for row in rows %}
 						<tr>
-							<td class="details-control"><i class="fas fa-angle-right dropdown"></i></td>
 							{% for col in activity_info %}
 								{% dict_lookup row col.id as cell_value %}
 								{% if 'html' in col.keys %}
@@ -217,22 +210,18 @@ td.details-control {
 
 
 				<fieldset>
-					<div style="display: none;">
-						<input type="checkbox" class="toggle-vis chkbox-annotation{% if annotation_child_rows %} chkbox-annotation-default{% endif %}" 
-							name="annotation-column" id="annotation__child_row_dropdown" value="0">
-					</div>
 					<div class="">
 					{% for col in annotation_info %}
 
 						{% ifchanged col.table %}
 							</div>
-							<div class="bg-light column-set" id="column_set_{{forloop.counter}}" >
+							<div class="bg-light column-set" id="column_set_{{forloop.counter0}}" >
 								<div>
 									<h5 style="display:inline-block">{{col.table}}</h5>
 									<span  style="margin:1rem">
 										Select 
-										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.annotation_table,'column_set_{{forloop.counter}}',true)">All</a>
-										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.annotation_table,'column_set_{{forloop.counter}}',false)">None</a>
+										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.annotation_table,'column_set_{{forloop.counter0}}',true)">All</a>
+										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.annotation_table,'column_set_{{forloop.counter0}}',false)">None</a>
 									</span>
 								</div>
 					 	{% endifchanged %}
@@ -241,7 +230,7 @@ td.details-control {
 
 						<span style="width: 18rem; display: inline-block;">
 							<input type="checkbox" class="toggle-vis chkbox-annotation{% if col.visible %} chkbox-annotation-default{% endif %}" 
-								name="annotation-column" id="{{col.id}}" value="{{forloop.counter}}"/>
+								name="annotation-column" id="{{col.id}}" value="{{forloop.counter0}}"/>
 							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="{% if col.sql %}[ {{col.sql}} ] {% endif %}{{col.desc}}">{{col.name}}
 							
 						</span>
@@ -271,28 +260,25 @@ td.details-control {
 				<button type="button" class="btn btn-primary" id="btn-activity-deselect-all">Deselect All</button>
 				<button type="button" class="btn btn-primary" id="btn-activity-defaults">Restore Defaults</button>
 				<fieldset>
-					<div style="display: none;">
-						<input type="checkbox" class="toggle-vis chkbox-activity{% if activity_child_rows %} chkbox-activity-default{% endif %}" name="activity-column" id="activity__child_row_dropdown" value="0">
-					</div>
 					<div class="">
 					{% for col in activity_info %}
 
 						{% ifchanged col.table %}
 							</div>
-							<div class="bg-light column-set" id="column_set_{{forloop.counter}}" >
+							<div class="bg-light column-set" id="column_set_{{forloop.counter0}}" >
 								<div>
 									<h5 style="display:inline-block">{{col.table|capfirst}}</h5>
 									<span  style="margin:1rem">
 										Select 
-										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.activity_table,'column_set_{{forloop.counter}}',true)">All</a>
-										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.activity_table,'column_set_{{forloop.counter}}',false)">None</a>
+										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.activity_table,'column_set_{{forloop.counter0}}',true)">All</a>
+										<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.activity_table,'column_set_{{forloop.counter0}}',false)">None</a>
 									</span>
 								</div>
 					 	{% endifchanged %}
 
 						<span style="width: 18rem; display: inline-block;">
 							<input type="checkbox" class="toggle-vis chkbox-activity{% if col.visible %} chkbox-activity-default{% endif %}" 
-								name="activity-column" id="{{col.id}}" value="{{forloop.counter}}">
+								name="activity-column" id="{{col.id}}" value="{{forloop.counter0}}">
 							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="{% if col.sql %}[ {{col.sql}} ] {% endif %}{{col.desc}}">{{col.name}}</label>
 						</span>
 					{% endfor %}
@@ -338,7 +324,7 @@ td.details-control {
 
 	// Shows or hides all columns for a table
 	function selectAll(table_obj, chkbox_class, is_visible) {
-		// Use columnExportSelector to leave the child row dropdown column alone
+		// Use columnExportSelector to skip columns with export=False
 		table_obj.columns(
 			function(index, data, node ) {
 				return columnExportSelector(table_obj, 'all', index);
@@ -374,64 +360,13 @@ td.details-control {
 			$("#compound_count").html(0);
 	}
 	
-	function childRow(table_name, row_data) {
-		var inner_data = '';
-		if (table_name == 'annotation_table') {
-			{% for col in annotation_info %}
-				{% if col.childrow %}
-				inner_data += '<tr><td>{{col.name}}</td><td>'+ row_data[ {{forloop.counter}} ] +'</td></tr>';
-				{% endif %}
-			{% endfor %}
-			if (inner_data == '') {
-				inner_data = '<tr><td>No data</td></tr>';
-			}
-		} else if (table_name == 'activity_table') {
-			{% for col in activity_info %}
-				{% if col.childrow %}
-				inner_data += '<tr><td>{{col.name}}</td><td>'+ row_data[ {{forloop.counter}} ] +'</td></tr>';
-				{% endif %}
-			{% endfor %}
-			if (inner_data == '') {
-				inner_data = '<tr><td>No data</td></tr>';
-			}
-		} else {
-			console.log("childRow: Check your values. You shouldn't see this.");
-			inner_data = '<tr><td>No data</td></tr>';
-		}
-		
-		return '<table>' + inner_data + '</table>';
-	}
-	
 	function drugIndTable(molregno) {
 		{% for key, data in drugind_tables.items %}
 		if (molregno == '{{key}}') return '{{data|escapejs}}';
 		{% endfor %}
 	}
 	
-	function toggleChildRow(table_name, table_obj, td_obj) {
-		var tr = td_obj.closest('tr');
-		var icon = td_obj.children('i.dropdown');
-		var row = table_obj.row(tr);
-		
-		if (row.child.isShown()) {
-			row.child.remove();
-			tr.removeClass('shown');
-			icon.removeClass('fa-angle-down');
-			icon.addClass('fa-angle-right');
-		} else {
-			{% find_col_by_key annotation_info 'sql' 'molecule_dictionary.molregno' as molregno_col %}
-			var molregno_col = {{molregno_col}} + 1; // Add 1 to account for dropdown column
-			row.child( drugIndTable(row.data()[molregno_col]) ).show();
-			tr.addClass('shown');
-			icon.removeClass('fa-angle-right');
-			icon.addClass('fa-angle-down');
-		}
-	}
-	
 	function columnExportSelector(table, export_type, index) {
-		// In no circumstance do we export the child-row column
-		if (index == 0) return false;
-		
 		if (export_type == "all") {
 			return true;
 		} else if (export_type == "visible") {
@@ -589,14 +524,6 @@ td.details-control {
 		
 		$('#btn-activity-defaults').on('click', function(e) {
 			selectDefaults(activity_table, 'chkbox-activity');
-		});
-		
-		$('#annotation-table tbody').on('click', 'td.details-control', function() {
-			toggleChildRow('annotation_table', annotation_table, $(this));
-		});
-		
-		$('#activity-table tbody').on('click', 'td.details-control', function() {
-			toggleChildRow('activity_table', activity_table, $(this));
 		});
 		
 		selectDefaults(annotation_table, 'chkbox-annotation');
