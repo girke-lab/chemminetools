@@ -321,31 +321,31 @@
 
 <script type="text/javascript">
 	var targetSearch = {};// namespace for public variables
-
+	
 	// Shows or hides all columns for a table
-	function selectAll(table_obj, chkbox_class, is_visible) {
-		// Use columnExportSelector to skip columns with export=False
-		table_obj.columns(
-			function(index, data, node ) {
-				return columnExportSelector(table_obj, 'all', index);
-			}
-		).visible(is_visible);
+	function selectAllColumns(table_name, is_visible) {
+		table_obj = targetSearch[table_name + '_table'];
+		chkbox_class = 'chkbox-' + table_name;
+		
+		table_obj.columns().visible(is_visible);
 		$('.' + chkbox_class).prop('checked', is_visible);
 	}
 	
-	function selectDefaults(table_obj, chkbox_class) {
-		// Hide all columns and clear all checkboxes
-		table_obj.columns().visible(false);
-		$('.' + chkbox_class).prop('checked', false);
+	function selectDefaultColumns(table_name) {
+		table_obj = targetSearch[table_name + '_table'];
+		chkbox_class = 'chkbox-' + table_name;
 		
 		// Iterate through all checkboxes. If a checkbox is classed as a "default"
-		// checkbox, check it and unhide the associated column
+		// checkbox, check it and unhide the associated column. Otherwise, uncheck
+		// it and hide the column.
 		$('.' + chkbox_class).each(function() {
-			if ( $(this).hasClass(chkbox_class + "-default") ) {
-				table_obj.column( $(this).attr('value') ).visible(true);
-				$(this).prop('checked', true);
-			}
+			v = $(this).hasClass(chkbox_class + '-default');
+			// The second visible() arg "false" defers redrawing the DataTable
+			table_obj.column( $(this).attr('value') ).visible(v, false);
+			$(this).prop('checked', v);
 		});
+		// Now redraw the DataTable
+		table_obj.columns.adjust().draw();
 	}
 	
 	function setCompoundCount(tags) {
@@ -366,15 +366,22 @@
 		{% endfor %}
 	}
 	
-	function columnExportSelector(table, export_type, index) {
-		if (export_type == "all") {
-			return true;
-		} else if (export_type == "visible") {
-			return table.column(index).visible();
-		}
+	function columnExportSelector(table_name, export_type, index) {
+		table_obj = targetSearch[table_name + '_table'];
+		nx_list = targetSearch[table_name + '_no_export'];
 		
-		console.log("columnExportSelector: Check your values. You shouldn't see this.");
+		if (nx_list.includes(index)) {
+			return false;
+		} else if (export_type == 'all') {
+			return true;
+		} else if (export_type == 'visible') {
+			return table_obj.column(index).visible();
+		} else {
+			console.log("columnExportSelector: Check your values. You shouldn't see this.");
+			return false;
+		}
 	}
+	
 	function toggleTableColumns(table_obj,setId, state) {
 		$("#"+setId+" input").each(function(){
 			table_obj.column( $(this).attr('value') ).visible(state);
@@ -425,7 +432,7 @@
 					text: 'Save to CSV (All Columns)',
 					exportOptions: {
 						columns: function(index, data, node) {
-							return columnExportSelector(annotation_table, 'all', index);
+							return columnExportSelector('annotation', 'all', index);
 						}
 					},
 				},
@@ -435,7 +442,7 @@
 					text: 'Save to CSV (Visible Columns)',
 					exportOptions: {
 						columns: function(index, data, node) {
-							return columnExportSelector(annotation_table, 'visible', index);
+							return columnExportSelector('annotation', 'visible', index);
 						}
 					},
 				},
@@ -456,7 +463,7 @@
 					text: 'Save to CSV (All Columns)',
 					exportOptions: {
 						columns: function(index, data, node) {
-							return columnExportSelector(activity_table, 'all', index);
+							return columnExportSelector('activity', 'all', index);
 						}
 					},
 				},
@@ -466,7 +473,7 @@
 					text: 'Save to CSV (Visible Columns)',
 					exportOptions: {
 						columns: function(index, data, node) {
-							return columnExportSelector(activity_table, 'visible', index);
+							return columnExportSelector('activity', 'visible', index);
 						}
 					},
 				},
@@ -489,6 +496,8 @@
 
 		targetSearch.annotation_table = annotation_table;
 		targetSearch.activity_table = activity_table;
+		targetSearch.annotation_no_export = {% col_index_list annotation_info 'export' False %};
+		targetSearch.activity_no_export = {% col_index_list activity_info 'export' False %};
 		
 		annotation_table.buttons().container().appendTo( $('#csv-buttons-annotation') );
 		activity_table.buttons().container().appendTo( $('#csv-buttons-activity') );
@@ -503,31 +512,31 @@
 		});
 		
 		$('#btn-annotation-select-all').on('click', function(e) {
-			selectAll(annotation_table, 'chkbox-annotation', true);
+			selectAllColumns('annotation', true);
 		});
 		
 		$('#btn-annotation-deselect-all').on('click', function(e) {
-			selectAll(annotation_table, 'chkbox-annotation', false);
+			selectAllColumns('annotation', false);
 		});
 		
 		$('#btn-annotation-defaults').on('click', function(e) {
-			selectDefaults(annotation_table, 'chkbox-annotation');
+			selectDefaultColumns('annotation');
 		});
 		
 		$('#btn-activity-select-all').on('click', function(e) {
-			selectAll(activity_table, 'chkbox-activity', true);
+			selectAllColumns('activity', true);
 		});
 		
 		$('#btn-activity-deselect-all').on('click', function(e) {
-			selectAll(activity_table, 'chkbox-activity', false);
+			selectAllColumns('activity', false);
 		});
 		
 		$('#btn-activity-defaults').on('click', function(e) {
-			selectDefaults(activity_table, 'chkbox-activity');
+			selectDefaultColumns('activity');
 		});
 		
-		selectDefaults(annotation_table, 'chkbox-annotation');
-		selectDefaults(activity_table, 'chkbox-activity');
+		selectDefaultColumns('annotation');
+		selectDefaultColumns('activity');
 	});
 </script>
 

@@ -29,9 +29,21 @@ def order_by(l, orderByIndex):
 @register.simple_tag
 def find_col_by_key(info, key, value):
     """Given a list of dicts 'info', return the index for the first instance in
-    which info[key] = value."""
+    which info[key] == value."""
     if info != None:
         for i in range(0, len(info)):
             if info[i].get(key) == value:
                 return i
     return None
+
+@register.simple_tag
+def col_index_list(info, key, value):
+    """Given a list of dicts 'info', return a list of indices corresponding to
+    columns in which info[key] == value. Use to build lists of default columns,
+    non-exportable columns, etc."""
+    index_list = list()
+    if info != None:
+        for i in range(0, len(info)):
+            if info[i].get(key) == value:
+                index_list.append(i)
+    return index_list
