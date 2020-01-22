@@ -1,7 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from yaml import load, Loader, Dumper
 
 # make it possible to run as standalone program

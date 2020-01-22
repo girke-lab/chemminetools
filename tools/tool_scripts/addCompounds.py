@@ -1,10 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # make it possible to run as standalone program
 
-from __future__ import unicode_literals
-from builtins import str
 import sys
 import re
 import random

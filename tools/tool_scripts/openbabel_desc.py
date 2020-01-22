@@ -1,7 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from builtins import str
 import argparse
 import os
 import sys

@@ -1,8 +1,7 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 # make it possible to run as standalone program
-from builtins import str
 import sys
 sys.path.append('/srv/chemminetools')
 sys.path.append('/srv/chemminetools/sdftools')  # allow tools.py to be imported
