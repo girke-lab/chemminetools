@@ -35,7 +35,7 @@ def createJob(
     commandOptions,
     input,
     inputvar='',
-    async=True,
+    wait=False,
     tagNames = [],
     ):
 
@@ -51,7 +51,7 @@ def createJob(
     newJob.save()
     result = launch.delay(application.script, commandOptions, input,
                           newJob.id, user,tagNames)
-    if not async:
+    if wait:
         result.wait()
     newJob.task_id = result.id
     newJob.save()

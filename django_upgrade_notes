@@ -3,8 +3,8 @@ remove django-userena
 install django-userena-ce
 
 upgrade packages:
- pip3 list|grep django-|grep django|sed -e 's/django-\(.*\) .*/\1/'|while read i; do pip3 install -U django-$i; done
- pip3 list|grep djangocms-|grep djangocms|sed -e 's/djangocms-\(.*\) .*/\1/'|while read i; do pip3 install -U djangocms-$i; done
+ pip3 list --format=legacy|grep django-|grep django|sed -e 's/django-\(.*\) .*/\1/'|while read i; do pip3 install -U django-$i; done
+ pip3 list --format=legacy|grep djangocms-|grep djangocms|sed -e 's/djangocms-\(.*\) .*/\1/'|while read i; do pip3 install -U djangocms-$i; done
 
 ##update /usr/local/lib/python3.5/dist-packages/guest/models.py, add parameters to ForiegnKey: on_delete=models.CASCADE
 If /usr/local/lib/python3.5/dist-packages/guest/ exists from a previous installation, delete it.

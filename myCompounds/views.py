@@ -107,7 +107,7 @@ def downloadCompounds(request, outputFormat):
             return fileDownloadResponse(smiles,"download.smi")
     elif 'pubchem_id' in params: # NOT YET TESTED
         cids = params.getlist('pubchem_id')
-        job = createJob(request.user,'pubchemID2SDF','',[],cids,outputFormat,async=False)
+        job = createJob(request.user,'pubchemID2SDF','',[],cids,outputFormat,wait=True)
         return redirect(tools.views.view_job,job_id=job.id,resource="other",filename="download."+outputFormat)
     else:
         return HttpResponse("unknown search paramaters",status=400)

@@ -1,0 +1,14 @@
+Django ~= 2.2.0
+django-bootstrap4
+django-bootstrap-toolkit
+django-cms
+django-cron
+django-guardian
+django-lockdown
+django-mptt
+django-userena-ce
+djangocms_file
+djangocms_googlemap
+djangocms_link
+djangocms_picture
+djangocms_text_ckeditor

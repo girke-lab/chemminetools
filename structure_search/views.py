@@ -162,7 +162,7 @@ def getStructures(request, job_id, format):
         print(traceback.format_exc())
         raise Http404
     newJob = createJob(request.user, 'pubchemID2SDF', '', [], targetIds,
-                       format, async=False) 
+                       format, wait=True) 
     if format == 'smiles':
         filename = 'search_result.smi'
     else:

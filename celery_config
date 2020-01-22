@@ -1,36 +1,23 @@
 CELERYD_NODES="w1"
 
-# Where to chdir at start.
-CELERYD_CHDIR="/srv/chemminetools"
-
-# How to call "manage.py celeryd_multi"
-#CELERYD_MULTI="$CELERYD_CHDIR/manage.py celeryd_multi"
-CELERYD_MULTI="celery multi"
-
-# How to call "manage.py celeryctl"
-#CELERYCTL="$CELERYD_CHDIR/manage.py celeryctl"
-
 # Extra arguments to celeryd
 CELERYD_OPTS="--time-limit=172800 --concurrency=8"
 
 # %n will be replaced with the nodename.
-CELERYD_LOG_FILE="/var/log/celery/%n.log"
-CELERYD_PID_FILE="/var/run/celery/%n.pid"
-CELERY_CREATE_DIRS=1
+CELERYD_LOG_FILE="/var/log/celery/%n%I.log"
+CELERYD_PID_FILE="/run/celery/%n.pid"
 
-# Workers should run as an unprivileged user.
-CELERYD_USER="www-data"
-CELERYD_GROUP="www-data"
+CELERYD_LOG_LEVEL="INFO"
+#CELERYD_LOG_LEVEL="DEBUG"
 
 # Name of the projects settings module.
-export DJANGO_SETTINGS_MODULE="chemminetools.settings"
+DJANGO_SETTINGS_MODULE="chemminetools.settings"
 
-
-CELERY_BIN="/usr/local/bin/celery"
+CELERY_BIN="/srv/venvs/chemminetools/bin/celery"
 CELERY_APP="chemminetools"
 
-#Tthe default path when celery starts does not include /usr/local/bin/, 
+#The default path when celery starts does not include /usr/local/bin/, 
 #which then causes R scripts using Rscript to fail when celery runs them.
 #So we set the path explicitly here.
 
-PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+PATH=/srv/venvs/chemminetools/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin

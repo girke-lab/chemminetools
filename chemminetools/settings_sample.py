@@ -25,7 +25,7 @@ PROJECT_DIR = '/srv/chemminetools'
 DEBUG = True
 #TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS= ['18.219.7.240']
+ALLOWED_HOSTS= ['example.com', 'localhost']
 
 ADMINS = ()
 
@@ -110,8 +110,9 @@ STATIC_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Make this unique, and don't share it with anybody.
-
-SECRET_KEY = 'd_ce0eja3qgm0b-3u487kf++d+m14satsx-b1l-niq=-e@wt#0'
+# Generate with:
+# $ python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+SECRET_KEY = ''
 
 # List of callables that know how to import templates from various sources.
 
@@ -264,7 +265,8 @@ GUEST_DELETE_FREQUENCY = 8640
 ASSEI_SERVER = ('127.0.0.1', 50008)
 QUERY_TIMEOUT = 60
 
-PUBCHEM_DOWNLOADER = '/srv/chemminetools/eis/pubchemdl.py'
+# Script no longer exists. Variable nowhere to be found.
+#PUBCHEM_DOWNLOADER = '/srv/chemminetools/eis/pubchemdl.py'
 
 # hard limits
 
@@ -289,15 +291,20 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-SOUTH_MIGRATION_MODULES = {
-    'easy_thumbnails': 'easy_thumbnails.south_migrations',
-}
-#EMAIL GOOGLE SETTINGS
-EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST='smtp.gmail.com'
-EMAIL_PORT=587
-EMAIL_HOST_USER='chemminetool@gmail.com'
-EMAIL_HOST_PASSWORD='chemminetools2!'
-EMAIL_USE_TLS=True
+#EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
+#EMAIL_HOST='smtp.gmail.com'
+#EMAIL_PORT=587
+#EMAIL_HOST_USER=''
+#EMAIL_HOST_PASSWORD=''
+#EMAIL_USE_TLS=True
+EMAIL_BACKEND = 'django.core.mail.backends.dummy.EmailBackend'
 
-LOCKDOWN_PASSWORDS=('longevity')
+LOCKDOWN_PASSWORDS=('lockdown')
+
+# ChEMBL database settings
+CHEMBL_DB = {
+    'DBHOST' : 'localhost',
+    'DBNAME' : 'chembl',
+    'DBUSER' : 'chemminetools',
+    'DBPASS' : 'chemminetools',
+}
