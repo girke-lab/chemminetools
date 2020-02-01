@@ -116,10 +116,29 @@
 		<div class="col-md-12">
 			<h4>By Annotation</h4>
 			<div class="btn-toolbar" role="toolbar" aria-label="Button toolbar for annotation table">
-				<div class="btn-group mr-2" role="group">
+				<div class="btn-group mr-1" role="group">
 					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#columnSelectModalAnnotation">Show/Hide Columns</button>
 				</div>
-				<div class="btn-group" id="csv-buttons-annotation" role="group"></div>
+				<div class="btn-group mr-1" role="group">
+					<button id="csvAnnotation" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Save to CSV</button>
+					<div id="csv-buttons-annotation" class="dropdown-menu" aria-labelledby="csvAnnotation"></div>
+				</div>
+				<div class="btn-group mr-1" role="group">
+					<button id="rowSelAnnotation" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Rows</button>
+					<div class="dropdown-menu" aria-labelledby="rowSelAnnotation">
+						<div class="btn-group-vertical">
+							<button type="button" class="btn btn-secondary" onClick="targetSearch.annotation_table.rows().select()">All</button>
+							<button type="button" class="btn btn-secondary" onClick="targetSearch.annotation_table.rows().deselect()">None</button>
+							<button type="button" class="btn btn-secondary mt-1" disabled>Unique Compounds</button>
+							<button type="button" class="btn btn-secondary" disabled>Compounds Not in Workbench</button>
+							<button type="button" class="btn btn-secondary mt-1" onClick="targetSearch.annotation_table.select.style('api')">Disable Select</button>
+							<button type="button" class="btn btn-secondary" onClick="targetSearch.annotation_table.select.style('multi')">Enable Select</button>
+						</div>
+					</div>
+				</div>
+				<div class="btn-group">
+					<button type="button" class="btn btn-secondary" onClick="showWorkbenchModal('annotation')">Add Selected Compounds to Workbench</button>
+				</div>
 			</div>
 			<table class="table table-striped" id="annotation-table">
 				<thead>
@@ -204,9 +223,9 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<button type="button" class="btn btn-primary" id="btn-annotation-select-all">Select All</button>
-				<button type="button" class="btn btn-primary" id="btn-annotation-deselect-all">Deselect All</button>
-				<button type="button" class="btn btn-primary" id="btn-annotation-defaults">Restore Defaults</button>
+				<button type="button" class="btn btn-primary" id="btn-annotation-select-all" onClick="selectAllColumns('annotation', true)">Select All</button>
+				<button type="button" class="btn btn-primary" id="btn-annotation-deselect-all" onClick="selectAllColumns('annotation', false)">Deselect All</button>
+				<button type="button" class="btn btn-primary" id="btn-annotation-defaults" onClick="selectDefaultColumns('annotation')">Restore Defaults</button>
 
 
 				<fieldset>
@@ -256,9 +275,9 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<button type="button" class="btn btn-primary" id="btn-activity-select-all">Select All</button>
-				<button type="button" class="btn btn-primary" id="btn-activity-deselect-all">Deselect All</button>
-				<button type="button" class="btn btn-primary" id="btn-activity-defaults">Restore Defaults</button>
+				<button type="button" class="btn btn-primary" id="btn-activity-select-all" onClick="selectAllColumns('activity', true)">Select All</button>
+				<button type="button" class="btn btn-primary" id="btn-activity-deselect-all" onClick="selectAllColumns('activity', false)">Deselect All</button>
+				<button type="button" class="btn btn-primary" id="btn-activity-defaults" onClick="selectDefaultColumns('activity')">Restore Defaults</button>
 				<fieldset>
 					<div class="">
 					{% for col in activity_info %}
@@ -310,6 +329,41 @@
 	</div>
 </div>
 {% endfor %}
+
+<!-- Add-Compound-to-Workbench modal window -->
+<div class="modal fade" id="workbenchModal" tabindex="-1" role="dialog" aria-labelledBy="wbmtitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="wbmtitle">Add Compounds to Workbench</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div id="wbmsummary"></div>
+				<div>
+					<form id="wbmform" autocomplete="off">
+						{% csrf_token %}
+						<input name="action" type="hidden" value="add" />
+						<input name="source_id" type="hidden" value="chembl" />
+						<input id="wbmids" name="ids" type="hidden" value="" />
+						<label for="wbmtags">Tags</label>
+						<select class="tags" id="wbmtags" name="tags" multiple placeholder="Compound Tags">
+							{% for tag in tags %}
+								<option value="{{tag}}">{{tag}}</option>
+							{% endfor %}
+						</select>
+					</form>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<button id="wbmsubmitbtn" type="button" class="btn btn-primary" onclick="wbmSubmit()" disabled>Submit</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 {% endblock base_content %}
 
@@ -390,6 +444,69 @@
 		return false;
 	}
 	
+	function showWorkbenchModal(table_name) {
+		var table_obj = targetSearch[table_name + '_table'];
+		var chembl_column = targetSearch[table_name + '_chembl_column'];
+		var pref_name_column = targetSearch[table_name + '_pref_name_column'];
+		var summary_str = '';
+		var chembl_id_str = '';
+		
+		var rows = table_obj.rows( {selected:true} );
+		if (rows.any()) {
+			summary_str = '<p>The following compounds will be added to your workbench:</p>';
+			summary_str += '<ul>';
+			rows.every( function() {
+				var chembl_text = $(table_obj.cell(this.index(), chembl_column).node()).text();
+				var pref_name_text = $(table_obj.cell(this.index(), pref_name_column).node()).text();
+				if (pref_name_text == 'None')
+					summary_str += ('<li>' + chembl_text + '</li>');
+				else
+					summary_str += ('<li>' + chembl_text + ' (' + pref_name_text + ')</li>');
+				chembl_id_str += (chembl_text + ' ');
+			});
+			summary_str += '</ul>';
+			$('#wbmsubmitbtn').prop('disabled', false);
+		} else {
+			summary_str = '<p>No compounds are selected.</p>';
+			summary_str += '<p>Select compounds by clicking on the table rows, or by using the &quot;Select Rows&quot; menu button.</p>';
+			$('#wbmsubmitbtn').prop('disabled', true);
+		}
+		
+		$('#wbmsummary').html(summary_str);
+		$('#wbmids').prop('value', chembl_id_str);
+		targetSearch.wbmtags.clear();
+		$('#wbmsubmitbtn').html('Submit');
+		$('#workbenchModal').modal();
+		//console.log("wbmids:", $('#wbmids').prop('value'));
+	}
+	
+	function wbmSubmit() {
+		$('#wbmsubmitbtn').prop('disabled', true);
+		$('#wbmsubmitbtn').html('Please Wait...');
+		
+		var post_data = $('#wbmform').serialize();
+		jQuery.post("{% url 'myCompounds-ajax' %}", post_data, function (recv_data) {
+			if (recv_data.success == true) {
+				//console.log("compound upload success:", recv_data.message);
+				alertify.success(recv_data.message);
+			} else {
+				if (recv_data.message) {
+					//console.log("compound upload fail:", recv_data.message);
+					alertify.error(recv_data.message);
+				} else {
+					//console.log("compound upload fail: unknown error");
+					alertify.error("Unknown error occurred");
+				}
+			}
+		}).fail( function() {
+			//console.log("ajax fail...");
+			alertify.error("AJAX call failed");
+		}).always( function() {
+			$('#workbenchModal').modal('hide');
+		});
+		//console.log("form data:", post_data);
+	}
+	
 	$(document).ready(function() {
 		jQuery("#tags").selectize({
 			plugins: ['remove_button'],
@@ -397,26 +514,31 @@
 				setCompoundCount(value);
 			},
 		});
-        jQuery("#compound_autocomplete").selectize({
-            valueField: "chembl_id",
-            labelField: "name",
-            searchField: ["name"],
-            load: function(query,callback){
-                jQuery.get("compoundNames/"+query).
-                    then(function(result){
-                        console.log("got back suggestions: ",result);
-                        callback(result);
-                    });
-            },
-            onChange:function(value){
-				if(value == null || value === "")
-					return;
-                console.log("new compound selected: ",value);
-                var compoundArea= jQuery("#compound-ids");
-                compoundArea.val(compoundArea.val() + "\n"+value);
-
-            },
-        });
+		
+		targetSearch.wbmtags = jQuery("#wbmtags").selectize({
+			plugins: ['remove_button'],
+			create: true,
+		})[0].selectize;
+		
+		jQuery("#compound_autocomplete").selectize({
+			valueField: "chembl_id",
+			labelField: "name",
+			searchField: ["name"],
+			load: function(query,callback){
+				jQuery.get("compoundNames/"+query).
+					then(function(result){
+						console.log("got back suggestions: ",result);
+						callback(result);
+					});
+			},
+			onChange:function(value){
+		if(value == null || value === "")
+			return;
+		console.log("new compound selected: ",value);
+		var compoundArea= jQuery("#compound-ids");
+		compoundArea.val(compoundArea.val() + "\n"+value);
+			},
+		});
 		
 		var annotation_table = $('#annotation-table').DataTable({
 			dom: 'frltip',
@@ -429,7 +551,7 @@
 				{
 					extend: 'csv',
 					filename: 'annotation-table',
-					text: 'Save to CSV (All Columns)',
+					text: 'All Columns',
 					exportOptions: {
 						columns: function(index, data, node) {
 							return columnExportSelector('annotation', 'all', index);
@@ -439,7 +561,7 @@
 				{
 					extend: 'csv',
 					filename: 'annotation-table',
-					text: 'Save to CSV (Visible Columns)',
+					text: 'Visible Columns',
 					exportOptions: {
 						columns: function(index, data, node) {
 							return columnExportSelector('annotation', 'visible', index);
@@ -447,6 +569,7 @@
 					},
 				},
 			],
+			select: { style: 'multi' },
 		});
 		
 		var activity_table = $('#activity-table').DataTable({
@@ -498,9 +621,15 @@
 		targetSearch.activity_table = activity_table;
 		targetSearch.annotation_no_export = {% col_index_list annotation_info 'export' False %};
 		targetSearch.activity_no_export = {% col_index_list activity_info 'export' False %};
+		targetSearch.annotation_chembl_column = {% find_col_by_key annotation_info 'id' 'annotation__chembl_id_lookup__chembl_id' %};
+		targetSearch.annotation_pref_name_column = {% find_col_by_key annotation_info 'id' 'annotation__molecule_dictionary__pref_name' %};
 		
-		annotation_table.buttons().container().appendTo( $('#csv-buttons-annotation') );
+		//annotation_table.buttons().container().appendTo( $('#csv-buttons-annotation') );
 		activity_table.buttons().container().appendTo( $('#csv-buttons-activity') );
+		
+		var annotation_table_buttons = annotation_table.buttons().container();
+		annotation_table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
+		annotation_table_buttons.appendTo( $('#csv-buttons-annotation') );
 		
 		$('input.toggle-vis').on('change', function(e) {
 			if ( $(this).attr('name') == 'annotation-column' ) {
@@ -509,30 +638,6 @@
 				var column = activity_table.column( $(this).attr('value') );
 			}
 			column.visible( $(this).prop('checked') );
-		});
-		
-		$('#btn-annotation-select-all').on('click', function(e) {
-			selectAllColumns('annotation', true);
-		});
-		
-		$('#btn-annotation-deselect-all').on('click', function(e) {
-			selectAllColumns('annotation', false);
-		});
-		
-		$('#btn-annotation-defaults').on('click', function(e) {
-			selectDefaultColumns('annotation');
-		});
-		
-		$('#btn-activity-select-all').on('click', function(e) {
-			selectAllColumns('activity', true);
-		});
-		
-		$('#btn-activity-deselect-all').on('click', function(e) {
-			selectAllColumns('activity', false);
-		});
-		
-		$('#btn-activity-defaults').on('click', function(e) {
-			selectDefaultColumns('activity');
 		});
 		
 		selectDefaultColumns('annotation');

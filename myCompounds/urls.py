@@ -1,10 +1,11 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
 from .views import *
-from django.conf.urls import *
+from django.urls import path, re_path
 
-urlpatterns = [url(r'^addCompounds/?(?P<resource>\w*)/?(?P<job_id>\d*)/?$', uploadCompound),
-               url(r'^download/(?P<outputFormat>(sdf|smi))$', downloadCompounds),
-               url(r'^(?P<resource>\S*)$', showCompounds)]
+#app_name = 'myCompounds'
+urlpatterns = [re_path(r'^addCompounds/?(?P<resource>\w*)/?(?P<job_id>\d*)/?$', uploadCompound, name='uploadCompound'),
+               re_path(r'^download/(?P<outputFormat>(sdf|smi))$', downloadCompounds, name='downloadCompounds'),
+               path('ajax', ajax, name='myCompounds-ajax'),
+               re_path(r'^(?P<resource>\S*)$', showCompounds, name='showCompounds')]

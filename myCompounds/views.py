@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from builtins import str
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from guest.decorators import guest_allowed, login_required
 from django.template import RequestContext
@@ -27,6 +27,7 @@ import tools
 from sdftools.moleculeformats import smiles_to_sdf, sdf_to_sdf, \
     InputError, sdf_to_smiles
 from django.conf import settings
+from tools.models import Job
 from tools.runapp import createJob, updateJob
 from django.utils.http import urlquote
 from targetsearch.chembl_helpers import get_chembl_sdfs,get_chembl_smiles
@@ -254,6 +255,59 @@ def uploadCompound(request, resource = None, job_id = None):
         time.sleep(2)
         return redirect(tools.views.view_job, job_id=newJob.id,
                         resource='')
+
+@guest_allowed
+def ajax(request):
+    compoundTags = set()
+    
+    def die(msg):
+        ajaxResponse = { 'success' : False, 'message' : msg }
+        return JsonResponse(ajaxResponse)
+    
+    if 'tags' in request.POST:
+        compoundTags = set(request.POST.getlist('tags'))
+        Tag.ensureAllExist(compoundTags, request.user)
+    
+    if 'action' not in request.POST:
+        return die('Expected "action" in request.')
+    action = request.POST['action']
+    
+    if action == 'add':
+        if 'source_id' not in request.POST:
+            return die('Expected "source_id" in request.')
+        source_id = request.POST['source_id']
+        
+        if 'ids' not in request.POST:
+            return die('No "ids" given in request.')
+        ids = tuple(request.POST['ids'].split())
+        
+        if len(ids) == 0:
+            return die('No "ids" given in request.')
+        
+        if source_id == 'chembl':
+            try:
+                sdfs = get_chembl_sdfs(ids)
+                sdf = '\n$$$$\n'.join(sdfs) + '\n$$$$\n'
+                with open('/tmp/sdfdump.sdf', 'w') as sdfdump:
+                    sdfdump.write(sdf)
+                
+                newJob = createJob(request.user, 'Upload Compounds', '',
+                                   ['--user=' + str(request.user.id), '--tags=' + (','.join(compoundTags))], sdf)
+                time.sleep(2)
+                newJob = updateJob(request.user, newJob.id)
+                if newJob.status == Job.RUNNING:
+                    ajaxResponse = { 'success' : True, 'message' : 'Compound upload in progress. Check "Past Jobs" for status.' }
+                elif newJob.status == Job.FINISHED:
+                    ajaxResponse = { 'success' : True, 'message' : 'Compounds uploaded successfully.'}
+                else:
+                    ajaxResponse = { 'success' : False, 'message' : 'An error occurred while uploading your compounds.' }
+                return JsonResponse(ajaxResponse)
+            except Exception as e:
+                return die(str(e))
+        else:
+            return die('Unknown source_id: {}'.format(source_id))
+    else:
+        return die('Unknown action: {}'.format(action))
 
 
 def makeSDF(user):
