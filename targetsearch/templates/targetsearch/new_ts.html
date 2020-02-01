@@ -438,9 +438,10 @@
 	
 	function toggleTableColumns(table_obj,setId, state) {
 		$("#"+setId+" input").each(function(){
-			table_obj.column( $(this).attr('value') ).visible(state);
+			table_obj.column( $(this).attr('value') ).visible(state, false);
 			$(this).prop('checked', state);
 		});
+		table_obj.columns.adjust().draw();
 		return false;
 	}
 	
