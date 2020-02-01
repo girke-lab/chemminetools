@@ -1,14 +1,22 @@
-    Alias /static/ /srv/chemminetools/static_production/
-    WSGIScriptAlias / /srv/chemminetools/chemminetools/wsgi.py
-    <Location />
-        Order Allow,Deny
-        Allow from all
-    </Location>
-    <Directory "/srv/chemminetools/chemminetools">
-    	<Files "wsgi.py">
-    		Require all granted
-    	</Files>
-    </Directory>
-    <Directory "/srv/chemminetools/static_production">
-    		Require all granted
-    </Directory>
+Alias /static/ /srv/chemminetools/static_production/
+
+WSGIDaemonProcess chemminetools python-home=/srv/venvs/chemminetools
+WSGIProcessGroup chemminetools
+WSGIApplicationGroup %{GLOBAL}
+
+WSGIScriptAlias / /srv/chemminetools/chemminetools/wsgi.py
+
+<Location />
+    Order Allow,Deny
+    Allow from all
+</Location>
+
+<Directory "/srv/chemminetools/chemminetools">
+    <Files "wsgi.py">
+        Require all granted
+    </Files>
+</Directory>
+
+<Directory "/srv/chemminetools/static_production">
+    Require all granted
+</Directory>

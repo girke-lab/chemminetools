@@ -29,10 +29,10 @@ def groupBy(keyFn, row_data):
     return temp_dict
 
 def runQuery(query, values):
-    dbhost = 'chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com'
-    dbname = 'chembl'
-    dbuser = 'chembl'
-    dbpass = 'chembl1889'
+    dbhost = settings.CHEMBL_DB['DBHOST']
+    dbname = settings.CHEMBL_DB['DBNAME']
+    dbuser = settings.CHEMBL_DB['DBUSER']
+    dbpass = settings.CHEMBL_DB['DBPASS']
     
     with psycopg2.connect(host=dbhost, dbname=dbname, user=dbuser, password=dbpass) as conn:
         cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)

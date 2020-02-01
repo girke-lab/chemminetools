@@ -13,7 +13,8 @@ from django.contrib.messages import constants as messages
 CELERY_TASK_SERIALIZER = 'pickle'
 CELERY_RESULT_SERIALIZER = 'pickle'
 CELERY_ACCEPT_CONTENT = {'pickle'}
-CELERY_BROKER_URL= "amqp://guest@localhost//"
+#CELERY_BROKER_URL= "amqp://guest@localhost//"
+CELERY_BROKER_URL = "amqp://remote_worker:askfj4l3nbb43@localhost//"
 CELERY_RESULT_BACKEND="cache+memcached://127.0.0.1:11211/"
 #CELERY_TASK_ACKS_LATE = True
 #CELERY_WORKER_PREFETCH_MULTIPLIER = 1
@@ -25,7 +26,7 @@ PROJECT_DIR = '/srv/chemminetools'
 DEBUG = True
 #TEMPLATE_DEBUG = DEBUG
 
-ALLOWED_HOSTS= ['example.com', 'localhost']
+ALLOWED_HOSTS= ['example.com', 'localhost', '127.0.0.1']
 
 ADMINS = ()
 
@@ -110,7 +111,8 @@ STATIC_URL = '/static/'
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Make this unique, and don't share it with anybody.
-# Generate with:
+# A new key should be generated for you if you use the bootstrap script.
+# If necessary, re-generate with:
 # $ python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 SECRET_KEY = ''
 

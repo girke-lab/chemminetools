@@ -1,143 +1,178 @@
 #!/bin/bash
-# These are notes for configuring a chemminetools web server 
-# These instructions were tested on Debian Linux 7.0 aka "Wheezy"
+# This script is for configuring a ChemmineTools web server
+# It is known to work on Debian 10.2 (Buster)
 
-# 1st:
-# installed custom screen & vim plugins
+# In its current form, this script should be run as root on a fresh, minimal,
+# updated install of Debian Buster. It is assumed that ChemmineTools has been
+# extracted/cloned to /srv/chemminetools, and that this script is running from
+# there. It has not been tested with Vagrant yet.
 
-set -o xtrace
+# Echo commands, and exit on error
+set -xe
 
-# for debian 9, both python 2.7 and python 3.5 are installed by default. 
-# this will make python3 the default for cli 
-update-alternatives --install /usr/bin/python python /usr/bin/python2.7 1
-update-alternatives --install /usr/bin/python python /usr/bin/python3.5 2
+# Install GPG early
+apt update
+apt install -y gnupg
 
-#use python 2.7 for install debian packages
-update-alternatives --set python /usr/bin/python2.7
+# Add CRAN's APT repo to sources
+echo 'deb https://cloud.r-project.org/bin/linux/debian buster-cran35/' >> /etc/apt/sources.list
+# Add GPG key to APT keyring
+apt-key adv --keyserver keys.gnupg.net --recv-key 'E19F5F87128899B192B1A2C2AD5F960A256A04AF'
+## See https://cran.r-project.org/bin/linux/debian/ for guidance when this
+## inevitably becomes out-of-date.
 
-# Install Required Debian Packages (including django) 
-apt-get update
-apt-get install -y git
-apt-get install -y postgresql-9.6
-apt-get install -y python3-psycopg2
-apt-get install -y python-skimage
-apt-get install -y python3-pip
-apt-get install -y libcurl4-openssl-dev
-apt-get install -y rabbitmq-server
-apt-get install -y python-pylibmc
-apt-get install -y libxml2-dev
-apt-get install -y openjdk-8-jre
-apt-get install -y libreadline5
-apt-get install -y r-base-core
-apt-get install -y subversion
-apt-get install -y apache2
-apt-get install -y libapache2-mod-wsgi-py3
-apt-get install -y memcached
-apt-get install -y libpq-dev
-apt-get install -y nginx
-apt-get install -y libgsl-dev  # needed for eiR
-apt-get install -y libssl-dev  # needed for eiR
-apt-get install -y librsvg2-dev  # needed for ChemmineR
-apt-get install -y openbabel libopenbabel-dev swig
-apt-get install -y libgc1c2 # for fmcs
-apt-get install -y libzmq3-dev #for rzmq server used by eiSearch
 
-# clean up package install 
-apt-get clean
+# Install Debian packages
+apt update
+## If this is a development installation, these packages may be useful
+#apt install -y git man rsync ssh sudo vim wget
+## Direct ChemmineTools dependencies
+apt install -y apache2 curl libapache2-mod-wsgi-py3 memcached openbabel postgresql \
+python3 python3-future python3-memcache python3-pip python3-psycopg2 \
+python3-venv rabbitmq-server r-base-core
+## Indirect ChemmineTools dependencies (probably to compile pip/R packages)
+apt install -y libcurl4-openssl-dev libopenbabel-dev libpq-dev librsvg2-dev \
+libssl-dev libxml2-dev libzmq3-dev swig
+## We won't need Apache until the very end. Might as well stop it early.
+systemctl stop apache2
 
-#swithc back to python 3 for the rest
-update-alternatives --set python /usr/bin/python3.5
 
-# For correct dependency resolution pip needs everything on a single line
-pip3 install Django==1.11.14 django-guardian==1.4.9   \
-django-cms==3.5.2 South==1.0.2  django-appmedia==1.0.1 django-celery==3.2.2 simplejson==3.16.0 \
-ghostscript PyYAML==3.12 beautifulsoup4==4.6.1 celery==3.1.26.post2 django-userena==2.0.1 \
-'html5lib<0.99999999' subprocess32 openbabel django-mptt==0.9.1 djangocms_text_ckeditor==3.6.0 \
-djangocms_picture djangocms_link djangocms_file djangocms_googlemap django_cron==0.5.1 \
-python-memcached future configparser django-ckeditor django-lockdown django-bootstrap4
+# Setup Python venv
+mkdir -p /srv/venvs
+pushd /srv/venvs
+python3 -m venv --system-site-packages chemminetools
+source chemminetools/bin/activate
+popd
+## Install Python packages in venv
+pip install -r django_req.txt beautifulsoup4 celery html5lib openbabel PyYAML \
+requests simplejson
+## Manually install gyroid_utils
+curl http://cluster.hpcc.ucr.edu/~khoran/gyroid_utils.tgz | tar -xzf- --no-same-owner --no-same-permissions -C /srv/venvs/chemminetools/lib/python3.7/site-packages/
 
-# create symbolic link for /srv/chemminetools
-#ln -s /vagrant /srv/chemminetools
 
-# copy config file
-cd /srv/chemminetools
-cp chemminetools/settings_sample.py chemminetools/settings.py 
-# made changes to get it running: add in database settings and secret key
+set +x
+# Install R packages
+for pkg in amap bitops R.oo gridExtra rzmq RPostgreSQL BiocManager shiny; do
+    echo "Installing R package [$pkg]. Check /tmp/$pkg.log for errors."
+    echo 'install.packages(c("'$pkg'"), repos="https://cloud.r-project.org")' | R --slave &> /tmp/$pkg.log
+done
+# Install Bioconductor packages
+for pkg in ChemmineOB ChemmineR fmcsR ctc rjson R.utils eiR; do
+    echo "Installing Bioconductor package [$pkg]. Check /tmp/$pkg.log for errors."
+    echo 'BiocManager::install(c("'$pkg'"))' | R --slave &> /tmp/$pkg.log
+done
+set -x
 
-# create postgresql database as postgres user
-sudo -u postgres createuser -U postgres chemminetools -w -S -R -d
-sudo -u postgres psql -U postgres -d postgres -c "alter user chemminetools with password 'chemminetools';"
-sudo -u postgres createdb -E utf8 -O chemminetools chemminetools -T template0 --locale=C.UTF-8
 
-# manually install packages in /usr/local/lib/python2.7/dist-packages:
-cd /tmp
-wget http://cluster.hpcc.ucr.edu/~khoran/guest.tgz
-wget http://cluster.hpcc.ucr.edu/~khoran/gyroid_utils.tgz
-tar xfz gyroid_utils.tgz -C /usr/local/lib/python3.5/dist-packages/
-tar xfz guest.tgz -C /usr/local/lib/python3.5/dist-packages/
-rm -rf guest.tgz gyroid_utils.tgz
+# Setup PostgreSQL user for ChemmineTools
+runuser -u postgres -- createuser -U postgres chemminetools -w -S -R -d
+runuser -u postgres -- psql -U postgres -d postgres -c "alter user chemminetools with password 'chemminetools';"
+runuser -u postgres -- createdb -E utf8 -O chemminetools chemminetools -T template0 --locale=C.UTF-8
 
-# add sql commands to blank database
-cd /srv/chemminetools
-mkdir static_production
-python manage.py syncdb --noinput
-python manage.py migrate --noinput
-python manage.py collectstatic --noinput
-python manage.py check_permissions
+# Setup Celery
+install -m 644 celery_config /etc/default/celeryd
+install -m 644 celery_tmpfiles.conf /etc/tmpfiles.d/celery.conf
+install -m 644 celery.service /etc/systemd/system/celery.service
 
-# install R packages
-
-printf "install.packages(c(\"amap\",\"bitops\",\"R.oo\",\"gridExtra\",\"rzmq\",\"RPostgreSQL\",\"BiocManager\"),repos=\"https://cloud.r-project.org\")" | R --slave
-
-#printf "source(\"http://bioconductor.org/biocLite.R\")
-#biocLite()
-printf "BiocManager::install(c(\"ChemmineR\", \"fmcsR\",\"ChemmineOB\",\"ctc\", \"rjson\", \"R.utils\", \"eiR\", \"RPostgreSQL\"),dependencies=c(\"Imports\"))
-" | R --slave
-
-# create working directory and set permissions
-cd /srv/chemminetools
-mkdir /srv/working
-chown www-data /srv/working
-ln -s /srv/working working
-
-# register all applications in database
-cd /srv/chemminetools/tools/tool_scripts
-find *.yaml -print | xargs -I {} ./loader.py -i {}
-
-# enable wsgi settings in apache
-cp /srv/chemminetools/apacheconfig  /etc/apache2/conf-available/chemminetools.conf
-a2enconf chemminetools
-# echo "export PYTHONPATH=\"/usr/local/lib/:/usr/local/lib/python2.7/dist-packages/\"" >> /etc/profile
-
-# add apache module
-a2enmod wsgi
-
-# daemonize celery
-cd /etc/init.d
-cp /srv/chemminetools/celeryd .
-chmod ugo+x celeryd
-update-rc.d celeryd defaults 98 02
-cp /srv/chemminetools/celery_config /etc/default/celeryd
-
-# cause celery to launch AFTER /vagrant is mounted
-cp /srv/chemminetools/udev_rule /etc/udev/rules.d/50-vagrant-mount.rules
-
-# start celery now
-systemctl start celeryd
-
-# restart apache
-systemctl restart apache2
-
-# setup and start nginx pubchem proxy
-cp /srv/chemminetools/nginx_config /etc/nginx/sites-enabled/default
-systemctl restart nginx
-
-#setup rabbitmq for remote connections
+# Setup RabbitMQ for remote connections
 rabbitmqctl add_user remote_worker askfj4l3nbb43
 rabbitmqctl set_permissions -p '/' remote_worker ".*" ".*" ".*"
 
-# exit now if a bash script, the rest should be run interactively 
+# Setup Apache HTTP Server
+install -m 644 apacheconfig /etc/apache2/conf-available/chemminetools.conf
+a2enmod wsgi
+a2enconf chemminetools
+
+# Create working directory and set permissions
+mkdir -p /srv/working
+chown www-data:www-data /srv/working
+ln -s /srv/working /srv/chemminetools/working
+
+# Copy sample Django settings file and generate a secret key
+# Note: you can't use sed's s/// command here because the secret key may
+# contain an '&', which will freak sed out...
+pushd /srv/chemminetools/chemminetools
+SECRET_KEY=$(python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())')
+sed -e "/^SECRET_KEY/cSECRET_KEY = '${SECRET_KEY}'" settings_sample.py > settings.py
+popd
+
+# Initialize ChemmineTools static files and DB schema
+pushd /srv/chemminetools
+mkdir static_production
+python manage.py migrate --noinput
+python manage.py collectstatic --noinput
+python manage.py check_permissions
+popd
+
+# Register all applications in database
+pushd /srv/chemminetools/tools/tool_scripts
+for tool in *.yaml; do
+    python loader.py -i $tool
+done
+popd
+
+# Create temp directories for Celery
+systemd-tmpfiles --create
+
+# Start remaining services
+systemctl daemon-reload
+systemctl enable celery
+systemctl start celery
+systemctl start apache2
+
+# Present user with installation success message and further instructions.
+set +x
+cat << EOF
+ChemmineTools installation *ALMOST* complete!
+Before using ChemmineTools, you'll need to make a few more configuration
+changes:
+
+- Review /srv/chemminetools/chemminetools/settings.py to make sure the settings
+  are appropriate to your installation. Minimally, change the ALLOWED_HOSTS
+  list to include your site's domain name(s) and/or IP address. Restart Apache
+  after making changes (systemctl restart apache2)
+- You'll need to prepare two additional databases, one with ChEMBL data, and
+  another with eiR index data. See the following file for more information:
+  /srv/chemminetools/chembl_update/README
+- Create a Django superuser with:
+  $ source /srv/venvs/chemminetools/bin/activate
+  $ cd /srv/chemminetools/
+  $ python manage.py createsuperuser
+- Consider using a firewall to limit access to your server. This will be
+  specific to your installation (AWS, VirtualBox, iptables, etc.) and is beyond
+  the scope of this script.
+EOF
+# Exit now if running as a Bash script
 exit 0
+
+################
+# Useful notes #
+################
+
+# Activate venv before doing anything Django-related
+source /srv/venvs/chemminetools/bin/activate
+
+# Create a superuser for Django site
+python manage.py createsuperuser
+
+# Start a shell with Django environment loaded
+python manage.py shell
+
+# Adding a new app
+python manage.py startapp newAppName
+## Add newAppName to INSTALLED_APPS set in settings.py
+## Add app to urlpatterns list in urls.py with something like:
+## url(r'^newAppName/', include('newAppName.urls')),
+
+# Create database migrations (changes to DB schema over time)
+python manage.py makemigrations newAppName
+
+# Apply database migrations
+python manage.py migrate
+
+###############################
+# Older notes - for reference #
+###############################
 
 # The following steps are only necessary for creating a real production environment
 
@@ -160,11 +195,6 @@ python manage.py runserver 8020
 
 # launch celery worker on local port
 python manage.py celery worker --loglevel=info
-
-########################
-# Creating a superuser #
-########################
-python manage.py createsuperuser
 
 #####################
 # Django Console    #
@@ -217,26 +247,6 @@ base_queryset = Compound.objects
 compoundList = base_queryset.filter(username='tbackman')
 # get sdf:
 compound.sdffile_set.all()[0].sdffile
-
-#####################
-# adding a new app  #
-#####################
-
-python manage.py startapp <newAppName>
-
-# add app to settings.py:
-'<newAppName>',
-
-# add app to urls.py:
-(r'^<newAppName>/', include('<newAppName>.urls')),
-
-# edit <newAppName>/models.py to add base models
-
-# check new database entries
-python manage.py sql <newAppName>
-
-# load new tables into database
-python manage.py syncdb
 
 #####################
 # Database use      #
