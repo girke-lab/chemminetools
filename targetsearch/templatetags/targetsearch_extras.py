@@ -27,14 +27,14 @@ def order_by(l, orderByIndex):
     return l
 
 @register.simple_tag
-def find_col_by_key(info, key, value):
+def find_col_by_key(info, key, value, default=None):
     """Given a list of dicts 'info', return the index for the first instance in
     which info[key] == value."""
     if info != None:
         for i in range(0, len(info)):
             if info[i].get(key) == value:
                 return i
-    return None
+    return default
 
 @register.simple_tag
 def col_index_list(info, key, value):

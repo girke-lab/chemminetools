@@ -288,8 +288,6 @@ def ajax(request):
             try:
                 sdfs = get_chembl_sdfs(ids)
                 sdf = '\n$$$$\n'.join(sdfs) + '\n$$$$\n'
-                with open('/tmp/sdfdump.sdf', 'w') as sdfdump:
-                    sdfdump.write(sdf)
                 
                 newJob = createJob(request.user, 'Upload Compounds', '',
                                    ['--user=' + str(request.user.id), '--tags=' + (','.join(compoundTags))], sdf)

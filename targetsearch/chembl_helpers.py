@@ -40,12 +40,20 @@ def runQuery(query, values):
         return cur.fetchall()
 
 def get_chembl_sdfs(chemblIds):
-    data = runQuery("""
-      SELECT chembl_id||molfile 
-      FROM chembl_id_lookup JOIN
-           compound_structures ON(entity_id=molregno)
-      WHERE chembl_id_lookup.chembl_id IN %s""",(chemblIds,))
-    return [row[0] for row in data]
+    data = runQuery("""SELECT chembl_id||molfile, pref_name
+      FROM molecule_dictionary JOIN
+           compound_structures USING(molregno)
+      WHERE molecule_dictionary.chembl_id IN %s""",(chemblIds,))
+
+    sdf_list = list()
+    # Attach pref_name, if it exists
+    for row in data:
+        molfile = row[0]
+        if row.pref_name is not None:
+            molfile += ('\n> <NAME>\n' + row.pref_name)
+        sdf_list.append(molfile)
+
+    return sdf_list
 
 def get_chembl_smiles(chemblIds):
     data = runQuery("""

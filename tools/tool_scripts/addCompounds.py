@@ -46,7 +46,7 @@ def addMyCompounds(sdf, user,tags):
     sdffile = ''
     counter = 0
     linecounter = 0
-    namekey = 'PUBCHEM_IUPAC_NAME'
+    namekeys = ['NAME', 'PUBCHEM_IUPAC_NAME']
     message = 'ERROR: bad input data.'
     added_ids = []
     initial_compound_count = Compound.objects.filter(user=user).count()
@@ -83,7 +83,7 @@ def addMyCompounds(sdf, user,tags):
             sdffile += '\n'
             if line.startswith('$$$$'):
                 try:
-                    moldata = parse_annotation(sdffile, namekey)
+                    moldata = parse_annotation(sdffile, namekeys)
                 except:
                     print("error while processing sdf: ")
                     print("Unexpected error:", sys.exc_info())
@@ -98,7 +98,7 @@ def addMyCompounds(sdf, user,tags):
                     raise Exception
                 try:
                     newid = insert_single_compound(moldata, sdffile,
-                            namekey, 'id', user,tags)
+                            'id', user, tags)
                 except:
                     print("error while inserting compound: ")
                     print("Unexpected error:", sys.exc_info())

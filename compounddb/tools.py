@@ -45,7 +45,7 @@ def get_sdf_tags(sdf):
     return tagdict
 
 
-def parse_annotation(sdf, namekey):
+def parse_annotation(sdf, namekeys):
     """ parse annotation from SDF file """
 
     # parse the sdf tags
@@ -73,10 +73,13 @@ def parse_annotation(sdf, namekey):
     mol.AddHydrogens()
     moldata['weight'] = str(mol.GetMolWt())
 
-    # if the name is not in sdf:
-
-    if namekey not in moldata:
-        moldata[namekey] = ''
+    # Retrieve display name from SDF, or empty string if absent:
+    for n in namekeys:
+        if n in moldata:
+            moldata['name'] = moldata[n]
+            break
+    if moldata.get('name') is None:
+        moldata['name'] = ''
 
     # smiles
 
@@ -114,7 +117,6 @@ def _update_single_compound(
 def insert_single_compound(
     moldata,
     sdf,
-    namekey,
     idkey,
     user,
     tags,
@@ -122,7 +124,7 @@ def insert_single_compound(
     """ insert single compound into database """
 
     cid = moldata[idkey]
-    name = moldata[namekey]
+    name = moldata['name']
     if '\n' in name:
         name = name.split('\n')[0]
 

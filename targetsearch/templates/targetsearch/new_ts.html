@@ -403,10 +403,10 @@
 		targetSearch.activity_table = activity_table;
 		targetSearch.annotation_no_export = {% col_index_list annotation_info 'export' False %};
 		targetSearch.activity_no_export = {% col_index_list activity_info 'export' False %};
-		targetSearch.annotation_chembl_column = {% find_col_by_key annotation_info 'id' 'annotation__chembl_id_lookup__chembl_id' %};
-		targetSearch.annotation_pref_name_column = {% find_col_by_key annotation_info 'id' 'annotation__molecule_dictionary__pref_name' %};
-		targetSearch.activity_chembl_column = {% find_col_by_key activity_info 'id' 'activity__chembl_id_lookup__chembl_id' %};
-		targetSearch.activity_pref_name_column = {% find_col_by_key activity_info 'id' 'activity__molecule_dictionary__pref_name' %};
+		targetSearch.annotation_chembl_column = {% find_col_by_key annotation_info 'id' 'annotation__chembl_id_lookup__chembl_id' 'null' %};
+		targetSearch.annotation_pref_name_column = {% find_col_by_key annotation_info 'id' 'annotation__molecule_dictionary__pref_name' 'null' %};
+		targetSearch.activity_chembl_column = {% find_col_by_key activity_info 'id' 'activity__chembl_id_lookup__chembl_id' 'null' %};
+		targetSearch.activity_pref_name_column = {% find_col_by_key activity_info 'id' 'activity__molecule_dictionary__pref_name' 'null' %};
 		
 		var annotation_table_buttons = annotation_table.buttons().container();
 		annotation_table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
