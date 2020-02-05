@@ -1,0 +1,43 @@
+<div class="modal fade" id="csm{{table_name.title}}" tabindex="-1" role="dialog" aria-labelledBy="csm{{table_name.title}}Title" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="csm{{table_name.title}}Title">Column Select - {{table_name.title}}</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-select-all" onClick="selectAllColumns('{{table_name}}', true)">Select All</button>
+				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-deselect-all" onClick="selectAllColumns('{{table_name}}', false)">Deselect All</button>
+				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-defaults" onClick="selectDefaultColumns('{{table_name}}')">Restore Defaults</button>
+				<fieldset>
+					<div>
+					{% for col in table_info %}
+						{% ifchanged col.table %}
+						</div>
+						<div class="bg-light column-set" id="column_set_{{forloop.counter0}}">
+							<div>
+								<h5 style="display:inline-block">{{col.table}}</h5>
+								<span style="margin:1rem">
+									Select
+									<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.{{table_name}}_table,'column_set_{{forloop.counter0}}',true)">All</a>
+									<a href="javascript:void(0)" onclick="toggleTableColumns(targetSearch.{{table_name}}_table,'column_set_{{forloop.counter0}}',false)">None</a>
+								</span>
+							</div>
+						{% endifchanged %}
+						<span style="width: 18rem; display: inline-block;">
+							<input type="checkbox" class="toggle-vis chkbox-{{table_name}}{% if col.visible %} chkbox-{{table_name}}-default{% endif %}"
+								name="{{table_name}}-column" id="{{col.id}}" value="{{forloop.counter0}}"/>
+							<label for="{{col.id}}" data-toggle="tooltip" data-placement="top" title="{% if col.sql %}[ {{col.sql}} ] {% endif %}{{col.desc}}">{{col.name}}</label>
+						</span>
+					{% endfor %}
+					</div>
+				</fieldset>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
