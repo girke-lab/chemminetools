@@ -26,8 +26,15 @@
 					</div>
 				</div>
 			</div>
-			<div class="btn-group">
-				<button type="button" class="btn btn-secondary" onClick="showWorkbenchModal('{{table_name}}')">Add Selected Compounds to Workbench</button>
+			<div class="btn-group mr-1" role="group">
+				<button id="selRowAct{{table_name.title}}" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Selected Row Actions</button>
+				<div class="dropdown-menu" aria-labelledby="selRowAct{{table_name.title}}">
+					<div class="btn-group-vertical">
+						<button type="button" class="btn btn-secondary" onClick="showWorkbenchModal('{{table_name}}')">Add Compounds to Workbench</button>
+						<button type="button" class="btn btn-secondary" onclick="addIdToSearch('{{table_name}}','chembl')">Add Compound IDs to Search</button>
+						<button type="button" class="btn btn-secondary" onclick="addIdToSearch('{{table_name}}','accession')">Add Accession IDs to Search</button>
+					</div>
+				</div>
 			</div>
 		</div>
 		<table class="table table-striped" id="{{table_name}}-table">

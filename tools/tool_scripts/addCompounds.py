@@ -72,13 +72,14 @@ def addMyCompounds(sdf, user,tags):
                 line = re.sub(r"[^a-zA-Z_0-9-]", '_', line, count=0)
 
                 # loop adding postfix numbers to the cid until we find a unique cid in the database
-
-                appendNumber = 1
-                oldCid = line
-                while len(Compound.objects.filter(cid=line, user=user)) \
-                    > 0:
-                    appendNumber += 1
-                    line = str(oldCid) + '_' + str(appendNumber)
+                # disabling unique CIDs, since adding the postfix will cause
+                # problems when searching with CIDs.
+                #appendNumber = 1
+                #oldCid = line
+                #while len(Compound.objects.filter(cid=line, user=user)) \
+                #    > 0:
+                #    appendNumber += 1
+                #    line = str(oldCid) + '_' + str(appendNumber)
             sdffile += line
             sdffile += '\n'
             if line.startswith('$$$$'):

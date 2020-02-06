@@ -16,7 +16,7 @@
 	<div class="row">
 		<div class="col-md-12">
 			{% if message %}<span style="color: red">{{message}}</span>{% endif %}
-			<ul class="nav nav-tabs">
+			<ul class="nav nav-tabs" id="searchTabs">
 				<li class="nav-item">
 					<a class="nav-link{% if id_type == "compound" %} active{% endif %}" href="#compound_search" data-toggle="tab">Search By Compound</a>
 				</li>
@@ -38,7 +38,7 @@
 										<option value="{{id}}" {% if defaultCompoundDb == id %}selected {% endif %} >{{name}}</option>
 									{% endfor %}
 									</select>
-									<ul class="nav nav-tabs">
+									<ul class="nav nav-tabs" id="searchCompoundTabs">
 									  <li class="nav-item">
 										<a class="nav-link active" href="#workbench" data-toggle="tab">Workbench</a>
 									  </li>
@@ -348,7 +348,49 @@
 			select: { style: 'multi' },
 		});
 	}
-	
+
+	function addIdToSearch(table_name, id_type) {
+		var table_obj = targetSearch[table_name + '_table'];
+		var column = targetSearch[table_name + '_' + id_type + '_column'];
+		var append_set = new Set();
+
+		var rows = table_obj.rows( {selected:true} );
+		if (rows.any()) {
+			rows.every( function() {
+				var id_text = $(table_obj.cell(this.index(), column).node()).text();
+				append_set.add(id_text);
+			});
+			var append_list = Array.from(append_set);
+			var append_str = append_list.join(' ');
+			//console.log("append_str:", append_str);
+
+			if (id_type == 'chembl') {
+				var compoundArea = $('#compound-ids');
+				compoundArea.val(strjoin(compoundArea.val(), append_str));
+				$('#searchTabs a[href="#compound_search"]').tab('show');
+				$('#searchCompoundTabs a[href="#compoundids"]').tab('show');
+				document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
+			} else if (id_type == 'accession') {
+				var compoundArea = $('#target-ids');
+				compoundArea.val(strjoin(compoundArea.val(), append_str));
+				$('#searchTabs a[href="#target_search"]').tab('show');
+				document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
+			}
+		}
+	}
+
+	function strjoin(a, b) {
+		a = a.trim();
+		b = b.trim();
+
+		if (a == '')
+			return b;
+		else if (b == '')
+			return a;
+		else
+			return (a + ' ' + b);
+	}
+
 	$(document).ready(function() {
 		jQuery("#tags").selectize({
 			plugins: ['remove_button'],
@@ -373,15 +415,15 @@
 						callback(result);
 					});
 			},
-			onChange:function(value){
-		if(value == null || value === "")
-			return;
-		console.log("new compound selected: ",value);
-		var compoundArea= jQuery("#compound-ids");
-		compoundArea.val(compoundArea.val() + "\n"+value);
+			onChange:function(value) {
+				if(value == null || value === "")
+					return;
+				console.log("new compound selected: ",value);
+				var compoundArea= jQuery("#compound-ids");
+				compoundArea.val(strjoin(compoundArea.val(), value));
 			},
 		});
-		
+
 		var annotation_table = init_datatable('annotation');
 		var activity_table = init_datatable('activity');
 		
@@ -401,13 +443,17 @@
 
 		targetSearch.annotation_table = annotation_table;
 		targetSearch.activity_table = activity_table;
+
 		targetSearch.annotation_no_export = {% col_index_list annotation_info 'export' False %};
-		targetSearch.activity_no_export = {% col_index_list activity_info 'export' False %};
 		targetSearch.annotation_chembl_column = {% find_col_by_key annotation_info 'id' 'annotation__chembl_id_lookup__chembl_id' 'null' %};
 		targetSearch.annotation_pref_name_column = {% find_col_by_key annotation_info 'id' 'annotation__molecule_dictionary__pref_name' 'null' %};
+		targetSearch.annotation_accession_column = {% find_col_by_key annotation_info 'id' 'annotation__component_sequences__accession' 'null' %};
+
+		targetSearch.activity_no_export = {% col_index_list activity_info 'export' False %};
 		targetSearch.activity_chembl_column = {% find_col_by_key activity_info 'id' 'activity__chembl_id_lookup__chembl_id' 'null' %};
 		targetSearch.activity_pref_name_column = {% find_col_by_key activity_info 'id' 'activity__molecule_dictionary__pref_name' 'null' %};
-		
+		targetSearch.activity_accession_column = {% find_col_by_key activity_info 'id' 'activity__component_sequences__accession' 'null' %};
+
 		var annotation_table_buttons = annotation_table.buttons().container();
 		annotation_table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
 		annotation_table_buttons.appendTo( $('#csv-buttons-annotation') );
