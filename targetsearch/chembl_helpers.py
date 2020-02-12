@@ -427,6 +427,22 @@ def compoundNameAutocomplete(nameQuery):
 	
     return runQuery(sqlQuery,("%"+nameQuery+"%",))
 
+def targetNameAutocomplete(nameQuery):
+    sqlQuery = sql.SQL("""SELECT accession, description, organism
+                          FROM component_sequences
+                          WHERE description ILIKE %s
+                          ORDER BY description, organism""")
+
+    # Perform two queries, one that begins with the user's search terms,
+    # and another where it appears somewhere in the middle. Skip the second
+    # query if the first one returns enough results
+    top_results = runQuery(sqlQuery, (nameQuery+"%",))
+    if len(top_results) < 100:
+        bottom_results = runQuery(sqlQuery, ("_%"+nameQuery+"%",))
+    else:
+        bottom_results = []
+
+    return (top_results + bottom_results)
 
 #getUniChemSources()
 #mapToChembl(['DB00829','DB00945'],2)

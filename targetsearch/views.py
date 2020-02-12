@@ -16,7 +16,8 @@ from .chembl_helpers import (
     AnnotationWithDrugIndSearch,
     mapToChembl,
     mapToUniprot,
-    compoundNameAutocomplete
+    compoundNameAutocomplete,
+    targetNameAutocomplete,
     )
 
 from django.conf import settings
@@ -208,3 +209,9 @@ def compoundNames(request,query):
     names = compoundNameAutocomplete(query)
     data = [ {'chembl_id': n.chembl_id, 'name': n.synonyms} for n in names]
     return JsonResponse(data,safe=False)
+
+def targetNames(request, query):
+    names = targetNameAutocomplete(query)
+    data = [ {'accession_id': n.accession,
+              'name': (n.description+' ('+n.organism+')')} for n in names ]
+    return JsonResponse(data, safe=False)

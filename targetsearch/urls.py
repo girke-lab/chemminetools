@@ -1,13 +1,12 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from __future__ import absolute_import
-from django.conf.urls import *
-from django.urls import path
+from django.urls import path, re_path
 from .views import *
 
 urlpatterns = [
-        url(r'^$', newTS, name='newTS'),
-        url(r'^drugIndTable$', drugIndTable, name='drugIndTable'),
-        path('compoundNames/<query>',compoundNames),
+        path('', newTS, name='newTS'),
+        path('drugIndTable', drugIndTable, name='drugIndTable'),
+        path('compoundNames/<query>', compoundNames, name='compoundNames'),
+        path('targetNames/<query>', targetNames, name='targetNames'),
         ]

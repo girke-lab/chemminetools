@@ -62,14 +62,12 @@
 										</div>
 										<div id="compoundids" class='tab-pane '>
 											<div class="card text-white bg-secondary my-3 p-2">
-												<h6 class='card-title' for="compound-ids">Enter compound IDs</h6>
-												<p>Use the 'Compound Name Search' box to search for compounds by name, or
-												enter compound ids into box below.</p>
-												
-												<select id="compound_autocomplete"  placeholder="Compound Name Search"> </select>
+												<h6 class='card-title' for="compound-ids">Enter Compound IDs</h6>
+												<p>Use the 'Compound Name Search' box to search for compounds
+												by name, or enter compound IDs into the box below.</p>
+												<select id="compound_autocomplete" placeholder="Compound Name Search"></select>
 												<textarea id="compound-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
 											</div>
-
 										</div>
 									</div>
 									<input type="hidden" name="id_type" value="compound">
@@ -85,20 +83,23 @@
 						<div class="col-md-12">
 							<form method="GET">
 								<div class="form-group mt-3">
-									<input id="include-activity-chkbox" type="checkbox" name="include_activity">
-									<label for="include-activity-chkbox">&nbsp;Include Activity Results (slow)</label>
-									<p></p>
 									<label for="source-id-select">Database:</label>
 									<select id="source-id-select" name="source_id">
 									{% for id,name in proteinDbs.items|order_by:1 %}
 										<option value="{{id}}" {% if defaultProteinDb == id %}selected {% endif %} >{{name}}</option>
 									{% endfor %}
 									</select>
-									<br/>
-
-									<label for="target-ids">Target Protein IDs:</label>
-									<textarea id="target-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
-									<br>
+									<div class="card text-white bg-secondary my-3 p-2">
+										<h6 class="card-title" for="target-ids">Enter Target IDs</h6>
+										<p>Use the 'Target Name Search' box to search for targets
+										by name, or enter target IDs into the box below.</p>
+										<select id="target_autocomplete" placeholder="Target Name Search"></select>
+										<textarea id="target-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+									</div>
+									<div>
+										<input id="include-activity-chkbox" type="checkbox" name="include_activity">
+										<label for="include-activity-chkbox">&nbsp;Include Activity Results (slow)</label>
+									</div>
 									<input type="hidden" name="id_type" value="target">
 									<button type="submit" class="btn btn-primary">Search</button>
 								</div>
@@ -419,8 +420,25 @@
 				if(value == null || value === "")
 					return;
 				console.log("new compound selected: ",value);
-				var compoundArea= jQuery("#compound-ids");
+				var compoundArea = jQuery("#compound-ids");
 				compoundArea.val(strjoin(compoundArea.val(), value));
+			},
+		});
+
+		jQuery("#target_autocomplete").selectize({
+			valueField: "accession_id",
+			labelField: "name",
+			searchField: ["name"],
+			load: function(query, callback) {
+				jQuery.get("targetNames/" + query).then( function(result) {
+					callback(result);
+				});
+			},
+			onChange: function(value) {
+				if (value == null || value === "")
+					return;
+				var targetArea = jQuery("#target-ids");
+				targetArea.val(strjoin(targetArea.val(), value));
 			},
 		});
 
