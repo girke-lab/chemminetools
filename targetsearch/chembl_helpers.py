@@ -418,31 +418,22 @@ def getUniChemSources():
 
     return sources;
 
-def compoundNameAutocomplete(nameQuery): 
-    sqlQuery = sql.SQL("""
-               SELECT DISTINCT chembl_id, synonyms 
-               FROM molecule_synonyms 
-                JOIN molecule_dictionary USING(molregno) 
-                WHERE synonyms ilike %s """)
-	
-    return runQuery(sqlQuery,("%"+nameQuery+"%",))
+def compoundNameAutocomplete(nameQuery):
+    sqlQuery = sql.SQL("""SELECT DISTINCT chembl_id, synonyms
+                          FROM molecule_synonyms
+                          JOIN molecule_dictionary USING(molregno)
+                          WHERE synonyms ILIKE %s
+                          ORDER BY synonyms""")
+
+    return runQuery(sqlQuery, ("%"+nameQuery.replace(' ','%')+"%",))
 
 def targetNameAutocomplete(nameQuery):
     sqlQuery = sql.SQL("""SELECT accession, description, organism
                           FROM component_sequences
-                          WHERE description ILIKE %s
+                          WHERE description||' '||organism ILIKE %s
                           ORDER BY description, organism""")
 
-    # Perform two queries, one that begins with the user's search terms,
-    # and another where it appears somewhere in the middle. Skip the second
-    # query if the first one returns enough results
-    top_results = runQuery(sqlQuery, (nameQuery+"%",))
-    if len(top_results) < 100:
-        bottom_results = runQuery(sqlQuery, ("_%"+nameQuery+"%",))
-    else:
-        bottom_results = []
-
-    return (top_results + bottom_results)
+    return runQuery(sqlQuery, ('%'+nameQuery.replace(' ','%')+'%',))
 
 #getUniChemSources()
 #mapToChembl(['DB00829','DB00945'],2)

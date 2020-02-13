@@ -409,17 +409,21 @@
 			valueField: "chembl_id",
 			labelField: "name",
 			searchField: ["name"],
-			load: function(query,callback){
-				jQuery.get("compoundNames/"+query).
-					then(function(result){
-						console.log("got back suggestions: ",result);
+			load: function(query, callback) {
+				if (!query.length || query.length < 3) {
+					//console.log("compound_autocomplete: Empty query or query too short");
+					return callback();
+				} else {
+					jQuery.get("compoundNames/" + query).then( function(result) {
+						//console.log("compound_autocomplete: Got back suggestions:", result);
 						callback(result);
 					});
+				}
 			},
 			onChange:function(value) {
 				if(value == null || value === "")
 					return;
-				console.log("new compound selected: ",value);
+				//console.log("compound_autocomplete: new compound selected:",value);
 				var compoundArea = jQuery("#compound-ids");
 				compoundArea.val(strjoin(compoundArea.val(), value));
 			},
@@ -430,9 +434,16 @@
 			labelField: "name",
 			searchField: ["name"],
 			load: function(query, callback) {
-				jQuery.get("targetNames/" + query).then( function(result) {
-					callback(result);
-				});
+				if (!query.length || query.length < 3) {
+					//console.log("target_autocomplete: Empty query or query too short");
+					return callback();
+				} else {
+					//console.log("target_autocomplete: Loading suggestions for:", query);
+					jQuery.get("targetNames/" + query).then( function(result) {
+						//console.log("target_autocomplete: Got back suggestions:", result);
+						callback(result);
+					});
+				}
 			},
 			onChange: function(value) {
 				if (value == null || value === "")
