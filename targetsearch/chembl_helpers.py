@@ -3,6 +3,10 @@ import psycopg2.sql as sql
 import requests
 import json
 import os
+import pybel
+import tempfile
+import subprocess
+import shutil
 from psycopg2.extras import NamedTupleCursor
 from django.conf import settings
 
@@ -416,6 +420,61 @@ def targetNameAutocomplete(nameQuery):
                           ORDER BY description, organism""")
 
     return runQuery(sqlQuery, ('%'+nameQuery.replace(' ','%')+'%',))
+
+def getChemblPNG(chembl_id, size=500, mwt_limit=None, write_file=False,
+                 filename=None, shrink=True):
+    """Given a ChEMBL ID, generate a PNG of the molecular structure with
+    OpenBabel. Return either the PNG bytes, or a string of the filename.
+
+    Arguments:
+    chembl_id (str) -- ChEMBL ID of compound
+    size (int, str) -- Dimension of PNG file in pixels ('p' option in OB).
+                       Default 500
+    mwt_limit (int, float, None) -- If the molecular weight of the compound is
+                             greater than this limit, raise an exception.
+                             Default None.
+    write_file (bool) -- If True, write the PNG to a file and return the file
+                         path instead of the PNG bytes. An existing file will
+                         be overwritten. Default False.
+    filename (str) -- Path to output file. If None, create a temporary file.
+                      Default None.
+    shrink (bool) -- If true, run a utility (currently OptiPNG) to shrink the
+                     generated PNG. Default True.
+    """
+    data = runQuery("""SELECT standard_inchi, full_mwt
+                       FROM molecule_dictionary
+                       JOIN compound_properties USING(molregno)
+                       JOIN compound_structures USING(molregno)
+                       WHERE chembl_id = %s
+                       LIMIT 1""", (chembl_id,))
+    inchi = data[0].standard_inchi
+    mwt = float(data[0].full_mwt)
+
+    if mwt_limit is not None and mwt > mwt_limit:
+        raise Exception("{} exceeded mwt_limit (mwt={}, mwt_limit={})".format(chembl_id, mwt, mwt_limit))
+
+    mymol = pybel.readstring('inchi', inchi)
+
+    fp = tempfile.NamedTemporaryFile(delete=False)
+    fp.close()
+    tmpfile = fp.name
+
+    mymol.write(format='_png2', filename=tmpfile, overwrite=True, opt={'p': size})
+
+    if shrink:
+        cmd = ['optipng', tmpfile] # Losslessly shrinks PNG by ~15-25%
+        subprocess.run(cmd, check=True)
+
+    if write_file:
+        if filename is not None:
+            return shutil.move(tmpfile, filename)
+        else:
+            return tmpfile
+    else:
+        with open(tmpfile, 'rb') as f:
+            img = f.read()
+        os.remove(tmpfile)
+        return img
 
 #getUniChemSources()
 #mapToChembl(['DB00829','DB00945'],2)

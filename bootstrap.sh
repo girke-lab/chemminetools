@@ -27,9 +27,9 @@ apt update
 ## If this is a development installation, these packages may be useful
 #apt install -y git man rsync ssh sudo vim wget
 ## Direct ChemmineTools dependencies
-apt install -y apache2 curl libapache2-mod-wsgi-py3 memcached openbabel postgresql \
-python3 python3-future python3-memcache python3-pip python3-psycopg2 \
-python3-venv rabbitmq-server r-base-core
+apt install -y apache2 curl libapache2-mod-wsgi-py3 memcached openbabel \
+optipng postgresql python3 python3-future python3-memcache python3-pip \
+python3-psycopg2 python3-venv rabbitmq-server r-base-core
 ## Indirect ChemmineTools dependencies (probably to compile pip/R packages)
 apt install -y libcurl4-openssl-dev libopenbabel-dev libpq-dev librsvg2-dev \
 libssl-dev libxml2-dev libzmq3-dev swig

@@ -9,4 +9,5 @@ urlpatterns = [
         path('drugIndTable', drugIndTable, name='drugIndTable'),
         path('compoundNames/<query>', compoundNames, name='compoundNames'),
         path('targetNames/<query>', targetNames, name='targetNames'),
+        path('chemblPNG/<chembl_id>', chemblPNG, name='chemblPNG'),
         ]

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from django.contrib import messages
@@ -18,9 +18,11 @@ from .chembl_helpers import (
     mapToUniprot,
     compoundNameAutocomplete,
     targetNameAutocomplete,
+    getChemblPNG,
     )
 
 from django.conf import settings
+from django.views.decorators.cache import cache_page
 
 import os
 import csv
@@ -207,3 +209,11 @@ def targetNames(request, query):
     data = [ {'accession_id': n.accession,
               'name': (n.description+' ('+n.organism+')')} for n in names ]
     return JsonResponse(data, safe=False)
+
+@cache_page(60 * 120)
+def chemblPNG(request, chembl_id):
+    try:
+        img = getChemblPNG(chembl_id, mwt_limit=2000, shrink=False)
+        return HttpResponse(img, content_type='image/png')
+    except Exception as e:
+        raise Http404(str(e))
