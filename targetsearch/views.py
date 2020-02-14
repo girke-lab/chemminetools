@@ -24,6 +24,7 @@ from django.conf import settings
 
 import os
 import csv
+import json
 
 def readSources(type):
     sources = {}
@@ -40,8 +41,7 @@ def newTS(request):
     message = None
     annotation_info = None
     annotation_matches = None
-    molregno_to_chembl = None
-    drugind_tables = None
+    drugind_json = None
     activity_info = None
     activity_matches = None
     allTags = Tag.allUserTagNames(request.user)
@@ -95,12 +95,19 @@ def newTS(request):
             myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, ids)
             annotation_info = myAnnotationSearch.table_info
             annotation_matches = myAnnotationSearch.get_grouped_results()
-            molregno_to_chembl = myAnnotationSearch.molregno_to_chembl
 
-            # Generate Drug Indication tables
-            drugind_tables = dict()
-            for molregno, drugind_obj in myAnnotationSearch.drugind_objs.items():
-                drugind_tables[molregno] = tableHtml(drugind_obj, table_class="table table-striped")
+            # Generate Drug Indication JSON data
+            drugind_json = dict()
+            for chembl_id, drugind_obj in myAnnotationSearch.drugind_objs.items():
+                colnames = [ {'title': c['name']} for c in drugind_obj.table_info ]
+
+                data = list()
+                for row in drugind_obj.get_results():
+                    data.append(list(row.values()))
+
+                drugind_json[chembl_id] = dict()
+                drugind_json[chembl_id]['colnames'] = colnames
+                drugind_json[chembl_id]['data'] = data
 
             # Exclude ActivitySearch from search-by-target by default
             if id_type == 'target' and not include_activity:
@@ -138,8 +145,7 @@ def newTS(request):
         'id_type' : id_type,
         'annotation_info' : annotation_info,
         'annotation_matches' : annotation_matches,
-        'molregno_to_chembl' : molregno_to_chembl,
-        'drugind_tables' : drugind_tables,
+        'drugind_json' : json.dumps(drugind_json),
         'activity_info' : activity_info,
         'activity_matches' : activity_matches,
         'tags' : allTags,

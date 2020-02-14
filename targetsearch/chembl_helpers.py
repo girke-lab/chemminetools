@@ -196,10 +196,7 @@ class AnnotationSearch(SearchBase):
                         condition=sql.SQL(self.condition))
         super().run_batch_query(query, ids)
 
-        # Extract molregno from query_data
-        # TODO: self.molregno_to_chembl is a quick-and-dirty way of getting the
-        # ChEMBL ID to the Drug Indication HTML table. Figure a more elegant
-        # way of doing this...
+        # Extract ChEMBL ID and molregno from query_data
         temp_molregno_set = set()
         for r in self.query_data:
             pair = (r.annotation__chembl_id_lookup__chembl_id, r.annotation__molecule_dictionary__molregno)
@@ -208,7 +205,6 @@ class AnnotationSearch(SearchBase):
         self.molregno_set = set()
         self.molregno_to_chembl = dict()
         for chembl, molregno in temp_molregno_set:
-            #chembl, molregno = pair
             self.molregno_set.add(molregno)
             self.molregno_to_chembl[molregno] = chembl
 
@@ -256,7 +252,7 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
             'desc': 'Button to view Drug Indication table modal.',
             'visible': True,
             'export': False,
-            'html': '<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#drugIndModal_{}">View</button>',
+            'html': '<button type="button" class="btn btn-primary" onclick="showDrugIndModal(\'{}\')">View</button>',
             }]
         self.table_info += new_table_info
 
@@ -268,8 +264,9 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
         # Prepare Drug Indication search data
         self.drugind_objs = dict()
         for m in self.molregno_set:
-            self.drugind_objs[m] = DrugIndicationSearch(m)
-            self.add_drugind_data(self.drugind_objs[m])
+            c = self.molregno_to_chembl[m]
+            self.drugind_objs[c] = DrugIndicationSearch(m)
+            self.add_drugind_data(self.drugind_objs[c])
 
     def add_drugind_data(self, drugind_obj):
         """Helper method. Extract data from a prepared DrugIndicationSearch
@@ -299,7 +296,7 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
             if row['annotation__molecule_dictionary__molregno'] == drugind_obj.molregno:
                 row['annotation__drugind_summary__mesh_indications'] = "; ".join(mesh_indications)
                 row['annotation__drugind_summary__efo_indications'] = "; ".join(efo_indications)
-                row['annotation__drugind_summary__show_drugind_table'] = drugind_obj.molregno
+                row['annotation__drugind_summary__show_drugind_table'] = self.molregno_to_chembl[drugind_obj.molregno]
 
     def get_results(self):
         """Return query data as an OrderedDict list."""

@@ -120,23 +120,22 @@
 	{% endif %}
 </div><!-- end container-fluid -->
 
-<!-- Drug Indication modal windows -->
-{% for molregno, table in drugind_tables.items %}
-{% dict_lookup molregno_to_chembl molregno as chembl_id %}
-<div class="modal fade" id="drugIndModal_{{molregno}}" tabindex="-1" role="dialog" aria-labelledBy="drugInd_{{molregno}}_title" aria-hidden="true">
+<!-- Drug Indication modal window -->
+<div class="modal fade" id="drugIndModal" tabindex="-1" role="dialog" aria-labeledBy="dimtitle" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h5 class="modal-title" id="drugIndModal_{{molregno}}_title">Drug Indications for {{chembl_id}}</h5>
+				<h5 class="modal-title" id="dimtitle">Drug Indications for CHEMBL_ID</h5>
 				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 					<span aria-hidden="true">&times;</span>
 				</button>
 			</div>
-			<div id="drugIndDiv_{{molregno}}" class="modal-body">{{table}}</div>
+			<div class="modal-body">
+				<table id="dimtable" class="table table-striped" width="100%"></table>
+			</div>
 		</div>
 	</div>
 </div>
-{% endfor %}
 
 <!-- Add-Compound-to-Workbench modal window -->
 <div class="modal fade" id="workbenchModal" tabindex="-1" role="dialog" aria-labelledBy="wbmtitle" aria-hidden="true">
@@ -222,10 +221,22 @@
 			$("#compound_count").html(0);
 	}
 
-	function drugIndTable(molregno) {
-		{% for key, data in drugind_tables.items %}
-		if (molregno == '{{key}}') return '{{data|escapejs}}';
-		{% endfor %}
+	function showDrugIndModal(chembl_id) {
+		var drugIndJson = {{drugind_json|safe}};
+
+		targetSearch.drugind_table = $('#dimtable').DataTable({
+			dom: 'Bfrltip',
+			buttons: [{
+				extend: 'csv',
+				filename: 'drugind-table-'+chembl_id,
+				text: 'Save to CSV (All Columns)',
+			}],
+			columns: drugIndJson[chembl_id]['colnames'],
+			data: drugIndJson[chembl_id]['data'],
+		});
+
+		$('#dimtitle').html("Drug Indications for " + chembl_id);
+		$('#drugIndModal').modal();
 	}
 
 	function columnExportSelector(table_name, export_type, index) {
@@ -456,20 +467,6 @@
 		var annotation_table = init_datatable('annotation');
 		var activity_table = init_datatable('activity');
 
-		{% for molregno in drugind_tables.keys %}
-		{% dict_lookup molregno_to_chembl molregno as chembl_id %}
-		var drugind_table_{{molregno}} = $('#drugIndDiv_{{molregno}}').find('table').DataTable({
-			dom: 'Bfrltip',
-			buttons: [
-				{
-					extend: 'csv',
-					filename: 'drugind-table-{{chembl_id}}',
-					text: 'Save to CSV (All Columns)',
-				},
-			],
-		});
-		{% endfor %}
-
 		targetSearch.annotation_table = annotation_table;
 		targetSearch.activity_table = activity_table;
 
@@ -502,6 +499,11 @@
 
 		selectDefaultColumns('annotation');
 		selectDefaultColumns('activity');
+
+		$('#drugIndModal').on('hidden.bs.modal', function(e) {
+			targetSearch.drugind_table.destroy();
+			//console.log("Destroyed drugind table");
+		});
 	});
 </script>
 
