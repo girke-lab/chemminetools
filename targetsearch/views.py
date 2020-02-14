@@ -50,13 +50,13 @@ def newTS(request):
     defaultCompoundDb = "1"
     defaultProteinDb = "ACC+ID"
     groupingCol = 0
-    
+
     # Default GET request variables
     id_type = 'compound'
     ids = list()
     include_activity = False
     source_id = 1
-    
+
     # Retrieve GET request variables
     if 'id_type' in request.GET:
         id_type = request.GET['id_type']
@@ -69,7 +69,7 @@ def newTS(request):
             ids.append(c)
     if 'source_id' in request.GET:
         source_id = request.GET['source_id']
-    
+
     # Generate content
     try:
         # Only attempt conversion for compound search. Skip if already ChEMBL.
@@ -91,17 +91,17 @@ def newTS(request):
                     "desc": "Original compound ID prior to ChEMBL conversion",
                     "visible": True,
                     }
-            
-            myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, ids)            
+
+            myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, ids)
             annotation_info = myAnnotationSearch.table_info
             annotation_matches = myAnnotationSearch.get_grouped_results()
             molregno_to_chembl = myAnnotationSearch.molregno_to_chembl
-            
+
             # Generate Drug Indication tables
             drugind_tables = dict()
             for molregno, drugind_obj in myAnnotationSearch.drugind_objs.items():
                 drugind_tables[molregno] = tableHtml(drugind_obj, table_class="table table-striped")
-            
+
             # Exclude ActivitySearch from search-by-target by default
             if id_type == 'target' and not include_activity:
                 activity_info = None
@@ -121,31 +121,17 @@ def newTS(request):
             if len(idMapping) != 0:
                 groupingCol += 1
                 annotation_info.insert(0,queryIdCol)
-                
+
                 addQueryCol(annotation_matches)
                 if activity_matches != None:
                     activity_info.insert(0,queryIdCol)
                     addQueryCol(activity_matches)
-                                           
-            # No longer necessary as we have table names in the JSON files
-            # Commented out to prevent necromance by Git. Delete after everyone merges
-            #for col in annotation_info:
-            #    try:
-            #        col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
-            #    except:
-            #        col["table"] = ""
-            #if activity_info != None:
-            #    for col in activity_info:
-            #        try:
-            #            col["table"] = col["sql"][0:col["sql"].index(".")].replace("_"," ")
-            #        except:
-            #            col["table"] = ""
-    
+
     except Exception as e:
         print("exception in newTS:", sys.exc_info())
         traceback.print_tb(sys.exc_info()[2])
         message = str(e)
-    
+
     context = {
         'query_submit' : query_submit,
         'message' : message,
@@ -163,25 +149,25 @@ def newTS(request):
         'defaultProteinDb': defaultProteinDb,
         'groupingCol' : groupingCol
         }
-    
+
     return render(request, 'targetsearch/new_ts.html', context)
 
 def tableHtml(search_obj, header=True, footer=False, table_class=""):
     """Takes a SearchBase object and returns an HTML table"""
-    
+
     error = None
     table_info = None
     table_data = None
-    
+
     engine = Engine.get_default()
     template = engine.get_template('targetsearch/table.html')
-    
+
     try:
         table_info = search_obj.table_info
         table_data = search_obj.get_results()
     except Exception as e:
         error = str(e)
-    
+
     context = {
         'error' : error,
         'header' : header,
@@ -190,19 +176,19 @@ def tableHtml(search_obj, header=True, footer=False, table_class=""):
         'table_data' : table_data,
         'table_class' : table_class,
     }
-    
+
     return template.render(Context(context))
 
-def drugIndTable(request):    
+def drugIndTable(request):
     if 'molregno' in request.GET:
         molregno = request.GET['molregno']
     else:
         error = "drugIndTable: Missing molregno in GET variables"
         return render(request, 'targetsearch/table.html', {'error':error})
-    
+
     myDrugIndSearch = DrugIndicationSearch(molregno)
     html = tableHtml(myDrugIndSearch)
-    
+
     return HttpResponse(html)
 
 def compoundNames(request,query):

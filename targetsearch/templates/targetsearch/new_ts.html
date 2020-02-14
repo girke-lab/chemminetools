@@ -183,20 +183,20 @@
 
 <script type="text/javascript">
 	var targetSearch = {};// namespace for public variables
-	
+
 	// Shows or hides all columns for a table
 	function selectAllColumns(table_name, is_visible) {
 		table_obj = targetSearch[table_name + '_table'];
 		chkbox_class = 'chkbox-' + table_name;
-		
+
 		table_obj.columns().visible(is_visible);
 		$('.' + chkbox_class).prop('checked', is_visible);
 	}
-	
+
 	function selectDefaultColumns(table_name) {
 		table_obj = targetSearch[table_name + '_table'];
 		chkbox_class = 'chkbox-' + table_name;
-		
+
 		// Iterate through all checkboxes. If a checkbox is classed as a "default"
 		// checkbox, check it and unhide the associated column. Otherwise, uncheck
 		// it and hide the column.
@@ -209,7 +209,7 @@
 		// Now redraw the DataTable
 		table_obj.columns.adjust().draw();
 	}
-	
+
 	function setCompoundCount(tags) {
 		if(tags != null && tags.length !== 0)
 			$.get("/compounds/withTags/"+tags.join(",")+"/count").
@@ -221,17 +221,17 @@
 		else
 			$("#compound_count").html(0);
 	}
-	
+
 	function drugIndTable(molregno) {
 		{% for key, data in drugind_tables.items %}
 		if (molregno == '{{key}}') return '{{data|escapejs}}';
 		{% endfor %}
 	}
-	
+
 	function columnExportSelector(table_name, export_type, index) {
 		table_obj = targetSearch[table_name + '_table'];
 		nx_list = targetSearch[table_name + '_no_export'];
-		
+
 		if (nx_list.includes(index)) {
 			return false;
 		} else if (export_type == 'all') {
@@ -243,7 +243,7 @@
 			return false;
 		}
 	}
-	
+
 	function toggleTableColumns(table_obj,setId, state) {
 		$("#"+setId+" input").each(function(){
 			table_obj.column( $(this).attr('value') ).visible(state, false);
@@ -252,14 +252,14 @@
 		table_obj.columns.adjust().draw();
 		return false;
 	}
-	
+
 	function showWorkbenchModal(table_name) {
 		var table_obj = targetSearch[table_name + '_table'];
 		var chembl_column = targetSearch[table_name + '_chembl_column'];
 		var pref_name_column = targetSearch[table_name + '_pref_name_column'];
 		var summary_str = '';
 		var chembl_id_str = '';
-		
+
 		var rows = table_obj.rows( {selected:true} );
 		if (rows.any()) {
 			summary_str = '<p>The following compounds will be added to your workbench:</p>';
@@ -280,7 +280,7 @@
 			summary_str += '<p>Select compounds by clicking on the table rows, or by using the &quot;Select Rows&quot; menu button.</p>';
 			$('#wbmsubmitbtn').prop('disabled', true);
 		}
-		
+
 		$('#wbmsummary').html(summary_str);
 		$('#wbmids').prop('value', chembl_id_str);
 		targetSearch.wbmtags.clear();
@@ -288,11 +288,11 @@
 		$('#workbenchModal').modal();
 		//console.log("wbmids:", $('#wbmids').prop('value'));
 	}
-	
+
 	function wbmSubmit() {
 		$('#wbmsubmitbtn').prop('disabled', true);
 		$('#wbmsubmitbtn').html('Please Wait...');
-		
+
 		var post_data = $('#wbmform').serialize();
 		jQuery.post("{% url 'myCompounds-ajax' %}", post_data, function (recv_data) {
 			if (recv_data.success == true) {
@@ -315,7 +315,7 @@
 		});
 		//console.log("form data:", post_data);
 	}
-	
+
 	function init_datatable(table_name) {
 		return $('#' + table_name + '-table').DataTable({
 			dom: 'frltip',
@@ -399,12 +399,12 @@
 				setCompoundCount(value);
 			},
 		});
-		
+
 		targetSearch.wbmtags = jQuery("#wbmtags").selectize({
 			plugins: ['remove_button'],
 			create: true,
 		})[0].selectize;
-		
+
 		jQuery("#compound_autocomplete").selectize({
 			valueField: "chembl_id",
 			labelField: "name",
@@ -455,7 +455,7 @@
 
 		var annotation_table = init_datatable('annotation');
 		var activity_table = init_datatable('activity');
-		
+
 		{% for molregno in drugind_tables.keys %}
 		{% dict_lookup molregno_to_chembl molregno as chembl_id %}
 		var drugind_table_{{molregno}} = $('#drugIndDiv_{{molregno}}').find('table').DataTable({
@@ -486,11 +486,11 @@
 		var annotation_table_buttons = annotation_table.buttons().container();
 		annotation_table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
 		annotation_table_buttons.appendTo( $('#csv-buttons-annotation') );
-		
+
 		var activity_table_buttons = activity_table.buttons().container();
 		activity_table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
 		activity_table_buttons.appendTo( $('#csv-buttons-activity') );
-		
+
 		$('input.toggle-vis').on('change', function(e) {
 			if ( $(this).attr('name') == 'annotation-column' ) {
 				var column = annotation_table.column( $(this).attr('value') );
@@ -499,7 +499,7 @@
 			}
 			column.visible( $(this).prop('checked') );
 		});
-		
+
 		selectDefaultColumns('annotation');
 		selectDefaultColumns('activity');
 	});
