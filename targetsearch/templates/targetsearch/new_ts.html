@@ -137,6 +137,21 @@
 	</div>
 </div>
 
+<!-- Compound structure image modal window -->
+<div class="modal fade" id="csiModal" tabindex="-1" role="dialog" aria-labeledBy="csimtitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 550px">
+		<div class="modal-content">
+			<div class="modal-header" id="csimheader">
+				<h5 class="modal-title" id="csimtitle">Compound structure for CHEMBL_ID</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body" id="csimbody" style="text-align: center"></div>
+		</div>
+	</div>
+</div>
+
 <!-- Add-Compound-to-Workbench modal window -->
 <div class="modal fade" id="workbenchModal" tabindex="-1" role="dialog" aria-labelledBy="wbmtitle" aria-hidden="true">
 	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
@@ -403,6 +418,36 @@
 			return (a + ' ' + b);
 	}
 
+	function toggleStructures(table_name) {
+		var table_obj = targetSearch[table_name + '_table'];
+		var chembl_column = targetSearch[table_name + '_chembl_column'];
+		var column_jqobj = $( table_obj.column(chembl_column).nodes() );
+		var class_name = table_name + '-structure';
+
+		if (targetSearch[table_name + '_show_structures']) {
+			// Structures are shown, so hide them.
+			$('.'+class_name).remove();
+			$('#show-struct-' + table_name).html('Show Structures');
+			targetSearch[table_name + '_show_structures'] = false;
+		} else {
+			// Structures are hidden, so show them.
+			column_jqobj.each( function() {
+				var chembl_id = $(this).text();
+				var url = "/targetsearch/chemblPNG/" + chembl_id;
+				$(this).append('<div class="'+class_name+'"><button type="button" class="btn" onclick="showStructureModal(\''+chembl_id+'\')"><img src="'+url+'" style="max-width: 150px"/></button></div>');
+			});
+			$('#show-struct-' + table_name).html('Hide Structures');
+			targetSearch[table_name + '_show_structures'] = true;
+		}
+	}
+
+	function showStructureModal(chembl_id) {
+		var url = "/targetsearch/chemblPNG/" + chembl_id;
+		$('#csimtitle').html("Compound structure for " + chembl_id);
+		$('#csimbody').html('<img src="'+url+'" class="img-fluid"/>');
+		$('#csiModal').modal();
+	}
+
 	$(document).ready(function() {
 		jQuery("#tags").selectize({
 			plugins: ['remove_button'],
@@ -474,11 +519,13 @@
 		targetSearch.annotation_chembl_column = {% find_col_by_key annotation_info 'id' 'annotation__chembl_id_lookup__chembl_id' 'null' %};
 		targetSearch.annotation_pref_name_column = {% find_col_by_key annotation_info 'id' 'annotation__molecule_dictionary__pref_name' 'null' %};
 		targetSearch.annotation_accession_column = {% find_col_by_key annotation_info 'id' 'annotation__component_sequences__accession' 'null' %};
+		targetSearch.annotation_show_structures = false;
 
 		targetSearch.activity_no_export = {% col_index_list activity_info 'export' False %};
 		targetSearch.activity_chembl_column = {% find_col_by_key activity_info 'id' 'activity__chembl_id_lookup__chembl_id' 'null' %};
 		targetSearch.activity_pref_name_column = {% find_col_by_key activity_info 'id' 'activity__molecule_dictionary__pref_name' 'null' %};
 		targetSearch.activity_accession_column = {% find_col_by_key activity_info 'id' 'activity__component_sequences__accession' 'null' %};
+		targetSearch.activity_show_structures = false;
 
 		var annotation_table_buttons = annotation_table.buttons().container();
 		annotation_table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
@@ -504,6 +551,21 @@
 			targetSearch.drugind_table.destroy();
 			//console.log("Destroyed drugind table");
 		});
+
+		// Disable the Show Structure button when the ChEMBL ID column is hidden.
+		for (const table_name of ['annotation', 'activity']) {
+			//console.log("table_obj:", table_name+'_table');
+			var table_obj = targetSearch[table_name + '_table'];
+			table_obj.on('column-visibility', function(e, settings, column, state) {
+				//console.log("column-visibility event fired for",table_name,"table");
+				//console.log("column:", column, ", state:", state);
+				if (column == targetSearch[table_name + '_chembl_column']) {
+					$('#show-struct-' + table_name).prop('disabled', !state);
+					//console.log("button status:", $('#show-struct-'+table_name).prop('disabled'));
+				}
+			});
+		}
+
 	});
 </script>
 
