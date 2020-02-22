@@ -5,35 +5,43 @@
 <div class="row">
 	<div class="col-md-12">
 		<h4>By {{table_name.title}}</h4>
-		<div class="btn-toolbar" role="toolbar" aria-label="Button toolbar for {{table_name}} table">
-			<div class="btn-group mr-1" role="group">
+		<div class="btn-toolbar" role="toolbar" aria-label="First button toolbar for {{table_name}} table">
+			<div class="btn-group mr-1" role="group" data-toggle="tooltip" title="Change the visibility of data columns.">
 				<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#csm{{table_name.title}}">Show/Hide Columns</button>
 			</div>
-			<div class="btn-group mr-1" role="group">
+			<div class="btn-group mr-1" role="group" data-toggle="tooltip" title="Show the compound structure underneath the ChEMBL ID.">
 				<button id="show-struct-{{table_name}}" type="button" class="btn btn-primary" onclick="toggleStructures('{{table_name}}')">Show Structures</button>
 			</div>
 			<div class="btn-group mr-1" role="group">
-				<button id="csv{{table_name.title}}" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Save to CSV</button>
+				<button id="csv{{table_name.title}}" type="button" class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Save to CSV</button>
 				<div id="csv-buttons-{{table_name}}" class="dropdown-menu" aria-labelledby="csv{{table_name.title}}"></div>
 			</div>
+		</div>
+		<div class="btn-toolbar mt-2" role="toolbar" aria-label="Second button toolbar for {{table_name}} table">
+			<div class="btn-group btn-group-toggle mr-1" data-toggle="buttons">
+				<button class="btn btn-secondary" disabled>Select Mode:</button>
+				<button type="button" class="btn btn-secondary active" onclick="targetSearch.{{table_name}}_table.select.style('api')" data-toggle="tooltip" title="Disable manual row selection.">
+					<input type="radio" autocomplete="off" checked/>Off
+				</button>
+				<button type="button" class="btn btn-secondary" onclick="targetSearch.{{table_name}}_table.select.style('multi')" data-toggle="tooltip" title="Select multiple rows by clicking/touching them individually.">
+					<input type="radio" autocomplete="off"/>Touch
+				</button>
+				<button type="button" class="btn btn-secondary" onclick="targetSearch.{{table_name}}_table.select.style('os')" data-toggle="tooltip" title="Select multiple rows by holding [Shift] or [Ctrl], similar to a desktop file browser.">
+					<input type="radio" autocomplete="off"/>Desktop
+				</button>
+			</div>
 			<div class="btn-group mr-1" role="group">
-				<button id="rowSel{{table_name.title}}" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Select Rows</button>
-				<div class="dropdown-menu" aria-labelledby="rowSel{{table_name.title}}">
-					<div class="btn-group-vertical">
-						<button type="button" class="btn btn-secondary" onClick="targetSearch.{{table_name}}_table.rows().select()">All</button>
-						<button type="button" class="btn btn-secondary" onClick="targetSearch.{{table_name}}_table.rows().deselect()">None</button>
-						<button type="button" class="btn btn-secondary mt-1" onClick="targetSearch.{{table_name}}_table.select.style('api')">Disable Select</button>
-						<button type="button" class="btn btn-secondary" onClick="targetSearch.{{table_name}}_table.select.style('multi')">Enable Select</button>
-					</div>
-				</div>
+				<button type="button" class="btn btn-secondary" disabled>Select Rows:</button>
+				<button type="button" class="btn btn-secondary" onclick="targetSearch.{{table_name}}_table.rows().select()" data-toggle="tooltip" title="Select all rows.">All</button>
+				<button type="button" class="btn btn-secondary" onclick="targetSearch.{{table_name}}_table.rows().deselect()" data-toggle="tooltip" title="Deselect all rows.">None</button>
 			</div>
 			<div class="btn-group mr-1" role="group">
 				<button id="selRowAct{{table_name.title}}" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Selected Row Actions</button>
 				<div class="dropdown-menu" aria-labelledby="selRowAct{{table_name.title}}">
 					<div class="btn-group-vertical">
-						<button type="button" class="btn btn-secondary" onClick="showWorkbenchModal('{{table_name}}')">Add Compounds to Workbench</button>
-						<button type="button" class="btn btn-secondary" onclick="addIdToSearch('{{table_name}}','chembl')">Add Compound IDs to Search</button>
-						<button type="button" class="btn btn-secondary" onclick="addIdToSearch('{{table_name}}','accession')">Add Accession IDs to Search</button>
+						<button type="button" class="btn btn-secondary" onclick="showWorkbenchModal('{{table_name}}')" data-toggle="tooltip" title="Add compounds from selected rows to the ChemmineTools workbench. Compounds from the table will be deduplicated before being submitted.">Add Compounds to Workbench</button>
+						<button type="button" class="btn btn-secondary" onclick="addIdToSearch('{{table_name}}','chembl')" data-toggle="tooltip" title="Add ChEMBL IDs from selected rows to the Compound IDs search box. Compounds will be deduplicated before being added to the search.">Add Compound IDs to Search</button>
+						<button type="button" class="btn btn-secondary" onclick="addIdToSearch('{{table_name}}','accession')" data-toggle="tooltip" title="Add Accession IDs from selected rows to the Target IDs search box. Accession IDs will be deduplicated before being added to the search.">Add Accession IDs to Search</button>
 					</div>
 				</div>
 			</div>

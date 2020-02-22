@@ -8,9 +8,9 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-select-all" onClick="selectAllColumns('{{table_name}}', true)">Select All</button>
-				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-deselect-all" onClick="selectAllColumns('{{table_name}}', false)">Deselect All</button>
-				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-defaults" onClick="selectDefaultColumns('{{table_name}}')">Restore Defaults</button>
+				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-select-all" onclick="selectAllColumns('{{table_name}}', true)">Select All</button>
+				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-deselect-all" onclick="selectAllColumns('{{table_name}}', false)">Deselect All</button>
+				<button type="button" class="btn btn-primary" id="btn-{{table_name}}-defaults" onclick="selectDefaultColumns('{{table_name}}')">Restore Defaults</button>
 				<fieldset>
 					<div>
 					{% for col in table_info %}
