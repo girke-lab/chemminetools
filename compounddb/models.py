@@ -55,6 +55,10 @@ class Compound(models.Model):
     def __unicode__(self):
         return '%s_%s' % (self.id, self.cid)
 
+    def inWorkbench(user, ids):
+        workbench = Compound.objects.filter(user=user)
+        common_ids = { w.cid for w in workbench } & set(ids)
+        return common_ids
 
 
 class SDFFile(models.Model):

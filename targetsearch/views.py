@@ -9,7 +9,7 @@ import sys
 import traceback
 
 
-from .chembl_helpers import (
+from .helpers import (
     AnnotationSearch,
     ActivitySearch,
     DrugIndicationSearch,

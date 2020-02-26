@@ -19,17 +19,21 @@
         text-transform: uppercase;
         font-weight: bold;
       }
-      
+
       img {
         max-width: 100%;
       }
-      
+
       h1, h2, h3, h4, h5, h6 {
         font-weight: bold;
       }
+
+      .cmtools-display-none {
+        display: none;
+      }
       {% block extra_styles %}{% endblock %}
     </style>
-    
+
     {% render_block "css" %}
 
     <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
@@ -48,7 +52,7 @@
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse">
         <span class="navbar-toggler-icon"></span>
       </button>
-      
+
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
           {% show_menu 0 100 0 1 %}
@@ -72,7 +76,7 @@
                 <li class="cmtools-nav-header">Workbench</li>
                 <li class="nav-link"><a href="/myCompounds/">My Compounds</a></li>
                 <li class="nav-link"><a href="/myCompounds/addCompounds/">Add Compounds</a></li>
-                
+
                 <li class="cmtools-nav-header">Tools</li>
                 <li class="nav-link"><a href="/tools/list_jobs/">Past Jobs</a></li>
                 <li class="nav-link"><a href="/tools/launch_job/Upload/">Upload Numeric Data</a></li>
@@ -80,14 +84,14 @@
                 <li class="nav-link"><a href="/tools/launch_job/Properties/">Physicochemical Properties</a></li>
                 <li class="nav-link"><a href="/similarity/">Similarity Workbench</a></li>
                 <li class="nav-link"><a href="/targetsearch/">Drug-Target Search</a></li>
-                
+
                 <li class="cmtools-nav-header">Search</li>
                 <li class="nav-link"><a href="/eisearch/query/">Structural Similarity Search</a></li>
               </ul>
             </div>
           </div>
         </div>
-        
+
         <div class="col-md-9">
 
 {% bootstrap_messages %}

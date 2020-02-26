@@ -163,23 +163,22 @@
 				</button>
 			</div>
 			<div class="modal-body">
+				<form id="wbmform" autocomplete="off"">
 				<div id="wbmsummary"></div>
-				<div>
-					<form id="wbmform" autocomplete="off">
-						{% csrf_token %}
-						<input name="action" type="hidden" value="add" />
-						<input name="source_id" type="hidden" value="chembl" />
-						<input id="wbmids" name="ids" type="hidden" value="" />
+					{% csrf_token %}
+					<input name="source_id" type="hidden" value="chembl" />
+					<div id="wbmtagsdiv">
 						<label for="wbmtags">Tags</label>
 						<select class="tags" id="wbmtags" name="tags" multiple placeholder="Compound Tags">
 							{% for tag in tags %}
 								<option value="{{tag}}">{{tag}}</option>
 							{% endfor %}
 						</select>
-					</form>
-				</div>
+					</div>
+				</form>
 			</div>
 			<div class="modal-footer">
+				<div id="wbmcount"></div>
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 				<button id="wbmsubmitbtn" type="button" class="btn btn-primary" onclick="wbmSubmit()" disabled>Submit</button>
 			</div>
@@ -283,36 +282,85 @@
 		var table_obj = targetSearch[table_name + '_table'];
 		var chembl_column = targetSearch[table_name + '_chembl_column'];
 		var pref_name_column = targetSearch[table_name + '_pref_name_column'];
-		var summary_str = '';
-		var chembl_id_str = '';
+		var summary_html = '';
+		var chembl_id_set = new Set();
 
+		// Clean-up stuff from previous runs
+		$('#wbmsummary').html('');
+		$('#wbmsubmitbtn').html('Submit');
+		targetSearch.wbmtags.clear();
+
+		// Act on rows selected by user
 		var rows = table_obj.rows( {selected:true} );
 		if (rows.any()) {
-			summary_str = '<p>The following compounds will be added to your workbench:</p>';
-			summary_str += '<ul>';
+			// Build a lookup dict for compound display names
+			// e.g.: CHEMBL113 -> "CHEMBL113 (CAFFEINE)"
+			// Also build a set of compounds for pre-check routine.
+			var display_name_lookup = {};
 			rows.every( function() {
 				var chembl_text = $(table_obj.cell(this.index(), chembl_column).node()).text();
 				var pref_name_text = $(table_obj.cell(this.index(), pref_name_column).node()).text();
-				if (pref_name_text == 'None')
-					summary_str += ('<li>' + chembl_text + '</li>');
-				else
-					summary_str += ('<li>' + chembl_text + ' (' + pref_name_text + ')</li>');
-				chembl_id_str += (chembl_text + ' ');
+				if (!chembl_id_set.has(chembl_text)) {
+					chembl_id_set.add(chembl_text);
+					if (pref_name_text == 'None')
+						display_name_lookup[chembl_text] = chembl_text;
+					else
+						display_name_lookup[chembl_text] = chembl_text + ' (' + pref_name_text + ')';
+				}
 			});
-			summary_str += '</ul>';
-			$('#wbmsubmitbtn').prop('disabled', false);
+			// Format ChEMBL IDs into HTTP GET-style list
+			var chembl_ids_list = new Array();
+			for (c of chembl_id_set)
+				chembl_ids_list.push('ids=' + c);
+			var post_data = $('#wbmform').serialize(); //for source_id and CSRF token
+			post_data += '&' + chembl_ids_list.join('&');
+			//console.log('post_data:', post_data);
+			jQuery.post("{% url 'myCompounds-ajax' 'check' %}", post_data, function (recv_data) {
+				if (recv_data.success === true) {
+					var results = recv_data.results;
+					for (const r of results) {
+						summary_html += '<div class="card mb-3"><div class="card-body">';
+						summary_html += ('<p class="card-text">' + r.desc + '</p>');
+						summary_html += '<div class="ml-3">'; //item list
+						for (const i of r.ids) {
+							summary_html += '<div class="form-check">';
+							summary_html += '<input type="checkbox" class="form-check-input wbmids" id="wbmchk-'+i+'" name="ids" value="'+i+'"';
+							if (r.select === true) {
+								summary_html += ' checked';
+							}
+							if (r.enable !== true) {
+								summary_html += ' disabled';
+							}
+							summary_html += '/><label class="form-check-label" for="wbmchk-'+i+'">';
+							summary_html += display_name_lookup[i] + '</label>';
+							summary_html += '</div>'; //form-check
+						}
+						summary_html += '</div></div></div>'; //item list, card-body, card
+					}
+					$('#wbmsummary').html(summary_html);
+					$('#wbmtagsdiv').removeClass('cmtools-display-none');
+					wbmUpdateCount();
+					$('#workbenchModal').modal();
+				} else {
+					if (recv_data.message) {
+						alertify.error(recv_data.message);
+					} else {
+						alertify.error("Unknown error occurred");
+					}
+				}
+			}).fail( function() {
+				alertify.error("AJAX call failed");
+			});
 		} else {
-			summary_str = '<p>No compounds are selected.</p>';
-			summary_str += '<p>Select compounds by clicking on the table rows, or by using the &quot;Select Rows&quot; menu button.</p>';
-			$('#wbmsubmitbtn').prop('disabled', true);
+			summary_html += '<div class="card mb-3"><div class="card-body">';
+			summary_html += '<p class="card-text">No compounds are selected.</p>';
+			summary_html += '<p class="card-text">Select compounds by activating a &quot;Select Mode&quot; and clicking on individual table rows, or select all rows by clicking &quot;All&quot; next to &quot;Select Rows&quot;.</p>';
+			summary_html += '</div></div>';
+			$('#wbmsummary').html(summary_html);
+			$('#wbmtagsdiv').addClass('cmtools-display-none');
+			wbmUpdateCount();
+			$('#workbenchModal').modal();
 		}
-
-		$('#wbmsummary').html(summary_str);
-		$('#wbmids').prop('value', chembl_id_str);
-		targetSearch.wbmtags.clear();
-		$('#wbmsubmitbtn').html('Submit');
-		$('#workbenchModal').modal();
-		//console.log("wbmids:", $('#wbmids').prop('value'));
 	}
 
 	function wbmSubmit() {
@@ -320,26 +368,41 @@
 		$('#wbmsubmitbtn').html('Please Wait...');
 
 		var post_data = $('#wbmform').serialize();
-		jQuery.post("{% url 'myCompounds-ajax' %}", post_data, function (recv_data) {
-			if (recv_data.success == true) {
-				//console.log("compound upload success:", recv_data.message);
+		//console.log("form data:", post_data);
+		jQuery.post("{% url 'myCompounds-ajax' 'add' %}", post_data, function (recv_data) {
+			if (recv_data.success === true) {
 				alertify.success(recv_data.message);
 			} else {
 				if (recv_data.message) {
-					//console.log("compound upload fail:", recv_data.message);
 					alertify.error(recv_data.message);
 				} else {
-					//console.log("compound upload fail: unknown error");
 					alertify.error("Unknown error occurred");
 				}
 			}
 		}).fail( function() {
-			//console.log("ajax fail...");
 			alertify.error("AJAX call failed");
 		}).always( function() {
 			$('#workbenchModal').modal('hide');
 		});
-		//console.log("form data:", post_data);
+	}
+
+	function wbmUpdateCount() {
+		//console.log("hello from wbmUpdateCount");
+		var c = 0;
+		$('#wbmform .wbmids').each( function() {
+			if ($(this).prop('checked'))
+				c++;
+		});
+		if (c == 0) {
+			$('#wbmcount').html('<p class="mb-0 mr-3">No compounds selected</p>');
+			$('#wbmsubmitbtn').prop('disabled', true);
+		} else if (c == 1) {
+			$('#wbmcount').html('<p class="mb-0 mr-3">'+c+' compound selected</p>');
+			$('#wbmsubmitbtn').prop('disabled', false);
+		} else {
+			$('#wbmcount').html('<p class="mb-0 mr-3">'+c+' compounds selected</p>');
+			$('#wbmsubmitbtn').prop('disabled', false);
+		}
 	}
 
 	function init_datatable(table_name) {
@@ -564,6 +627,8 @@
 				}
 			});
 		}
+
+		$('#wbmform').on('change', '.wbmids', wbmUpdateCount);
 
 	});
 </script>

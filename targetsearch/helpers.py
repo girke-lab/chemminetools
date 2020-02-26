@@ -47,7 +47,7 @@ def get_chembl_sdfs(chemblIds):
     data = runQuery("""SELECT chembl_id||molfile, pref_name
       FROM molecule_dictionary JOIN
            compound_structures USING(molregno)
-      WHERE molecule_dictionary.chembl_id IN %s""",(chemblIds,))
+      WHERE molecule_dictionary.chembl_id IN %s""",(tuple(chemblIds),))
 
     sdf_list = list()
     # Attach pref_name, if it exists
@@ -64,8 +64,16 @@ def get_chembl_smiles(chemblIds):
       SELECT canonical_smiles||' '||chembl_id
       FROM chembl_id_lookup JOIN
            compound_structures ON(entity_id=molregno)
-      WHERE chembl_id_lookup.chembl_id IN %s""",(chemblIds,))
+      WHERE chembl_id_lookup.chembl_id IN %s""",(tuple(chemblIds),))
     return [row[0] for row in data]
+
+def get_chembl_ids_with_struct(ids):
+    data = runQuery("""
+        SELECT chembl_id
+        FROM molecule_dictionary
+        JOIN compound_structures USING(molregno)
+        WHERE molecule_dictionary.chembl_id IN %s""", (tuple(ids),))
+    return [ d.chembl_id for d in data ]
 
 def batchQuery(runQuery,ids, batchSize=1000):
     finalResult = []
