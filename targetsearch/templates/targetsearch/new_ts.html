@@ -495,18 +495,22 @@
 			// Structures are hidden, so show them.
 			column_jqobj.each( function() {
 				var chembl_id = $(this).text();
-				var url = "/targetsearch/chemblPNG/" + chembl_id;
-				$(this).append('<div class="'+class_name+'"><button type="button" class="btn" onclick="showStructureModal(\''+chembl_id+'\')"><img src="'+url+'" style="max-width: 150px"/></button></div>');
+				var url = "/targetsearch/chemblSVG/" + chembl_id;
+				$(this).append('<div class="'+class_name+'"><button type="button" class="btn" onclick="showStructureModal(\''+chembl_id+'\')"><img src="'+url+'" style="max-width: 150px" onerror="structImgError(this)"/></button></div>');
 			});
 			$('#show-struct-' + table_name).html('Hide Structures');
 			targetSearch[table_name + '_show_structures'] = true;
 		}
 	}
 
+	function structImgError(element) {
+		$(element).closest('div').html('(Structure info unavailable)');
+	}
+
 	function showStructureModal(chembl_id) {
-		var url = "/targetsearch/chemblPNG/" + chembl_id;
+		var url = "/targetsearch/chemblSVG/" + chembl_id;
 		$('#csimtitle').html("Compound structure for " + chembl_id);
-		$('#csimbody').html('<img src="'+url+'" class="img-fluid"/>');
+		$('#csimbody').html('<img src="'+url+'" width="500" height="500" class="img-fluid"/>');
 		$('#csiModal').modal();
 	}
 

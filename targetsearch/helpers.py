@@ -484,6 +484,40 @@ def getChemblPNG(chembl_id, size=500, mwt_limit=None, write_file=False,
         os.remove(tmpfile)
         return img
 
+def getChemblSVG(chembl_id, mwt_limit=None, filename=None):
+    """Given a ChEMBL ID, generate a PNG of the molecular structure with
+    OpenBabel. Return either the SVG data string, or a string of the filename.
+
+    Arguments:
+    chembl_id (str) -- ChEMBL ID of compound
+    mwt_limit (int, float, None) -- If the molecular weight of the compound is
+                             greater than this limit, raise an exception.
+                             Default None.
+    filename (str) -- Path to output file. If None, return SVG data.
+                      Default None."""
+
+    data = runQuery("""SELECT molfile, full_mwt
+                       FROM molecule_dictionary
+                       JOIN compound_properties USING(molregno)
+                       JOIN compound_structures USING(molregno)
+                       WHERE chembl_id = %s
+                       LIMIT 1""", (chembl_id,))
+    mdl = data[0].molfile
+    mwt = float(data[0].full_mwt)
+
+    if mwt_limit is not None and mwt > mwt_limit:
+        raise Exception("{} exceeded mwt_limit (mwt={}, mwt_limit={})".format(chembl_id, mwt, mwt_limit))
+
+    mymol = pybel.readstring('mdl', mdl)
+    svg = mymol.write(format='svg', opt={'d': ''})
+
+    if filename is None:
+        return svg
+    else:
+        with open(filename, 'w') as f:
+            f.write(svg)
+        return filename
+
 #getUniChemSources()
 #mapToChembl(['DB00829','DB00945'],2)
 

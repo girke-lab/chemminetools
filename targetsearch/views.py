@@ -19,6 +19,7 @@ from .helpers import (
     compoundNameAutocomplete,
     targetNameAutocomplete,
     getChemblPNG,
+    getChemblSVG,
     )
 
 from django.conf import settings
@@ -215,5 +216,13 @@ def chemblPNG(request, chembl_id):
     try:
         img = getChemblPNG(chembl_id, mwt_limit=2000, shrink=False)
         return HttpResponse(img, content_type='image/png')
+    except Exception as e:
+        raise Http404(str(e))
+
+@cache_page(60 * 120)
+def chemblSVG(request, chembl_id):
+    try:
+        img = getChemblSVG(chembl_id)
+        return HttpResponse(img, content_type='image/svg+xml')
     except Exception as e:
         raise Http404(str(e))
