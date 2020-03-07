@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+
+{% block js_content %}
+<script type="text/javascript">
+	$(document).ready(function() {
+		$("[data-toggle=tooltip]").tooltip();
+	});
+</script>
+{% endblock %}
+
+{% block base_content %}
+<!-- Page header -->
+<div class="row">
+	<div class="col-md-12">
+		<h2>Compound '{{compound.cid}}'</h2>
+	</div>
+</div>
+
+<div class="row">
+	<!-- Compound structure image -->
+	<div class="col-md-7">
+		<button type="button" class="btn" onclick="showCsiModal('{{compound.cid}}', '{% url 'render_svg' compound.id %}')" data-toggle="tooltip" title="Enlarge compound structure image">
+			<img width="300" src="{% url 'render_svg' compound.id %}"/>
+		</button>
+	</div>
+
+	<!-- Compound info table -->
+	<div class="col-md-5">
+		<table class="table table-striped">
+		<tbody>
+		<tr class="cid"><th>CID</th><td>{{compound.cid}}<a href="{% url 'compound_detail' compound.id 'editform' %}" class="editRowButton" data-toggle="tooltip" title="edit"> &nbsp;<i class="fas fa-pen"></i></a></td></tr>
+		<tr class="name"><th>Name</th><td>{{compound.name}}<a href="{% url 'compound_detail' compound.id 'editform' %}" class="editRowButton" data-toggle="tooltip" title="edit"> &nbsp;<i class="fas fa-pen"></i></td></tr>
+		<tr class="formula"><th>Formula</th><td>{{compound.formula}}</td></tr>
+		<tr class="weight"><th>Molecular Weight</th><td>{{compound.weight|floatformat:3}}</td></tr>
+		</tbody>
+		</table>
+	</div>
+</div>
+
+<div class="row">
+	<!-- Compound structure data -->
+	<div class="col-md-7">
+		<ul class="nav nav-tabs" id="myTab">
+			<li class="nav-item"><a class="nav-link active" href="#smiles" data-toggle="tab">SMILES</a></li>
+			<li class="nav-item"><a class="nav-link" href="#sdf" data-toggle="tab">SDF</a></li>
+			<li class="nav-item"><a class="nav-link" href="#inchi" data-toggle="tab">InChI</a></li>
+		</ul>
+
+		<div class="tab-content">
+			<div class="tab-pane show active" id="smiles"><textarea class="field col-md-12" rows="6" readonly="readonly">{{smiles}}</textarea></div>
+			<div class="tab-pane" id="sdf"><textarea class="field col-md-12" rows="24" readonly="readonly">{{sdf}}</textarea></div>
+			<div class="tab-pane" id="inchi"><textarea class="field col-md-12" rows="6" readonly="readonly">{{inchi}}</textarea></div>
+		</div>
+
+	</div>
+
+	<!-- Download buttons -->
+	<div class="col-md-5">
+		<h3>Downloads</h3>
+		<p><a class="btn btn-outline-primary" href="/compounds/{{compound.id}}/smiles/{{compound.id}}.smi">SMILES »</a></p>
+		<p><a class="btn btn-outline-primary" href="/compounds/{{compound.id}}/sdf/{{compound.id}}.sdf">SDF »</a></p>
+		<p><a class="btn btn-outline-primary" href="/compounds/{{compound.id}}/inchi/{{compound.id}}.inchi">InChI »</a></p>
+		<p><a class="btn btn-outline-primary" href="/compounds/{{compound.id}}/png/{{compound.id}}.png">PNG (image) »</a></p>
+	</div>
+</div>
+
+{% include "compounddb/compound_img_modal.html" %}
+{% endblock %}

@@ -1,0 +1,74 @@
+<!-- Compound structure image modal window -->
+<div class="modal fade" id="csiModal" tabindex="-1" role="dialog" aria-labeledBy="csimTitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" id="csimDialog" role="document" style="max-width: 40%">
+		<div class="modal-content">
+			<div class="modal-header" id="csimHeader">
+				<h5 class="modal-title" id="csimTitle">Compound structure for CHEMBL_ID</h5>
+				<span>
+					<button id="csimRestore" type="button" class="close cmtools-display-none" style="float: none" data-toggle="tooltip" title="Restore" onclick="restoreCsiModal()">
+						<i class="fas fa-compress-alt"></i>
+					</button>
+					<button id="csimMaximize" type="button" class="close" style="float: none" data-toggle="tooltip" title="Maximize" onclick="maximizeCsiModal()">
+						<i class="fas fa-expand-alt"></i>
+					</button>
+					<button type="button" class="close" data-dismiss="modal" style="float: none" data-toggle="tooltip" title="Close">
+						<i class="fas fa-times"></i>
+					</button>
+				</span>
+			</div>
+			<div class="modal-body" id="csimBody" style="text-align: center"></div>
+		</div>
+	</div>
+</div>
+
+<script>
+	function showCsiModal(cid, url) {
+		$('#csimTitle').html("Compound structure for " + cid);
+		$('#csimBody').html('<img src="'+url+'" width="2000" height="2000" class="img-fluid"/>');
+		$('#csiModal').modal();
+	}
+
+	function maximizeCsiModal() {
+		// Maximize the window
+		$('#csimMaximize').tooltip('hide');
+		$('#csimMaximize').addClass('cmtools-display-none');
+		$('#csimRestore').removeClass('cmtools-display-none');
+		var interval_id = setInterval(expand, 20);
+		var width = 40;
+		function expand() {
+			width += 3;
+			if (width < 90) {
+				$('#csimDialog').css('max-width', width+'%');
+			} else {
+				$('#csimDialog').css('max-width', '90%');
+				clearInterval(interval_id);
+			}
+		}
+	}
+
+	function restoreCsiModal() {
+		// Restore the window to smaller size
+		$('#csimRestore').tooltip('hide');
+		$('#csimRestore').addClass('cmtools-display-none');
+		$('#csimMaximize').removeClass('cmtools-display-none');
+		var interval_id = setInterval(shrink, 20);
+		var width = 90;
+		function shrink() {
+			width -= 3;
+			if (width > 40) {
+				$('#csimDialog').css('max-width', width+'%');
+			} else {
+				$('#csimDialog').css('max-width', '40%');
+				clearInterval(interval_id);
+			}
+		}
+	}
+
+	$(function() {
+		$('#csiModal').on('hidden.bs.modal', function(e) {
+			$('#csimRestore').addClass('cmtools-display-none');
+			$('#csimMaximize').removeClass('cmtools-display-none');
+			$('#csimDialog').css('max-width', '40%');
+		});
+	});
+</script>

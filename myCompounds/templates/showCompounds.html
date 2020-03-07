@@ -14,7 +14,6 @@
 </style>
 
 <script type="text/javascript">
-	var structures_loaded = false;
 	var table;
 
 	alertify.dialog("selectTags",function(){},true,'prompt');
@@ -22,7 +21,7 @@
 
 	$(document).ready(function() {
 		$.ajaxSetup({
-			  headers: { "X-CSRFToken": '{{csrf_token}}' }
+			headers: { "X-CSRFToken": '{{csrf_token}}' }
 		});
 		$('.fa-trash-alt').click(DeleteRow);
 		$("[data-toggle=tooltip]").tooltip();
@@ -34,7 +33,7 @@
 
 
 
-		table = $('.table').DataTable( {
+		table = $('.table').DataTable({
 			dom: '<"row-fluid spaceAfter" Bi>frltip',
 			buttons: {
 				buttons: ['selectAll','selectNone',
@@ -47,55 +46,29 @@
 			initComplete: function(){
 				$('.table-body').show();
 			},
-		 } );
+			columnDefs: [
+				{ 'visible': false, 'targets': 2 }
+			],
+		});
 		//table.buttons().container().appendTo( $("#top_buttons"));
 
-		new $.fn.dataTable.Buttons( table, {
-		    buttons: {
-					    }
-		} );
+		new $.fn.dataTable.Buttons( table, { buttons: {} } );
 
-		$('.table').on('draw.dt',function(){
-			console.log("page change");
-			if (structures_loaded) {
-				showCompounds();
+		$("#loadstructures").click(function() {
+			var structure_col = table.column(2);
+			if (structure_col.visible()) {
+				// Structures are shown, so hide them.
+				structure_col.visible(false);
+				$("#loadstructures").html('Show Structures');
 			} else {
-				hideCompounds();
-			}
-
-		});
-
-
-		$("#loadstructures").click(function () {
-			if (!structures_loaded) {
-				showCompounds();
-			} else {
-				hideCompounds();
+				// Structures are hidden, so show them.
+				structure_col.visible(true);
+				$("#loadstructures").html('Hide Structures');
 			}
 		});
-	});
-	function showCompounds(){
-		console.log("showing compounds");
-		$("#loadstructures").html('Hide Structures');
-		$(".compoundImage").show();
-		$(".compoundImageTitle").show();
-		$(".compoundImage").each(function() {
-			$(this).html('<img width="150" class="img-rounded" src="/compounds/'+ $(this).attr('id')  + '/png"/>');
-		});
-		structures_loaded = true;
 
-	}
-	function hideCompounds(){
-		console.log("hiding compounds");
-		$("#loadstructures").html('Show Structures');
-		structures_loaded = false;
-		$(".compoundImage").hide();
-		$(".compoundImageTitle").hide();
-		$(".compoundImage").each(function() {
-			$(this).html('');
-		});
+	}); // $(document).ready()
 
-	}
 	function createDeleteButton(){
 		return {
 			text: "Delete Selected",
@@ -126,7 +99,7 @@
 	}
 	function createTagAddRemoveButton(action){
 		var actionText = action === "add" ? "Add Tags" : "Remove Tags";
-		
+
 		return	{
 			text: actionText,
 			action: function(event,dt,note,config){
@@ -168,8 +141,7 @@
 	function DeleteRow()
 	{
 		var self=this;
-		var compound_id;
-	        compound_id= $(self).parents('tr').first().attr("id");
+		var compound_id = $(self).parents('tr').first().attr("id");
 		$.post( "/compounds/batch/delete", {id: [compound_id]}).
 			then(function(){
 				$(self).parents('tr').first().remove();
@@ -177,23 +149,24 @@
 				alertify.error("failed to delete compound "+compound_id);
 			});
 	}
+
 </script>
-{% endblock %} 
+{% endblock %}
 
 {% block base_content %}
-<div class="row"> 
+<div class="row">
 <div class="col-md-12">
 <h2>My Compounds</h2>
 </div>
-</div><!--/row--> 
+</div><!--/row-->
 <div class="row">
 	<div class="col-md-12">
 		<div class="btn-group" id="top_buttons">
-		  <button id="loadstructures" class="btn btn-outline-primary">Show Structures</button>
-		  <a href="/myCompounds/downloadSDF.sdf" download="myCompounds.sdf"><button class="btn btn-outline-primary">Download SDF</button></a>
-		  <a href="/myCompounds/downloadSMILES.smi" download="myCompounds.smi"><button class="btn btn-outline-primary">Download Smiles</button></a>
+			<button id="loadstructures" class="btn btn-outline-primary">Show Structures</button>
+			<a href="/myCompounds/downloadSDF.sdf" download="myCompounds.sdf"><button class="btn btn-outline-primary">Download SDF</button></a>
+			<a href="/myCompounds/downloadSMILES.smi" download="myCompounds.smi"><button class="btn btn-outline-primary">Download Smiles</button></a>
 		</div>
-	</div> 
+	</div>
 </div><!--/row-->
 
 <div class="row">
@@ -204,31 +177,34 @@
 {% if matches %}
 	<table class="table table-sm" >
 	<thead>
-	<tr>
-	<th>CID</th>
-	<th>Name</th>
-	<th style="display:none" class="compoundImageTitle">Structure</th>
-	<th>Formula</th>
-	<th>Tags</th>
-	<th>Options</th>
-	</tr>
+		<tr>
+			<th>CID</th>
+			<th>Name</th>
+			<th>Structure</th>
+			<th>Formula</th>
+			<th>Tags</th>
+			<th>Options</th>
+		</tr>
 	</thead>
 	<tbody class="table-body" style="display:none">
 	{% for compound in matches %}
 		<tr id="{{compound.id}}">
-		<td><a href="/compounds/{{compound.id}}">{{compound.cid}}</a></td>
-		<td>{{compound.name}}</td>
-		<td style="display:none" class="compoundImage" id="{{compound.id}}">  </td>
-		<td>{{compound.formula}}</td>
-		<td>{%for tag in compound.tags.all %}
-			{{tag.name}},
-		    {% endfor %}
-		</td>
-			
-		<td><!--<i data-toggle="tooltip" placement="top" title="Delete this compound" class="fas fa-trash-alt"></i>-->
-		<a href="/eisearch/query/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="Search similar compounds"><i class="fas fa-search"></i></a>
-		<a href="/compounds/{{compound.id}}/editform" class="editRowButton" data-toggle="tooltip" placement="top" title="Edit compound details"><i class="fas fa-pen"></i></a>
-		</td>
+			<td><a href="{% url 'compound_detail' compound.id %}">{{compound.cid}}</a></td>
+			<td>{{compound.name}}</td>
+			<td id="{{compound.id}}">
+				<button type="button" class="btn" onclick="showCsiModal('{{compound.cid}}', '{% url 'render_svg' compound.id %}')" data-toggle="tooltip" title="Enlarge compound structure image">
+					<img width="150" src="{% url 'render_svg' compound.id %}" />
+				</button>
+			</td>
+			<td>{{compound.formula}}</td>
+			<td>{%for tag in compound.tags.all %}
+				{{tag.name}},
+					{% endfor %}
+			</td>
+			<td>
+			<a href="/eisearch/query/?smi={{compound.smiles}}" class="searchRowButton" data-toggle="tooltip" placement="top" title="Search similar compounds"><i class="fas fa-search"></i></a>
+			<a href="{% url 'compound_detail' compound.id 'editform' %}" class="editRowButton" data-toggle="tooltip" placement="top" title="Edit compound details"><i class="fas fa-pen"></i></a>
+			</td>
 		</tr>
 	{% endfor %}
 	</tbody>
@@ -254,4 +230,6 @@
 		</div>
 	</div>
 </div><!--/row-->
+
+{% include "compounddb/compound_img_modal.html" %}
 {% endblock %}

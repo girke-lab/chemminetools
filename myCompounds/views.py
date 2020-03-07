@@ -34,7 +34,6 @@ from targetsearch.helpers import get_chembl_sdfs, get_chembl_smiles
 from .helpers import addCompoundsAjax, checkCompoundsAjax
 
 
-
 @guest_allowed
 def showCompounds(request, resource):
 

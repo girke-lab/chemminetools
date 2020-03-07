@@ -137,20 +137,7 @@
 	</div>
 </div>
 
-<!-- Compound structure image modal window -->
-<div class="modal fade" id="csiModal" tabindex="-1" role="dialog" aria-labeledBy="csimtitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 550px">
-		<div class="modal-content">
-			<div class="modal-header" id="csimheader">
-				<h5 class="modal-title" id="csimtitle">Compound structure for CHEMBL_ID</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body" id="csimbody" style="text-align: center"></div>
-		</div>
-	</div>
-</div>
+{% include "compounddb/compound_img_modal.html" %}
 
 <!-- Add-Compound-to-Workbench modal window -->
 <div class="modal fade" id="workbenchModal" tabindex="-1" role="dialog" aria-labelledBy="wbmtitle" aria-hidden="true">
@@ -495,8 +482,8 @@
 			// Structures are hidden, so show them.
 			column_jqobj.each( function() {
 				var chembl_id = $(this).text();
-				var url = "/targetsearch/chemblSVG/" + chembl_id;
-				$(this).append('<div class="'+class_name+'"><button type="button" class="btn" onclick="showStructureModal(\''+chembl_id+'\')"><img src="'+url+'" style="max-width: 150px" onerror="structImgError(this)"/></button></div>');
+				var url = "/compounds/chembl/" + chembl_id + "/svg";
+				$(this).append('<div class="'+class_name+'"><button type="button" class="btn" onclick="showCsiModal(\''+chembl_id+'\', \''+url+'\')"><img src="'+url+'" style="max-width: 150px" onerror="structImgError(this)"/></button></div>');
 			});
 			$('#show-struct-' + table_name).html('Hide Structures');
 			targetSearch[table_name + '_show_structures'] = true;
@@ -505,13 +492,6 @@
 
 	function structImgError(element) {
 		$(element).closest('div').html('(Structure info unavailable)');
-	}
-
-	function showStructureModal(chembl_id) {
-		var url = "/targetsearch/chemblSVG/" + chembl_id;
-		$('#csimtitle').html("Compound structure for " + chembl_id);
-		$('#csimbody').html('<img src="'+url+'" width="500" height="500" class="img-fluid"/>');
-		$('#csiModal').modal();
 	}
 
 	$(document).ready(function() {

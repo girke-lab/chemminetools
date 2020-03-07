@@ -19,7 +19,7 @@ from simplejson import dumps
 import tempfile
 import os
 import json
-
+from targetsearch.helpers import getChemblSVG
 
 class compoundForm(ModelForm):
 
@@ -34,7 +34,7 @@ class compoundForm(ModelForm):
 @guest_allowed
 @cache_page(60 * 120)
 @vary_on_cookie
-def render_image(request, filename,id=None,cid=None ):
+def render_image(request, id=None, cid=None):
 
     compound = get_compound(request.user,id,cid)
 
@@ -56,6 +56,41 @@ def render_image(request, filename,id=None,cid=None ):
     os.remove(fp.name)
     return HttpResponse(image, content_type='image/png')
 
+# 1d * 24h/d * 60m/h * 60s/m = 86400
+# 4w * 7d/w * 24h/d * 60m/h * 60s/m = 2419200
+
+@guest_allowed
+@cache_page(60 * 120)
+def render_svg(request, id):
+    compound = get_compound(request.user, id, None)
+
+    if compound.weight > 20000:
+        raise Http404("Molecular weight ({}) exceeds 20000 Da".format(compound.weight))
+    sdf = compound.sdffile_set.all()[0].sdffile
+    mymol = pybel.readstring('mdl', sdf)
+    svg = mymol.write(format='svg', opt={'d': ''})
+
+    hr = HttpResponse(svg, content_type='image/svg+xml')
+    d = dict()
+    d['Cache-Control'] = 'max-age=86400, private'
+    d['Expires'] = None
+    d['Vary'] = 'Cookie'
+    hr.cmt_force_http_headers = d
+    return hr
+
+@cache_page(60 * 120)
+def render_chembl_svg(request, chembl_id):
+    try:
+        img = getChemblSVG(chembl_id)
+        hr = HttpResponse(img, content_type='image/svg+xml')
+        d = dict()
+        d['Cache-Control'] = 'max-age=86400, public'
+        d['Expires'] = None
+        d['Vary'] = None
+        hr.cmt_force_http_headers = d
+        return hr
+    except Exception as e:
+        raise Http404(str(e))
 
 @guest_allowed
 def cid_lookup(request):
@@ -74,7 +109,7 @@ def get_compound(user,id=None,cid=None):
     compound = None
     try:
         if id is not None:
-            compound = Compound.objects.get(id__iexact=id, user=user)
+            compound = Compound.objects.get(pk=id, user=user)
         elif cid is not None:
             compound = Compound.objects.get(cid__iexact=cid, user=user)
 
@@ -84,20 +119,9 @@ def get_compound(user,id=None,cid=None):
 
 
 @guest_allowed
-def compound_detail(
-    request,
-    resource,
-    filename,
-    id=None,
-    cid=None,
-    ):
+def compound_detail(request, resource=None, id=None, cid=None):
 
     compound = get_compound(request.user,id,cid)
-    #try:
-    #    compound = Compound.objects.get(id__iexact=id,
-    #            user=request.user)
-    #except Compound.DoesNotExist:
-    #    raise Http404
 
     if request.method == 'POST':
         form = compoundForm(request.POST)
@@ -131,11 +155,11 @@ def compound_detail(
             return HttpResponse('deleted', content_type='text/plain')
         elif resource == 'editform':
             form = compoundForm(instance=compound)
-            return render(request,'genericForm.html',
+            return render(request,'compounddb/genericForm.html',
                     dict(title='Edit Compound \'' + compound.cid + '\''
                     , form=form))
 
-    return render(request,'compound.html', dict(compound=compound,
+    return render(request,'compounddb/compound.html', dict(compound=compound,
                               sdf=sdf, smiles=smiles, inchi=inchi))
 @guest_allowed
 def tagCompounds(request,action):

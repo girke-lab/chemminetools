@@ -11,7 +11,7 @@
     <meta name="author" content="">
 
     <link href="/static/admin/bootstrap-4.3.1-dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/static/admin/fontawesome-free-5.9.0-web/css/all.css" rel="stylesheet">
+    <link href="/static/admin/fontawesome-free-5.12.1-web/css/all.css" rel="stylesheet">
     <style>
       .cmtools-nav-header {
         padding: .5rem 1rem;
@@ -36,11 +36,7 @@
 
     {% render_block "css" %}
 
-    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
-    <!--[if lt IE 9]>
-      <script src="/static/admin/html5.js"></script>
-    <![endif]-->
-
+    <script src="/static/admin/jquery-3.4.1.min.js"></script>
     {% block extra_headers %}{% endblock %}
 
   </head>
@@ -115,7 +111,7 @@
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
 {% render_block "js" %}
-    <script src="/static/admin/jquery-3.4.1.min.js"></script>
+    <!-- Moved jQuery to top of page to allow early jQuery usage -->
     <script src="/static/admin/popper-1.15.0.min.js"></script>
     <script src="/static/admin/bootstrap-4.3.1-dist/js/bootstrap.min.js"></script>
     {% block js_content %}{% endblock %}

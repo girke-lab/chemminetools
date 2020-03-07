@@ -502,6 +502,8 @@ def getChemblSVG(chembl_id, mwt_limit=None, filename=None):
                        JOIN compound_structures USING(molregno)
                        WHERE chembl_id = %s
                        LIMIT 1""", (chembl_id,))
+    if len(data) == 0:
+        raise Exception("ChEMBL ID not found for: {}".format(chembl_id))
     mdl = data[0].molfile
     mwt = float(data[0].full_mwt)
 
