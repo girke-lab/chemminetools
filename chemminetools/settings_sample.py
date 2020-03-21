@@ -122,6 +122,7 @@ SECRET_KEY = ''
                     #'django.template.loaders.app_directories.Loader')
 
 MIDDLEWARE = (
+    'middleware.http_headers.ForceHttpHeadersMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.locale.LocaleMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -310,3 +311,8 @@ CHEMBL_DB = {
     'DBUSER' : 'chemminetools',
     'DBPASS' : 'chemminetools',
 }
+
+# Uncomment these to allow usage of ChemmineTools in IFrames.
+# Understand the security implications before doing so.
+#CSRF_COOKIE_SAMESITE = None
+#SESSION_COOKIE_SAMESITE = None
