@@ -34,7 +34,7 @@ class compoundForm(ModelForm):
 @guest_allowed
 @cache_page(60 * 120)
 @vary_on_cookie
-def render_image(request, id=None, cid=None):
+def render_image(request, id=None, cid=None, filename=None):
 
     compound = get_compound(request.user,id,cid)
 
@@ -61,7 +61,7 @@ def render_image(request, id=None, cid=None):
 
 @guest_allowed
 @cache_page(60 * 120)
-def render_svg(request, id):
+def render_svg(request, id, filename=None):
     compound = get_compound(request.user, id, None)
 
     if compound.weight > 20000:
@@ -79,7 +79,7 @@ def render_svg(request, id):
     return hr
 
 @cache_page(60 * 120)
-def render_chembl_svg(request, chembl_id):
+def render_chembl_svg(request, chembl_id, filename=None):
     try:
         img = getChemblSVG(chembl_id)
         hr = HttpResponse(img, content_type='image/svg+xml')
@@ -119,7 +119,7 @@ def get_compound(user,id=None,cid=None):
 
 
 @guest_allowed
-def compound_detail(request, resource=None, id=None, cid=None):
+def compound_detail(request, resource=None, id=None, cid=None, filename=None):
 
     compound = get_compound(request.user,id,cid)
 
@@ -189,7 +189,7 @@ def tagCompounds(request,action):
             else:
                 return HttpResponse("Unknown action given",status=404)
             compound.save()
-    
+
 
     return HttpResponse('')
 
