@@ -422,6 +422,9 @@
 					},
 				},
 			],
+			select: {
+				style: 'desktop',
+			},
 		});
 	}
 
@@ -614,6 +617,7 @@
 
 		$('#wbmform').on('change', '.wbmids', wbmUpdateCount);
 
+		$("[data-toggle=tooltip]").tooltip();
 	});
 </script>
 

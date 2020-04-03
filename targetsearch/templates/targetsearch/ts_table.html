@@ -20,13 +20,13 @@
 		<div class="btn-toolbar mt-2" role="toolbar" aria-label="Second button toolbar for {{table_name}} table">
 			<div class="btn-group btn-group-toggle mr-1" data-toggle="buttons">
 				<button class="btn btn-secondary" disabled>Select Mode:</button>
-				<button type="button" class="btn btn-secondary active" onclick="targetSearch.{{table_name}}_table.select.style('api')" data-toggle="tooltip" title="Disable manual row selection.">
+				<button type="button" class="btn btn-secondary" onclick="targetSearch.{{table_name}}_table.select.style('api')" data-toggle="tooltip" title="Disable manual row selection.">
 					<input type="radio" autocomplete="off" checked/>Off
 				</button>
 				<button type="button" class="btn btn-secondary" onclick="targetSearch.{{table_name}}_table.select.style('multi')" data-toggle="tooltip" title="Select multiple rows by clicking/touching them individually.">
 					<input type="radio" autocomplete="off"/>Touch
 				</button>
-				<button type="button" class="btn btn-secondary" onclick="targetSearch.{{table_name}}_table.select.style('os')" data-toggle="tooltip" title="Select multiple rows by holding [Shift] or [Ctrl], similar to a desktop file browser.">
+				<button type="button" class="btn btn-secondary active" onclick="targetSearch.{{table_name}}_table.select.style('os')" data-toggle="tooltip" title="Select multiple rows by holding [Shift] or [Ctrl], similar to a desktop file browser.">
 					<input type="radio" autocomplete="off"/>Desktop
 				</button>
 			</div>
