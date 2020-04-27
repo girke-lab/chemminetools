@@ -84,7 +84,7 @@
 					alertify.confirm("Delete","Are you sure you wanted to delete "+selectedIds.length+
 							" compound(s)?",
 						function(){
-							$.post( "/compounds/batch/delete", {id: selectedIds}).
+							$.post( "/compounds/batch/delete/", {id: selectedIds}).
 								then(function(){
 									console.log("selected rows to delete:",selectedRows);
 									selectedRows.remove().draw();
@@ -121,7 +121,7 @@
 						console.log("info: ",info);
 
 						jQuery.ajax({
-							url: "/compounds/tagCompounds/"+action,
+							url: "/compounds/tagCompounds/"+action+"/",
 							type: "POST",
 							contentType: "application/json",
 							data: JSON.stringify(info),
@@ -142,7 +142,7 @@
 	{
 		var self=this;
 		var compound_id = $(self).parents('tr').first().attr("id");
-		$.post( "/compounds/batch/delete", {id: [compound_id]}).
+		$.post( "/compounds/batch/delete/", {id: [compound_id]}).
 			then(function(){
 				$(self).parents('tr').first().remove();
 			}).fail(function(){
