@@ -7,6 +7,7 @@ import pybel
 import tempfile
 import subprocess
 import shutil
+import pprint
 from psycopg2.extras import NamedTupleCursor
 from django.conf import settings
 
@@ -519,6 +520,95 @@ def getChemblSVG(chembl_id, mwt_limit=None, filename=None):
         with open(filename, 'w') as f:
             f.write(svg)
         return filename
+
+
+def getParalogs(queryIds):
+    ids = set(queryIds)
+    base = "http://www.ensembl.org/biomart/martservice?query="
+    uniprotQuery= """<?xml version="1.0" encoding="UTF-8"?> 
+        <!DOCTYPE Query>
+        <Query  virtualSchemaName = "default" formatter = "TSV" header = "0" uniqueRows = "1" count = "" datasetConfigVersion = "0.6" >
+            <Dataset name = "hsapiens_gene_ensembl" interface = "default" >
+                <Filter name = "uniprot_gn_id" value ="{}" />
+                <Attribute name = "ensembl_gene_id" />
+                <Attribute name = "hsapiens_paralog_ensembl_gene" />
+                <Attribute name = "hsapiens_paralog_perc_id" />
+                <Attribute name = "hsapiens_paralog_perc_id_r1" />
+                <Attribute name = "hsapiens_paralog_associated_gene_name" />
+                <Attribute name = "external_gene_name" />
+           </Dataset>
+        </Query>""".format(",".join(ids)).replace("\n","")
+                              #<Attribute name = "hsapiens_paralog_ds" />
+                #<Attribute name = "hsapiens_paralog_dn" />
+
+    paralogResults = requests.get(base + uniprotQuery).text
+
+    paralogs = {}
+    geneIds = set()
+#    print("paralog results: \n"+str(paralogResults))
+
+    for line in paralogResults.splitlines():
+        row = line.split("\t")
+        geneIds.add(row[0])
+        geneIds.add(row[1])
+        hits = paralogs.get(row[0],[])
+        hits += [row[1:5]]
+        paralogs[row[0]] = hits
+
+        #paralogs[row[1]]=row[0]
+
+#    print("gene ids: "+str(geneIds))
+#    print("paralogs: \n"+str(paralogs))
+
+    ensemblQuery= """<?xml version="1.0" encoding="UTF-8"?> 
+        <!DOCTYPE Query>
+        <Query  virtualSchemaName = "default" formatter = "TSV" header = "0" uniqueRows = "1" count = "" datasetConfigVersion = "0.6" >
+            <Dataset name = "hsapiens_gene_ensembl" interface = "default" >
+                <Filter name = "ensembl_gene_id" value ="{}"/>
+                <Attribute name = "ensembl_gene_id" />
+                <Attribute name = "uniprot_gn_symbol" />
+                <Attribute name = "uniprotswissprot" />
+                <Attribute name = "uniprotsptrembl" />
+            </Dataset>
+        </Query>""".format(",".join(geneIds)).replace("\n","")
+
+
+    results = requests.get(base + ensemblQuery).text
+    geneToUniprot = {}
+    for line in results.splitlines():
+        row = line.split("\t")
+        #print(row)
+        if row[0] not in geneToUniprot:
+            geneToUniprot[row[0]] = {"uniprot":"","trembl":[]}
+        if row[2] != "":
+            geneToUniprot[row[0]]["uniprot"] = row[2]
+        elif row[3] != "":
+            geneToUniprot[row[0]]["trembl"] += [row[3]]
+
+    #print("geneToUniprot: "+str(geneToUniprot))
+    
+
+    results  = {}
+    for geneId in paralogs:
+        hits = paralogs[geneId]
+        id = geneId
+        if geneId in geneToUniprot: #translate id if we can
+            id = geneToUniprot[id]["uniprot"]
+
+        for hit in hits:  # for each hit, translate the hit gene name if we can
+            if hit[0] in geneToUniprot:
+                hit += [geneToUniprot[hit[0]]["trembl"]]
+                hit[0] = geneToUniprot[hit[0]]["uniprot"]
+
+        results[id] = hits
+
+
+#    print("results: \n")
+#    pp = pprint.PrettyPrinter(indent=4)
+#    pp.pprint(results)
+    return results
+
+#getParalogs(['P35354','P23219','P02768'])
 
 #getUniChemSources()
 #mapToChembl(['DB00829','DB00945'],2)
