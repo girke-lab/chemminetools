@@ -603,9 +603,9 @@ def getParalogs(queryIds):
         results[id] = hits
 
 
-#    print("results: \n")
-#    pp = pprint.PrettyPrinter(indent=4)
-#    pp.pprint(results)
+    #print("results: \n")
+    #pp = pprint.PrettyPrinter(indent=4)
+    #pp.pprint(results)
     return results
 
 #getParalogs(['P35354','P23219','P02768'])
