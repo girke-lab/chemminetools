@@ -23,6 +23,9 @@
 				<li class="nav-item">
 					<a class="nav-link{% if id_type == "target" %} active{% endif %}" href="#target_search" data-toggle="tab">Search By Target</a>
 				</li>
+				<li class="nav-item">
+					<a class="nav-link{% if id_type == "homolog-target" %} active{% endif %}" href="#homolog_search" data-toggle="tab">Search By Target Paralog</a>
+				</li>
 			</ul>
 
 			<div class="tab-content" style="overflow: visible">
@@ -104,6 +107,50 @@
 									<button type="submit" class="btn btn-primary">Search</button>
 								</div>
 							</form>
+						</div>
+					</div>
+				</div>
+
+				<!-- Note: Full homolog functionality will come later. Use "homolog"
+				     for internal IDs, and "paralog" for user-visible names for now -->
+				<div class="tab-pane{% if id_type == "homolog-target" %} active{% endif %}" id="homolog_search">
+					<div class="container-fluid">
+						<div class="col-md-12">
+							<div class="form-group mt-3">
+								<div class="card bg-secondary my-3 p-2">
+									<h6 class="card-title text-white" for="target-ids">Paralog Search Tool</h6>
+									<p class="text-white">Enter UniProt Accession ID(s) into the search box. Then click &quot;Add Paralogs&quot;.</p>
+									<p class="text-white">Your Accession ID(s) and associated paralogs will appear below.
+									If you don't want certain paralogs to be included in the search, uncheck the box next to it.</p>
+									<p class="text-white">After you've reviewed your paralog search units, click &quot;Search&quot;.</p>
+									<form id="homolog-query" class="mb-2">
+										<div class="d-flex">
+											<span class="form-check flex-grow-1 pl-0">
+												<input id="homolog-acc-ids" name="ids" type="text" placeholder="Accession ID" />
+												<input name="homolog_type" type="hidden" value="paralog-cache" />
+												{% csrf_token %}
+												<button id="homolog-query-btn" class="btn btn-primary" type="button" onclick="addHomologs()">Add Paralogs</button>
+											</span>
+											<button class="btn btn-danger" type="button" onclick="removeAllHomologs()">Remove All Search Units</button>
+										</div>
+									</form>
+									<div id="homolog-alerts"></div>
+									<form id="homolog-target-search">
+										<div id="homolog-accordion">
+											<div id="homolog-empty-placeholder" class="card">
+												Empty search list. Use the above tool to populate list.
+											</div>
+										</div>
+									</form>
+								</div>
+								<div>
+									<input id="homolog-activity-chkbox" type="checkbox" name="include_activity" form="homolog-target-search">
+									<label for="homolog-activity-chkbox">&nbsp;Include Activity Results (slow)</label>
+								</div>
+								<input type="hidden" name="id_type" value="homolog-target" form="homolog-target-search">
+								<button type="submit" class="btn btn-primary" form="homolog-target-search">Search</button>
+								<button type="button" class="btn btn-outline-primary" onclick="console.log($('#homolog-target-search').serialize())">Submit to Console</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -497,6 +544,138 @@
 		$(element).closest('div').html('(Structure info unavailable)');
 	}
 
+	targetSearch['homolog_unit_next'] = 0;
+	targetSearch['homolog_item_next'] = 0;
+	targetSearch['homolog_set'] = new Set();
+
+	function addHomologs() {
+		$('#homolog-query-btn').prop('disabled', true).html('Please Wait...');
+		var post_data = $('#homolog-query').serialize();
+		jQuery.post("{% url 'targetsearch-ajax' 'homologs' %}", post_data, function(recv_data) {
+			if (recv_data.success === true) {
+				console.log("paralogs:", recv_data.paralogs);
+				console.log("idErrors:", recv_data.idErrors);
+				console.log("cacheMisses:", recv_data.cacheMisses);
+				console.log("uniprotIdMap:", recv_data.uniprotIdMap);
+				console.log("descriptions:", recv_data.descriptions);
+				console.log("chemblErrors:", recv_data.chemblErrors);
+				var homolog_unit_show = null;
+
+				for (let [src_uniprot_id, paralog_list] of Object.entries(recv_data.paralogs)) {
+					var unit_id_str = 'homolog-unit-' + targetSearch.homolog_unit_next;
+					var body_id_str = 'homolog-body-' + targetSearch.homolog_unit_next;
+					targetSearch.homolog_unit_next++;
+
+					var gene_name = recv_data.uniprotIdMap[src_uniprot_id].gene_name;
+					var desc = recv_data.descriptions[src_uniprot_id];
+					if (desc === undefined) {
+						desc = "Not in ChEMBL database";
+					}
+					var line_str = src_uniprot_id + ': ' + gene_name + ', ' + desc;
+
+					var homolog_unit_dropdown_btn = '<button class="btn btn-link flex-grow-1 text-left" type="button" data-toggle="collapse" data-target="#'+body_id_str+'">'+line_str+'</button>';
+					var homolog_unit_trash_btn = '<button class="btn btn-outline-danger" type="button" data-toggle="tooltip" title="Remove Unit" onclick="removeHomologs(\''+unit_id_str+'\', this)"><i class="fas fa-trash-alt"></i></button>';
+					var homolog_unit_header = '<div class="card-header d-flex mb-0 p-0">'+ homolog_unit_dropdown_btn + homolog_unit_trash_btn +'</div>';
+
+					var homolog_unit_body_inner = '';
+					var homolog_unit_body_disabled = '';
+					for (const paralog of paralog_list) {
+						var item_id_str = 'homolog-item-' + targetSearch.homolog_item_next;
+						var acc_id = paralog["uniprot"];
+						targetSearch.homolog_item_next++;
+
+						let gene_name = recv_data.uniprotIdMap[acc_id].gene_name;
+
+						if (recv_data.chemblErrors.includes(acc_id)) {
+							let line_str = acc_id + ': ' + gene_name;
+
+							homolog_unit_body_disabled += '<div class="form-check">';
+							homolog_unit_body_disabled += '<input id="'+item_id_str+'" type="checkbox" class="form-check-input" name="ids" value="paralog,'+src_uniprot_id+','+acc_id+'" disabled />';
+							homolog_unit_body_disabled += '<label for="'+item_id_str+'" class="form-check-label">'+line_str+'</label>';
+							homolog_unit_body_disabled += '</div>';
+						} else {
+							let desc = recv_data.descriptions[acc_id];
+							let line_str = acc_id + ': ' + gene_name + ', ' + desc;
+
+							homolog_unit_body_inner += '<div class="form-check">';
+							homolog_unit_body_inner += '<input id="'+item_id_str+'" type="checkbox" class="form-check-input" name="ids" value="paralog,'+src_uniprot_id+','+acc_id+'" checked />';
+							homolog_unit_body_inner += '<label for="'+item_id_str+'" class="form-check-label">'+line_str+'</label>';
+							homolog_unit_body_inner += '</div>';
+						}
+					}
+
+					var homolog_unit_body = '<div id="'+body_id_str+'" class="collapse" data-parent="#homolog-accordion">';
+					homolog_unit_body += '<div class="card-body">';
+					homolog_unit_body += homolog_unit_body_inner;
+					if (homolog_unit_body_disabled !== '') {
+						homolog_unit_body += '<p class="card-text my-2">The following Accession IDs are not in the current ChEMBL database:</p>';
+						homolog_unit_body += homolog_unit_body_disabled;
+					}
+					homolog_unit_body += '</div></div>';
+
+					var homolog_unit = '<div id="'+unit_id_str+'" class="card">';
+					homolog_unit += homolog_unit_header;
+					homolog_unit += homolog_unit_body;
+					homolog_unit += '</div>';
+
+					$('#homolog-empty-placeholder').addClass('cmtools-display-none');
+					$('#homolog-accordion').append(homolog_unit);
+					targetSearch.homolog_set.add(unit_id_str);
+					// $().collapse() returns before completion, so defer it until after the loop
+					homolog_unit_show = body_id_str;
+					$('#homolog-acc-ids').val('');
+				}
+				if (homolog_unit_show) {
+					$('#'+homolog_unit_show).collapse('show');
+					//console.log("showing", homolog_unit_show);
+				}
+				if (recv_data.idErrors.length !== 0) {
+					homologAlert("The following UniProt IDs returned no data: " + recv_data.idErrors.join(' '), "alert-danger");
+				}
+			} else {
+				if (recv_data.message) {
+					homologAlert(recv_data.message, "alert-danger");
+				} else {
+					homologAlert("Unknown error occurred", "alert-danger");
+				}
+			}
+		}).fail( function() {
+			homologAlert("AJAX call failed", "alert-danger");
+		}).always( function() {
+			$('#homolog-query-btn').prop('disabled', false).html('Add Paralogs');
+		});
+	}
+
+	function removeHomologs(unit_id, tooltip_obj) {
+		$(tooltip_obj).tooltip('dispose');
+		if (targetSearch.homolog_set.delete(unit_id)) {
+			$('#'+unit_id).remove();
+			if (targetSearch.homolog_set.size === 0) {
+				$('#homolog-empty-placeholder').removeClass('cmtools-display-none');
+			}
+		} else {
+			console.log("removeHomologs:", unit_id, "not in homolog_set. This should never happen...");
+		}
+	}
+
+	function removeAllHomologs() {
+		targetSearch.homolog_set.forEach(function(unit_id) {
+			$('#'+unit_id).remove();
+		});
+		targetSearch.homolog_set.clear();
+		$('#homolog-empty-placeholder').removeClass('cmtools-display-none');
+	}
+
+	function homologAlert(msg, alert_class) {
+		var alert = '<div class="alert alert-dismissible fade show '+alert_class+'" role="alert">';
+		alert += msg;
+		alert += '<button type="button" class="close" data-dismiss="alert" aria-label="Close">';
+		alert += '<span aria-hidden="true">&times;</span>';
+		alert += '</button></div>';
+
+		$('#homolog-alerts').append(alert);
+	}
+
 	$(document).ready(function() {
 		jQuery("#tags").selectize({
 			plugins: ['remove_button'],
@@ -614,6 +793,12 @@
 				}
 			});
 		}
+
+		// Override submission behavior for homolog-query form
+		$('#homolog-query').on('submit', function(e) {
+			e.preventDefault();
+			addHomologs();
+		});
 
 		$('#wbmform').on('change', '.wbmids', wbmUpdateCount);
 

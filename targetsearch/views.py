@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, Http404
+from django.urls import reverse
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from django.contrib import messages
@@ -9,18 +10,7 @@ import sys
 import traceback
 
 
-from .helpers import (
-    AnnotationSearch,
-    ActivitySearch,
-    DrugIndicationSearch,
-    AnnotationWithDrugIndSearch,
-    mapToChembl,
-    mapToUniprot,
-    compoundNameAutocomplete,
-    targetNameAutocomplete,
-    getChemblPNG,
-    getChemblSVG,
-    )
+from .helpers import *
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
@@ -64,7 +54,10 @@ def newTS(request):
     if 'id_type' in request.GET:
         id_type = request.GET['id_type']
     if 'ids' in request.GET:
-        ids = list(request.GET['ids'].split())
+        if id_type == 'homolog-target':
+            ids = request.GET.getlist('ids')
+        else:
+            ids = list(request.GET['ids'].split())
     if 'include_activity' in request.GET:
         include_activity = True
     if 'tags' in request.GET:
@@ -75,7 +68,6 @@ def newTS(request):
 
     # Generate content
     try:
-        # Only attempt conversion for compound search. Skip if already ChEMBL.
         idMapping={}
         if id_type == 'compound' and source_id != '1':
             idMapping= mapToChembl(ids, source_id)
@@ -83,6 +75,37 @@ def newTS(request):
         elif id_type == 'target' and source_id != 'ACC':
             idMapping= mapToUniprot(ids, source_id)
             ids = list(idMapping.keys())
+        elif id_type == 'homolog-target':
+            #full_ids = ids # Full context for homolog handling
+            #ids = [ i.split(',')[2] for i in full_ids ] # Bare Accession IDs for old target-search
+
+            # Context dictionary for homolog handling
+            # ex:
+            # homolog_context = {
+            #     'P29274': {'paralog': 'P30542'},
+            #     'P29275': {'paralog': 'P30542'},
+            #     'P0DMS8': {'paralog': 'P30542'},
+            #     }
+            homolog_context = dict()
+            for i in ids:
+                [relation, src_id, homolog_id] = i.split(',')
+                if homolog_id not in homolog_context.keys():
+                    homolog_context[homolog_id] = dict()
+                if src_id == homolog_id:
+                    continue # Don't bother with "X is a homolog of X"
+                if relation not in homolog_context[homolog_id].keys():
+                    homolog_context[homolog_id][relation] = set()
+                homolog_context[homolog_id][relation].add(src_id)
+
+            ids = list(homolog_context.keys()) # Bare Accession IDs for old target-search
+
+            # Prepare homolog relation descriptions
+            homolog_desc = dict()
+            for homolog_id, relations in homolog_context.items():
+                desc_parts = list()
+                for relation, src_ids in sorted(relations.items()):
+                    desc_parts.append("{} of {}".format(relation, ', '.join(sorted(list(src_ids)))))
+                homolog_desc[homolog_id] = '; '.join(desc_parts)
 
         if len(ids) != 0:
             query_submit = True
@@ -94,6 +117,14 @@ def newTS(request):
                     "desc": "Original compound ID prior to ChEMBL conversion",
                     "visible": True,
                     }
+            headerTextCol = {
+                "id": "header_text",
+                "sql": None,
+                "table": "Header Text",
+                "name": "Header Text",
+                "desc": "Description text to show in row-group headers (i.e. source query IDs, translations, etc.)",
+                "visible": False,
+                }
 
             myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, ids)
             annotation_info = myAnnotationSearch.table_info
@@ -113,7 +144,7 @@ def newTS(request):
                 drugind_json[chembl_id]['data'] = data
 
             # Exclude ActivitySearch from search-by-target by default
-            if id_type == 'target' and not include_activity:
+            if id_type in ['target', 'homolog-target'] and not include_activity:
                 activity_info = None
                 activity_matches = None
             else:
@@ -121,21 +152,44 @@ def newTS(request):
                 activity_info = myActivitySearch.table_info
                 activity_matches = myActivitySearch.get_grouped_results()
 
+            # Add column with original query info if necessary
             def addQueryCol(matches) :
                 for key, rowGroup in matches.items():
                     queryKey = idMapping[key]
                     for i in range(len(rowGroup)):
                         matches[key][i] = OrderedDict([("query_id",queryKey)] + [ item for item in rowGroup[i].items()] )
 
-
             if len(idMapping) != 0:
-                groupingCol += 1
+                #groupingCol += 1
                 annotation_info.insert(0,queryIdCol)
 
                 addQueryCol(annotation_matches)
                 if activity_matches != None:
                     activity_info.insert(0,queryIdCol)
                     addQueryCol(activity_matches)
+
+            # Add row-group header column
+            def addHeaderCol(matches):
+                for key, rowGroup in matches.items():
+                    if id_type in ['compound', 'target'] and len(idMapping) != 0:
+                        header_text = "{} ({})".format(key, idMapping[key])
+                    elif id_type == 'homolog-target':
+                        if homolog_desc[key]:
+                            header_text = "{} ({})".format(key, homolog_desc[key])
+                        else:
+                            header_text = key
+                    else:
+                        header_text = key
+                    for i in range(len(rowGroup)):
+                        matches[key][i] = OrderedDict([('header_text', header_text)] + [item for item in rowGroup[i].items()])
+
+            #annotation_info.append(headerTextCol)
+            annotation_info.insert(0, headerTextCol)
+            addHeaderCol(annotation_matches)
+            if activity_matches != None:
+                #activity_info.append(headerTextCol)
+                activity_info.insert(0, headerTextCol)
+                addHeaderCol(activity_matches)
 
     except Exception as e:
         print("exception in newTS:", sys.exc_info())
@@ -226,3 +280,19 @@ def chemblSVG(request, chembl_id):
         return HttpResponse(img, content_type='image/svg+xml')
     except Exception as e:
         raise Http404(str(e))
+
+def ajax(request, action):
+    def die(msg):
+        ajaxResponse = { 'success' : False, 'message' : msg }
+        return JsonResponse(ajaxResponse)
+
+    if action == 'homologs':
+        try:
+            ids = request.POST['ids']
+            homolog_type = request.POST['homolog_type']
+            result = homologsAjax(ids.split(), homolog_type)
+            return JsonResponse(result)
+        except Exception as e:
+            return die(str(e))
+    else:
+        return die('Unknown action: {}'.format(action))
