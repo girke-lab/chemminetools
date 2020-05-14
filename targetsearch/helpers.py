@@ -10,7 +10,7 @@ import shutil
 import pprint
 from psycopg2.extras import NamedTupleCursor
 from django.conf import settings
-from sqlitedict import SqliteDict #Remove after testing
+#from sqlitedict import SqliteDict #Remove after testing
 
 def groupBy(keyFn, row_data):
     """Group rows in row_data by the result of keyFn.
