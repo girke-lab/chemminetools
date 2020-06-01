@@ -33,7 +33,7 @@
 				<div class="tab-pane{% if id_type == "compound" %} active{% endif %}" id="compound_search">
 					<div class="container-fluid">
 						<div class="col-md-12">
-							<form method="GET">
+							<form method="GET" autocomplete="off">
 								<div class="form-group mt-3">
 									<label for="source-id-select">Database:</label>
 									<select id="source-id-select" name="source_id">
@@ -75,6 +75,7 @@
 									</div>
 									<input type="hidden" name="id_type" value="compound">
 									<button type="submit" class="btn btn-primary">Search</button>
+									<button id="compound-sample-btn" class="btn btn-outline-primary" type="button" data-toggle="tooltip" data-html="true" title="<p>CHEMBL25 (Aspirin)</p><p>CHEMBL113 (Caffeine)</p><p>Note: This will replace whatever text is currently in the search box.</p>" onclick="$('#compound-ids').val('CHEMBL25 CHEMBL113');$('#searchCompoundTabs a[href=\'#compoundids\']').tab('show');$('#compound-sample-btn').tooltip('hide')">Use Sample IDs <i class="far fa-question-circle"></i></button>
 								</div>
 							</form>
 						</div>
@@ -84,7 +85,7 @@
 				<div class="tab-pane{% if id_type == "target" %} active{% endif %}" id="target_search">
 					<div class="container-fluid">
 						<div class="col-md-12">
-							<form method="GET">
+							<form method="GET" autocomplete="off">
 								<div class="form-group mt-3">
 									<label for="source-id-select">Database:</label>
 									<select id="source-id-select" name="source_id">
@@ -105,6 +106,7 @@
 									</div>
 									<input type="hidden" name="id_type" value="target">
 									<button type="submit" class="btn btn-primary">Search</button>
+									<button id="target-sample-btn" class="btn btn-outline-primary" type="button" data-toggle="tooltip" data-html="true" title="<p>P23219 (Prostaglandin-endoperoxide synthase)</p><p>P30542 (Adenosine receptor A1)</p><p>Note: This will replace whatever text is currently in the search box.</p>" onclick="$('#target-ids').val('P23219 P30542');$('#target-sample-btn').tooltip('hide')">Use Sample IDs <i class="far fa-question-circle"></i></button>
 								</div>
 							</form>
 						</div>
@@ -119,23 +121,24 @@
 							<div class="form-group mt-3">
 								<div class="card bg-secondary my-3 p-2">
 									<h6 class="card-title text-white" for="target-ids">Paralog Search Tool</h6>
-									<p class="text-white">Enter UniProt Accession ID(s) into the search box. Then click &quot;Add Paralogs&quot;.</p>
+									<p class="text-white">Enter UniProt Accession ID(s) into the search box. Alternatively, click <span class="btn btn-sm btn-outline-primary bg-white">Use Sample IDs</span> for examples. Then click <span class="btn btn-sm btn-primary">Add Paralogs</span>.</p>
 									<p class="text-white">Your Accession ID(s) and associated paralogs will appear below.
 									If you don't want certain paralogs to be included in the search, uncheck the box next to it.</p>
-									<p class="text-white">After you've reviewed your paralog search units, click &quot;Search&quot;.</p>
-									<form id="homolog-query" class="mb-2">
+									<p class="text-white">After you've reviewed your paralog search units, click <span class="btn btn-sm btn-primary">Search</span>.</p>
+									<form id="homolog-query" class="mb-2" autocomplete="off">
 										<div class="d-flex">
 											<span class="form-check flex-grow-1 pl-0">
 												<input id="homolog-acc-ids" name="ids" type="text" placeholder="Accession ID" />
 												<input name="homolog_type" type="hidden" value="paralog" />
 												{% csrf_token %}
 												<button id="homolog-query-btn" class="btn btn-primary" type="button" onclick="addHomologs()">Add Paralogs</button>
+												<button id="homolog-sample-btn" class="btn btn-outline-primary bg-white" type="button" data-toggle="tooltip" data-html="true" title="<p>P23219 (PTGS1, Prostaglandin-endoperoxide synthase)</p><p>P30542 (ADORA1, Adenosine receptor A1)</p><p>Note: This will replace whatever text is currently in the search box.</p>" onclick="$('#homolog-acc-ids').val('P23219 P30542');$('#homolog-sample-btn').tooltip('hide')">Use Sample IDs <i class="far fa-question-circle"></i></button>
 											</span>
 											<button class="btn btn-danger" type="button" onclick="removeAllHomologs()">Remove All Search Units</button>
 										</div>
 									</form>
 									<div id="homolog-alerts"></div>
-									<form id="homolog-target-search">
+									<form id="homolog-target-search" autocomplete="off">
 										<div id="homolog-accordion">
 											<div id="homolog-empty-placeholder" class="card">
 												Empty search list. Use the above tool to populate list.
@@ -491,14 +494,12 @@
 			//console.log("append_str:", append_str);
 
 			if (id_type == 'chembl') {
-				var compoundArea = $('#compound-ids');
-				compoundArea.val(strjoin(compoundArea.val(), append_str));
+				appendValById('compound-ids', append_str);
 				$('#searchTabs a[href="#compound_search"]').tab('show');
 				$('#searchCompoundTabs a[href="#compoundids"]').tab('show');
 				document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
 			} else if (id_type == 'accession') {
-				var compoundArea = $('#target-ids');
-				compoundArea.val(strjoin(compoundArea.val(), append_str));
+				appendValById('target-ids', append_str);
 				$('#searchTabs a[href="#target_search"]').tab('show');
 				document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
 			}
@@ -515,6 +516,11 @@
 			return a;
 		else
 			return (a + ' ' + b);
+	}
+
+	function appendValById(obj_id, append_str) {
+		var obj = $('#'+obj_id);
+		obj.val(strjoin(obj.val(), append_str));
 	}
 
 	function toggleStructures(table_name) {
