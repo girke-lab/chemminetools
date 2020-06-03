@@ -176,7 +176,7 @@ def view_job(
             #print("query column empty? "+str(queryColumnEmpty))
             f.close()
             allTags = Tag.allUserTagNames(request.user)
-            print("job input: "+str(job.input))
+            #print("job input: "+str(job.input))
             if queryColumnEmpty:
                 singleQuery = job.input
             else:
@@ -193,9 +193,9 @@ def view_job(
             for line in csvinput:
                 if line[0] != "":
                     queryColumnEmpty =False
-                print("csv line: "+str(line))
+                #print("csv line: "+str(line))
                 csvOutput.append(line)
-            print("query column empty? "+str(queryColumnEmpty))
+            #print("query column empty? "+str(queryColumnEmpty))
             f.close()
 
             allTags = Tag.allUserTagNames(request.user)

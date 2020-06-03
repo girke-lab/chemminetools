@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse, Http404
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
+from tools.models import *
 from django.contrib import messages
 from collections import OrderedDict
 from django.template import Context, Engine
@@ -53,12 +54,14 @@ def newTS(request):
     defaultCompoundDb = "1"
     defaultProteinDb = "ACC+ID"
     groupingCol = 0
+    similarityJobs = [(job.id,str(job)) for job in Job.objects.filter(user=request.user,application__category_id=5)]
 
     # Default GET request variables
     id_type = 'compound'
     ids = list()
     include_activity = False
     source_id = 1
+    similarity_job_id=-1
 
     # Retrieve GET request variables
     if 'id_type' in request.GET:
@@ -72,6 +75,8 @@ def newTS(request):
             ids.append(c)
     if 'source_id' in request.GET:
         source_id = request.GET['source_id']
+    if 'similarity_job_id' in request.GET:
+        similarity_job_id = request.GET['similarity_job_id']
 
     # Generate content
     try:
@@ -94,6 +99,15 @@ def newTS(request):
                     "desc": "Original compound ID prior to ChEMBL conversion",
                     "visible": True,
                     }
+            originalQueryCol = {
+                    "id": "original_query_id",
+                    "sql": None,
+                    "table": "Original Query ID",
+                    "name": "Original Query ID",
+                    "desc": "The compound that the current query compound was originally derived from, based on similarity",
+                    "visible": True,
+                    }
+
 
             myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, ids)
             annotation_info = myAnnotationSearch.table_info
@@ -121,21 +135,28 @@ def newTS(request):
                 activity_info = myActivitySearch.table_info
                 activity_matches = myActivitySearch.get_grouped_results()
 
-            def addQueryCol(matches) :
-                for key, rowGroup in matches.items():
-                    queryKey = idMapping[key]
-                    for i in range(len(rowGroup)):
-                        matches[key][i] = OrderedDict([("query_id",queryKey)] + [ item for item in rowGroup[i].items()] )
-
-
             if len(idMapping) != 0:
                 groupingCol += 1
-                annotation_info.insert(0,queryIdCol)
+                addMappedQueryColumn(idMapping,queryIdCol,
+                        annotation_info,annotation_matches,
+                        activity_info,activity_matches)
 
-                addQueryCol(annotation_matches)
-                if activity_matches != None:
-                    activity_info.insert(0,queryIdCol)
-                    addQueryCol(activity_matches)
+            if similarity_job_id != -1:
+                similarityMapping = readSimilarityMappingData(request.user,similarity_job_id)
+                if len(idMapping) != 0: # need to compose our mapping with previous mapping
+                    similarityMapping = composeMaps(idMapping,similarityMapping)
+                #print("similarity mapping: \n"+str(similarityMapping))
+                if len(similarityMapping) != 0:
+                    groupingCol += 1
+                    addMappedQueryColumn(similarityMapping, originalQueryCol,
+                            annotation_info,annotation_matches,
+                            activity_info,activity_matches)
+
+            #if similarity_job_id != -1, then read job_<similarity_job_id>
+            # map chembl id (2nd column) back to the original compound id (first column)
+            # insert new column to show original compound id.
+
+
 
     except Exception as e:
         print("exception in newTS:", sys.exc_info())
@@ -156,10 +177,59 @@ def newTS(request):
         'defaultCompoundDb': defaultCompoundDb,
         'proteinDbs': proteinDbs,
         'defaultProteinDb': defaultProteinDb,
-        'groupingCol' : groupingCol
+        'groupingCol' : groupingCol,
+        'similarityJobs': similarityJobs
         }
 
     return render(request, 'targetsearch/new_ts.html', context)
+
+def addMappedQueryColumn(mapping,columnDefinition,annotation_info, annotation_matches,activity_info,activity_matches):
+
+    def addQueryCol(matches) :
+        for key, rowGroup in matches.items():
+            if key in mapping:
+                queryKey = mapping[key]
+                for i in range(len(rowGroup)):
+                    matches[key][i] = OrderedDict([(columnDefinition["id"],queryKey)] + [ item for item in rowGroup[i].items()] )
+
+
+    annotation_info.insert(0,columnDefinition)
+
+    addQueryCol(annotation_matches)
+    if activity_matches != None:
+        activity_info.insert(0,columnDefinition)
+        addQueryCol(activity_matches)
+
+
+def readSimilarityMappingData(user,job_id):
+    job = Job.objects.get(id=job_id, user=user)
+    mapping = {}
+
+    try:
+        f = open(job.output, 'r')
+        csvinput = csv.reader(f, delimiter=' ')
+        for line in csvinput:
+            #map from target back to query
+            # multiple queries may map to the same target
+            queries = mapping.setdefault(line[1],[]);
+            queries.append(line[0]);
+    finally:
+        f.close()
+
+    for key, value in mapping.items():
+        mapping[key] = ",".join(value)
+
+    return mapping
+
+
+## map1: x->y and map2: y -> z, return x->z    
+def composeMaps(map1,map2):
+    composedMap = {}
+    for key1,value1 in map1.items():
+        if value1 in map2:
+            composedMap[key1] = map2[value1]
+    return composedMap
+
 
 def tableHtml(search_obj, header=True, footer=False, table_class=""):
     """Takes a SearchBase object and returns an HTML table"""
