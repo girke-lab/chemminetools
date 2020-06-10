@@ -40,9 +40,11 @@ parser.add_argument('-t', '--tags', help='comma seperated string of tags',
                     required=False)
 parser.add_argument('-o', '--outfile', help='output file',
                     required=True)
+parser.add_argument('-d', '--deduplicate', help='skip inserting any compounds that already exist for given user',
+                    action='store_true',required=False)
 args = vars(parser.parse_args())
 
-def addMyCompounds(sdf, user,tags):
+def addMyCompounds(sdf, user,tags,dedup):
     sdffile = ''
     counter = 0
     linecounter = 0
@@ -99,7 +101,7 @@ def addMyCompounds(sdf, user,tags):
                     raise Exception
                 try:
                     newid = insert_single_compound(moldata, sdffile,
-                            'id', user, tags)
+                            'id', user, tags,dedup)
                 except:
                     print("error while inserting compound: ")
                     print("Unexpected error:", sys.exc_info())
@@ -133,7 +135,7 @@ def main():
     if 'tags' in args and args['tags'] is not None:
         tags = Tag.objects.filter(user=user,name__in=args['tags'].split(','))
 
-    output = addMyCompounds(sdf, user,tags)
+    output = addMyCompounds(sdf, user,tags, args['deduplicate'])
 
     f = open(args['outfile'], 'w')
     f.write(output)

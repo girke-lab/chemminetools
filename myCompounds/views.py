@@ -249,8 +249,10 @@ def uploadCompound(request, resource = None, job_id = None):
                     dict(input_mode=input_mode,
                     post_data=request.POST,
                     tags=compoundTags))
-        newJob = createJob(request.user, 'Upload Compounds', '',
-                           ['--user=' + str(request.user.id),"--tags="+(",".join(compoundTags))], sdf)
+        jobArgs = ['--user=' + str(request.user.id),"--tags="+(",".join(compoundTags))]
+        if 'dedup' in request.POST:
+            jobArgs += ["--deduplicate"]
+        newJob = createJob(request.user, 'Upload Compounds', '',jobArgs , sdf)
         time.sleep(2)
         return redirect(tools.views.view_job, job_id=newJob.id,
                         resource='')
