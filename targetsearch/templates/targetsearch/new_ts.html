@@ -129,7 +129,7 @@
 										<div class="d-flex">
 											<span class="form-check flex-grow-1 pl-0">
 												<input id="homolog-acc-ids" name="ids" type="text" placeholder="Accession ID" />
-												<input name="homolog_type" type="hidden" value="paralog" />
+												<input name="homolog_type" type="hidden" value="paralog-cache" />
 												{% csrf_token %}
 												<button id="homolog-query-btn" class="btn btn-primary" type="button" onclick="addHomologs()">Add Paralogs</button>
 												<button id="homolog-sample-btn" class="btn btn-outline-primary bg-white" type="button" data-toggle="tooltip" data-html="true" title="<p>P23219 (PTGS1, Prostaglandin-endoperoxide synthase)</p><p>P30542 (ADORA1, Adenosine receptor A1)</p><p>Note: This will replace whatever text is currently in the search box.</p>" onclick="$('#homolog-acc-ids').val('P23219 P30542');$('#homolog-sample-btn').tooltip('hide')">Use Sample IDs <i class="far fa-question-circle"></i></button>
@@ -152,7 +152,7 @@
 								</div>
 								<input type="hidden" name="id_type" value="homolog-target" form="homolog-target-search">
 								<button type="submit" class="btn btn-primary" form="homolog-target-search">Search</button>
-								<button type="button" class="btn btn-outline-primary" onclick="console.log($('#homolog-target-search').serialize())">Submit to Console</button>
+								<!--<button type="button" class="btn btn-outline-primary" onclick="console.log($('#homolog-target-search').serialize())">Submit to Console</button>-->
 							</div>
 						</div>
 					</div>
@@ -588,24 +588,34 @@
 					for (const paralog of paralog_list) {
 						var item_id_str = 'homolog-item-' + targetSearch.homolog_item_next;
 						var acc_id = paralog["uniprot"];
+						var perc_id = paralog["perc_id"];
+						var perc_id_r1 = paralog["perc_id_r1"];
 						targetSearch.homolog_item_next++;
 
 						let gene_name = recv_data.uniprotIdMap[acc_id].gene_name;
+						/*let gene_name2 = paralog["gene_name"];
+						if (gene_name === gene_name2) {
+							console.log("gene_name and gene_name2 are the same:", gene_name);
+						} else {
+							console.log("gene_name and gene_name2 are different:", gene_name, gene_name2);
+						}*/
 
 						if (recv_data.chemblErrors.includes(acc_id)) {
 							let line_str = acc_id + ': ' + gene_name;
+							let tooltip = acc_id + ' (' + gene_name + ')<br/>Similarity: ' + perc_id + '&percnt;<br/>Similarity, R1: ' + perc_id_r1 + '&percnt;';
 
 							homolog_unit_body_disabled += '<div class="form-check">';
 							homolog_unit_body_disabled += '<input id="'+item_id_str+'" type="checkbox" class="form-check-input" name="ids" value="paralog,'+src_uniprot_id+','+acc_id+'" disabled />';
-							homolog_unit_body_disabled += '<label for="'+item_id_str+'" class="form-check-label">'+line_str+'</label>';
+							homolog_unit_body_disabled += '<label for="'+item_id_str+'" class="form-check-label" data-toggle="tooltip" data-html="true" title="'+tooltip+'">'+line_str+'</label>';
 							homolog_unit_body_disabled += '</div>';
 						} else {
 							let desc = recv_data.descriptions[acc_id];
 							let line_str = acc_id + ': ' + gene_name + ', ' + desc;
+							let tooltip = acc_id + ' (' + gene_name + ')<br/>Similarity: ' + perc_id + '&percnt;<br/>Similarity, R1: ' + perc_id_r1 + '&percnt;';
 
 							homolog_unit_body_inner += '<div class="form-check">';
 							homolog_unit_body_inner += '<input id="'+item_id_str+'" type="checkbox" class="form-check-input" name="ids" value="paralog,'+src_uniprot_id+','+acc_id+'" checked />';
-							homolog_unit_body_inner += '<label for="'+item_id_str+'" class="form-check-label">'+line_str+'</label>';
+							homolog_unit_body_inner += '<label for="'+item_id_str+'" class="form-check-label" data-toggle="tooltip" data-html="true" title="'+tooltip+'">'+line_str+' <i class="far fa-question-circle"></i></label>';
 							homolog_unit_body_inner += '</div>';
 						}
 					}
@@ -645,6 +655,7 @@
 					homologAlert("Unknown error occurred", "alert-danger");
 				}
 			}
+			$("[data-toggle=tooltip]").tooltip();
 		}).fail( function() {
 			homologAlert("AJAX call failed", "alert-danger");
 		}).always( function() {
