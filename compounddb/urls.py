@@ -21,6 +21,7 @@ urlpatterns = [path('cid_lookup/', cid_lookup),
 
                path('tagCompounds/', tagCompounds),
                path('tagCompounds/<action>/', tagCompounds),
+               path('tagDuplicates/', tagDuplicateCompounds),
                path('batch/<action>/', batchOperation),
                path('withTags/<tags>/count/', countCompoundsWithTags),
 

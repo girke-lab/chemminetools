@@ -36,7 +36,14 @@
 		table = $('.table').DataTable({
 			dom: '<"row-fluid spaceAfter" Bi>frltip',
 			buttons: {
-				buttons: ['selectAll','selectNone',
+				buttons: ['selectAll',
+                    {
+                        text: "Select visible",
+                        action: function ( e, dt, button, config ) {
+                            dt.rows( { page: 'current' } ).select();
+                        }
+                    },
+                    'selectNone',
 					createTagAddRemoveButton("add"),
 					createTagAddRemoveButton("remove"),
 					createDeleteButton(),
@@ -66,11 +73,53 @@
 				$("#loadstructures").html('Hide Structures');
 			}
 		});
+        $("#tagDuplicates").click(function(){
+            $.get("/compounds/tagDuplicates").
+                then(function(results){
+                    var row,rowData,rowTags;
+                    console.log("tagDuplicates results: ",results);
+                    $(".duplicate-help").show();
+                    for(var id in results){
+                        if(results.hasOwnProperty(id)){
+                            //console.log("setting tag for ",id,results[id]);
+                            //console.log("row data: "+ table.row("#"+id).data()[4]);
+                            try{
+                                row = table.row("#"+id);
+                                rowData = row.data();
+
+                                //create array with old and new tags
+                                rowTags = rowData[4].split(/\s+|,/).concat(results[id]).
+                                            filter(function(x){return x!== ""});
+                                //console.log("all tags: ",rowTags);
+
+                                //make sure we have a unique list of tags
+                                rowData[4] = [... new Set(rowTags)].join(",");
+                                row.data(rowData).draw();
+                            }catch(error){
+                                console.error("exception while setting duplicate tags: ",error);
+                            }
+                        }
+                    }
+                    //location.reload();
+                }).
+                fail(function(error){
+                    alertify.error("failed to tag duplications");
+                });
+        });
+        $("#selectDuplicates").click(function(){
+            $(".duplicate-help").show();
+            table.columns(4).search("duplicate-set-").draw();
+        });
+        $("#clearDuplicateSelection").click(function(){
+            $(".duplicate-help").hide();
+            table.columns(4).search("").draw();
+        });
 
 	}); // $(document).ready()
 
 	function createDeleteButton(){
 		return {
+            extend:"selected",
 			text: "Delete Selected",
 			className:"btn-danger",
 			action: function(event,dt,note,config){
@@ -101,12 +150,12 @@
 		var actionText = action === "add" ? "Add Tags" : "Remove Tags";
 
 		return	{
+            extend: "selected",
 			text: actionText,
 			action: function(event,dt,note,config){
 				var selectedIds;
 				var content = jQuery("#tag_input")[0];
 				selectedIds =  Array.from(dt.rows( { selected: true } ).ids());
-				console.log("selected Ids: ",Array.from(selectedIds));
 				jQuery("#tags")[0].selectize.clear();
 
 				console.log("data: ",selectedIds);
@@ -114,11 +163,8 @@
 					title: actionText,
 					onok: function(){
 						var tags,info;
-						console.log("ok clicked");
 						tags = jQuery("#tags")[0].selectize.items;
-						console.log("tags to add/remove: ",tags);
 						info={ids: selectedIds, tags: tags};
-						console.log("info: ",info);
 
 						jQuery.ajax({
 							url: "/compounds/tagCompounds/"+action+"/",
@@ -168,6 +214,35 @@
 		</div>
 	</div>
 </div><!--/row-->
+<div class="row mt-2">
+	<div class="col-md-12">
+        Duplicate detection, based on Inchi strings<br>
+		<div class="btn-group" id="top_buttons">
+			<button id="tagDuplicates" class="btn btn-outline-secondary">Find Duplicates</button>
+			<button id="selectDuplicates" class="btn btn-outline-secondary">Select Duplicates</button>
+			<button id="clearDuplicateSelection" class="btn btn-outline-secondary">Clear Selection</button>
+		</div>
+        <div class="duplicate-help mt-3" style="display:none">
+            <p>
+           Each set of duplicate compounds are now tagged with a name like "duplicate-set-N", where "N" is
+           incremented for each set of duplicates. In addition, for each group of duplicates, all but one memember
+           of each group will have the tag "duplicate-extra" added. This tag then identifies the set of compounds 
+           that could be removed if you wanted to remove all duplicates. 
+           </p>
+           <p>
+           To see just the duplicate compound sets, click "Select Duplicates". To go back to viewing all compounds, click "Clear Selection".
+           With the duplicates selected, you can then delete the extra compounds. If you're happy with which compounds are
+           tagged as "duplicate-extra", then you can just put that tag name into the table search box, then click "Select Visible",
+           and then "Delete Selected". You can also change which compounds are tagged with "duplicate-extra", or just 
+           manually select and delete the compounds you want. 
+           CAUTION: clicking "select all" will always select every compound, not just the duplicates or what you can see on the screen.
+           </p>
+
+
+        </div>
+	</div>
+</div><!--/row-->
+
 
 <div class="row">
 

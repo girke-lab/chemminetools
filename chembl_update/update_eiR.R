@@ -6,10 +6,11 @@ library(eiR)
 library(R.utils)
 library(RPostgreSQL)
 
+chemblDB="chembl_26"
 indexDir = "/srv/shared_jobs/development/eir_index"
 
 eiConn = dbConnect(dbDriver('PostgreSQL'),dbname='eisearch_chembl_loading',host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='ei_updater',password='kj48nb3n2khlsdfbb')
-chemblConn = dbConnect(dbDriver('PostgreSQL'),dbname='chembl',host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='chembl',password='chembl1889')
+chemblConn = dbConnect(dbDriver('PostgreSQL'),dbname=chemblDB,host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='chembl',password='chembl1889')
 
 buildSDF  = function(outputFile){
 	#fetch list of compound sdfs

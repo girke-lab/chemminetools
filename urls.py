@@ -13,7 +13,7 @@ from django.views.generic import RedirectView
 
 
 admin.autodiscover()
-print('\n before urls in general')
+#print('\n before urls in general')
 urlpatterns =[
     url(r'^admin/', admin.site.urls),
     url(r'^eisearch/', include('structure_search.urls')),
@@ -31,7 +31,7 @@ urlpatterns =[
     url(r'^targetsearch/', include('targetsearch.urls')),
     url(r'^', include('cms.urls')),
     ]
-print('\n after urls in general')
+#print('\n after urls in general')
 if settings.DEBUG:
     import django
     urlpatterns = [url(r'^working/(?P<path>.*)$',
