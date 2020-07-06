@@ -5,6 +5,7 @@
 library(eiR)
 library(R.utils)
 library(RPostgreSQL)
+library(ChemmineR)
 
 chemblDB="chembl_26"
 indexDir = "/srv/shared_jobs/development/eir_index"
@@ -51,8 +52,8 @@ buildSDF  = function(outputFile){
 buildIndex = function(sdfFile){
 	message("initializing database")
 	initDb(eiConn)
-	message("running eiInit from ",sdfFile)
-	eiInit(sdfFile,dir=indexDir,conn=eiConn,updateByName=TRUE)
+#	message("running eiInit from ",sdfFile)
+#	eiInit(sdfFile,dir=indexDir,conn=eiConn,updateByName=TRUE)
 	message("eiInit done. starting eiMakeDb")
 	runId=eiMakeDb(200,100,dir=indexDir,conn=eiConn)
 	message("eiMakeDb done")
@@ -61,5 +62,5 @@ buildIndex = function(sdfFile){
 
 
 sdfFile = "chembl.sdf"
-buildSDF(sdfFile)
+#buildSDF(sdfFile)
 buildIndex(sdfFile)

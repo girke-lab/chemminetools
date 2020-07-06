@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+{% load targetsearch_extras %}
+
+{% block extra_styles %}
+.column-set {
+	border: 1px solid #ccc;
+	border-radius: 16px;
+	padding: 0.01em 16px;
+	margin: 1em;
+}
+{% endblock extra_styles %}
+
+{% block base_content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+
+        </div>
+    </div>
+	<div class="row">
+		<div class="col-md-12">
+            {% include "targetsearch/ts_table.html" with table_name="annotation" table_info=annotation_info table_data=annotation_matches grouping_col=groupingCol %}
+            {% if activity_matches is not None %}
+                {% include "targetsearch/ts_table.html" with table_name="activity" table_info=activity_info table_data=activity_matches grouping_col=groupingCol %}
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+
+	
+{% endblock base_content %}
+
+{% block js_content %}
+
+{% include "selectize.html" %}
+{% include "dataTables.html" %}
+{% include "alertify.html" %}
+
+<script type="text/javascript">
+
+	$(document).ready(function() {
+    });
+
+</script>
+
+{% endblock js_content %}

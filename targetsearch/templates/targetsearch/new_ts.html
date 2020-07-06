@@ -126,66 +126,14 @@
 	</div><!-- end row (form tabs)-->
 
 	{% if query_submit %}
-		{% include "targetsearch/ts_table.html" with table_name="annotation" table_info=annotation_info table_data=annotation_matches %}
+		{% include "targetsearch/ts_table.html" with table_name="annotation" table_info=annotation_info table_data=annotation_matches drugind_json=drugind_json grouping_col=groupingCol %}
 		{% if activity_matches is not None %}
-			{% include "targetsearch/ts_table.html" with table_name="activity" table_info=activity_info table_data=activity_matches %}
+			{% include "targetsearch/ts_table.html" with table_name="activity" table_info=activity_info table_data=activity_matches drugind_json=drugind_json grouping_col=groupingCol %}
 		{% endif %}
 	{% endif %}
 </div><!-- end container-fluid -->
 
-<!-- Drug Indication modal window -->
-<div class="modal fade" id="drugIndModal" tabindex="-1" role="dialog" aria-labeledBy="dimtitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="dimtitle">Drug Indications for CHEMBL_ID</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<table id="dimtable" class="table table-striped" width="100%"></table>
-			</div>
-		</div>
-	</div>
-</div>
-
 {% include "compounddb/compound_img_modal.html" %}
-
-<!-- Add-Compound-to-Workbench modal window -->
-<div class="modal fade" id="workbenchModal" tabindex="-1" role="dialog" aria-labelledBy="wbmtitle" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 40%">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h5 class="modal-title" id="wbmtitle">Add Compounds to Workbench</h5>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body">
-				<form id="wbmform" autocomplete="off"">
-				<div id="wbmsummary"></div>
-					{% csrf_token %}
-					<input name="source_id" type="hidden" value="chembl" />
-					<div id="wbmtagsdiv">
-						<label for="wbmtags">Tags</label>
-						<select class="tags" id="wbmtags" name="tags" multiple placeholder="Compound Tags">
-							{% for tag in tags %}
-								<option value="{{tag}}">{{tag}}</option>
-							{% endfor %}
-						</select>
-					</div>
-				</form>
-			</div>
-			<div class="modal-footer">
-				<div id="wbmcount"></div>
-				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-				<button id="wbmsubmitbtn" type="button" class="btn btn-primary" onclick="wbmSubmit()" disabled>Submit</button>
-			</div>
-		</div>
-	</div>
-</div>
-
 {% endblock base_content %}
 
 {% block js_content %}
@@ -195,34 +143,6 @@
 {% include "alertify.html" %}
 
 <script type="text/javascript">
-	var targetSearch = {};// namespace for public variables
-
-	// Shows or hides all columns for a table
-	function selectAllColumns(table_name, is_visible) {
-		table_obj = targetSearch[table_name + '_table'];
-		chkbox_class = 'chkbox-' + table_name;
-
-		table_obj.columns().visible(is_visible);
-		$('.' + chkbox_class).prop('checked', is_visible);
-	}
-
-	function selectDefaultColumns(table_name) {
-		table_obj = targetSearch[table_name + '_table'];
-		chkbox_class = 'chkbox-' + table_name;
-
-		// Iterate through all checkboxes. If a checkbox is classed as a "default"
-		// checkbox, check it and unhide the associated column. Otherwise, uncheck
-		// it and hide the column.
-		$('.' + chkbox_class).each(function() {
-			v = $(this).hasClass(chkbox_class + '-default');
-			// The second visible() arg "false" defers redrawing the DataTable
-			table_obj.column( $(this).attr('value') ).visible(v, false);
-			$(this).prop('checked', v);
-		});
-		// Now redraw the DataTable
-		table_obj.columns.adjust().draw();
-	}
-
 	function setCompoundCount(tags) {
 		if(tags != null && tags.length !== 0)
 			$.get("/compounds/withTags/"+tags.join(",")+"/count").
@@ -234,243 +154,6 @@
 		else
 			$("#compound_count").html(0);
 	}
-
-	function showDrugIndModal(chembl_id) {
-		var drugIndJson = {{drugind_json|safe}};
-
-		targetSearch.drugind_table = $('#dimtable').DataTable({
-			dom: 'Bfrltip',
-			buttons: [{
-				extend: 'csv',
-				filename: 'drugind-table-'+chembl_id,
-				text: 'Save to CSV (All Columns)',
-			}],
-			columns: drugIndJson[chembl_id]['colnames'],
-			data: drugIndJson[chembl_id]['data'],
-		});
-
-		$('#dimtitle').html("Drug Indications for " + chembl_id);
-		$('#drugIndModal').modal();
-	}
-
-	function columnExportSelector(table_name, export_type, index) {
-		table_obj = targetSearch[table_name + '_table'];
-		nx_list = targetSearch[table_name + '_no_export'];
-
-		if (nx_list.includes(index)) {
-			return false;
-		} else if (export_type == 'all') {
-			return true;
-		} else if (export_type == 'visible') {
-			return table_obj.column(index).visible();
-		} else {
-			console.log("columnExportSelector: Check your values. You shouldn't see this.");
-			return false;
-		}
-	}
-
-	function toggleTableColumns(table_obj,setId, state) {
-		$("#"+setId+" input").each(function(){
-			table_obj.column( $(this).attr('value') ).visible(state, false);
-			$(this).prop('checked', state);
-		});
-		table_obj.columns.adjust().draw();
-		return false;
-	}
-
-	function showWorkbenchModal(table_name) {
-		var table_obj = targetSearch[table_name + '_table'];
-		var chembl_column = targetSearch[table_name + '_chembl_column'];
-		var pref_name_column = targetSearch[table_name + '_pref_name_column'];
-		var summary_html = '';
-		var chembl_id_set = new Set();
-
-		// Clean-up stuff from previous runs
-		$('#wbmsummary').html('');
-		$('#wbmsubmitbtn').html('Submit');
-		targetSearch.wbmtags.clear();
-
-		// Act on rows selected by user
-		var rows = table_obj.rows( {selected:true} );
-		if (rows.any()) {
-			// Build a lookup dict for compound display names
-			// e.g.: CHEMBL113 -> "CHEMBL113 (CAFFEINE)"
-			// Also build a set of compounds for pre-check routine.
-			var display_name_lookup = {};
-			rows.every( function() {
-				var chembl_text = $(table_obj.cell(this.index(), chembl_column).node()).text();
-				var pref_name_text = $(table_obj.cell(this.index(), pref_name_column).node()).text();
-				if (!chembl_id_set.has(chembl_text)) {
-					chembl_id_set.add(chembl_text);
-					if (pref_name_text == 'None')
-						display_name_lookup[chembl_text] = chembl_text;
-					else
-						display_name_lookup[chembl_text] = chembl_text + ' (' + pref_name_text + ')';
-				}
-			});
-			// Format ChEMBL IDs into HTTP GET-style list
-			var chembl_ids_list = new Array();
-			for (c of chembl_id_set)
-				chembl_ids_list.push('ids=' + c);
-			var post_data = $('#wbmform').serialize(); //for source_id and CSRF token
-			post_data += '&' + chembl_ids_list.join('&');
-			//console.log('post_data:', post_data);
-			jQuery.post("{% url 'myCompounds-ajax' 'check' %}", post_data, function (recv_data) {
-				if (recv_data.success === true) {
-					var results = recv_data.results;
-					for (const r of results) {
-						summary_html += '<div class="card mb-3"><div class="card-body">';
-						summary_html += ('<p class="card-text">' + r.desc + '</p>');
-						summary_html += '<div class="ml-3">'; //item list
-						for (const i of r.ids) {
-							summary_html += '<div class="form-check">';
-							summary_html += '<input type="checkbox" class="form-check-input wbmids" id="wbmchk-'+i+'" name="ids" value="'+i+'"';
-							if (r.select === true) {
-								summary_html += ' checked';
-							}
-							if (r.enable !== true) {
-								summary_html += ' disabled';
-							}
-							summary_html += '/><label class="form-check-label" for="wbmchk-'+i+'">';
-							summary_html += display_name_lookup[i] + '</label>';
-							summary_html += '</div>'; //form-check
-						}
-						summary_html += '</div></div></div>'; //item list, card-body, card
-					}
-					$('#wbmsummary').html(summary_html);
-					$('#wbmtagsdiv').removeClass('cmtools-display-none');
-					wbmUpdateCount();
-					$('#workbenchModal').modal();
-				} else {
-					if (recv_data.message) {
-						alertify.error(recv_data.message);
-					} else {
-						alertify.error("Unknown error occurred");
-					}
-				}
-			}).fail( function() {
-				alertify.error("AJAX call failed");
-			});
-		} else {
-			summary_html += '<div class="card mb-3"><div class="card-body">';
-			summary_html += '<p class="card-text">No compounds are selected.</p>';
-			summary_html += '<p class="card-text">Select compounds by activating a &quot;Select Mode&quot; and clicking on individual table rows, or select all rows by clicking &quot;All&quot; next to &quot;Select Rows&quot;.</p>';
-			summary_html += '</div></div>';
-			$('#wbmsummary').html(summary_html);
-			$('#wbmtagsdiv').addClass('cmtools-display-none');
-			wbmUpdateCount();
-			$('#workbenchModal').modal();
-		}
-	}
-
-	function wbmSubmit() {
-		$('#wbmsubmitbtn').prop('disabled', true);
-		$('#wbmsubmitbtn').html('Please Wait...');
-
-		var post_data = $('#wbmform').serialize();
-		//console.log("form data:", post_data);
-		jQuery.post("{% url 'myCompounds-ajax' 'add' %}", post_data, function (recv_data) {
-			if (recv_data.success === true) {
-				alertify.success(recv_data.message);
-			} else {
-				if (recv_data.message) {
-					alertify.error(recv_data.message);
-				} else {
-					alertify.error("Unknown error occurred");
-				}
-			}
-		}).fail( function() {
-			alertify.error("AJAX call failed");
-		}).always( function() {
-			$('#workbenchModal').modal('hide');
-		});
-	}
-
-	function wbmUpdateCount() {
-		//console.log("hello from wbmUpdateCount");
-		var c = 0;
-		$('#wbmform .wbmids').each( function() {
-			if ($(this).prop('checked'))
-				c++;
-		});
-		if (c == 0) {
-			$('#wbmcount').html('<p class="mb-0 mr-3">No compounds selected</p>');
-			$('#wbmsubmitbtn').prop('disabled', true);
-		} else if (c == 1) {
-			$('#wbmcount').html('<p class="mb-0 mr-3">'+c+' compound selected</p>');
-			$('#wbmsubmitbtn').prop('disabled', false);
-		} else {
-			$('#wbmcount').html('<p class="mb-0 mr-3">'+c+' compounds selected</p>');
-			$('#wbmsubmitbtn').prop('disabled', false);
-		}
-	}
-
-	function init_datatable(table_name) {
-		return $('#' + table_name + '-table').DataTable({
-			dom: 'frltip',
-			rowGroup: { dataSrc: {{groupingCol}}, },
-			columnDefs: {
-				targets: 0,
-				orderable: false,
-			},
-			buttons: [
-				{
-					extend: 'csv',
-					filename: table_name + '-table',
-					text: 'All Columns',
-					exportOptions: {
-						columns: function(index, data, node) {
-							return columnExportSelector(table_name, 'all', index);
-						}
-					},
-				},
-				{
-					extend: 'csv',
-					filename: table_name + '-table',
-					text: 'Visible Columns',
-					exportOptions: {
-						columns: function(index, data, node) {
-							return columnExportSelector(table_name, 'visible', index);
-						}
-					},
-				},
-			],
-			select: {
-				style: 'os',
-			},
-		});
-	}
-
-	function addIdToSearch(table_name, id_type) {
-		var table_obj = targetSearch[table_name + '_table'];
-		var column = targetSearch[table_name + '_' + id_type + '_column'];
-		var append_set = new Set();
-
-		var rows = table_obj.rows( {selected:true} );
-		if (rows.any()) {
-			rows.every( function() {
-				var id_text = $(table_obj.cell(this.index(), column).node()).text();
-				append_set.add(id_text);
-			});
-			var append_list = Array.from(append_set);
-			var append_str = append_list.join(' ');
-			//console.log("append_str:", append_str);
-
-			if (id_type == 'chembl') {
-				var compoundArea = $('#compound-ids');
-				compoundArea.val(strjoin(compoundArea.val(), append_str));
-				$('#searchTabs a[href="#compound_search"]').tab('show');
-				$('#searchCompoundTabs a[href="#compoundids"]').tab('show');
-				document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
-			} else if (id_type == 'accession') {
-				var compoundArea = $('#target-ids');
-				compoundArea.val(strjoin(compoundArea.val(), append_str));
-				$('#searchTabs a[href="#target_search"]').tab('show');
-				document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
-			}
-		}
-	}
-
 	function strjoin(a, b) {
 		a = a.trim();
 		b = b.trim();
@@ -483,33 +166,6 @@
 			return (a + ' ' + b);
 	}
 
-	function toggleStructures(table_name) {
-		var table_obj = targetSearch[table_name + '_table'];
-		var chembl_column = targetSearch[table_name + '_chembl_column'];
-		var column_jqobj = $( table_obj.column(chembl_column).nodes() );
-		var class_name = table_name + '-structure';
-
-		if (targetSearch[table_name + '_show_structures']) {
-			// Structures are shown, so hide them.
-			$('.'+class_name).remove();
-			$('#show-struct-' + table_name).html('Show Structures');
-			targetSearch[table_name + '_show_structures'] = false;
-		} else {
-			// Structures are hidden, so show them.
-			column_jqobj.each( function() {
-				var chembl_id = $(this).text();
-				var url = "/compounds/chembl/" + chembl_id + "/svg";
-				$(this).append('<div class="'+class_name+'"><button type="button" class="btn" onclick="showCsiModal(\''+chembl_id+'\', \''+url+'\')"><img src="'+url+'" style="max-width: 150px" onerror="structImgError(this)"/></button></div>');
-			});
-			$('#show-struct-' + table_name).html('Hide Structures');
-			targetSearch[table_name + '_show_structures'] = true;
-		}
-	}
-
-	function structImgError(element) {
-		$(element).closest('div').html('(Structure info unavailable)');
-	}
-
 	$(document).ready(function() {
 		jQuery("#tags").selectize({
 			plugins: ['remove_button'],
@@ -517,12 +173,6 @@
 				setCompoundCount(value);
 			},
 		});
-
-		targetSearch.wbmtags = jQuery("#wbmtags").selectize({
-			plugins: ['remove_button'],
-			create: true,
-		})[0].selectize;
-
 		jQuery("#compound_autocomplete").selectize({
 			valueField: "chembl_id",
 			labelField: "name",
@@ -571,64 +221,6 @@
 			},
 		});
 
-		var annotation_table = init_datatable('annotation');
-		var activity_table = init_datatable('activity');
-
-		targetSearch.annotation_table = annotation_table;
-		targetSearch.activity_table = activity_table;
-
-		targetSearch.annotation_no_export = {% col_index_list annotation_info 'export' False %};
-		targetSearch.annotation_chembl_column = {% find_col_by_key annotation_info 'id' 'annotation__chembl_id_lookup__chembl_id' 'null' %};
-		targetSearch.annotation_pref_name_column = {% find_col_by_key annotation_info 'id' 'annotation__molecule_dictionary__pref_name' 'null' %};
-		targetSearch.annotation_accession_column = {% find_col_by_key annotation_info 'id' 'annotation__component_sequences__accession' 'null' %};
-		targetSearch.annotation_show_structures = false;
-
-		targetSearch.activity_no_export = {% col_index_list activity_info 'export' False %};
-		targetSearch.activity_chembl_column = {% find_col_by_key activity_info 'id' 'activity__chembl_id_lookup__chembl_id' 'null' %};
-		targetSearch.activity_pref_name_column = {% find_col_by_key activity_info 'id' 'activity__molecule_dictionary__pref_name' 'null' %};
-		targetSearch.activity_accession_column = {% find_col_by_key activity_info 'id' 'activity__component_sequences__accession' 'null' %};
-		targetSearch.activity_show_structures = false;
-
-		var annotation_table_buttons = annotation_table.buttons().container();
-		annotation_table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
-		annotation_table_buttons.appendTo( $('#csv-buttons-annotation') );
-
-		var activity_table_buttons = activity_table.buttons().container();
-		activity_table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
-		activity_table_buttons.appendTo( $('#csv-buttons-activity') );
-
-		$('input.toggle-vis').on('change', function(e) {
-			if ( $(this).attr('name') == 'annotation-column' ) {
-				var column = annotation_table.column( $(this).attr('value') );
-			} else if ( $(this).attr('name') == 'activity-column' ) {
-				var column = activity_table.column( $(this).attr('value') );
-			}
-			column.visible( $(this).prop('checked') );
-		});
-
-		selectDefaultColumns('annotation');
-		selectDefaultColumns('activity');
-
-		$('#drugIndModal').on('hidden.bs.modal', function(e) {
-			targetSearch.drugind_table.destroy();
-			//console.log("Destroyed drugind table");
-		});
-
-		// Disable the Show Structure button when the ChEMBL ID column is hidden.
-		for (const table_name of ['annotation', 'activity']) {
-			//console.log("table_obj:", table_name+'_table');
-			var table_obj = targetSearch[table_name + '_table'];
-			table_obj.on('column-visibility', function(e, settings, column, state) {
-				//console.log("column-visibility event fired for",table_name,"table");
-				//console.log("column:", column, ", state:", state);
-				if (column == targetSearch[table_name + '_chembl_column']) {
-					$('#show-struct-' + table_name).prop('disabled', !state);
-					//console.log("button status:", $('#show-struct-'+table_name).prop('disabled'));
-				}
-			});
-		}
-
-		$('#wbmform').on('change', '.wbmids', wbmUpdateCount);
 
 		$("[data-toggle=tooltip]").tooltip();
 	});

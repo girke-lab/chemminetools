@@ -39,6 +39,29 @@ def readSources(type):
             sources[key.strip()] = val.strip()
     return sources
 
+def detailPage(request,id):
+    
+    print("rendering detail page for "+str(id))
+
+    myAnnotationSearch = AnnotationWithDrugIndSearch("compound", [id])
+    annotation_info = myAnnotationSearch.table_info
+    annotation_matches = myAnnotationSearch.get_grouped_results()
+
+    myActivitySearch = ActivitySearch("compound", [id])
+    activity_info = myActivitySearch.table_info
+    activity_matches = myActivitySearch.get_grouped_results()
+
+    drugind_json = drugIndicationData(myAnnotationSearch.drugind_objs);
+
+    return render(request,'detail.html', {
+        
+        'annotation_info' : annotation_info,
+        'annotation_matches' : annotation_matches,
+        'activity_info' : activity_info,
+        'activity_matches' : activity_matches,
+        'drugind_json' : json.dumps(drugind_json),
+        })
+
 def newTS(request):
     # Default local variables
     query_submit = False
@@ -113,18 +136,7 @@ def newTS(request):
             annotation_info = myAnnotationSearch.table_info
             annotation_matches = myAnnotationSearch.get_grouped_results()
 
-            # Generate Drug Indication JSON data
-            drugind_json = dict()
-            for chembl_id, drugind_obj in myAnnotationSearch.drugind_objs.items():
-                colnames = [ {'title': c['name']} for c in drugind_obj.table_info ]
-
-                data = list()
-                for row in drugind_obj.get_results():
-                    data.append(list(row.values()))
-
-                drugind_json[chembl_id] = dict()
-                drugind_json[chembl_id]['colnames'] = colnames
-                drugind_json[chembl_id]['data'] = data
+            drugind_json = drugIndicationData(myAnnotationSearch.drugind_objs);
 
             # Exclude ActivitySearch from search-by-target by default
             if id_type == 'target' and not include_activity:
@@ -280,6 +292,22 @@ def targetNames(request, query):
     data = [ {'accession_id': n.accession,
               'name': (n.description+' ('+n.organism+')')} for n in names ]
     return JsonResponse(data, safe=False)
+
+def drugIndicationData(drugind_objs):
+    # Generate Drug Indication JSON data
+    drugind_json = dict()
+    for chembl_id, drugind_obj in drugind_objs.items():
+        colnames = [ {'title': c['name']} for c in drugind_obj.table_info ]
+
+        data = list()
+        for row in drugind_obj.get_results():
+            data.append(list(row.values()))
+
+        drugind_json[chembl_id] = dict()
+        drugind_json[chembl_id]['colnames'] = colnames
+        drugind_json[chembl_id]['data'] = data
+    return drugind_json
+
 
 @cache_page(60 * 120)
 def chemblPNG(request, chembl_id):
