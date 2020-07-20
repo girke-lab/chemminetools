@@ -35,7 +35,7 @@
 						<div class="col-md-12">
 							<form method="GET" autocomplete="off">
 								<div class="form-group mt-3">
-									<label for="source-id-select">Database:</label>
+									<label for="source-id-select" data-toggle="tooltip" title="If you are using non-ChEMBL IDs (e.g. PubChem), select the appropriate database here.">Database <i class="far fa-question-circle"></i>:</label>
 									<select id="source-id-select" name="source_id">
 									{% for id,name in compoundDbs.items|order_by:1 %}
 										<option value="{{id}}" {% if defaultCompoundDb == id %}selected {% endif %} >{{name}}</option>
@@ -64,7 +64,10 @@
 									<div class='tab-content'>
 										<div id="workbench" class='tab-pane active'>
 											 <div class="card text-white bg-secondary my-3 p-2">
-												<h6 class='card-title'>Import compound IDs from workbench</h6>
+												<h6 class='card-title'>Import Compound IDs from Workbench</h6>
+												<p>The &quot;Compound Tags&quot; field below lists the compound tags from your Workbench. Select one or more tags to add them to your query. If your Workbench compounds use a non-ChEMBL ID system (e.g. PubChem), change the Database above.</p>
+												<p>After you've selected your desired compound tags, click <span class="btn btn-sm btn-primary">Search</span>.</p>
+												<hr class="mt-0">
 												<p><span id="compound_count">0</span> compounds selected.</p>
 												<select id="tags" name="tags" multiple placeholder="Compound Tags">
 													<option value="all">All</option>
@@ -78,8 +81,10 @@
 										<div id="compoundids" class='tab-pane '>
 											<div class="card text-white bg-secondary my-3 p-2">
 												<h6 class='card-title' for="compound-ids">Enter Compound IDs</h6>
-												<p>Use the 'Compound Name Search' box to search for compounds
-												by name, or enter compound IDs into the box below.</p>
+												<p>To search for a compound by name, enter part of the name into the &quot;Compound Name Search&quot; search box, then select your desired compound from the list of results.</p>
+												<p>If you already have a list of compound ID(s), enter them directly into the text box below.</p>
+												<p>Alternatively, click <span class="btn btn-sm btn-outline-primary bg-white">Use Sample IDs</span> for examples.</p>
+												<p>After you've entered your desired compounds, click <span class="btn btn-sm btn-primary">Search</span>.</p>
 												<select id="compound_autocomplete" placeholder="Compound Name Search"></select>
 												<textarea id="compound-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
 											</div>
@@ -88,6 +93,7 @@
 									<input type="hidden" name="id_type" value="compound">
 									<button type="submit" class="btn btn-primary">Search</button>
 									<button id="compound-sample-btn" class="btn btn-outline-primary" type="button" data-toggle="tooltip" data-html="true" title="<p>CHEMBL25 (Aspirin)</p><p>CHEMBL113 (Caffeine)</p><p>Note: This will replace whatever text is currently in the search box.</p>" onclick="$('#compound-ids').val('CHEMBL25 CHEMBL113');$('#searchCompoundTabs a[href=\'#compoundids\']').tab('show');$('#compound-sample-btn').tooltip('hide')">Use Sample IDs <i class="far fa-question-circle"></i></button>
+									<a href="/help/drug-target/#search-by-compound" class="btn btn-outline-primary ml-3" role="button" rel="noreferrer noopener" target="_blank">Help <i class="fas fa-external-link-alt"></i></a>
 								</div>
 							</form>
 						</div>
@@ -99,7 +105,7 @@
 						<div class="col-md-12">
 							<form method="GET" autocomplete="off">
 								<div class="form-group mt-3">
-									<label for="source-id-select">Database:</label>
+									<label for="source-id-select" data-toggle="tooltip" title="If you are using non-UniProtKB IDs (e.g. Ensembl), select the appropriate database here.">Database <i class="far fa-question-circle"></i>:</label>
 									<select id="source-id-select" name="source_id">
 									{% for id,name in proteinDbs.items|order_by:1 %}
 										<option value="{{id}}" {% if defaultProteinDb == id %}selected {% endif %} >{{name}}</option>
@@ -108,8 +114,10 @@
 
 									<div class="card text-white bg-secondary my-3 p-2">
 										<h6 class="card-title" for="target-ids">Enter Target IDs</h6>
-										<p>Use the 'Target Name Search' box to search for targets
-										by name, or enter target IDs into the box below.</p>
+										<p>To search for a target by name, enter part of the name into the &quot;Target Name Search&quot; search box, then select your desired target from the list of results.</p>
+										<p>If you already have a list of target ID(s), enter them directly into the text box below.</p>
+										<p>Alternatively, click <span class="btn btn-sm btn-outline-primary bg-white">Use Sample IDs</span> for examples.</p>
+										<p>After you've entered your desired targets, click <span class="btn btn-sm btn-primary">Search</span>.</p>
 										<select id="target_autocomplete" placeholder="Target Name Search"></select>
 										<textarea id="target-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
 									</div>
@@ -120,6 +128,7 @@
 									<input type="hidden" name="id_type" value="target">
 									<button type="submit" class="btn btn-primary">Search</button>
 									<button id="target-sample-btn" class="btn btn-outline-primary" type="button" data-toggle="tooltip" data-html="true" title="<p>P23219 (Prostaglandin-endoperoxide synthase)</p><p>P30542 (Adenosine receptor A1)</p><p>Note: This will replace whatever text is currently in the search box.</p>" onclick="$('#target-ids').val('P23219 P30542');$('#target-sample-btn').tooltip('hide')">Use Sample IDs <i class="far fa-question-circle"></i></button>
+									<a href="/help/drug-target/#search-by-target" class="btn btn-outline-primary ml-3" role="button" rel="noreferrer noopener" target="_blank">Help <i class="fas fa-external-link-alt"></i></a>
 								</div>
 							</form>
 						</div>
@@ -165,6 +174,7 @@
 								</div>
 								<input type="hidden" name="id_type" value="homolog-target" form="homolog-target-search">
 								<button type="submit" class="btn btn-primary" form="homolog-target-search">Search</button>
+								<a href="/help/drug-target/#search-by-target-paralog" class="btn btn-outline-primary ml-3" role="button" rel="noreferrer noopener" target="_blank">Help <i class="fas fa-external-link-alt"></i></a>
 								<!--<button type="button" class="btn btn-outline-primary" onclick="console.log($('#homolog-target-search').serialize())">Submit to Console</button>-->
 							</div>
 						</div>
