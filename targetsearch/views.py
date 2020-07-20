@@ -7,6 +7,7 @@ from tools.models import *
 from django.contrib import messages
 from collections import OrderedDict
 from django.template import Context, Engine
+from guest.decorators import guest_allowed
 import sys
 import traceback
 
@@ -28,6 +29,7 @@ def readSources(type):
             sources[key.strip()] = val.strip()
     return sources
 
+@guest_allowed
 def newTS(request):
     # Default local variables
     query_submit = False
