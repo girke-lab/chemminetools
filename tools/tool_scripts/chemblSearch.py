@@ -26,8 +26,8 @@ args = vars(parser.parse_args())
 
 def chembl_similarity(smile,threshold,numResults):
     similarity_query = new_client.similarity
-    print("smile query: "+smile)
-    print("similarity: "+str(threshold))
+    #print("smile query: "+smile)
+    #print("similarity: "+str(threshold))
     results = similarity_query.filter(smiles=smile, similarity=threshold). \
                 only(['molecule_chembl_id','similarity'])
     #print(str(results))
@@ -54,7 +54,7 @@ def main():
             matches = chembl_similarity(smile_query, similarity, numResults)
             if matches != None:
                 for match in matches:
-                    print("match: "+str(match))
+                    #print("match: "+str(match))
                     f.write(query_id+" "+match[0]+" "+match[1]+"\n")
 
 

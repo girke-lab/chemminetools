@@ -41,6 +41,18 @@
 										<option value="{{id}}" {% if defaultCompoundDb == id %}selected {% endif %} >{{name}}</option>
 									{% endfor %}
 									</select>
+
+                                    <br/>
+
+                                    <label for="query-mapping--id-select">Similarity Mapping:</label>
+									<select id="query-mapping-select" name="similarity_job_id">
+										<option value="-1" >None</option>
+									{% for id,name in similarityJobs %}
+										<option value="{{id}}" >{{name}}</option>
+									{% endfor %}
+									</select>
+
+
 									<ul class="nav nav-tabs" id="searchCompoundTabs">
 									  <li class="nav-item">
 										<a class="nav-link active" href="#workbench" data-toggle="tab">Workbench</a>
@@ -93,6 +105,7 @@
 										<option value="{{id}}" {% if defaultProteinDb == id %}selected {% endif %} >{{name}}</option>
 									{% endfor %}
 									</select>
+
 									<div class="card text-white bg-secondary my-3 p-2">
 										<h6 class="card-title" for="target-ids">Enter Target IDs</h6>
 										<p>Use the 'Target Name Search' box to search for targets
