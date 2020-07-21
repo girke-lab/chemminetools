@@ -21,6 +21,8 @@ from .helpers import (
     targetNameAutocomplete,
     getChemblPNG,
     getChemblSVG,
+    getEntityType,
+    targetSummaryInfo,
     )
 
 from django.conf import settings
@@ -40,26 +42,39 @@ def readSources(type):
     return sources
 
 def detailPage(request,id):
+    targetInfo=None
     
     print("rendering detail page for "+str(id))
 
-    myAnnotationSearch = AnnotationWithDrugIndSearch("compound", [id])
+    idType = getEntityType(id)
+    if idType == "unknown":
+        return render(request,'detail.html', {"given_id":id})
+
+    myAnnotationSearch = AnnotationWithDrugIndSearch(idType, [id])
     annotation_info = myAnnotationSearch.table_info
     annotation_matches = myAnnotationSearch.get_grouped_results()
 
-    myActivitySearch = ActivitySearch("compound", [id])
+    myActivitySearch = ActivitySearch(idType, [id])
     activity_info = myActivitySearch.table_info
     activity_matches = myActivitySearch.get_grouped_results()
 
     drugind_json = drugIndicationData(myAnnotationSearch.drugind_objs);
 
+    if idType == "target":
+        targetInfo = targetSummaryInfo(id)
+        print(str(targetInfo))
+
+
+
     return render(request,'detail.html', {
-        
+        'given_id':id,
+        'type': idType,
         'annotation_info' : annotation_info,
         'annotation_matches' : annotation_matches,
         'activity_info' : activity_info,
         'activity_matches' : activity_matches,
         'drugind_json' : json.dumps(drugind_json),
+        'target_info': targetInfo,
         })
 
 def newTS(request):
@@ -99,7 +114,7 @@ def newTS(request):
     if 'source_id' in request.GET:
         source_id = request.GET['source_id']
     if 'similarity_job_id' in request.GET:
-        similarity_job_id = request.GET['similarity_job_id']
+        similarity_job_id = int(request.GET['similarity_job_id'])
 
     # Generate content
     try:

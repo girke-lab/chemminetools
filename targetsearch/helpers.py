@@ -428,6 +428,39 @@ def targetNameAutocomplete(nameQuery):
                           ORDER BY description, organism""")
 
     return runQuery(sqlQuery, ('%'+nameQuery.replace(' ','%')+'%',))
+    
+def targetSummaryInfo(accession):
+    sqlQuery = sql.SQL(""" select accession, description, organism, 
+                            (select string_agg(component_synonym,',') 
+                                from component_synonyms as cs 
+                                where cs.component_id=cseq.component_id 
+                                      and syn_type='GENE_SYMBOL'
+                            ) as gene_names 
+                           from component_sequences as cseq 
+                           where accession = %s """)
+
+    result = runQuery(sqlQuery, (accession,))
+    if len(result) == 1:
+        return result[0];
+    return None
+
+
+def getEntityType(entityId):
+    """when we have an ID, but don't know whether its a CHEMBL ID
+       or an accession or something else
+    """
+    chemblTest = sql.SQL("""SELECT DISTINCT 1 
+                            FROM molecule_dictionary
+                            WHERE chembl_id = %s""")
+    accessionTest = sql.SQL("""SELECT DISTINCT 1 
+                               FROM component_sequences
+                               WHERE accession = %s""")
+    if len(runQuery(chemblTest,(entityId,)))== 1:
+        return "compound"
+    elif len(runQuery(accessionTest,(entityId,))) == 1:
+        return "target"
+    else:
+        return "unknown"
 
 def getChemblPNG(chembl_id, size=500, mwt_limit=None, write_file=False,
                  filename=None, shrink=True):
