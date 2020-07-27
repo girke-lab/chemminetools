@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# requires: ChemmineR,R.utils
+# requires: ChemmineR,R.utils, eiR >= 1.29.1
 # use: ./eiSearch.R --outfile=output.txt --similarity=0.3 --compounds=10 < input.sdf
 
 library(eiR)
@@ -52,8 +52,8 @@ buildSDF  = function(outputFile){
 buildIndex = function(sdfFile){
 	message("initializing database")
 	initDb(eiConn)
-#	message("running eiInit from ",sdfFile)
-#	eiInit(sdfFile,dir=indexDir,conn=eiConn,updateByName=TRUE)
+	message("running eiInit from ",sdfFile)
+	eiInit(sdfFile,dir=indexDir,conn=eiConn,updateByName=TRUE,skipPriorities=TRUE)
 	message("eiInit done. starting eiMakeDb")
 	runId=eiMakeDb(200,100,dir=indexDir,conn=eiConn)
 	message("eiMakeDb done")
@@ -62,5 +62,5 @@ buildIndex = function(sdfFile){
 
 
 sdfFile = "chembl.sdf"
-#buildSDF(sdfFile)
+buildSDF(sdfFile)
 buildIndex(sdfFile)
