@@ -29,6 +29,42 @@ def readSources(type):
             sources[key.strip()] = val.strip()
     return sources
 
+def detailPage(request,id):
+    targetInfo=None
+
+    print("rendering detail page for "+str(id))
+
+    idType = getEntityType(id)
+    if idType == "unknown":
+        return render(request,'detail.html', {"given_id":id})
+
+    myAnnotationSearch = AnnotationWithDrugIndSearch(idType, [id])
+    annotation_info = myAnnotationSearch.table_info
+    annotation_matches = myAnnotationSearch.get_grouped_results()
+
+    myActivitySearch = ActivitySearch(idType, [id])
+    activity_info = myActivitySearch.table_info
+    activity_matches = myActivitySearch.get_grouped_results()
+
+    drugind_json = drugIndicationData(myAnnotationSearch.drugind_objs);
+
+    if idType == "target":
+        targetInfo = targetSummaryInfo(id)
+        print(str(targetInfo))
+
+
+
+    return render(request,'detail.html', {
+        'given_id':id,
+        'type': idType,
+        'annotation_info' : annotation_info,
+        'annotation_matches' : annotation_matches,
+        'activity_info' : activity_info,
+        'activity_matches' : activity_matches,
+        'drugind_json' : json.dumps(drugind_json),
+        'target_info': targetInfo,
+        })
+
 @guest_allowed
 def newTS(request):
     # Default local variables
@@ -70,7 +106,7 @@ def newTS(request):
     if 'source_id' in request.GET:
         source_id = request.GET['source_id']
     if 'similarity_job_id' in request.GET:
-        similarity_job_id = request.GET['similarity_job_id']
+        similarity_job_id = int(request.GET['similarity_job_id'])
 
     # Generate content
     try:
@@ -144,18 +180,7 @@ def newTS(request):
             annotation_info = myAnnotationSearch.table_info
             annotation_matches = myAnnotationSearch.get_grouped_results()
 
-            # Generate Drug Indication JSON data
-            drugind_json = dict()
-            for chembl_id, drugind_obj in myAnnotationSearch.drugind_objs.items():
-                colnames = [ {'title': c['name']} for c in drugind_obj.table_info ]
-
-                data = list()
-                for row in drugind_obj.get_results():
-                    data.append(list(row.values()))
-
-                drugind_json[chembl_id] = dict()
-                drugind_json[chembl_id]['colnames'] = colnames
-                drugind_json[chembl_id]['data'] = data
+            drugind_json = drugIndicationData(myAnnotationSearch.drugind_objs);
 
             # Exclude ActivitySearch from search-by-target by default
             if id_type in ['target', 'homolog-target'] and not include_activity:
@@ -214,7 +239,7 @@ def newTS(request):
 
 def addMappedQueryColumn(mapping,columnDefinition,annotation_info, annotation_matches,activity_info,activity_matches):
 
-    def addQueryCol(matches) :
+    def addQueryCol(matches):
         for key, rowGroup in matches.items():
             if key in mapping:
                 queryKey = mapping[key]
@@ -251,7 +276,7 @@ def readSimilarityMappingData(user,job_id):
     return mapping
 
 
-## map1: x->y and map2: y -> z, return x->z    
+## map1: x->y and map2: y -> z, return x->z
 def composeMaps(map1,map2):
     composedMap = {}
     for key1,value1 in map1.items():
@@ -308,6 +333,21 @@ def targetNames(request, query):
     data = [ {'accession_id': n.accession,
               'name': (n.description+' ('+n.organism+')')} for n in names ]
     return JsonResponse(data, safe=False)
+
+def drugIndicationData(drugind_objs):
+    # Generate Drug Indication JSON data
+    drugind_json = dict()
+    for chembl_id, drugind_obj in drugind_objs.items():
+        colnames = [ {'title': c['name']} for c in drugind_obj.table_info ]
+
+        data = list()
+        for row in drugind_obj.get_results():
+            data.append(list(row.values()))
+
+        drugind_json[chembl_id] = dict()
+        drugind_json[chembl_id]['colnames'] = colnames
+        drugind_json[chembl_id]['data'] = data
+    return drugind_json
 
 @cache_page(60 * 120)
 def chemblPNG(request, chembl_id):

@@ -93,6 +93,9 @@
 
 {% bootstrap_messages %}
 
+<div style="float: right">
+    <span id="compound_stats"></span>
+</div>
 {% placeholder base_content %}
 {% block base_content %}{% endblock %}
 {% placeholder content %}
@@ -119,6 +122,12 @@
 <script type="text/javascript">
 	$(document).ready(function() {
 		$(".alert").alert()
+        jQuery.get("/compounds/withTags/all/count/").
+            then(function(result){
+                if(result != null){
+                    jQuery("#compound_stats").html(result+" compound(s) in workbench");
+                }
+            });
 	});
 </script>
 
