@@ -1,4 +1,5 @@
 amqp==2.5.2
+asgiref==3.2.10
 asn1crypto==0.24.0
 beautifulsoup4==4.8.2
 billiard==3.6.1.0
@@ -6,7 +7,7 @@ celery==4.4.0
 certifi==2019.11.28
 chardet==3.0.4
 cryptography==2.6.1
-Django==2.2.9
+Django==2.2.14
 django-bootstrap-toolkit==2.15.0
 django-bootstrap4==1.1.1
 django-classy-tags==0.9.0
@@ -49,13 +50,14 @@ pycrypto==2.6.1
 PyGObject==3.30.4
 python-memcached==1.58
 pytz==2019.3
-pyxdg==0.25
+pyxdg==0.26
 PyYAML==5.3
 requests==2.22.0
 SecretStorage==2.3.1
 simplejson==3.17.0
 six==1.12.0
 soupsieve==1.9.5
+sqlitedict==1.6.0
 sqlparse==0.3.0
 Unidecode==1.0.23
 urllib3==1.25.7

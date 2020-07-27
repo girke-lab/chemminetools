@@ -57,7 +57,7 @@ for pkg in amap bitops R.oo gridExtra rzmq RPostgreSQL BiocManager shiny; do
     echo 'install.packages(c("'$pkg'"), repos="https://cloud.r-project.org")' | R --slave &> /tmp/$pkg.log
 done
 # Install Bioconductor packages
-for pkg in ChemmineOB ChemmineR fmcsR ctc rjson R.utils eiR; do
+for pkg in ChemmineOB ChemmineR fmcsR ctc rjson R.utils eiR BatchJobs BiocParallel UniProt.ws; do
     echo "Installing Bioconductor package [$pkg]. Check /tmp/$pkg.log for errors."
     echo 'BiocManager::install(c("'$pkg'"))' | R --slave &> /tmp/$pkg.log
 done

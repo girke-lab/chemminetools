@@ -1,29 +1,17 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, Http404
+from django.urls import reverse
 from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from tools.models import *
 from django.contrib import messages
 from collections import OrderedDict
 from django.template import Context, Engine
+from guest.decorators import guest_allowed
 import sys
 import traceback
 
-
-from .helpers import (
-    AnnotationSearch,
-    ActivitySearch,
-    DrugIndicationSearch,
-    AnnotationWithDrugIndSearch,
-    mapToChembl,
-    mapToUniprot,
-    compoundNameAutocomplete,
-    targetNameAutocomplete,
-    getChemblPNG,
-    getChemblSVG,
-    getEntityType,
-    targetSummaryInfo,
-    )
+from .helpers import *
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
@@ -43,7 +31,7 @@ def readSources(type):
 
 def detailPage(request,id):
     targetInfo=None
-    
+
     print("rendering detail page for "+str(id))
 
     idType = getEntityType(id)
@@ -77,6 +65,7 @@ def detailPage(request,id):
         'target_info': targetInfo,
         })
 
+@guest_allowed
 def newTS(request):
     # Default local variables
     query_submit = False
@@ -105,7 +94,10 @@ def newTS(request):
     if 'id_type' in request.GET:
         id_type = request.GET['id_type']
     if 'ids' in request.GET:
-        ids = list(request.GET['ids'].split())
+        if id_type == 'homolog-target':
+            ids = request.GET.getlist('ids')
+        else:
+            ids = list(request.GET['ids'].split())
     if 'include_activity' in request.GET:
         include_activity = True
     if 'tags' in request.GET:
@@ -118,7 +110,6 @@ def newTS(request):
 
     # Generate content
     try:
-        # Only attempt conversion for compound search. Skip if already ChEMBL.
         idMapping={}
         if id_type == 'compound' and source_id != '1':
             idMapping= mapToChembl(ids, source_id)
@@ -126,6 +117,37 @@ def newTS(request):
         elif id_type == 'target' and source_id != 'ACC':
             idMapping= mapToUniprot(ids, source_id)
             ids = list(idMapping.keys())
+        elif id_type == 'homolog-target':
+            #full_ids = ids # Full context for homolog handling
+            #ids = [ i.split(',')[2] for i in full_ids ] # Bare Accession IDs for old target-search
+
+            # Context dictionary for homolog handling
+            # ex:
+            # homolog_context = {
+            #     'P29274': {'paralog': 'P30542'},
+            #     'P29275': {'paralog': 'P30542'},
+            #     'P0DMS8': {'paralog': 'P30542'},
+            #     }
+            homolog_context = dict()
+            for i in ids:
+                [relation, src_id, homolog_id] = i.split(',')
+                if homolog_id not in homolog_context.keys():
+                    homolog_context[homolog_id] = dict()
+                if src_id == homolog_id:
+                    continue # Don't bother with "X is a homolog of X"
+                if relation not in homolog_context[homolog_id].keys():
+                    homolog_context[homolog_id][relation] = set()
+                homolog_context[homolog_id][relation].add(src_id)
+
+            ids = list(homolog_context.keys()) # Bare Accession IDs for old target-search
+
+            # Prepare homolog relation descriptions
+            homolog_desc = dict()
+            for homolog_id, relations in homolog_context.items():
+                desc_parts = list()
+                for relation, src_ids in sorted(relations.items()):
+                    desc_parts.append("{} of {}".format(relation, ', '.join(sorted(list(src_ids)))))
+                homolog_desc[homolog_id] = '; '.join(desc_parts)
 
         if len(ids) != 0:
             query_submit = True
@@ -137,6 +159,14 @@ def newTS(request):
                     "desc": "Original compound ID prior to ChEMBL conversion",
                     "visible": True,
                     }
+            headerTextCol = {
+                "id": "header_text",
+                "sql": None,
+                "table": "Header Text",
+                "name": "Header Text",
+                "desc": "Description text to show in row-group headers (i.e. source query IDs, translations, etc.)",
+                "visible": False,
+                }
             originalQueryCol = {
                     "id": "original_query_id",
                     "sql": None,
@@ -146,7 +176,6 @@ def newTS(request):
                     "visible": True,
                     }
 
-
             myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, ids)
             annotation_info = myAnnotationSearch.table_info
             annotation_matches = myAnnotationSearch.get_grouped_results()
@@ -154,7 +183,7 @@ def newTS(request):
             drugind_json = drugIndicationData(myAnnotationSearch.drugind_objs);
 
             # Exclude ActivitySearch from search-by-target by default
-            if id_type == 'target' and not include_activity:
+            if id_type in ['target', 'homolog-target'] and not include_activity:
                 activity_info = None
                 activity_matches = None
             else:
@@ -183,7 +212,10 @@ def newTS(request):
             # map chembl id (2nd column) back to the original compound id (first column)
             # insert new column to show original compound id.
 
-
+        if ts_paralog_cache():
+            homolog_type_value = 'paralog-cache'
+        else:
+            homolog_type_value = 'paralog'
 
     except Exception as e:
         print("exception in newTS:", sys.exc_info())
@@ -205,14 +237,15 @@ def newTS(request):
         'proteinDbs': proteinDbs,
         'defaultProteinDb': defaultProteinDb,
         'groupingCol' : groupingCol,
-        'similarityJobs': similarityJobs
+        'similarityJobs': similarityJobs,
+        'homolog_type_value': homolog_type_value,
         }
 
     return render(request, 'targetsearch/new_ts.html', context)
 
 def addMappedQueryColumn(mapping,columnDefinition,annotation_info, annotation_matches,activity_info,activity_matches):
 
-    def addQueryCol(matches) :
+    def addQueryCol(matches):
         for key, rowGroup in matches.items():
             if key in mapping:
                 queryKey = mapping[key]
@@ -249,14 +282,13 @@ def readSimilarityMappingData(user,job_id):
     return mapping
 
 
-## map1: x->y and map2: y -> z, return x->z    
+## map1: x->y and map2: y -> z, return x->z
 def composeMaps(map1,map2):
     composedMap = {}
     for key1,value1 in map1.items():
         if value1 in map2:
             composedMap[key1] = map2[value1]
     return composedMap
-
 
 def tableHtml(search_obj, header=True, footer=False, table_class=""):
     """Takes a SearchBase object and returns an HTML table"""
@@ -323,7 +355,6 @@ def drugIndicationData(drugind_objs):
         drugind_json[chembl_id]['data'] = data
     return drugind_json
 
-
 @cache_page(60 * 120)
 def chemblPNG(request, chembl_id):
     try:
@@ -339,3 +370,19 @@ def chemblSVG(request, chembl_id):
         return HttpResponse(img, content_type='image/svg+xml')
     except Exception as e:
         raise Http404(str(e))
+
+def ajax(request, action):
+    def die(msg):
+        ajaxResponse = { 'success' : False, 'message' : msg }
+        return JsonResponse(ajaxResponse)
+
+    if action == 'homologs':
+        try:
+            ids = request.POST['ids']
+            homolog_type = request.POST['homolog_type']
+            result = homologsAjax(ids.split(), homolog_type)
+            return JsonResponse(result)
+        except Exception as e:
+            return die(str(e))
+    else:
+        return die('Unknown action: {}'.format(action))

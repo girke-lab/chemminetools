@@ -1,3 +1,4 @@
+from django.conf import settings
 #from django.template.defaulttags import register
 from django.utils.html import format_html
 
@@ -48,3 +49,11 @@ def col_index_list(info, key, value):
             if info[i].get(key) == value:
                 index_list.append(i)
     return index_list
+
+#TODO: Move this to its own app after local_settings.py is implemented
+@register.simple_tag
+def analytics():
+    try:
+        return settings.ANALYTICS
+    except AttributeError as e:
+        return True

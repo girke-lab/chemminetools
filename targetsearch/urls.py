@@ -9,5 +9,6 @@ urlpatterns = [
         path('drugIndTable', drugIndTable, name='drugIndTable'),
         path('compoundNames/<query>', compoundNames, name='compoundNames'),
         path('targetNames/<query>', targetNames, name='targetNames'),
+        path('ajax/<action>', ajax, name='targetsearch-ajax'),
         path('detail/<id>', detailPage),
         ]

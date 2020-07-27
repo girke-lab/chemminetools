@@ -68,6 +68,9 @@
 				<button id="csv{{table_name.title}}" type="button" class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Save to CSV</button>
 				<div id="csv-buttons-{{table_name}}" class="dropdown-menu" aria-labelledby="csv{{table_name.title}}"></div>
 			</div>
+			<div class="btn-group ml-3 mr-1" role="group">
+				<a href="https://girke-lab.github.io/chemminetools-docs/docs/drug-target/#result-tables" class="btn btn-outline-primary" role="button" rel="noreferrer noopener" target="_blank">Help <i class="fas fa-external-link-alt"></i></a>
+			</div>
 		</div>
 		<div class="btn-toolbar mt-2" role="toolbar" aria-label="Second button toolbar for {{table_name}} table">
 			<div class="btn-group btn-group-toggle mr-1" data-toggle="buttons">
@@ -384,14 +387,12 @@
 			//console.log("append_str:", append_str);
 
 			if (id_type == 'chembl') {
-				var compoundArea = $('#compound-ids');
-				compoundArea.val(strjoin(compoundArea.val(), append_str));
+				appendValById('compound-ids', append_str);
 				$('#searchTabs a[href="#compound_search"]').tab('show');
 				$('#searchCompoundTabs a[href="#compoundids"]').tab('show');
 				document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
 			} else if (id_type == 'accession') {
-				var compoundArea = $('#target-ids');
-				compoundArea.val(strjoin(compoundArea.val(), append_str));
+				appendValById('target-ids', append_str);
 				$('#searchTabs a[href="#target_search"]').tab('show');
 				document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
 			}
@@ -475,6 +476,12 @@
 		$('#drugIndModal').on('hidden.bs.modal', function(e) {
 			targetSearch.drugind_table.destroy();
 			//console.log("Destroyed drugind table");
+		});
+
+		// Override submission behavior for homolog-query form
+		$('#homolog-query').on('submit', function(e) {
+			e.preventDefault();
+			addHomologs();
 		});
 
 		$('#wbmform').on('change', '.wbmids', wbmUpdateCount);
