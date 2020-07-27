@@ -52,7 +52,10 @@
 
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
-          {% show_menu 0 100 0 1 %}
+          <!--{ % show_menu 0 100 0 1 % }-->
+          <li class="nav-item"><a class="nav-link" href="/about/">About</a></li>
+          <li class="nav-item"><a class="nav-link" href="https://girke-lab.github.io/chemminetools-docs/" target="_blank" rel="noreferrer noopener">Help</a></li>
+          <li class="nav-item"><a class="nav-link" href="/downloads/">Downloads</a></li>
         </ul>
         <p class="navbar-text my-2 my-lg-0">
           {% if user.email %}
