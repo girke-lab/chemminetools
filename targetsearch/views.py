@@ -212,6 +212,11 @@ def newTS(request):
             # map chembl id (2nd column) back to the original compound id (first column)
             # insert new column to show original compound id.
 
+        if ts_paralog_cache():
+            homolog_type_value = 'paralog-cache'
+        else:
+            homolog_type_value = 'paralog'
+
     except Exception as e:
         print("exception in newTS:", sys.exc_info())
         traceback.print_tb(sys.exc_info()[2])
@@ -232,7 +237,8 @@ def newTS(request):
         'proteinDbs': proteinDbs,
         'defaultProteinDb': defaultProteinDb,
         'groupingCol' : groupingCol,
-        'similarityJobs': similarityJobs
+        'similarityJobs': similarityJobs,
+        'homolog_type_value': homolog_type_value,
         }
 
     return render(request, 'targetsearch/new_ts.html', context)

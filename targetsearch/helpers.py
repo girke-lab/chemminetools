@@ -10,7 +10,16 @@ import shutil
 import pprint
 from psycopg2.extras import NamedTupleCursor
 from django.conf import settings
-from sqlitedict import SqliteDict #Remove after testing
+
+def ts_paralog_cache():
+    try:
+        return settings.TS_PARALOG_CACHE
+    except AttributeError as e:
+        return False
+
+# Useful to avoid waiting for Ensembl to respond during development
+if ts_paralog_cache():
+    from sqlitedict import SqliteDict
 
 def groupBy(keyFn, row_data):
     """Group rows in row_data by the result of keyFn.

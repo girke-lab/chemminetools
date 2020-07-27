@@ -151,7 +151,7 @@
 										<div class="d-flex">
 											<span class="form-check flex-grow-1 pl-0">
 												<input id="homolog-acc-ids" name="ids" type="text" placeholder="Accession ID" />
-												<input name="homolog_type" type="hidden" value="paralog-cache" />
+												<input name="homolog_type" type="hidden" value="{{homolog_type_value}}" />
 												{% csrf_token %}
 												<button id="homolog-query-btn" class="btn btn-primary" type="button" onclick="addHomologs()">Add Paralogs</button>
 												<button id="homolog-sample-btn" class="btn btn-outline-primary bg-white" type="button" data-toggle="tooltip" data-html="true" title="<p>P23219 (PTGS1, Prostaglandin-endoperoxide synthase)</p><p>P30542 (ADORA1, Adenosine receptor A1)</p><p>Note: This will replace whatever text is currently in the search box.</p>" onclick="$('#homolog-acc-ids').val('P23219 P30542');$('#homolog-sample-btn').tooltip('hide')">Use Sample IDs <i class="far fa-question-circle"></i></button>
