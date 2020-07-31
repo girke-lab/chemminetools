@@ -1,0 +1,164 @@
+{# Common Drug-Target Search scripts that should only be included once #}
+
+<script>
+var targetSearch = {};// namespace for public variables
+
+// Shows or hides all columns for a table
+function selectAllColumns(table_name, is_visible) {
+	table_obj = targetSearch[table_name + '_table'];
+	chkbox_class = 'chkbox-' + table_name;
+
+	table_obj.columns().visible(is_visible);
+	$('.' + chkbox_class).prop('checked', is_visible);
+}
+
+function selectDefaultColumns(table_name) {
+	table_obj = targetSearch[table_name + '_table'];
+	chkbox_class = 'chkbox-' + table_name;
+
+	// Iterate through all checkboxes. If a checkbox is classed as a "default"
+	// checkbox, check it and unhide the associated column. Otherwise, uncheck
+	// it and hide the column.
+	$('.' + chkbox_class).each(function() {
+		v = $(this).hasClass(chkbox_class + '-default');
+		// The second visible() arg "false" defers redrawing the DataTable
+		table_obj.column( $(this).attr('value') ).visible(v, false);
+		$(this).prop('checked', v);
+	});
+	// Now redraw the DataTable
+	table_obj.columns.adjust().draw();
+}
+
+function toggleTableColumns(table_obj,setId, state) {
+	$("#"+setId+" input").each(function(){
+		table_obj.column( $(this).attr('value') ).visible(state, false);
+		$(this).prop('checked', state);
+	});
+	table_obj.columns.adjust().draw();
+	return false;
+}
+
+function columnExportSelector(table_name, export_type, index) {
+	table_obj = targetSearch[table_name + '_table'];
+	nx_list = targetSearch[table_name + '_no_export'];
+
+	if (nx_list.includes(index)) {
+		return false;
+	} else if (export_type == 'all') {
+		return true;
+	} else if (export_type == 'visible') {
+		return table_obj.column(index).visible();
+	} else {
+		console.log("columnExportSelector: Check your values. You shouldn't see this.");
+		return false;
+	}
+}
+
+function init_datatable(table_name,groupingCol) {
+	return $('#' + table_name + '-table').DataTable({
+		dom: 'frltip',
+		rowGroup: groupingCol ?  { dataSrc: groupingCol, } : {},
+		columnDefs: {
+			targets: 0,
+			orderable: false,
+		},
+		buttons: [
+			{
+				extend: 'csv',
+				filename: table_name + '-table',
+				text: 'All Columns',
+				exportOptions: {
+					columns: function(index, data, node) {
+						return columnExportSelector(table_name, 'all', index);
+					}
+				},
+			},
+			{
+				extend: 'csv',
+				filename: table_name + '-table',
+				text: 'Visible Columns',
+				exportOptions: {
+					columns: function(index, data, node) {
+						return columnExportSelector(table_name, 'visible', index);
+					}
+				},
+			},
+		],
+		select: {
+			style: 'os',
+		},
+	});
+}
+
+function addIdToSearch(table_name, id_type) {
+	var table_obj = targetSearch[table_name + '_table'];
+	var column = targetSearch[table_name + '_' + id_type + '_column'];
+	var append_set = new Set();
+
+	var rows = table_obj.rows( {selected:true} );
+	if (rows.any()) {
+		rows.every( function() {
+			var id_text = $(table_obj.cell(this.index(), column).node()).text();
+			append_set.add(id_text);
+		});
+		var append_list = Array.from(append_set);
+		var append_str = append_list.join(' ');
+		//console.log("append_str:", append_str);
+
+		if (id_type == 'chembl') {
+			appendValById('compound-ids', append_str);
+			$('#searchTabs a[href="#compound_search"]').tab('show');
+			$('#searchCompoundTabs a[href="#compoundids"]').tab('show');
+			document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
+		} else if (id_type == 'accession') {
+			appendValById('target-ids', append_str);
+			$('#searchTabs a[href="#target_search"]').tab('show');
+			document.getElementById('searchTabs').scrollIntoView({behavior: 'smooth'});
+		}
+	}
+}
+
+function strjoin(a, b) {
+	a = a.trim();
+	b = b.trim();
+
+	if (a == '')
+		return b;
+	else if (b == '')
+		return a;
+	else
+		return (a + ' ' + b);
+}
+
+function appendValById(obj_id, append_str) {
+	var obj = $('#'+obj_id);
+	obj.val(strjoin(obj.val(), append_str));
+}
+
+function toggleStructures(table_name) {
+	var table_obj = targetSearch[table_name + '_table'];
+	var chembl_column = targetSearch[table_name + '_chembl_column'];
+	var column_jqobj = $( table_obj.column(chembl_column).nodes() );
+	var class_name = table_name + '-structure';
+
+	if (targetSearch[table_name + '_show_structures']) {
+		// Structures are shown, so hide them.
+		$('.'+class_name).remove();
+		$('#show-struct-' + table_name).html('Show Structures');
+		targetSearch[table_name + '_show_structures'] = false;
+	} else {
+		// Structures are hidden, so show them.
+		column_jqobj.each( function() {
+			var chembl_id = $(this).text();
+			var url = "/compounds/chembl/" + chembl_id + "/svg";
+			$(this).append('<div class="'+class_name+'"><button type="button" class="btn" onclick="showCsiModal(\''+chembl_id+'\', \''+url+'\')"><img src="'+url+'" style="max-width: 150px" onerror="structImgError(this)"/></button></div>');
+		});
+		$('#show-struct-' + table_name).html('Hide Structures');
+		targetSearch[table_name + '_show_structures'] = true;
+	}
+}
+
+function structImgError(element) {
+	$(element).closest('div').html('(Structure info unavailable)');
+}
+</script>
