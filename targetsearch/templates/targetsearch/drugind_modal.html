@@ -1,0 +1,47 @@
+<!-- Drug Indication modal window -->
+<div class="modal fade" id="drugIndModal" tabindex="-1" role="dialog" aria-labeledBy="dimtitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 80%">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="dimtitle">Drug Indications for CHEMBL_ID</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<table id="dimtable" class="table table-striped" width="100%"></table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Drug Indication modal scripts -->
+<script>
+function showDrugIndModal(chembl_id) {
+	var drugIndJson = {{drugind_json|safe}};
+
+	targetSearch.drugind_table = $('#dimtable').DataTable({
+		dom: 'Bfrltip',
+		buttons: [{
+			extend: 'csv',
+			filename: 'drugind-table-'+chembl_id,
+			text: 'Save to CSV (All Columns)',
+		}],
+		columns: drugIndJson[chembl_id]['colnames'],
+		data: drugIndJson[chembl_id]['data'],
+	});
+
+	$('#dimtitle').html("Drug Indications for " + chembl_id);
+	$('#drugIndModal').modal();
+}
+
+$(document).ready(function() {
+	//console.log("hello from drugind_modal.html");
+
+	$('#drugIndModal').on('hidden.bs.modal', function(e) {
+		targetSearch.drugind_table.destroy();
+		//console.log("Destroyed drugind table");
+	});
+});
+</script>
+<!-- End Drug Indication modal block -->

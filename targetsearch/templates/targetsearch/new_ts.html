@@ -12,6 +12,7 @@
 {% endblock extra_styles %}
 
 {% block base_content %}
+
 <div class="container-fluid">
 	<div class="row">
 		<div class="col-md-12">
@@ -201,8 +202,11 @@
 {% include "selectize.html" %}
 {% include "dataTables.html" %}
 {% include "alertify.html" %}
+{% include "targetsearch/ts_script.html" %}
+{% include "targetsearch/drugind_modal.html" %}
+{% include "targetsearch/workbench_modal.html" %}
 
-<script type="text/javascript">
+<script>
 	function setCompoundCount(tags) {
 		if(tags != null && tags.length !== 0)
 			$.get("/compounds/withTags/"+tags.join(",")+"/count").
@@ -213,23 +217,6 @@
 				});
 		else
 			$("#compound_count").html(0);
-	}
-
-	function strjoin(a, b) {
-		a = a.trim();
-		b = b.trim();
-
-		if (a == '')
-			return b;
-		else if (b == '')
-			return a;
-		else
-			return (a + ' ' + b);
-	}
-
-	function appendValById(obj_id, append_str) {
-		var obj = $('#'+obj_id);
-		obj.val(strjoin(obj.val(), append_str));
 	}
 
 	targetSearch['homolog_unit_next'] = 0;
@@ -376,6 +363,8 @@
 	}
 
 	$(document).ready(function() {
+		//console.log("hello from new_ts.html");
+
 		jQuery("#tags").selectize({
 			plugins: ['remove_button'],
 			onChange: function(value){
@@ -430,6 +419,11 @@
 			},
 		});
 
+		// Override submission behavior for homolog-query form
+		$('#homolog-query').on('submit', function(e) {
+			e.preventDefault();
+			addHomologs();
+		});
 
 		$("[data-toggle=tooltip]").tooltip();
 	});
