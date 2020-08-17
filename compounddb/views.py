@@ -3,7 +3,7 @@
 
 from builtins import str
 from builtins import object
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, JsonResponse,HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template import RequestContext
 from compounddb.models import Compound, Tag
@@ -161,6 +161,62 @@ def compound_detail(request, resource=None, id=None, cid=None, filename=None):
 
     return render(request,'compounddb/compound.html', dict(compound=compound,
                               sdf=sdf, smiles=smiles, inchi=inchi))
+@guest_allowed
+def tagDuplicateCompounds(request):
+    from django.db.models import Count
+    import itertools
+    from operator import itemgetter
+
+    #print("tagging duplicates")
+    if request.is_ajax() and request.method == 'GET':
+        # group all compounds by inchi and return groups with size > 1
+        groupInfo =Compound.objects.values_list('inchi') \
+            .annotate(duplicate_count=Count('inchi')) \
+            .filter(user=request.user,duplicate_count__gt=1) \
+            .order_by('inchi')
+        dupedInchis = [row[0] for row in groupInfo ]
+        numGroups = len(groupInfo)
+        
+        #print("duped inchi's: "+str(dupedInchis))
+
+        # get the id and inchi of duplicated compounds
+        dupedCompounds = Compound.objects \
+                            .values_list("id","inchi") \
+                            .filter(user=request.user,inchi__in=dupedInchis)
+
+        #print("duped compounds: "+str(dupedCompounds))
+        allIds = [ row[0] for row in dupedCompounds]
+        groups = itertools.groupby(sorted(dupedCompounds,key=itemgetter(1)),key=itemgetter(1))
+        #print("groups: "+str(groups))
+
+        # tag all group memebers with 'duplicated'
+        Tag.ensureAllExist(["duplicate-extra"],request.user)
+        extraTag= Tag.objects.filter(user=request.user,name__exact="duplicate-extra").get()
+        #print("duplicatedTag: "+str(extraTag))
+
+
+        # create all tags we'll need at once
+        tagNames = [ "duplicate-set-"+str(i) for i in range(numGroups)] 
+        Tag.ensureAllExist(tagNames,request.user)
+        tags = Tag.objects.filter(user=request.user,name__in=tagNames).order_by("id")
+
+        newTags = {}
+        # tag all but the first member of each group with duplicted-X
+        for setNum,group in enumerate(groups): # groups is a list of tuples, each tuple is (inchi,[ids])
+            ids = [row[0] for row in list(group[1])] 
+            #print("group: "+str(ids))
+            for i,compound in enumerate(Compound.objects.filter(user=request.user,id__in=ids)):
+                t=newTags.setdefault(compound.id,[])
+                if i != 0: #don't tag first compound in each group, that will be the one to keep
+                    compound.tags.add(extraTag)
+                    t.append(extraTag.name)
+                compound.tags.add(tags[setNum])
+                t.append(tags[setNum].name)
+                compound.save()
+        return JsonResponse(newTags)
+
+
+    return JsonResponse({})
 @guest_allowed
 def tagCompounds(request,action):
     if request.is_ajax() and request.method == 'POST':

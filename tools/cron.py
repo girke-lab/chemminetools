@@ -53,7 +53,6 @@ class deleteOldUsers(CronJobBase):
         try:
             how_many_days = 365
             oldUsers = User.objects.filter(
-                    email='', 
                     is_staff=False,
                     is_active=False, 
                     is_superuser=False, 

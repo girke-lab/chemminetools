@@ -10,10 +10,9 @@ class Tag(models.Model):
     name = models.CharField(max_length=256)
     user = models.ForeignKey(User, db_index=True,on_delete=models.CASCADE)
 
-    # this is only valid in django 2.2
-    #class Meta:
-    #    constraints = [
-    #        models.UniqueConstraint(fields= ['name','user']) ]
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields= ['name','user'],name="unique_name_user_tag") ]
 
     def allUserTagNames(user):
         if user.id == None:  # user is AnonymousUser
@@ -25,7 +24,7 @@ class Tag(models.Model):
         givenTags = set(tagNames)
 
         for newTag in givenTags.difference(existingTags):
-            print("creating new tag: "+newTag+" for user "+user.username)
+            #print("creating new tag: "+newTag+" for user "+user.username)
             Tag.objects.create(name = newTag, user=user)
 
 
@@ -40,6 +39,7 @@ class Compound(models.Model):
     smiles = models.TextField()
     user = models.ForeignKey(User, db_index=True,on_delete=models.CASCADE)
     tags = models.ManyToManyField(Tag, db_index=True)
+
 
     def byTagNames(tagNames,user):
         if "all" in tagNames:

@@ -120,6 +120,7 @@ def insert_single_compound(
     idkey,
     user,
     tags,
+    dedup,
     ):
     """ insert single compound into database """
 
@@ -130,8 +131,14 @@ def insert_single_compound(
 
     # compound
 
-    print("cid: "+str(cid)+", name: "+str(name))
-    print("tags: "+str(tags))
+    #print("cid: "+str(cid)+", name: "+str(name))
+    #print("tags: "+str(tags))
+    if dedup:
+        numMatches = Compound.objects.filter(user=user, inchi=moldata['inchi']).count()
+
+        if numMatches > 0:
+            return None
+
     c = Compound(
         cid=cid,
         name=name,

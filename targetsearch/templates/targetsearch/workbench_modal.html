@@ -1,0 +1,175 @@
+<!-- Workbench modal window (add compounds to workbench) -->
+<div class="modal fade" id="workbenchModal" tabindex="-1" role="dialog" aria-labelledBy="wbmtitle" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 40%">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="wbmtitle">Add Compounds to Workbench</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form id="wbmform" autocomplete="off">
+				<div id="wbmsummary"></div>
+					{% csrf_token %}
+					<input name="source_id" type="hidden" value="chembl" />
+					<div id="wbmtagsdiv">
+						<label for="wbmtags">Tags</label>
+						<select class="tags" id="wbmtags" name="tags" multiple placeholder="Compound Tags">
+							{% for tag in tags %}
+								<option value="{{tag}}">{{tag}}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<div id="wbmcount"></div>
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+				<button id="wbmsubmitbtn" type="button" class="btn btn-primary" onclick="wbmSubmit()" disabled>Submit</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Workbench modal scripts -->
+<script>
+function showWorkbenchModal(table_name) {
+	var table_obj = targetSearch[table_name + '_table'];
+	var chembl_column = targetSearch[table_name + '_chembl_column'];
+	var pref_name_column = targetSearch[table_name + '_pref_name_column'];
+	var summary_html = '';
+	var chembl_id_set = new Set();
+
+	// Clean-up stuff from previous runs
+	$('#wbmsummary').html('');
+	$('#wbmsubmitbtn').html('Submit');
+	targetSearch.wbmtags.clear();
+
+	// Act on rows selected by user
+	var rows = table_obj.rows( {selected:true} );
+	if (rows.any()) {
+		// Build a lookup dict for compound display names
+		// e.g.: CHEMBL113 -> "CHEMBL113 (CAFFEINE)"
+		// Also build a set of compounds for pre-check routine.
+		var display_name_lookup = {};
+		rows.every( function() {
+			var chembl_text = $(table_obj.cell(this.index(), chembl_column).node()).text();
+			var pref_name_text = $(table_obj.cell(this.index(), pref_name_column).node()).text();
+			if (!chembl_id_set.has(chembl_text)) {
+				chembl_id_set.add(chembl_text);
+				if (pref_name_text == 'None')
+					display_name_lookup[chembl_text] = chembl_text;
+				else
+					display_name_lookup[chembl_text] = chembl_text + ' (' + pref_name_text + ')';
+			}
+		});
+		// Format ChEMBL IDs into HTTP GET-style list
+		var chembl_ids_list = new Array();
+		for (c of chembl_id_set)
+			chembl_ids_list.push('ids=' + c);
+		var post_data = $('#wbmform').serialize(); //for source_id and CSRF token
+		post_data += '&' + chembl_ids_list.join('&');
+		//console.log('post_data:', post_data);
+		jQuery.post("{% url 'myCompounds-ajax' 'check' %}", post_data, function (recv_data) {
+			if (recv_data.success === true) {
+				var results = recv_data.results;
+				for (const r of results) {
+					summary_html += '<div class="card mb-3"><div class="card-body">';
+					summary_html += ('<p class="card-text">' + r.desc + '</p>');
+					summary_html += '<div class="ml-3">'; //item list
+					for (const i of r.ids) {
+						summary_html += '<div class="form-check">';
+						summary_html += '<input type="checkbox" class="form-check-input wbmids" id="wbmchk-'+i+'" name="ids" value="'+i+'"';
+						if (r.select === true) {
+							summary_html += ' checked';
+						}
+						if (r.enable !== true) {
+							summary_html += ' disabled';
+						}
+						summary_html += '/><label class="form-check-label" for="wbmchk-'+i+'">';
+						summary_html += display_name_lookup[i] + '</label>';
+						summary_html += '</div>'; //form-check
+					}
+					summary_html += '</div></div></div>'; //item list, card-body, card
+				}
+				$('#wbmsummary').html(summary_html);
+				$('#wbmtagsdiv').removeClass('cmtools-display-none');
+				wbmUpdateCount();
+				$('#workbenchModal').modal();
+			} else {
+				if (recv_data.message) {
+					alertify.error(recv_data.message);
+				} else {
+					alertify.error("Unknown error occurred");
+				}
+			}
+		}).fail( function() {
+			alertify.error("AJAX call failed");
+		});
+	} else {
+		summary_html += '<div class="card mb-3"><div class="card-body">';
+		summary_html += '<p class="card-text">No compounds are selected.</p>';
+		summary_html += '<p class="card-text">Select compounds by activating a &quot;Select Mode&quot; and clicking on individual table rows, or select all rows by clicking &quot;All&quot; next to &quot;Select Rows&quot;.</p>';
+		summary_html += '</div></div>';
+		$('#wbmsummary').html(summary_html);
+		$('#wbmtagsdiv').addClass('cmtools-display-none');
+		wbmUpdateCount();
+		$('#workbenchModal').modal();
+	}
+}
+
+function wbmSubmit() {
+	$('#wbmsubmitbtn').prop('disabled', true);
+	$('#wbmsubmitbtn').html('Please Wait...');
+
+	var post_data = $('#wbmform').serialize();
+	//console.log("form data:", post_data);
+	jQuery.post("{% url 'myCompounds-ajax' 'add' %}", post_data, function (recv_data) {
+		if (recv_data.success === true) {
+			alertify.success(recv_data.message);
+		} else {
+			if (recv_data.message) {
+				alertify.error(recv_data.message);
+			} else {
+				alertify.error("Unknown error occurred");
+			}
+		}
+	}).fail( function() {
+		alertify.error("AJAX call failed");
+	}).always( function() {
+		$('#workbenchModal').modal('hide');
+	});
+}
+
+function wbmUpdateCount() {
+	//console.log("hello from wbmUpdateCount");
+	var c = 0;
+	$('#wbmform .wbmids').each( function() {
+		if ($(this).prop('checked'))
+			c++;
+	});
+	if (c == 0) {
+		$('#wbmcount').html('<p class="mb-0 mr-3">No compounds selected</p>');
+		$('#wbmsubmitbtn').prop('disabled', true);
+	} else if (c == 1) {
+		$('#wbmcount').html('<p class="mb-0 mr-3">'+c+' compound selected</p>');
+		$('#wbmsubmitbtn').prop('disabled', false);
+	} else {
+		$('#wbmcount').html('<p class="mb-0 mr-3">'+c+' compounds selected</p>');
+		$('#wbmsubmitbtn').prop('disabled', false);
+	}
+}
+
+$(document).ready(function() {
+	//console.log("hello from workbench_modal.html");
+
+	targetSearch.wbmtags = jQuery("#wbmtags").selectize({
+		plugins: ['remove_button'],
+		create: true,
+	})[0].selectize;
+
+	$('#wbmform').on('change', '.wbmids', wbmUpdateCount);
+});
+</script>
+<!-- End Workbench modal block -->

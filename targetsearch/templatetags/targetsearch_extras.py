@@ -1,3 +1,4 @@
+from django.conf import settings
 #from django.template.defaulttags import register
 from django.utils.html import format_html
 
@@ -27,12 +28,13 @@ def order_by(l, orderByIndex):
     return l
 
 @register.simple_tag
-def find_col_by_key(info, key, value, default=None):
+def find_col_by_key(info, key, value_prefix, value, default=None):
     """Given a list of dicts 'info', return the index for the first instance in
-    which info[key] == value."""
+    which info[key] == value_prefix + value."""
+    #print("find_col_by_key key: "+str(key)+", value: "+str(value_prefix+value));
     if info != None:
         for i in range(0, len(info)):
-            if info[i].get(key) == value:
+            if info[i].get(key) == value_prefix+value:
                 return i
     return default
 
@@ -47,3 +49,11 @@ def col_index_list(info, key, value):
             if info[i].get(key) == value:
                 index_list.append(i)
     return index_list
+
+#TODO: Move this to its own app after local_settings.py is implemented
+@register.simple_tag
+def analytics():
+    try:
+        return settings.ANALYTICS
+    except AttributeError as e:
+        return True

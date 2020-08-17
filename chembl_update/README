@@ -1,4 +1,6 @@
 
+eiR version >= 1.29.1 is required.
+
 1) Download new ChEMBL db file and load into PostgreSQL
 	./update_chembl.sh <chembl version number> 
 1a)after this runs, the old database will be left as "chembl_old", you should drop this database when done with the whole update

@@ -16,6 +16,9 @@
 				<button id="csv{{table_name.title}}" type="button" class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Save to CSV</button>
 				<div id="csv-buttons-{{table_name}}" class="dropdown-menu" aria-labelledby="csv{{table_name.title}}"></div>
 			</div>
+			<div class="btn-group ml-3 mr-1" role="group">
+				<a href="https://girke-lab.github.io/chemminetools-docs/docs/drug-target/#result-tables" class="btn btn-outline-primary" role="button" rel="noreferrer noopener" target="_blank">Help <i class="fas fa-external-link-alt"></i></a>
+			</div>
 		</div>
 		<div class="btn-toolbar mt-2" role="toolbar" aria-label="Second button toolbar for {{table_name}} table">
 			<div class="btn-group btn-group-toggle mr-1" data-toggle="buttons">
@@ -75,3 +78,45 @@
 		</table>
 	</div>
 </div>
+
+
+<script>
+$(document).ready(function() {
+	const table_name = '{{table_name}}';
+	//console.log("hello from ts_table.html, table_name:", table_name);
+	const grouping_col = {% if grouping_col %} {{grouping_col}} {% else %} "" {% endif %};
+	var table;
+
+	table = init_datatable(table_name, grouping_col);
+	targetSearch[table_name+'_table'] = table;
+
+	targetSearch[table_name+'_no_export'] = {% col_index_list table_info 'export' False %};
+	targetSearch[table_name+'_chembl_column'] = {% find_col_by_key table_info 'id' table_name '__chembl_id_lookup__chembl_id' 'null' %};
+	targetSearch[table_name+'_pref_name_column'] = {% find_col_by_key table_info 'id' table_name '__molecule_dictionary__pref_name' 'null' %};
+	targetSearch[table_name+'_accession_column'] = {% find_col_by_key table_info 'id' table_name '__component_sequences__accession' 'null' %};
+	targetSearch[table_name+'_show_structures'] = false;
+
+	var table_buttons = table.buttons().container();
+	table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
+	table_buttons.appendTo( $('#csv-buttons-'+table_name) );
+
+	selectDefaultColumns(table_name);
+
+	$('input.toggle-vis').on('change', function(e) {
+		if ( $(this).attr('name') === table_name+'-column' ) {
+			let column = table.column( $(this).attr('value') );
+			column.visible( $(this).prop('checked') );
+		}
+	});
+
+	// Disable the Show Structure button when the ChEMBL ID column is hidden.
+	table.on('column-visibility', function(e, settings, column, state) {
+		//console.log("column-visibility event fired for",table_name,"table");
+		//console.log("column:", column, ", state:", state);
+		if (column == targetSearch[table_name + '_chembl_column']) {
+			$('#show-struct-' + table_name).prop('disabled', !state);
+			//console.log("button status:", $('#show-struct-'+table_name).prop('disabled'));
+		}
+	});
+});
+</script>

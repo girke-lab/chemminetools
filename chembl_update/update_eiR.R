@@ -1,15 +1,17 @@
 #!/usr/bin/env Rscript
-# requires: ChemmineR,R.utils
+# requires: ChemmineR,R.utils, eiR >= 1.29.1
 # use: ./eiSearch.R --outfile=output.txt --similarity=0.3 --compounds=10 < input.sdf
 
 library(eiR)
 library(R.utils)
 library(RPostgreSQL)
+library(ChemmineR)
 
+chemblDB="chembl_26"
 indexDir = "/srv/shared_jobs/development/eir_index"
 
 eiConn = dbConnect(dbDriver('PostgreSQL'),dbname='eisearch_chembl_loading',host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='ei_updater',password='kj48nb3n2khlsdfbb')
-chemblConn = dbConnect(dbDriver('PostgreSQL'),dbname='chembl',host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='chembl',password='chembl1889')
+chemblConn = dbConnect(dbDriver('PostgreSQL'),dbname=chemblDB,host='chembl.cycqd59qnrsj.us-east-2.rds.amazonaws.com',user='chembl',password='chembl1889')
 
 buildSDF  = function(outputFile){
 	#fetch list of compound sdfs
@@ -51,7 +53,7 @@ buildIndex = function(sdfFile){
 	message("initializing database")
 	initDb(eiConn)
 	message("running eiInit from ",sdfFile)
-	eiInit(sdfFile,dir=indexDir,conn=eiConn,updateByName=TRUE)
+	eiInit(sdfFile,dir=indexDir,conn=eiConn,updateByName=TRUE,skipPriorities=TRUE)
 	message("eiInit done. starting eiMakeDb")
 	runId=eiMakeDb(200,100,dir=indexDir,conn=eiConn)
 	message("eiMakeDb done")
