@@ -31,6 +31,7 @@ def readSources(type):
 
 def detailPage(request,id):
     targetInfo=None
+    compoundInfo=None
 
     print("rendering detail page for "+str(id))
 
@@ -50,8 +51,9 @@ def detailPage(request,id):
 
     if idType == "target":
         targetInfo = targetSummaryInfo(id)
-        print(str(targetInfo))
 
+    if idType == "compound":
+        compoundInfo = compoundSummaryInfo(id);
 
 
     return render(request,'detail.html', {
@@ -63,6 +65,7 @@ def detailPage(request,id):
         'activity_matches' : activity_matches,
         'drugind_json' : json.dumps(drugind_json),
         'target_info': targetInfo,
+        'compound_info': compoundInfo,
         })
 
 @guest_allowed

@@ -13,8 +13,14 @@ label {
     font-weight: bold;
 }
 {% endblock extra_styles %}
-
 {% block base_content %}
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$("[data-toggle=tooltip]").tooltip();
+});
+</script>
+
 
 <div class="container-fluid">
 	<div class="row my-3">
@@ -31,10 +37,31 @@ label {
         </div>
     </div>
     {% if type == "compound" %}
-	<div class="row my-3">
-		<div class="col-md-12">
-        <object data="https://www.ebi.ac.uk/chembl/embed/#compound_report_card/{{given_id}}/name_and_classification"
-            width="100%" height="500px"></object>
+	<div class="row my-4">
+		<div class="col-md-6">
+            <img width="200px" src="https://www.ebi.ac.uk/chembl/api/data/image/{{given_id}}.svg"/>
+        </div>
+		<div class="col-md-6">
+            {% if compound_info %}
+            <div class="">
+                <label for="name">Name:</label>
+                <span id="name">{{compound_info.pref_name}}</span>
+            </div>
+
+            <div class="">
+                <label for="formula">Formula:</label>
+                <span id="formula">{{compound_info.full_molformula}}</span>
+            </div>
+            <div >
+                <label for="mwt">Full Molecular Weight:</label>
+                <span id="mwt">{{compound_info.full_mwt}}</span>
+            </div>
+            <div >
+                <label for="molecule_type">Molecule Type:</label>
+                <span id=molecule_type"">{{compound_info.molecule_type}}</span>
+            </div>
+            {% endif%}
+
 
         </div>
     </div>
@@ -61,7 +88,7 @@ label {
 
     {% endif%}
     {% if annotation_info %}
-	<div class="row">
+	<div class="row my-3">
 		<div class="col-md-12">
             {% if type == "compound" %}
                 <h3>Target Search</h3>
@@ -92,11 +119,5 @@ label {
 {% include "targetsearch/ts_script.html" %}
 {% include "targetsearch/drugind_modal.html" %}
 {% include "targetsearch/workbench_modal.html" %}
-
-<script type="text/javascript">
-$(document).ready(function() {
-	$("[data-toggle=tooltip]").tooltip();
-});
-</script>
 
 {% endblock js_content %}

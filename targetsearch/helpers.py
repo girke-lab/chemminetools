@@ -451,6 +451,15 @@ def targetNameAutocomplete(nameQuery):
 
     return runQuery(sqlQuery, ('%'+nameQuery.replace(' ','%')+'%',))
     
+def compoundSummaryInfo(chemblId):
+    result = runQuery("""SELECT full_mwt,full_molformula, pref_name,chembl_id,molecule_type 
+                    FROM  molecule_dictionary JOIN compound_properties USING(molregno)  
+                    WHERE chembl_id=%s""",(chemblId,))
+
+    if len(result) == 1:
+        return result[0];
+    return None
+
 def targetSummaryInfo(accession):
     sqlQuery = sql.SQL(""" select accession, description, organism, 
                             (select string_agg(component_synonym,',') 
@@ -781,8 +790,9 @@ def getParalogsCached(queryIds):
                 'cacheMisses': list(querySet),
                 'uniprotIdMap': uniprotIdMap}
 
-#getUniChemSources()
-#mapToChembl(['DB00829','DB00945'],2)
 
-#print(chemblTargetAccessionsByActivity(('CHEMBL26',)))
-#print(chemblTargetAccessionsByAnnotations(('CHEMBL25',)))
+
+
+
+                
+
