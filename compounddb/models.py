@@ -32,7 +32,7 @@ class Tag(models.Model):
 class Compound(models.Model):
 
     cid = models.CharField(max_length=256, db_index=True)
-    name = models.CharField(max_length=256)
+    name = models.CharField(max_length=1024)
     formula = models.CharField(max_length=1024)
     weight = models.DecimalField(max_digits=10, decimal_places=2)
     inchi = models.TextField()
