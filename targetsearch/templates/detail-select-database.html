@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+{% load targetsearch_extras %}
+
+{% block extra_styles %}
+.column-set {
+	border: 1px solid #ccc;
+	border-radius: 16px;
+	padding: 0.01em 16px;
+	margin: 1em;
+}
+label {
+    font-weight: bold;
+}
+{% endblock extra_styles %}
+{% block base_content %}
+
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#type-select").click(function(){
+        console.log("type selected",$(this).val());
+        var selected= $(this).val();
+        if(selected === "compound"){
+            console.log("compound selected");
+            $("#compound-list").show();
+            $("#target-list").hide();
+            $("#submit-button").show();
+        }else if(selected === "target"){
+            $("#compound-list").hide();
+            $("#target-list").show();
+            $("#submit-button").show();
+        }else{
+            $("#compound-list").hide();
+            $("#target-list").hide();
+            $("#submit-button").hide();
+        }
+
+    });
+
+});
+</script>
+
+
+<div class="container-fluid">
+	<div class="row my-3">
+		<div class="col-md-12">
+            {% if message %}
+            <div class="alert alert-danger">
+                {{message}}
+            </div>
+            {% endif %}
+            <form>
+                Please select the entity type and database for the ID {{given_id}}:
+                <div class="my-3"></div>
+
+                <label for="type-select"  >Compound or Target?:</label>
+                <select id="type-select" name="id_type">
+                    <option value="" >Select...</option>
+                    <option value="compound" >Compound</option>
+                    <option value="target" >Target</option>
+                </select>
+
+
+
+                <div id="compound-list" style="display:none">
+
+                    <label for="source-id-select" >Database:</label>
+                    <select id="source-id-select" name="compound_source_id">
+                    {% for id,name in compoundDbs.items|order_by:1 %}
+                        <option value="{{id}}" {% if defaultCompoundDb == id %}selected {% endif %} >{{name}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div id="target-list" style="display:none">
+
+                    <label for="source-id-select" >Database:</label>
+                    <select id="source-id-select" name="target_source_id">
+                    {% for id,name in proteinDbs.items|order_by:1 %}
+                        <option value="{{id}}" {% if defaultCompoundDb == id %}selected {% endif %} >{{name}}</option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <br>
+
+                <button id="submit-button"  type="submit" style="display:none" class="btn btn-primary ">Submit</button>
+            </form>
+
+        </div>
+
+
+    </div>
+</div>
+{% endblock base_content %}
+

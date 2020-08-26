@@ -32,33 +32,73 @@ def readSources(type):
 def detailPage(request,id):
     targetInfo=None
     compoundInfo=None
+    id_type = None
+    compoundDbs = readSources("unichem")
+    proteinDbs= readSources("uniprot")
+    activity_info= None
+    activity_matches= None
 
-    print("rendering detail page for "+str(id))
 
-    idType = getEntityType(id)
-    if idType == "unknown":
-        return render(request,'detail.html', {"given_id":id})
+    #print("rendering detail page for "+str(id))
 
-    myAnnotationSearch = AnnotationWithDrugIndSearch(idType, [id])
+    if 'id_type' in request.GET:
+        id_type = request.GET['id_type']
+    else:
+        id_type = getEntityType(id)
+
+    if id_type == None or id_type == "unknown":
+        return render(request,'detail-select-database.html',{
+            'given_id': id,
+            'compoundDbs' : compoundDbs,
+            'proteinDbs':proteinDbs,
+        })
+
+
+    try:
+        if id_type == "compound" and 'compound_source_id' in request.GET:
+            source_id = request.GET['compound_source_id']
+            #get mapping dict, fetch keys, then get either first element, or None
+            id=next(iter(mapToChembl([id], source_id).keys()), None)
+            #print("new compound id: "+str(id)+", source_id: "+str(source_id))
+        elif id_type == "target" and 'target_source_id' in request.GET:
+            source_id = request.GET['target_source_id']
+            #get mapping dict, fetch keys, then get either first element, or None
+            id=next(iter(mapToUniprot([id], source_id).keys()), None)
+            #print("new target id: "+str(id)+", source_id: "+str(source_id))
+
+        if id == None:
+            raise Exception("ID not found in selected database")
+    except Exception as e:
+        message = "Sorry, I could not convert that ID to a ChEMBL compound or target. Error was: "+str(e)
+        return render(request,'detail-select-database.html',{
+            'given_id': id,
+            'compoundDbs' : compoundDbs,
+            'proteinDbs':proteinDbs,
+            'message': message,
+        })
+
+
+    myAnnotationSearch = AnnotationWithDrugIndSearch(id_type, [id])
     annotation_info = myAnnotationSearch.table_info
     annotation_matches = myAnnotationSearch.get_grouped_results()
 
-    myActivitySearch = ActivitySearch(idType, [id])
-    activity_info = myActivitySearch.table_info
-    activity_matches = myActivitySearch.get_grouped_results()
 
     drugind_json = drugIndicationData(myAnnotationSearch.drugind_objs);
 
-    if idType == "target":
+    if id_type == "target":
         targetInfo = targetSummaryInfo(id)
 
-    if idType == "compound":
+    if id_type == "compound":
         compoundInfo = compoundSummaryInfo(id);
+        # activity search is often very slow, so disable for now
+        #myActivitySearch = ActivitySearch(id_type, [id])
+        #activity_info = myActivitySearch.table_info
+        #activity_matches = myActivitySearch.get_grouped_results()
 
 
     return render(request,'detail.html', {
         'given_id':id,
-        'type': idType,
+        'type': id_type,
         'annotation_info' : annotation_info,
         'annotation_matches' : annotation_matches,
         'activity_info' : activity_info,
