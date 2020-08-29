@@ -14,7 +14,7 @@ from compounddb import first_mol, InvalidInputError
 
 from compounddb.tools import parse_annotation, insert_single_compound
 from compounddb.models import Compound, SDFFile,Tag
-from pubchem_rest_interface.Pubchem_pug import DownloadCIDs
+from pubchem_rest_interface.Pubchem_pug import pubchemDownload
 from django.contrib import messages
 import random
 import openbabel
@@ -71,8 +71,8 @@ def downloadCompounds(request, outputFormat):
     elif request.method == "POST":
         params = request.POST
     else:
-        return HttpResponse("dowload only supported via GET or POST",status=501)
-        
+        return HttpResponse("download only supported via GET or POST",status=501)
+
     if 'chembl_id' in params: #tested
         cids = params.getlist('chembl_id')
         try:
@@ -107,11 +107,19 @@ def downloadCompounds(request, outputFormat):
             return fileDownloadResponse(smiles,"download.smi")
     elif 'pubchem_id' in params: # NOT YET TESTED
         cids = params.getlist('pubchem_id')
-        job = createJob(request.user,'pubchemID2SDF','',[],cids,outputFormat,wait=True)
-        return redirect(tools.views.view_job,job_id=job.id,resource="other",filename="download."+outputFormat)
+        #job = createJob(request.user,'pubchemID2SDF','',[],cids,outputFormat,wait=True)
+        #return redirect(tools.views.view_job,job_id=job.id,resource="other",filename="download."+outputFormat)
+        if outputFormat == "sdf":
+            sdf = pubchemDownload(cids, "sdf")
+            return fileDownloadResponse(sdf, "download.sdf")
+        elif outputFormat == "smi":
+            smi = pubchemDownload(cids, "smiles")
+            return fileDownloadResponse(smi, "download.smi")
+        else:
+            return HttpResponse("Invalid outputFormat", status=400)
     else:
         return HttpResponse("unknown search paramaters",status=400)
-    
+
 
 def fileDownloadResponse(content,filename):
     response = HttpResponse(content,content_type="application/force-download")
@@ -209,11 +217,11 @@ def uploadCompound(request, resource = None, job_id = None):
             for cid in cids[:]:
                 match = re.search("(\d{1,200})", cid)
                 if match:
-                    filteredCIDs.append(int(match.group(1)))
+                    filteredCIDs.append(match.group(1))
 
             if len(filteredCIDs) > 0:
                 try:
-                    sdf = DownloadCIDs(cids)
+                    sdf = pubchemDownload(filteredCIDs, "sdf")
                 except:
                     print("Unexpected error:", sys.exc_info())
                     traceback.print_tb(sys.exc_info()[2])
