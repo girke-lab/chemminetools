@@ -34,7 +34,7 @@
 				<div class="tab-pane{% if id_type == "compound" %} active{% endif %}" id="compound_search">
 					<div class="container-fluid">
 						<div class="col-md-12">
-							<form method="GET" autocomplete="off">
+							<form method="GET" autocomplete="off" action="/targetsearch">
 								<div class="form-group mt-3">
 									<label for="source-id-select" data-toggle="tooltip" title="If you are using non-ChEMBL IDs (e.g. PubChem), select the appropriate database here.">Database <i class="far fa-question-circle"></i>:</label>
 									<select id="source-id-select" name="source_id">
@@ -56,14 +56,14 @@
 
 									<ul class="nav nav-tabs" id="searchCompoundTabs">
 									  <li class="nav-item">
-										<a class="nav-link active" href="#workbench" data-toggle="tab">Workbench</a>
+										<a class="nav-link   {% if initial_ids == "" %} active{% endif %}" href="#workbench" data-toggle="tab">Workbench</a>
 									  </li>
-									  <li class="nav-item">
-										<a class="nav-link" href="#compoundids" data-toggle="tab">Compound IDs</a>
+									  <li class="nav-item ">
+										<a class="nav-link   {% if initial_ids != "" %} active{% endif %} " href="#compoundids" data-toggle="tab">Compound IDs</a>
 									  </li>
 									</ul>
 									<div class='tab-content'>
-										<div id="workbench" class='tab-pane active'>
+										<div id="workbench" class='tab-pane {% if initial_ids == "" %} active{% endif %}'>
 											 <div class="card text-white bg-secondary my-3 p-2">
 												<h6 class='card-title'>Import Compound IDs from Workbench</h6>
 												<p>The &quot;Compound Tags&quot; field below lists the compound tags from your Workbench. Select one or more tags to add them to your query. If your Workbench compounds use a non-ChEMBL ID system (e.g. PubChem), change the Database above.</p>
@@ -79,7 +79,7 @@
 											</div>
 
 										</div>
-										<div id="compoundids" class='tab-pane '>
+										<div id="compoundids" class='tab-pane {% if initial_ids != "" %} active{% endif %}'>
 											<div class="card text-white bg-secondary my-3 p-2">
 												<h6 class='card-title' for="compound-ids">Enter Compound IDs</h6>
 												<p>To search for a compound by name, enter part of the name into the &quot;Compound Name Search&quot; search box, then select your desired compound from the list of results.</p>
@@ -87,7 +87,7 @@
 												<p>Alternatively, click <span class="btn btn-sm btn-outline-primary bg-white">Use Sample IDs</span> for examples.</p>
 												<p>After you've entered your desired compounds, click <span class="btn btn-sm btn-primary">Search</span>.</p>
 												<select id="compound_autocomplete" placeholder="Compound Name Search"></select>
-												<textarea id="compound-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+												<textarea id="compound-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)">{{initial_ids}}</textarea>
 											</div>
 										</div>
 									</div>
@@ -104,7 +104,7 @@
 				<div class="tab-pane{% if id_type == "target" %} active{% endif %}" id="target_search">
 					<div class="container-fluid">
 						<div class="col-md-12">
-							<form method="GET" autocomplete="off">
+							<form method="GET" autocomplete="off" action="/targetsearch">
 								<div class="form-group mt-3">
 									<label for="source-id-select" data-toggle="tooltip" title="If you are using non-UniProtKB IDs (e.g. Ensembl), select the appropriate database here.">Database <i class="far fa-question-circle"></i>:</label>
 									<select id="source-id-select" name="source_id">
@@ -120,7 +120,7 @@
 										<p>Alternatively, click <span class="btn btn-sm btn-outline-primary bg-white">Use Sample IDs</span> for examples.</p>
 										<p>After you've entered your desired targets, click <span class="btn btn-sm btn-primary">Search</span>.</p>
 										<select id="target_autocomplete" placeholder="Target Name Search"></select>
-										<textarea id="target-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+										<textarea id="target-ids" name="ids" class="form-control" rows="10" placeholder="Enter space-separated ID(s)">{{initial_ids}}</textarea>
 									</div>
 									<div>
 										<input id="include-activity-chkbox" type="checkbox" name="include_activity">
@@ -148,7 +148,7 @@
 									<p class="text-white">Your Accession ID(s) and associated paralogs will appear below.
 									If you don't want certain paralogs to be included in the search, uncheck the box next to it.</p>
 									<p class="text-white">After you've reviewed your paralog search units, click <span class="btn btn-sm btn-primary">Search</span>.</p>
-									<form id="homolog-query" class="mb-2" autocomplete="off">
+									<form id="homolog-query" class="mb-2" autocomplete="off" action="/targetsearch">
 										<div class="d-flex">
 											<span class="form-check flex-grow-1 pl-0">
 												<input id="homolog-acc-ids" name="ids" type="text" placeholder="Accession ID" />
@@ -161,7 +161,7 @@
 										</div>
 									</form>
 									<div id="homolog-alerts"></div>
-									<form id="homolog-target-search" autocomplete="off">
+									<form id="homolog-target-search" autocomplete="off" action="/targetsearch">
 										<div id="homolog-accordion">
 											<div id="homolog-empty-placeholder" class="card">
 												Empty search list. Use the above tool to populate list.

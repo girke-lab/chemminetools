@@ -109,7 +109,7 @@ def detailPage(request,id):
         })
 
 @guest_allowed
-def newTS(request):
+def newTS(request,initial_ids=""):
     # Default local variables
     query_submit = False
     message = None
@@ -118,6 +118,7 @@ def newTS(request):
     drugind_json = None
     activity_info = None
     activity_matches = None
+    homolog_type_value= None
     allTags = Tag.allUserTagNames(request.user)
     compoundDbs = readSources("unichem")
     proteinDbs= readSources("uniprot")
@@ -136,11 +137,21 @@ def newTS(request):
     # Retrieve GET request variables
     if 'id_type' in request.GET:
         id_type = request.GET['id_type']
+    #see if we can identify the entity type of any initial_ids
+    elif initial_ids != "": 
+        ii_array = initial_ids.split(",") 
+        if len(ii_array) > 0:
+            type_guess = getEntityType(ii_array[0])
+            if type_guess != "unknown":
+                id_type = type_guess
+
+
     if 'ids' in request.GET:
         if id_type == 'homolog-target':
             ids = request.GET.getlist('ids')
         else:
             ids = list(request.GET['ids'].split())
+        initial_ids = " ".join(ids)
     if 'include_activity' in request.GET:
         include_activity = True
     if 'tags' in request.GET:
@@ -260,6 +271,8 @@ def newTS(request):
         else:
             homolog_type_value = 'paralog'
 
+        initial_ids = initial_ids.replace(","," ")
+
     except Exception as e:
         print("exception in newTS:", sys.exc_info())
         traceback.print_tb(sys.exc_info()[2])
@@ -282,6 +295,7 @@ def newTS(request):
         'groupingCol' : groupingCol,
         'similarityJobs': similarityJobs,
         'homolog_type_value': homolog_type_value,
+        'initial_ids': initial_ids,
         }
 
     return render(request, 'targetsearch/new_ts.html', context)

@@ -11,4 +11,6 @@ urlpatterns = [
         path('targetNames/<query>', targetNames, name='targetNames'),
         path('ajax/<action>', ajax, name='targetsearch-ajax'),
         path('detail/<id>', detailPage),
+
+        path('<initial_ids>',newTS), # this needs to be last
         ]
