@@ -4,10 +4,14 @@
 library(ChemmineR)
 library(R.utils)
 
+addH=FALSE;
 
 if(!exists("debug_mode")){
 	args = commandArgs(asValues=TRUE)
 	outfile    = args$outfile
+
+    if(!is.null(args$addH) && tolower(args$addH) == "true")
+        addH = TRUE;
 	
 	# read in sdf from standard i/o
 	f <- file("stdin")
@@ -19,12 +23,12 @@ if(!exists("debug_mode")){
 
 sdfInput <- sdfInput[validSDF(sdfInput)]
 
-properties =data.frame(MF=MF(sdfInput, addH=FALSE), 
-							  MW=MW(sdfInput, addH=FALSE),
-							  Ncharges=sapply(bonds(sdfInput, type="charge"), length),
-							  atomcountMA(sdfInput, addH=FALSE), 
-							  groups(sdfInput, type="countMA"), 
-							  rings(sdfInput, upper=6, type="count", arom=TRUE))
+properties =data.frame(MF=MF(sdfInput, addH=addH), 
+                       MW=MW(sdfInput, addH=addH),
+                       Ncharges=sapply(bonds(sdfInput, type="charge"), length),
+                       atomcountMA(sdfInput, addH=addH), 
+                       groups(sdfInput, type="countMA"), 
+                       rings(sdfInput, upper=6, type="count", arom=TRUE))
 
 rownames(properties)=sdfid(sdfInput)
 

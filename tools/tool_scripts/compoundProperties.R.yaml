@@ -10,3 +10,9 @@ output_type: text/properties.table
 description: Computes several properties of the given compounds using <a href="http://bioconductor.org/packages/release/bioc/html/ChemmineR.html">ChemmineR</a>. These are  MF MW Ncharges C H N O S F Cl Br I P RNH2 R2NH R3N ROPO3 ROH RCHO RCOR RCOOH RCOOR ROR RCCH RCN RINGS AROMATIC
 
 
+ApplicationOptions:
+   Add Hydrogens:
+      realName: addH 
+      options:
+         - [False,false]
+         - [True,true]

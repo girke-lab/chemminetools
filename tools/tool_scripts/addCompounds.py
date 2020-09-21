@@ -49,7 +49,6 @@ def addMyCompounds(sdf, user,tags,dedup):
     counter = 0
     linecounter = 0
     namekeys = ['NAME', 'PUBCHEM_IUPAC_NAME']
-    message = 'ERROR: bad input data.'
     added_ids = []
     initial_compound_count = Compound.objects.filter(user=user).count()
 
@@ -60,9 +59,8 @@ def addMyCompounds(sdf, user,tags,dedup):
         for line in sdf:
             linecounter += 1
             if linecounter > MAX_SDF_LENGTH:
-                message = 'ERROR: an input sdf exceeds ' \
-                    + str(MAX_SDF_LENGTH) + ' lines.'
-                raise Exception
+                raise Exception( 'ERROR: an input sdf exceeds ' \
+                    + str(MAX_SDF_LENGTH) + ' lines.')
             if linecounter == 1:
 
                 # clean up cid with regexes
@@ -87,28 +85,25 @@ def addMyCompounds(sdf, user,tags,dedup):
             if line.startswith('$$$$'):
                 try:
                     moldata = parse_annotation(sdffile, namekeys)
-                except:
+                except Exception as e:
                     print("error while processing sdf: ")
                     print("Unexpected error:", sys.exc_info())
                     traceback.print_tb(sys.exc_info()[2])
-                    message = 'ERROR: invalid input format.'
-                    raise Exception
+                    raise Exception( 'ERROR: invalid input format.') from e
                 counter += 1
                 linecounter = 0
                 if initial_compound_count + counter > MAX_COMPOUND_LIMIT:
-                    message = 'ERROR: upload exceeds ' \
-                        + str(MAX_COMPOUND_LIMIT) + ' compounds.'
-                    raise Exception
+                    raise Exception('ERROR: upload exceeds ' \
+                        + str(MAX_COMPOUND_LIMIT) + ' compounds.')
                 try:
                     newid = insert_single_compound(moldata, sdffile,
                             'id', user, tags,dedup)
-                except:
+                except Exception as e:
                     print("error while inserting compound: ")
                     print("Unexpected error:", sys.exc_info())
                     traceback.print_tb(sys.exc_info()[2])
-                    message = \
-                        'ERROR: Database error, possibly excessively large compound?'
-                    raise Exception
+                    raise Exception( \
+                        'ERROR: failed to insert compound with id '+str(moldata['id'])) from e
                 added_ids.append(newid)
                 sdffile = ''
         if counter > 0:
@@ -124,7 +119,9 @@ def addMyCompounds(sdf, user,tags,dedup):
                 Compound.objects.get(id=id).delete()
             except:
                 pass
-        print("exception: "+message)
+        message = str(sys.exc_info()[1])
+        if e.__cause__ != None:
+            message = message + " Caused by: "+str(e.__cause__)
         return message
 
 
