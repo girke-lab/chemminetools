@@ -1,8 +1,10 @@
 from compounddb.models import Compound, Tag
-from targetsearch.helpers import get_chembl_sdfs, get_chembl_ids_with_struct
+from targetsearch.helpers import get_chembl_sdfs, get_chembl_ids_with_struct, get_chembl_smiles
 import time
 from tools.models import Job
 from tools.runapp import createJob, updateJob
+from base64 import b64encode
+from pubchem_rest_interface.Pubchem_pug import pubchemDownload
 
 def addCompoundsAjax(user, source_id, ids, tags):
     if len(tags) != 0:
@@ -80,3 +82,31 @@ def checkCompoundsAjax(user, source_id, ids):
         return { 'success': True, 'results': results }
     else:
         raise Exception('Unknown source_id: {}'.format(source_id))
+
+def downloadCompoundsAjax(user, source_id, ids, output_format, tags):
+    """AJAX version of downloadCompounds(). Given a list of compound IDs
+    (i.e. ChEMBL, PubChem, workbench ID, tags...), download the associated
+    compound data (i.e. SDF, SMILES). The data will be returned in Base64."""
+
+    if len(ids) == 0:
+        raise Exception('Empty list of "ids".')
+
+    if source_id == "chembl":
+        if output_format == "sdf":
+            sdfs = get_chembl_sdfs(tuple(ids))
+            sdf = "\n$$$$\n".join(sdfs) + "\n$$$$\n"
+            return { "success": True, "data": b64encode(sdf.encode()) }
+        elif output_format == "smi":
+            smiles = get_chembl_smiles(tuple(ids))
+            smi = "\n".join(smiles) + "\n"
+            return { "success": True, "data": b64encode(smi.encode()) }
+        else:
+            raise Exception("Invalid output_format: {}".format(output_format))
+    elif source_id == "cid":
+        raise Exception("Implement me...")
+    elif source_id == "tag":
+        raise Exception("Implement me...")
+    elif source_id == "pubchem":
+        raise Exception("Implement me...")
+    else:
+        raise Exception("Unknown source_id: {}".format(source_id))

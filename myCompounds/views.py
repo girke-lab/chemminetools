@@ -31,7 +31,7 @@ from tools.models import Job
 from tools.runapp import createJob, updateJob
 from django.utils.http import urlquote
 from targetsearch.helpers import get_chembl_sdfs, get_chembl_smiles
-from .helpers import addCompoundsAjax, checkCompoundsAjax
+from .helpers import addCompoundsAjax, checkCompoundsAjax, downloadCompoundsAjax
 
 
 @guest_allowed
@@ -284,6 +284,12 @@ def ajax(request, action):
     elif action == 'check':
         try:
             result = checkCompoundsAjax(request.user, source_id, ids)
+            return JsonResponse(result)
+        except Exception as e:
+            return die(str(e))
+    elif action == 'download':
+        try:
+            result = downloadCompoundsAjax(request.user, source_id, ids, tags)
             return JsonResponse(result)
         except Exception as e:
             return die(str(e))
