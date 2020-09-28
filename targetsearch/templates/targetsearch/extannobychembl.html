@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+{% load targetsearch_extras %}
+
+{% block extra_styles %}
+.column-set {
+	border: 1px solid #ccc;
+	border-radius: 16px;
+	padding: 0.01em 16px;
+	margin: 1em;
+}
+{% endblock extra_styles %}
+
+{% block base_content %}
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-md-12">
+			{% if message %}<span style="color: red">{{message}}</span>{% endif %}
+			{% if data is None %}
+			<h4>Available data for {{chembl_id}}</h4>
+			{% for key, value in check_avail.items %}
+				{% if value is not None %}
+				<a class="btn btn-primary" role="button" href="{% url 'extAnnoByChembl' chembl_id key %}">{{key}}</a>
+				{% endif %}
+			{% endfor %}
+			{% else %}
+			<h4>{{db}} data for {{chembl_id}}</h4>
+			{% for key, value in check_avail.items %}
+				{% if value is not None %}
+				<a class="btn btn-primary" role="button" href="{% url 'extAnnoByChembl' chembl_id key %}">{{key}}</a>
+				{% endif %}
+			{% endfor %}
+			<table id="extanno-table" class="table table-striped">
+				<thead>
+					<tr>
+						<th>Column</th>
+						<th>Value</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for key, value in data.items %}
+					<tr>
+						<td>{{key}}</td>
+						<td>{{value}}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+			{% endif %}
+		</div>
+	</div>
+</div>
+{% endblock base_content %}
+
+{% block js_content %}
+
+{% endblock js_content %}

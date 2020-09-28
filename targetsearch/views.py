@@ -443,3 +443,19 @@ def ajax(request, action):
             return die(str(e))
     else:
         return die('Unknown action: {}'.format(action))
+
+def extAnnoByChembl(request, chembl_id, db=None):
+    check_avail = checkExtAnno(chembl_id)
+    if db is None:
+        data = None
+    else:
+        data = getExtAnno(chembl_id, db)
+
+    context = {
+        'check_avail': check_avail,
+        'data': data,
+        'chembl_id': chembl_id,
+        'db': db,
+    }
+
+    return render(request, 'targetsearch/extannobychembl.html', context)

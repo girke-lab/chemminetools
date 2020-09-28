@@ -8,6 +8,7 @@ import tempfile
 import subprocess
 import shutil
 import pprint
+import sqlite3
 from psycopg2.extras import NamedTupleCursor
 from django.conf import settings
 
@@ -276,7 +277,19 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
             'visible': True,
             'export': False,
             'html': '<button type="button" class="btn btn-primary" onclick="showDrugIndModal(\'{}\')">View</button>',
-            }]
+            },
+            {
+            'id': 'annotation__extanno__show_extanno',
+            'sql': None,
+            'table': 'Extended Annotations',
+            'name': 'Extended Annotations',
+            'desc': 'Link to view extended annotations.',
+            'visible': True,
+            'export': False,
+            #'html': '<a class="btn btn-primary" role="button" target="_blank" href="/targetsearch/extannobychembl/{}/">View</a>',
+            'extanno': True,
+            }
+            ]
         self.table_info += new_table_info
 
         # Add blank cells for the new table columns
@@ -290,6 +303,8 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
             c = self.molregno_to_chembl[m]
             self.drugind_objs[c] = DrugIndicationSearch(m)
             self.add_drugind_data(self.drugind_objs[c])
+
+        # Prepare Extended Annotation data
 
     def add_drugind_data(self, drugind_obj):
         """Helper method. Extract data from a prepared DrugIndicationSearch
@@ -320,6 +335,19 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
                 row['annotation__drugind_summary__mesh_indications'] = "; ".join(mesh_indications)
                 row['annotation__drugind_summary__efo_indications'] = "; ".join(efo_indications)
                 row['annotation__drugind_summary__show_drugind_table'] = self.molregno_to_chembl[drugind_obj.molregno]
+                #row['annotation__extanno__show_extanno'] = self.molregno_to_chembl[drugind_obj.molregno]
+                extanno_dict = dict()
+                chembl_id = self.molregno_to_chembl[drugind_obj.molregno]
+                extanno_dict['chembl_id'] = chembl_id
+                extanno_check = checkExtAnno(chembl_id)
+                if extanno_check is None:
+                    extanno_dict['extannos'] = None
+                else:
+                    extanno_dict['extannos'] = set()
+                    for k, v in extanno_check.items():
+                        if v is not None:
+                            extanno_dict['extannos'].add(k)
+                row['annotation__extanno__show_extanno'] = extanno_dict
 
     def get_results(self):
         """Return query data as an OrderedDict list."""
@@ -790,9 +818,120 @@ def getParalogsCached(queryIds):
                 'cacheMisses': list(querySet),
                 'uniprotIdMap': uniprotIdMap}
 
+def queryExtAnno(chembl_id):
+    """Retrieves all available extended annotations for a given ChEMBL ID.
 
+    Currently not used anywhere, and is slow on SQLite. It's better to use
+    checkExtAnno() and getExtAnno(). Consider deprecating."""
+    with sqlite3.connect(settings.ANNO_DB) as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        query = """SELECT chembl_id, drugbank_id, drugage_id, cmap_id, lincs_id
+            FROM id_mapping
+            WHERE chembl_id = ?"""
+        cur.execute(query, (chembl_id,))
+        id_map = cur.fetchone()
 
+        if id_map is None:
+            return None
 
+        results = dict()
+        for a in [("drugbank_id","DrugBankAnnot"),
+                  ("drugage_id","drugAgeAnnot"),
+                  ("cmap_id","cmapAnnot"),
+                  ("lincs_id","lincsAnnot")]:
+            key, table = a
+            if id_map[key] is None:
+                results[key] = None
+            else:
+                query = """SELECT * FROM {table} WHERE {col} = ?""".format(table=table, col=key)
+                d = dict()
+                cur.execute(query, (id_map[key],))
+                anno_results = cur.fetchone()
+                for k in anno_results.keys():
+                    d[k] = anno_results[k]
+                results[key] = d
 
-                
+        return results
 
+def checkExtAnno(chembl_id):
+    """Checks the availability of an extended annotation for a given ChEMBL ID.
+
+    Returns a dict object with translated IDs, or None if a translation DNE."""
+    with sqlite3.connect(settings.ANNO_DB) as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        query = """SELECT drugbank_id as drugbank, drugage_id as drugage, cmap_id as cmap, lincs_id as lincs
+                   FROM id_mapping
+                   WHERE chembl_id = ?"""
+        cur.execute(query, (chembl_id,))
+        id_map = cur.fetchone()
+
+        if id_map is None:
+            return None
+
+        results = dict()
+        results.update(id_map)
+
+        return results
+
+def getExtAnno(chembl_id, db):
+    with sqlite3.connect(settings.ANNO_DB) as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        if db == "drugbank":
+            join_col = "drugbank_id"
+            join_table = "DrugBankAnnot"
+        elif db == "drugage":
+            join_col = "drugage_id"
+            join_table = "drugAgeAnnot"
+        elif db == "cmap":
+            join_col = "cmap_id"
+            join_table = "cmapAnnot"
+        elif db == "lincs":
+            join_col = "lincs_id"
+            join_table = "lincsAnnot"
+        else:
+            raise Exception("Invalid db value: {}".format(db))
+        query = """SELECT id_mapping.chembl_id, {join_table}.*
+                   FROM id_mapping
+                   JOIN {join_table} using({join_col})
+                   WHERE chembl_id = ?""".format(join_col=join_col, join_table=join_table)
+        cur.execute(query, (chembl_id,))
+        anno_results = cur.fetchone()
+
+    if anno_results is None:
+        return None
+
+    results = dict()
+    results.update(anno_results)
+
+    return results
+
+def getExtAnno2(id_type, cid):
+    if id_type == "drugbank_id":
+        table = "DrugBankAnnot"
+    elif id_type == "drugage_id":
+        table = "drugAgeAnnot"
+    elif id_type == "cmap_id":
+        table = "cmapAnnot"
+    elif id_type == "lincs_id":
+        table = "lincsAnnot"
+    else:
+        raise Exception("Invalid id_type value: {}".format(id_type))
+
+    with sqlite3.connect(settings.ANNO_DB) as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        query = """SELECT *
+                   FROM {table}
+                   WHERE {id_type} = ?""".format(table=table, id_type=id_type)
+        cur.execute(query, (cid,))
+        anno_results = cur.fetchone()
+
+    if anno_results is None:
+        return None
+    else:
+        results = dict()
+        results.update(anno_results)
+        return results

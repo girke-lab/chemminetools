@@ -11,6 +11,9 @@ urlpatterns = [
         path('targetNames/<query>', targetNames, name='targetNames'),
         path('ajax/<action>', ajax, name='targetsearch-ajax'),
         path('detail/<id>', detailPage),
+        #path('extanno/<id_type>/<cid>/', extAnno, name='extAnno'),
+        path('extannobychembl/<chembl_id>/', extAnnoByChembl, name='extAnnoByChembl'),
+        path('extannobychembl/<chembl_id>/<db>/', extAnnoByChembl, name='extAnnoByChembl'),
 
         path('<initial_ids>',newTS), # this needs to be last
         ]

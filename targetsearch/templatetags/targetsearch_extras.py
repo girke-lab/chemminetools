@@ -1,6 +1,6 @@
 from django.conf import settings
 #from django.template.defaulttags import register
-from django.utils.html import format_html
+from django.utils.html import format_html, mark_safe
 
 from django import template
 
@@ -57,3 +57,16 @@ def analytics():
         return settings.ANALYTICS
     except AttributeError as e:
         return True
+
+@register.simple_tag
+def extanno_format(extanno_dict):
+    chembl_id = extanno_dict['chembl_id']
+    output_html = ''
+
+    if extanno_dict['extannos'] is None:
+        return 'None'
+
+    for db_name, display_name in [('drugbank', 'Drugbank'), ('drugage', 'Drugage'), ('lincs', 'LINCS'), ('cmap', 'CMAP')]:
+        if db_name in extanno_dict['extannos']:
+            output_html += format_html('<a class="btn btn-primary" role="button" target="_blank" href="/targetsearch/extannobychembl/{}/{}/">{}</a> ', chembl_id, db_name, display_name)
+    return mark_safe(output_html)

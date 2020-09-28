@@ -67,6 +67,8 @@
 								<td>{% html_format col.html cell_value %}</td>
 							{% elif 'url' in col.keys %}
 								<td><a target="_blank" href="{% url_format col.url cell_value %}">{{ cell_value }}</a></td>
+							{% elif 'extanno' in col.keys %}
+								<td>{% extanno_format cell_value %}</td>
 							{% else %}
 								<td>{{ cell_value }}</td>
 							{% endif %}
