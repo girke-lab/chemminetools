@@ -6,7 +6,7 @@ billiard==3.6.1.0
 celery==4.4.0
 certifi==2019.11.28
 chardet==3.0.4
-cryptography==2.6.1
+cryptography==3.2
 Django==2.2.16
 django-bootstrap-toolkit==2.15.0
 django-bootstrap4==1.1.1
