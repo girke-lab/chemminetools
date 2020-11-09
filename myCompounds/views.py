@@ -268,12 +268,22 @@ def uploadCompound(request, resource = None, job_id = None):
 @guest_allowed
 def ajax(request, action):
     def die(msg):
-        ajaxResponse = { 'success' : False, 'message' : msg }
+        ajaxResponse = { 'success' : False, 'source' : 'ajax', 'message' : msg }
         return JsonResponse(ajaxResponse)
 
-    tags = set(request.POST.getlist('tags'))
+    if 'tags' in request.POST:
+        tags = set(request.POST.getlist('tags'))
+    else:
+        tags = None
+
     source_id = request.POST.get('source_id')
     ids = set(request.POST.getlist('ids'))
+
+    if 'id_list' in request.POST:
+        id_str = request.POST.get('id_list')
+        id_list = list(id_str.split(' '))
+    else:
+        id_list = None
 
     if action == 'add':
         try:
@@ -289,7 +299,16 @@ def ajax(request, action):
             return die(str(e))
     elif action == 'download':
         try:
-            result = downloadCompoundsAjax(request.user, source_id, ids, tags)
+            output_format = request.POST.get('output_format')
+            #debug = { 'success' : False,
+            #          'source' : 'ajax',
+            #          'message' : 'debug result',
+            #          'source_id' : source_id,
+            #          'id_list' : id_list,
+            #          'size_of_id_list' : len(id_list),
+            #          'output_format' : output_format }
+            #return JsonResponse(debug)
+            result = downloadCompoundsAjax(request.user, source_id, id_list, output_format)
             return JsonResponse(result)
         except Exception as e:
             return die(str(e))

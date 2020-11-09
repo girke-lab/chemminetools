@@ -10,9 +10,9 @@
 var structures_loaded = false;
 var selectedTags = [];
 
-$.ajaxSetup({
-	  headers: { "X-CSRFToken": '{{csrf_token}}' }
-});
+//$.ajaxSetup({
+//	  headers: { "X-CSRFToken": '{{csrf_token}}' }
+//});
 $(document).ready(function() {
 	$("#loadstructures").click(function () {
 		if (!structures_loaded) {
@@ -129,7 +129,49 @@ function download(format){
 	console.log("downloading");
 	ids = jQuery(".compound").map(function(){ return this.id;}).get();
 	console.log("ids: ",ids);
-	postData("/myCompounds/download/"+format,ids,"pubchem_id");
+	//postData("/myCompounds/download/"+format,ids,"pubchem_id");
+}
+
+function ajaxDownload(output_format) {
+	if ( output_format != "sdf" && output_format != "smi" ) {
+		console.log("ajaxDownload: output_format must be 'sdf' or 'smi'");
+		return;
+	}
+
+	if ( $('#a_dl_'+output_format).attr("href") != "#" ) {
+		console.log("ajaxDownload: reusing saved data");
+		document.getElementById('a_dl_'+output_format).click();
+		return;
+	}
+
+	var original_btn_str = $('#btn_dl_'+output_format).html();
+	$('#btn_dl_'+output_format).prop("disabled", true).html("Please wait...");
+	//$('#dl_source_id').val(source_id); // hard-coded below
+	//$('#dl_id_list').val(ids);
+	ids = jQuery(".compound").map(function(){ return this.id; }).get();
+	//console.log("ajaxDownload: ids:", ids.join(' '));
+	$('#dl_id_list').val(ids.join(' '));
+	$('#dl_output_format').val(output_format);
+	var post_data = $('#dl_form').serialize();
+	console.log("ajaxDownload: post_data:", post_data);
+	jQuery.post("{% url 'myCompounds-ajax' 'download' %}", post_data, function(recv_data) {
+		if (recv_data.success === true) {
+			console.log("ajaxDownload received data");
+			//console.log("success:", recv_data.success);
+			//console.log("data:", recv_data.data);
+
+			//save_data[output_format] = recv_data.data;
+			$('#a_dl_'+output_format).attr("href", "data:text/plain;base64,"+btoa(recv_data.data));
+			document.getElementById('a_dl_'+output_format).click();
+		} else {
+			console.log("ajaxDownload received malformed response");
+		}
+	}).fail(function(recv_data) {
+		console.log("ajaxDownload failed");
+	}).always(function(recv_data) {
+		//console.log("ajaxDownload always");
+		$('#btn_dl_'+output_format).prop("disabled", false).html(original_btn_str);
+	});
 }
 
 </script>
@@ -187,9 +229,13 @@ function download(format){
   
 		<div class="btn-toolbar mb-3">
 			<div class="btn-group">
-				<button type="button" class="btn btn-outline-primary" onclick="download('sdf')">Download SDF</button>
-				<button type="button" class="btn btn-outline-primary" onclick="download('smi')">Download SMILES</button>
+				<button id="btn_dl_sdf" type="button" class="btn btn-outline-primary" onclick="ajaxDownload('sdf')">Download SDF</button>
+				<button id="btn_dl_smi" type="button" class="btn btn-outline-primary" onclick="ajaxDownload('smi')">Download SMILES</button>
 				<a id="save-cid-list-btn" role="button" class="btn btn-outline-primary disabled" download="cid_list.txt" href="#">Download CID List</a>
+				<span class="d-none">
+					<a id="a_dl_sdf" href="#" download="output.sdf"></a>
+					<a id="a_dl_smi" href="#" download="output.smi"></a>
+				</span>
 			</div>
 			<div class="btn-group ml-3">
 				<button id="loadstructures" class="btn btn-outline-secondary">Show Structures</button>
@@ -229,6 +275,14 @@ function download(format){
     {% endfor %}
     </tbody>
     </table>
+
+		<!-- Hidden form for ajaxDownload -->
+		<form id="dl_form" class="d-none" autocomplete="off">
+			{% csrf_token %}
+			<input id="dl_id_list" name="id_list" type="hidden" />
+			<input id="dl_source_id" name="source_id" type="hidden" value="pubchem"/>
+			<input id="dl_output_format" name="output_format" type="hidden" />
+		</form>
 {% else %}
     <h2>No Hits Found</h2>
 {% endif %}

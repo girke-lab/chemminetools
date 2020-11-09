@@ -83,10 +83,10 @@ def checkCompoundsAjax(user, source_id, ids):
     else:
         raise Exception('Unknown source_id: {}'.format(source_id))
 
-def downloadCompoundsAjax(user, source_id, ids, output_format, tags):
+def downloadCompoundsAjax(user, source_id, ids, output_format):
     """AJAX version of downloadCompounds(). Given a list of compound IDs
     (i.e. ChEMBL, PubChem, workbench ID, tags...), download the associated
-    compound data (i.e. SDF, SMILES). The data will be returned in Base64."""
+    compound data (i.e. SDF, SMILES)."""
 
     if len(ids) == 0:
         raise Exception('Empty list of "ids".')
@@ -95,11 +95,11 @@ def downloadCompoundsAjax(user, source_id, ids, output_format, tags):
         if output_format == "sdf":
             sdfs = get_chembl_sdfs(tuple(ids))
             sdf = "\n$$$$\n".join(sdfs) + "\n$$$$\n"
-            return { "success": True, "data": b64encode(sdf.encode()) }
+            return { "success": True, "source": "downloadCompoundsAjax", "data": sdf }
         elif output_format == "smi":
             smiles = get_chembl_smiles(tuple(ids))
             smi = "\n".join(smiles) + "\n"
-            return { "success": True, "data": b64encode(smi.encode()) }
+            return { "success": True, "source": "downloadCompoundsAjax", "data": smi }
         else:
             raise Exception("Invalid output_format: {}".format(output_format))
     elif source_id == "cid":
@@ -107,6 +107,13 @@ def downloadCompoundsAjax(user, source_id, ids, output_format, tags):
     elif source_id == "tag":
         raise Exception("Implement me...")
     elif source_id == "pubchem":
-        raise Exception("Implement me...")
+        if output_format == "sdf":
+            sdf = pubchemDownload(ids, "sdf")
+            return { "success": True, "source": "downloadCompoundsAjax", "data": sdf }
+        elif output_format == "smi":
+            smi = pubchemDownload(ids, "smiles")
+            return { "success": True, "source": "downloadCompoundsAjax", "data": smi }
+        else:
+            raise Exception("Invalid output_format: {}".format(output_format))
     else:
         raise Exception("Unknown source_id: {}".format(source_id))

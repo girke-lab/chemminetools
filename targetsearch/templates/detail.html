@@ -10,104 +10,162 @@
 	margin: 1em;
 }
 label {
-    font-weight: bold;
+	font-weight: bold;
 }
 {% endblock extra_styles %}
 {% block base_content %}
 
-<script type="text/javascript">
-$(document).ready(function() {
-	$("[data-toggle=tooltip]").tooltip();
-});
+<script>
+	function ajaxDownload(source_id, ids, output_format) {
+		if ( output_format != "sdf" && output_format != "smi" ) {
+			console.log("ajaxDownload: output_format must be 'sdf' or 'smi'");
+			return;
+		}
+
+		if ( $('#a_dl_'+output_format).attr("href") != "#" ) {
+			console.log("ajaxDownload: reusing saved data");
+			document.getElementById('a_dl_'+output_format).click();
+			return;
+		}
+
+		var original_btn_str = $('#btn_dl_'+output_format).html();
+		$('#btn_dl_'+output_format).prop("disabled", true).html("Please wait...");
+		$('#dl_source_id').val(source_id);
+		$('#dl_id_list').val(ids);
+		$('#dl_output_format').val(output_format);
+		var post_data = $('#dl_form').serialize();
+		jQuery.post("{% url 'myCompounds-ajax' 'download' %}", post_data, function(recv_data) {
+			if (recv_data.success === true) {
+				console.log("ajaxDownload received data");
+				//console.log("success:", recv_data.success);
+				//console.log("data:", recv_data.data);
+
+				//save_data[output_format] = recv_data.data;
+				$('#a_dl_'+output_format).attr("href", "data:text/plain;base64,"+btoa(recv_data.data));
+				document.getElementById('a_dl_'+output_format).click();
+			} else {
+				console.log("ajaxDownload received malformed response");
+			}
+		}).fail(function(recv_data) {
+			console.log("ajaxDownload failed");
+		}).always(function(recv_data) {
+			//console.log("ajaxDownload always");
+			$('#btn_dl_'+output_format).prop("disabled", false).html(original_btn_str);
+		});
+	}
+
+	$(document).ready(function() {
+		$("[data-toggle=tooltip]").tooltip();
+	});
 </script>
 
 
 <div class="container-fluid">
+
 	<div class="row my-3">
 		<div class="col-md-6">
-            {% if type == "compound" %}
-                <h2>Compound {{given_id}}</h2>
-                <a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{given_id}}">ChEMBL</a>
-                <a target="_blank" href="https://pubchem.ncbi.nlm.nih.gov/#query={{given_id}}">PubChem</a>
-            {% elif type == "target" %}
-                <h2>Target Accession {{given_id}}</h2>
-                <a target="_blank" href="https://www.uniprot.org/uniprot/{{given_id}}">Uniprot</a>
-            {% endif%}
+		{% if type == "compound" %}
+			<h2>Compound {{given_id}}</h2>
+			<a target="_blank" href="https://www.ebi.ac.uk/chembl/compound_report_card/{{given_id}}">ChEMBL</a>
+			<a target="_blank" href="https://pubchem.ncbi.nlm.nih.gov/#query={{given_id}}">PubChem</a>
+		{% elif type == "target" %}
+			<h2>Target Accession {{given_id}}</h2>
+			<a target="_blank" href="https://www.uniprot.org/uniprot/{{given_id}}">Uniprot</a>
+		{% endif %}
+		</div>
+	</div>
 
-        </div>
-    </div>
-    {% if type == "compound" %}
+{% if type == "compound" %}
 	<div class="row my-4">
 		<div class="col-md-6">
-            <img width="200px" src="https://www.ebi.ac.uk/chembl/api/data/image/{{given_id}}.svg"/>
-        </div>
+			<img width="200px" src="https://www.ebi.ac.uk/chembl/api/data/image/{{given_id}}.svg"/>
+		</div>
 		<div class="col-md-6">
-            {% if compound_info %}
-            <div class="">
-                <label for="name">Name:</label>
-                <span id="name">{{compound_info.pref_name}}</span>
-            </div>
-
-            <div class="">
-                <label for="formula">Formula:</label>
-                <span id="formula">{{compound_info.full_molformula}}</span>
-            </div>
-            <div >
-                <label for="mwt">Full Molecular Weight:</label>
-                <span id="mwt">{{compound_info.full_mwt}}</span>
-            </div>
-            <div >
-                <label for="molecule_type">Molecule Type:</label>
-                <span id=molecule_type"">{{compound_info.molecule_type}}</span>
-            </div>
-            {% endif%}
-
-
-        </div>
-    </div>
-    {% elif type == "target" %}
-    <div class="row my-3">
+		{% if compound_info %}
+			<div class="">
+				<label for="name">Name:</label>
+				<span id="name">{{compound_info.pref_name}}</span>
+			</div>
+			<div class="">
+				<label for="formula">Formula:</label>
+				<span id="formula">{{compound_info.full_molformula}}</span>
+			</div>
+			<div>
+				<label for="mwt">Full Molecular Weight:</label>
+				<span id="mwt">{{compound_info.full_mwt}}</span>
+			</div>
+			<div>
+				<label for="molecule_type">Molecule Type:</label>
+				<span id="molecule_type">{{compound_info.molecule_type}}</span>
+			</div>
+		{% endif %}
+		</div>
+	</div>
+	<div class="row my-4">
 		<div class="col-md-12">
-            {% if target_info %}
-            <div class="">
-                <label for="description">Description:</label>
-                <span id="description">{{target_info.description}}</span>
-            </div>
-
-            <div class="">
-                <label for="organism">Organism:</label>
-                <span id="organism">{{target_info.organism}}</span>
-            </div>
-            <div class="">
-                <label for="gene">Gene:</label>
-                <span id="gene">{{target_info.gene_names}}</span>
-            </div>
-            {% endif%}
-        </div>
-    </div>
-
-    {% endif%}
-    {% if annotation_info %}
+			<div class="btn-toolbar">
+				<div class="btn-group">
+					<button id="btn_dl_sdf" type="button" class="btn btn-outline-primary" onclick="ajaxDownload('chembl', '{{given_id}}', 'sdf')">Download SDF</button>
+					<button id="btn_dl_smi" type="button" class="btn btn-outline-primary" onclick="ajaxDownload('chembl', '{{given_id}}', 'smi')">Download SMILES</button>
+					<span class="d-none">
+						<a id="a_dl_sdf" href="#" download="{{given_id}}.sdf"></a>
+						<a id="a_dl_smi" href="#" download="{{given_id}}.smi"></a>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+{% elif type == "target" %}
 	<div class="row my-3">
 		<div class="col-md-12">
-            {% if type == "compound" %}
-                <h3>Target Search</h3>
-            {% elif type == "target" %}
-                <h3>Compound Search</h3>
-            {% endif %}
+		{% if target_info %}
+			<div class="">
+				<label for="description">Description:</label>
+				<span id="description">{{target_info.description}}</span>
+			</div>
+			<div class="">
+				<label for="organism">Organism:</label>
+				<span id="organism">{{target_info.organism}}</span>
+			</div>
+			<div class="">
+				<label for="gene">Gene:</label>
+				<span id="gene">{{target_info.gene_names}}</span>
+			</div>
+		{% endif %}
+		</div>
+	</div>
+{% endif %}
 
-            {% include "targetsearch/ts_table.html" with table_name="annotation" table_info=annotation_info table_data=annotation_matches grouping_col=groupingCol %}
-            {% if activity_matches is not None %}
-                {% include "targetsearch/ts_table.html" with table_name="activity" table_info=activity_info table_data=activity_matches grouping_col=groupingCol %}
-            {% endif %}
+{% if annotation_info %}
+	<div class="row my-3">
+		<div class="col-md-12">
+		{% if type == "compound" %}
+			<h3>Target Search</h3>
+		{% elif type == "target" %}
+			<h3>Compound Search</h3>
+		{% endif %}
 
-        </div>
-    </div>
-    {% else %}
-    Sorry, we could not recognize the identifier '{{given_id}}'. Acceptible identifiers are CHEMBL IDs or 
-    accessions assocated with CHEMBL compounds.
-    {% endif %}
+		{% include "targetsearch/ts_table.html" with table_name="annotation" table_info=annotation_info table_data=annotation_matches grouping_col=groupingCol %}
+		{% if activity_matches is not None %}
+			{% include "targetsearch/ts_table.html" with table_name="activity" table_info=activity_info table_data=activity_matches grouping_col=groupingCol %}
+		{% endif %}
+
+		</div>
+	</div>
+{% else %}
+	Sorry, we could not recognize the identifier '{{given_id}}'. Acceptible identifiers are CHEMBL IDs or 
+	accessions assocated with CHEMBL compounds.
+{% endif %}
+
 </div>
+
+<!-- Hidden form for ajaxDownload -->
+<form id="dl_form" class="d-none" autocomplete="off">
+	{% csrf_token %}
+	<input id="dl_id_list" name="id_list" type="hidden" />
+	<input id="dl_source_id" name="source_id" type="hidden" />
+	<input id="dl_output_format" name="output_format" type="hidden" />
+</form>
 
 {% endblock base_content %}
 
