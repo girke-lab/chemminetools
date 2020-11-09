@@ -284,7 +284,7 @@ class AnnotationWithDrugIndSearch(AnnotationSearch):
             'table': 'Extended Annotations',
             'name': 'Extended Annotations',
             'desc': 'Link to view extended annotations.',
-            'visible': True,
+            'visible': False,
             'export': False,
             #'html': '<a class="btn btn-primary" role="button" target="_blank" href="/targetsearch/extannobychembl/{}/">View</a>',
             'extanno': True,

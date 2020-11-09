@@ -161,4 +161,16 @@ function toggleStructures(table_name) {
 function structImgError(element) {
 	$(element).closest('div').html('(Structure info unavailable)');
 }
+
+function toggleExtAnno() {
+	const chkbox_id = "annotation__extanno__show_extanno";
+	const btn_id = "show-extanno-annotation";
+
+	document.getElementById(chkbox_id).click();
+	//if ( $('.'+chkbox_id).prop('checked') ) {
+	//	$('.'+btn_id).html("Hide Extended Annotation Links");
+	//} else {
+	//	$('.'+btn_id).html("Show Extended Annotation Links");
+	//}
+}
 </script>

@@ -12,6 +12,11 @@
 			<div class="btn-group mr-1" role="group" data-toggle="tooltip" title="Show the compound structure underneath the ChEMBL ID.">
 				<button id="show-struct-{{table_name}}" type="button" class="btn btn-primary" onclick="toggleStructures('{{table_name}}')">Show Structures</button>
 			</div>
+			{% if table_name == "annotation" %}
+			<div class="btn-group mr-1" role="group" data-toggle="tooltip" title="Show/Hide links for additional annotation data.">
+				<button id="show-extanno-{{table_name}}" type="button" class="btn btn-primary" onclick="toggleExtAnno()">Show Extended Annotation Links</button>
+			</div>
+			{% endif %}
 			<div class="btn-group mr-1" role="group">
 				<button id="csv{{table_name.title}}" type="button" class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Save to CSV</button>
 				<div id="csv-buttons-{{table_name}}" class="dropdown-menu" aria-labelledby="csv{{table_name.title}}"></div>
@@ -97,6 +102,7 @@ $(document).ready(function() {
 	targetSearch[table_name+'_pref_name_column'] = {% find_col_by_key table_info 'id' table_name '__molecule_dictionary__pref_name' 'null' %};
 	targetSearch[table_name+'_accession_column'] = {% find_col_by_key table_info 'id' table_name '__component_sequences__accession' 'null' %};
 	targetSearch[table_name+'_show_structures'] = false;
+	targetSearch[table_name+'_extanno_column'] = {% find_col_by_key table_info 'id' table_name '__extanno__show_extanno' 'null' %};
 
 	var table_buttons = table.buttons().container();
 	table_buttons.removeClass('btn-group').addClass('btn-group-vertical');
@@ -112,12 +118,20 @@ $(document).ready(function() {
 	});
 
 	// Disable the Show Structure button when the ChEMBL ID column is hidden.
+	// Toggle the text for toggling ExtAnno Links
 	table.on('column-visibility', function(e, settings, column, state) {
 		//console.log("column-visibility event fired for",table_name,"table");
 		//console.log("column:", column, ", state:", state);
 		if (column == targetSearch[table_name + '_chembl_column']) {
 			$('#show-struct-' + table_name).prop('disabled', !state);
 			//console.log("button status:", $('#show-struct-'+table_name).prop('disabled'));
+		}
+		if (column == targetSearch[table_name + '_extanno_column']) {
+			if (state === true) {
+				$('#show-extanno-' + table_name).html("Hide Extended Annotation Links");
+			} else {
+				$('#show-extanno-' + table_name).html("Show Extended Annotation Links");
+			}
 		}
 	});
 });
