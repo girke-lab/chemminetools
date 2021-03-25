@@ -53,7 +53,7 @@ PyGObject==3.30.4
 python-memcached==1.58
 pytz==2019.3
 pyxdg==0.26
-PyYAML==5.3
+PyYAML==5.4
 requests==2.22.0
 SecretStorage==2.3.1
 simplejson==3.17.0
