@@ -12,6 +12,7 @@ import sys
 import traceback
 
 from .helpers import *
+from . import ts_graph
 
 from django.conf import settings
 from django.views.decorators.cache import cache_page
@@ -278,6 +279,8 @@ def newTS(request,initial_ids=""):
         traceback.print_tb(sys.exc_info()[2])
         message = str(e)
 
+    ids_resubmit = '+'.join(ids)
+
     context = {
         'query_submit' : query_submit,
         'message' : message,
@@ -296,6 +299,7 @@ def newTS(request,initial_ids=""):
         'similarityJobs': similarityJobs,
         'homolog_type_value': homolog_type_value,
         'initial_ids': initial_ids,
+        'ids_resubmit' : ids_resubmit,
         }
 
     return render(request, 'targetsearch/new_ts.html', context)
@@ -459,3 +463,25 @@ def extAnnoByChembl(request, chembl_id, db=None):
     }
 
     return render(request, 'targetsearch/extannobychembl.html', context)
+
+def tsGraph(request, id_type, table_name, ids):
+    id_list = ids.split('+')
+
+    if table_name == 'annotation':
+        anno_data = ts_graph.get_anno_data(id_type, id_list)
+        (nodes_data, edges_data) = ts_graph.make_anno_graph(anno_data)
+    elif table_name == 'activity':
+        act_data = ts_graph.get_act_data(id_type, id_list)
+        (nodes_data, edges_data) = ts_graph.make_act_graph(act_data)
+
+    context = {
+        'id_type' : id_type,
+        'table_name' : table_name,
+        'ids' : ids,
+        'ids_type' : str(type(ids)),
+        'id_list' : id_list,
+        'nodes_data' : nodes_data,
+        'edges_data' : edges_data,
+    }
+
+    return render(request, 'targetsearch/ts_graph.html', context)

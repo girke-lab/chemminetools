@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+{% load targetsearch_extras %}
+
+{% block extra_styles %}
+#ts_graph {
+    width: 600px;
+    height: 600px;
+    border: 1px solid lightgray;
+}
+{% endblock extra_styles %}
+
+{% block extra_headers %}
+<script type="text/javascript" src="/static/admin/vis-network-9.0.0/standalone/umd/vis-network.min.js"></script>
+{% endblock extra_headers %}
+
+{% block base_content %}
+<h4>Compound-Target Graph ({{ table_name | title }})</h4>
+
+<div id="ts_graph"></div>
+<p id="status_msg">Large datasets may take a while to load.</p>
+{% endblock base_content %}
+
+{% block js_content %}
+{{ nodes_data | json_script:"nodes_json" }}
+{{ edges_data | json_script:"edges_json" }}
+<script type="text/javascript">
+    const nodes = new vis.DataSet(JSON.parse(document.getElementById("nodes_json").text));
+    const edges = new vis.DataSet(JSON.parse(document.getElementById("edges_json").text));
+
+    const nodesView = new vis.DataView(nodes);
+    const edgesView = new vis.DataView(edges);
+
+    const container = document.getElementById("ts_graph");
+    const data = {nodes: nodesView, edges: edgesView};
+    const options = {physics: {enabled: false}};
+    const network = new vis.Network(container, data, options);
+</script>
+{% endblock js_content %}

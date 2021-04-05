@@ -14,6 +14,7 @@ urlpatterns = [
         #path('extanno/<id_type>/<cid>/', extAnno, name='extAnno'),
         path('extannobychembl/<chembl_id>/', extAnnoByChembl, name='extAnnoByChembl'),
         path('extannobychembl/<chembl_id>/<db>/', extAnnoByChembl, name='extAnnoByChembl'),
+        path('tsgraph/<id_type>/<table_name>/<ids>/', tsGraph, name='tsGraph'),
 
         path('<initial_ids>',newTS), # this needs to be last
         ]
