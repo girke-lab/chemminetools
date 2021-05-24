@@ -145,9 +145,9 @@ label {
 			<h3>Compound Search</h3>
 		{% endif %}
 
-		{% include "targetsearch/ts_table.html" with table_name="annotation" table_info=annotation_info table_data=annotation_matches grouping_col=groupingCol %}
+		{% include "targetsearch/ts_table.html" with table_name="annotation" table_info=annotation_info table_data=annotation_matches grouping_col=groupingCol id_type=type ids_resubmit=given_id %}
 		{% if activity_matches is not None %}
-			{% include "targetsearch/ts_table.html" with table_name="activity" table_info=activity_info table_data=activity_matches grouping_col=groupingCol %}
+			{% include "targetsearch/ts_table.html" with table_name="activity" table_info=activity_info table_data=activity_matches grouping_col=groupingCol id_type=type ids_resubmit=given_id %}
 		{% endif %}
 
 		</div>

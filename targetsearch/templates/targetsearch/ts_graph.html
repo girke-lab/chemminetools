@@ -17,7 +17,10 @@
 {% block base_content %}
 <h4>Compound-Target Graph ({{ table_name | title }})</h4>
 
-<div id="ts_graph"></div>
+<div class="d-flex">
+    <span id="ts_graph"></span>
+    <span id="ts_info" class="flex-grow-1">Click on a node (compound or target) to view details.</span>
+</div>
 <p id="status_msg">Large datasets may take a while to load.</p>
 {% endblock base_content %}
 
@@ -25,15 +28,47 @@
 {{ nodes_data | json_script:"nodes_json" }}
 {{ edges_data | json_script:"edges_json" }}
 <script type="text/javascript">
-    const nodes = new vis.DataSet(JSON.parse(document.getElementById("nodes_json").text));
-    const edges = new vis.DataSet(JSON.parse(document.getElementById("edges_json").text));
+    const nodes = JSON.parse(document.getElementById("nodes_json").text);
+    const edges = JSON.parse(document.getElementById("edges_json").text);
 
-    const nodesView = new vis.DataView(nodes);
-    const edgesView = new vis.DataView(edges);
+    const nodesDS = new vis.DataSet(nodes);
+    const edgesDS = new vis.DataSet(edges);
+
+    const nodesView = new vis.DataView(nodesDS);
+    const edgesView = new vis.DataView(edgesDS);
 
     const container = document.getElementById("ts_graph");
     const data = {nodes: nodesView, edges: edgesView};
-    const options = {physics: {enabled: false}};
+    const options = { edges: { smooth: false } };
     const network = new vis.Network(container, data, options);
+
+    var sne = null;
+    network.on("selectNode", function (params) {
+        sne = params;
+        //console.log("selectNode Event:", sne);
+        var n = nodes[sne.nodes[0]];
+        console.log("selected node:", n);
+
+        var info_html = '';
+        info_html += n.title.replaceAll('\n', '</br>');
+        if (n.type == "compound") {
+            var cmt_url = '/targetsearch/detail/'+n.label; //TODO: trailing slash error
+            var ebi_url = 'https://www.ebi.ac.uk/chembl/compound_report_card/'+n.label+'/';
+            info_html += '<p><a class="btn btn-primary" role="button" href="'+cmt_url+'" target="_blank">ChemMine Tools Compound Info</a></p>';
+            info_html += '<p><a class="btn btn-primary" role="button" href="'+ebi_url+'" target="_blank">EBI ChEMBL Report Card</a></p>';
+        } else if (n.type == "target") {
+            var uniprot_url = 'https://www.uniprot.org/uniprot/'+n.label;
+            info_html += '<p><a class="btn btn-primary" role="button" href="'+uniprot_url+'" target="_blank">Uniprot Info</a></p>';
+        } else {
+            info_html += '<p>Unknown node type.</p>';
+        }
+        document.getElementById("ts_info").innerHTML = info_html;
+    });
+
+    var see = null;
+    network.on("selectEdge", function (params) {
+        see = params;
+        console.log("selectEdge event:", see);
+    });
 </script>
 {% endblock js_content %}

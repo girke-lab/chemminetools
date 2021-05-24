@@ -54,7 +54,7 @@ def get_act_data(id_type, ids):
     return act_data
 
 def make_anno_graph(query_data, table_name = 'annotation'):
-    node_id_next = 1
+    node_id_next = 0
     nodes = list()
     edges = list()
     compounds = dict()
@@ -101,6 +101,8 @@ def make_anno_graph(query_data, table_name = 'annotation'):
         n['type'] = 'compound'
         n['group'] = 1
         #n['color'] = '#abcdef'
+        n['chembl_id'] = cmp_info['chembl_id']
+        n['pref_name'] = cmp_info['pref_name']
 
         t = '{chembl_id}\n{pref_name}'
         n['title'] = t.format(**cmp_info)
@@ -121,6 +123,9 @@ def make_anno_graph(query_data, table_name = 'annotation'):
         n['type'] = 'target'
         n['group'] = 2
         #n['color'] = '#abcdef'
+        n['acc_id'] = tgt_info['acc_id']
+        n['desc'] = tgt_info['desc']
+        n['org'] = tgt_info['org']
 
         t = '{acc_id}\n{desc}\n{org}'
         n['title'] = t.format(**tgt_info)
@@ -142,7 +147,7 @@ def make_anno_graph(query_data, table_name = 'annotation'):
     return (nodes, edges)
 
 def make_act_graph(query_data):
-    node_id_next = 1
+    node_id_next = 0
     nodes = list()
     edges = list()
     compounds = dict()
