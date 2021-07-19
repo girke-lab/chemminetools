@@ -21,7 +21,8 @@
     <span id="ts_graph"></span>
     <span id="ts_info" class="flex-grow-1">Click on a node (compound or target) to view details.</span>
 </div>
-<p id="status_msg">Large datasets may take a while to load.</p>
+<p id="status_msg">Datasets with a large number of nodes may not settle within a reasonable time. Use &quot;Freeze graph&quot; to stop the node spacing process.</p>
+<p><button class="btn btn-outline-danger" type="button" onclick="network.stopSimulation()">Freeze graph</button></p>
 {% endblock base_content %}
 
 {% block js_content %}
