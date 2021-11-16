@@ -16,10 +16,10 @@
 			<div class="btn-group mr-1" role="group" data-toggle="tooltip" title="Show/Hide links for additional annotation data.">
 				<button id="show-extanno-{{table_name}}" type="button" class="btn btn-primary" onclick="toggleExtAnno()">Show Extended Annotation Links</button>
 			</div>
-			{% endif %}
 			<div class="btn-group mr-1" role="group" data-toggle="tooltip" title="Display compound-target graph.">
-				<a class="btn btn-primary" role="button" href="{% url 'tsGraph' id_type table_name ids_resubmit %}" target="_blank">View Graph (Experimental)<i class="fas fa-external-link-alt"></i></a>
+				<a class="btn btn-primary" role="button" href="{% url 'tsFilter2' %}?ids={{ids_resubmit}}" target="_blank">View Graph (Experimental)<i class="fas fa-external-link-alt"></i></a>
 			</div>
+			{% endif %}
 			<div class="btn-group mr-1" role="group">
 				<button id="csv{{table_name.title}}" type="button" class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Save to CSV</button>
 				<div id="csv-buttons-{{table_name}}" class="dropdown-menu" aria-labelledby="csv{{table_name.title}}"></div>

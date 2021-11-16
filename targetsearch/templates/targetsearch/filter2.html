@@ -1,0 +1,1034 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+{% load targetsearch_extras %}
+
+{% block extra_styles %}
+#anno_graph {
+    height: 800px;
+    border: 1px solid lightgray;
+}
+
+.palette-box {
+    height: 50px;
+    width: 50px;
+    border: 2px solid black;
+    cursor: pointer;
+}
+
+.pw-table-cell {
+    padding: 0 0.25em;
+}
+
+.pw-table-row-highlight {
+    background-color: lightgray;
+}
+{% endblock extra_styles %}
+
+{% block extra_headers %}
+<link rel="stylesheet" href="/static/admin/jquery-ui-1.13.0/jquery-ui.min.css">
+<!--link rel="stylesheet" href="/static/admin/node_modules/evol-colorpicker/css/evol-colorpicker.min.css"-->
+<script type="text/javascript" src="/static/admin/jquery-ui-1.13.0/jquery-ui.min.js"></script>
+<script type="text/javascript" src="/static/admin/vis-network-9.0.0/standalone/umd/vis-network.min.js"></script>
+<!--script type="text/javascript" src="/static/admin/node_modules/chart.js/dist/chart.js"></script-->
+<!--script type="text/javascript" src="/static/admin/node_modules/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.js"></script-->
+<script type="text/javascript" src="/static/admin/node_modules/@jaames/iro/dist/iro.min.js"></script>
+<!--script type="text/javascript" src="/static/admin/node_modules/evol-colorpicker/js/evol-colorpicker.min.js"></script-->
+{% endblock extra_headers %}
+
+{% block base_content %}
+<div class="container-fluid">
+  <div class="row">{% if message %}<span style="color: red">{{message}}</span>{% endif %}</div>
+  <div>
+    <h4>Filters</h4>
+    <p>If desired, adjust any of the settings below to filter out data rows.
+    You'll need to select "Reload Graph" afterward for the graph to reflect your changes.</p>
+  </div>
+  <div id="filter-row">
+    <form>
+      <div class="form-row">
+        <b title="Limit compound results based on number of target connections." data-toggle="tooltip">Compound-to-target connections <i class="far fa-question-circle"></i> :</b>
+      </div>
+      <div class="form-row pl-3">
+        <div class="col-8">
+          <label for="filter_ct_slider">Slider:</label>
+          <div id="filter_ct_slider"></div>
+        </div>
+        <div class="col-2">
+          <label for="filter_ct_low">Low:</label>
+          <input id="filter_ct_low" class="form-control filter-low filter-range" type="number" step="1" value="1" min="1" max="{{ct_max}}" required="true" autocomplete="off" onchange="filterChange('ct', 'low')">
+        </div>
+        <div class="col-2">
+          <label for="filter_ct_high">High:</label>
+          <input id="filter_ct_high" class="form-control filter-high filter-range" type="number" step="1" value="{{ct_max}}" min="1" max="{{ct_max}}" required="true" autocomplete="off" onchange="filterChange('ct', 'high')">
+        </div>
+      </div>
+      <div class="form-row">
+        <b title="Limit target results based on number of compound connections." data-toggle="tooltip">Target-to-compound connections <i class="far fa-question-circle"></i> :</b>
+      </div>
+      <div class="form-row pl-3">
+        <div class="col-8">
+          <label for="filter_tc_slider">Slider:</label>
+          <div id="filter_tc_slider"></div>
+        </div>
+        <div class="col-2">
+          <label for="filter_tc_low">Low:</label>
+          <input id="filter_tc_low" class="form-control filter-low filter-range" type="number" step="1" value="1" min="1" max="{{tc_max}}" required="true" autocomplete="off" onchange="filterChange('tc', 'low')">
+        </div>
+        <div class="col-2">
+          <label for="filter_tc_high">high:</label>
+          <input id="filter_tc_high" class="form-control filter-high filter-range" type="number" step="1" value="{{tc_max}}" min="1" max="{{tc_max}}" required="true" autocomplete="off" onchange="filterChange('tc', 'high')">
+        </div>
+      </div>
+      <div class="form-row">
+        <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+        <span id="filter_count" class="pl-2 pt-2">0 results have been filtered out.</span>
+      </div>
+    </form>
+  </div>
+  <hr>
+  <div>
+    <h4>Data Table</h4>
+    <p>Click on a ChEMBL or Accession ID to highlight that particular node in the graph below.</p>
+  </div>
+  <div id="table-row">
+    <table id="dt">
+      <thead>
+        <tr>
+        {% for c in cols_basic %}<th>{{c}}</th>{% endfor %}
+        </tr>
+      </thead>
+
+    </table>
+  </div>
+  <hr>
+  <div>
+    <h4>Data Graph and Node Info</h4>
+    <p>This section displays compound-target connections as a network graph.
+    Hover over or select a node to see further information.</p>
+  </div>
+  <div id="graph-row" class="row">
+    <div class="col-6">
+      <div id="anno_graph">Graph not initialized</div>
+      <p>
+        <button class="btn btn-primary" type="button" onclick="loadGraph()">Reload Graph</button>
+        <button class="btn btn-outline-primary" type="button" onclick="resetNodeColors()">Reset Node Colors</button>
+        <!--button class="btn btn-outline-danger" type="button" onclick="network.stopSimulation()">Freeze Graph</button>
+        <button class="btn btn-outline-danger" type="button" onclick="network.destroy()">Unload Graph</button-->
+      </p>
+      <p>
+        Display Gene Ontology Classifications (Reload Graph afterward):
+        <ul>
+          <li>
+            <input id="filter_go_p" type="checkbox" autocomplete="off">
+            <label for="filter_go_p">Biological Process</label>
+          </li>
+          <li>
+            <input id="filter_go_c" type="checkbox" autocomplete="off">
+            <label for="filter_go_c">Cellular Component</label>
+          </li>
+          <li>
+            <input id="filter_go_f" type="checkbox" autocomplete="off">
+            <label for="filter_go_f">Molecular Function</label>
+          </li>
+        </ul>
+      </p>
+    </div>
+    <div class="col-6">
+      <div id="info-panel">
+        <p>Select a node on the graph to the left. Detailed information will be displayed here.</p>
+      </div>
+      <div id="pathway-accordion" class="accordion"></div>
+    </div>
+    <!--div class="display: none">
+      <canvas id="anno_chart"></canvas>
+    </div-->
+  </div>
+</div>
+{% endblock base_content %}
+
+{% block js_content %}
+{% include "dataTables.html" %}
+{% include "targetsearch/tsg_color_modal.html" %}
+
+{# Django-to-JSON stuff goes here #}
+{{ anno_matches | json_script:"anno_matches_json" }}
+{# go_data | json_script:"go_data_json" #}
+{{ acc_go_edges | json_script:"acc_go_edges_json" }}
+{# go_acc_edges | json_script:"go_acc_edges_json" #}
+{{ go_nodes | json_script:"go_nodes_json" }}
+{{ acc_go_lookup | json_script:"acc_go_lookup_json" }}
+{{ go_acc_lookup | json_script:"go_acc_lookup_json" }}
+{{ go_child_lookup | json_script:"go_child_lookup_json" }}
+{{ tgt_cmp_lookup | json_script:"tgt_cmp_lookup_json" }}
+{# ct_max_dict | json_script:"ct_max_json" #}
+{# tc_max_dict | json_script:"tc_max_json" #}
+{{ table_info_dict | json_script:"table_info_json" }}
+
+<script>
+  var tbl;
+
+  const anno_matches_all = JSON.parse(document.getElementById("anno_matches_json").text);
+  //const go_data_all = JSON.parse(document.getElementById("go_data_json").text);
+  // Note: acc_go_edges_all only lists DIRECT edges between targets and GO terms
+  const acc_go_edges_all = JSON.parse(document.getElementById("acc_go_edges_json").text);
+  //const go_acc_edges_all = JSON.parse(document.getElementById("go_acc_edges_json").text);
+  const go_nodes_all = JSON.parse(document.getElementById("go_nodes_json").text);
+  const acc_go_lookup = JSON.parse(document.getElementById("acc_go_lookup_json").text);
+  const go_acc_lookup = JSON.parse(document.getElementById("go_acc_lookup_json").text);
+  const go_child_lookup = JSON.parse(document.getElementById("go_child_lookup_json").text);
+  const tgt_cmp_lookup = JSON.parse(document.getElementById("tgt_cmp_lookup_json").text);
+  //const ct_max_dict = JSON.parse(document.getElementById("ct_max_json").text);
+  //const tc_max_dict = JSON.parse(document.getElementById("tc_max_json").text);
+  const table_info = JSON.parse(document.getElementById("table_info_json").text);
+
+  var anno_matches_filtered = Array.from(anno_matches_all);
+
+  var nodes = new Array();
+  var edges = new Array();
+  var nodesDS = null;
+  var edgesDS = null;
+  var nodesView = null;
+  var edgesView = null;
+  var network = null;
+
+  var graphGroups = {
+    compound: {shape: "box", color: "#97C2FC"},
+    target: {shape: "ellipse", color: "#FFFF00"},
+    P: {shape: "box", color: "#7BE141"},//(123,225,65)
+    C: {shape: "box", color: "#6E6EFD"},//(110,110,253)
+    F: {shape: "box", color: "#FFA807"}//(255,168,7)
+  };
+
+  //const chart_ctx = document.getElementById("anno_chart").getContext("2d");
+  /*const chart_obj = new Chart(chart_ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["NULL"],
+      datasets: [{
+        label: "Dataset label",
+        data: [100],
+        backgroundColor: ["rgba(123, 225, 65, 1)"]
+      }]
+    },
+    options: {
+      responsive: true,
+      legend: {
+        position: "top"
+      },
+      plugins: {
+        title: {
+          display: true,
+          font: {
+            size: 16
+          },
+          text: "Select a target to render chart"
+        },
+        subtitle: {
+          display: true,
+          font: {
+            size: 14
+          },
+          text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit."
+        },
+        datalabels: {
+          formatter: function(value, context) {
+            return context.chart.data.labels[context.dataIndex];
+          },
+          labels: {
+            title: {
+              font: {
+                weight: "bold"
+              }
+            }
+          }
+        },
+        tooltip: {
+          enabled: false
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });*/
+  var selectedAcc = null;
+  var selectedGo = null;
+  var mostRecentPathway = null;
+  var nctIconColors = new Object(); // nctIconColors[pathway_id] -> color
+  //var ct_slider = null;
+  //var tc_slider = null;
+  var sliders = new Object();
+
+  function getCmpDesc(chembl_id) {
+    let cmp = cmpNodes.get(chembl_id);
+    let desc = chembl_id + "\n----------";
+
+    cmp.forEach((elem, idx) => {
+      desc += "\n" + idx + ": " + elem;
+    });
+
+    return desc;
+  }
+
+  function getTgtDesc(acc_id) {
+    let tgt = tgtNodes.get(acc_id);
+    let desc = acc_id + "\n----------";
+
+    tgt.forEach((elem, idx) => {
+      desc += "\n" + idx + ": " + elem;
+    });
+
+    return desc;
+  }
+
+  function getGoDesc(go_id) {
+    let go_obj = go_nodes_all[go_id];
+
+    let desc = go_id + "\n----------";
+    desc += "\nGene Ontology name: " + go_obj["pref_name"];
+    if (go_obj["aspect"] === 'P') {
+      desc += "\nAspect: Biological Process";
+    } else if (go_obj["aspect"] === 'C') {
+      desc += "\nAspect: Cellular Component";
+    } else if (go_obj["aspect"] === 'F') {
+      desc += "\nAspect: Molecular Function";
+    } else {
+      desc += "\nAspect: Unknown";
+    }
+    desc += "\nFull path: " + go_obj["path"];
+    desc += "\nClass level: " + go_obj["class_level"];
+    if (go_obj["parent_go_id"] != null) {
+      desc += "\nParent GO ID: " + go_obj["parent_go_id"];
+    } else {
+      desc += "\nParent GO ID: None (root term)";
+    }
+
+    return desc;
+  }
+
+  function getGoDesc2(go_id) {
+    let go_obj = go_nodes_all[go_id];
+
+    let desc = new Array();
+    desc.push("Gene Ontology name: " + go_obj["pref_name"]);
+    if (go_obj["aspect"] === 'P') {
+      desc.push("Aspect: Biological Process");
+    } else if (go_obj["aspect"] === 'C') {
+      desc.push("Aspect: Cellular Component");
+    } else if (go_obj["aspect"] === 'F') {
+      desc.push("Aspect: Molecular Function");
+    } else {
+      desc.push("Aspect: Unknown");
+    }
+    desc.push("Full path: " + go_obj["path"]);
+    desc.push("Class level: " + go_obj["class_level"]);
+    if (go_obj["parent_go_id"] != null) {
+      desc.push("Parent GO ID: " + go_obj["parent_go_id"]);
+    } else {
+      desc.push("Parent GO ID: None (root term)");
+    }
+
+    return desc;
+  }
+
+  function loadGraph() {
+    nodes = new Array();
+    edges = new Array();
+    // Use these sets to exclude filtered-out nodes
+    let cmp_node_set = new Set();
+    let tgt_node_set = new Set();
+    let go_node_set = new Set();
+
+    // Add compound-target edges
+    anno_matches_filtered.forEach((elem, idx) => {
+      let from_name = elem["annotation__chembl_id_lookup__chembl_id"];
+      let to_name = elem["annotation__component_sequences__accession"];
+
+      let e = new Object();
+      e["from"] = from_name;
+      e["to"] = to_name;
+      edges.push(e);
+
+      cmp_node_set.add(from_name);
+      tgt_node_set.add(to_name);
+    });
+
+    // Add compound nodes
+    cmp_node_set.forEach((idx) => {
+      let c = new Object();
+      c["id"] = idx;
+      c["chembl_id"] = idx;
+      c["label"] = idx;
+      c["group"] = "compound";
+      c["title"] = getCmpDesc(idx);
+      nodes.push(c);
+    });
+    /*
+    cmpNodes.forEach((elem, idx) => {
+      if (cmp_node_set.has(idx)) {
+        let c = new Object();
+        c["chembl_id"] = idx;
+        //c["id"] = elem.get("id");
+        c["id"] = idx;
+        c["label"] = idx;
+        //c["shape"] = "box";
+        //c["group"] = 1;
+        c["group"] = "compound";
+        nodes.push(c);
+      }
+    });*/
+
+    // Add target nodes
+    tgt_node_set.forEach((idx) => {
+      let t = new Object();
+      t["id"] = idx;
+      t["acc_id"] = idx;
+      t["label"] = idx;
+      t["group"] = "target";
+      t["title"] = getTgtDesc(idx);
+      nodes.push(t);
+    });
+    /*
+    tgtNodes.forEach((elem, idx) => {
+      if (tgt_node_set.has(idx)) {
+        let t = new Object();
+        t["acc_id"] = idx;
+        //t["id"] = elem.get("id");
+        t["id"] = idx;
+        t["label"] = idx;
+        //t["shape"] = "ellipse";
+        //t["group"] = 2;
+        t["group"] = "target";
+        nodes.push(t);
+      }
+    });*/
+
+    // Add initial target-GO edges
+    // Note: we define edges FROM go nodes TO drug-targets to make the edge
+    // take the color of the go node. This should improve graph readability.
+    tgt_node_set.forEach((tgt) => {
+      //let from_id = tgt;
+      let to_id = tgt;
+      acc_go_edges_all[tgt].forEach((gid) => {
+        let aspect = go_nodes_all[gid]["aspect"];
+        if (  ( (aspect === 'P') && $("#filter_go_p").prop("checked") ) ||
+              ( (aspect === 'C') && $("#filter_go_c").prop("checked") ) ||
+              ( (aspect === 'F') && $("#filter_go_f").prop("checked") ) ) {
+          //let to_id = gid;
+          let from_id = gid;
+          let e = new Object();
+          e["from"] = from_id;
+          e["to"] = to_id;
+          edges.push(e);
+
+          go_node_set.add(gid);
+        } else {
+          //console.log("excluded GO node:", gid, aspect);
+        }
+      });
+    });
+
+    // Iteratively add parent GO nodes
+    let child_go_nodes = new Set(go_node_set);
+    while (child_go_nodes.size > 0) {
+      //console.log("child_go_nodes size:", child_go_nodes.size);
+      let new_cgn = new Set();
+      child_go_nodes.forEach((gid) => {
+        //console.log("gid:", gid);
+        let pgid = go_nodes_all[gid]["parent_go_id"];
+        let pgid_next = go_nodes_all[pgid]["parent_go_id"];
+        if (pgid_next === null) {
+          //console.log("skipping edge to root node")
+        } else if (pgid !== null) {
+          let e = new Object();
+          //e["from"] = gid;
+          //e["to"] = pgid;
+          e["from"] = pgid;
+          e["to"] = gid;
+          edges.push(e);
+          go_node_set.add(pgid);
+          new_cgn.add(pgid);
+          //console.log("new edge:", gid, pgid);
+        } else {
+          //console.log("root node:", gid);
+        }
+      });
+      child_go_nodes = new_cgn;
+    }
+    console.log("Finished building GO tree edges");
+
+    // Add GO nodes
+    go_node_set.forEach((elem) => {
+      let g = new Object();
+      g["id"] = elem;
+      g["go_id"] = elem;
+      g["label"] = elem;
+      g["group"] = go_nodes_all[elem]["aspect"];
+      g["title"] = getGoDesc(elem);
+      nodes.push(g);
+    });
+
+    nodesDS = new vis.DataSet(nodes);
+    edgesDS = new vis.DataSet(edges);
+
+    nodesView = new vis.DataView(nodesDS);
+    edgesView = new vis.DataView(edgesDS);
+
+    var graphContainer = document.getElementById("anno_graph");
+    var graphData = {nodes: nodesView, edges: edgesView};
+    var graphOpts = {edges: { smooth: false}, groups: graphGroups};
+    network = new vis.Network(graphContainer, graphData, graphOpts);
+
+    network.on("selectNode", function (sne) {
+      //console.log("selectNode Event:", sne);
+      let node_id = sne.nodes[0];
+      updateInfoPanel(node_id);
+    });
+  }
+
+  function updateInfoPanel(node_id) {
+    n = nodesDS.get(node_id);
+
+    let header_html = "";
+    let info_html = "";
+    info_html += n.title.replaceAll("\n", "</br>");
+    if (n.group == "compound") {
+      header_html = "<h5>Compound Info</h5>"
+      let cmt_url = "/targetsearch/detail/"+n.chembl_id;
+      let ebi_url = "https://www.ebi.ac.uk/chembl/compound_report_card/"+n.chembl_id+"/";
+      info_html += '<p><a class="btn btn-primary" role="button" href="'+cmt_url+'" target="_blank">ChemMine Tools Compound Info</a></p>';
+      info_html += '<p><a class="btn btn-primary" role="button" href="'+ebi_url+'" target="_blank">EBI ChEMBL Report Card</a></p>';
+
+      $("#pathway-accordion").html("");
+    } else if (n.group == "target") {
+      header_html = "<h5>Target Info</h5>"
+      let uniprot_url = "https://www.uniprot.org/uniprot/"+n.acc_id;
+      info_html += '<p><a class="btn btn-primary" role="button" href="'+uniprot_url+'" target="_blank">Uniprot Info</a></p>';
+
+      selectedAcc = n.id;
+      //updateChartAcc(n.id);
+      renderPathwayList(getPathwayData(n.id));
+    } else if (n.group == "P" || n.group == "C" || n.group == "F") {
+      header_html = "<h5>Gene Ontology Term Info</h5>"
+      let go_url = "http://amigo.geneontology.org/amigo/term/"+n.go_id;
+      info_html += '<p><a class="btn btn-primary" role="button" href="'+go_url+'" target="_blank">AmiGO Page</a></p>';
+      info_html += '<p><button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#tsgcModal">Node Color Tool</button></p>';
+
+      selectedGo = n.id;
+      //$("#pathway-accordion").html("");
+    } else {
+      header_html += '<h5>Unknown node type.</h5>';
+      $("#pathway-accordion").html("");
+    }
+    //document.getElementById("anno_info").innerHTML = info_html;
+    $("#info-panel").html(header_html + info_html);
+  }
+
+  // This function is called when a target node is selected in the network graph.
+  // It updates the pie chart thing that'll be deprecated shortly...
+  /*function updateChartAcc(acc_id) {
+    console.log("updateChartAcc: acc_id=", acc_id);
+    //let go_nodes = acc_go_edges_all[acc_id];
+    let go_nodes = acc_go_lookup[acc_id];
+    let go_aspect_cnt = new Object();
+    go_aspect_cnt['P'] = 0;
+    go_aspect_cnt['C'] = 0;
+    go_aspect_cnt['F'] = 0;
+    go_nodes.forEach((elem, idx) => {
+      let go_node = go_nodes_all[elem];
+      go_aspect_cnt[go_node["aspect"]] += 1;
+    });
+
+    console.log("updateChartAcc: go_aspect_cnt=", go_aspect_cnt);
+
+    let newLabels = ["Biological Process", "Cellular Component", "Molecular Function"];
+    let newDatasets = [{
+      data: [go_aspect_cnt['P'], go_aspect_cnt['C'], go_aspect_cnt['F']],
+      backgroundColor: [
+        "rgba(123, 225, 65, 1)",
+        "rgba(110, 110, 253, 1)",
+        "rgba(255, 168, 7, 1)"
+      ]
+    }];
+
+    chart_obj.data.labels = newLabels;
+    chart_obj.data.datasets = newDatasets;
+    chart_obj.options.onClick = updateChartGo;
+    chart_obj.options.plugins.tooltip = {enabled: false};
+    chart_obj.options.plugins.datalabels.formatter = function(value, context) {
+      return context.chart.data.labels[context.dataIndex] + " ("+value+")";
+    };
+    chart_obj.options.plugins.title.text = selectedAcc;
+    chart_obj.options.plugins.subtitle.display = true;
+    chart_obj.options.plugins.subtitle.text = "Select a Gene Ontology aspect.";
+    chart_obj.update();
+  }*/
+
+  // Gather pathway data for a given target based on Accession ID
+  // Usually called when a target node is selected in the network graph
+  function getPathwayData(acc_id) {
+    console.log("getPathwayData: acc_id=", acc_id);
+
+    // Structured list data for all the pathways we want to support
+    // label: display text for the overall category
+    // list: list of pathway IDs only
+    // datasrc: pointer to data object containing detailed info
+    let pathway_data = new Object();
+    pathway_data["go_p"] = {label: "Gene Ontology - Biological Process", list: new Array(), datasrc: go_nodes_all};
+    pathway_data["go_c"] = {label: "Gene Ontology - Cellular Component", list: new Array(), datasrc: go_nodes_all};
+    pathway_data["go_f"] = {label: "Gene Ontology - Molecular Function", list: new Array(), datasrc: go_nodes_all};
+    //pathway_data["rctm"] = {label: "Reactome (Placeholder)", list: new Array(), datasrc: null};
+    //pathway_data["kegg"] = {label: "KEGG (Placeholder)", list: new Array(), datasrc: null};
+
+    // Populate GO info
+    let go_nodes = acc_go_lookup[acc_id];
+    go_nodes.forEach((elem, idx) => {
+      let n = go_nodes_all[elem];
+      if (n["aspect"] === "P") {
+        pathway_data["go_p"]["list"].push(elem);
+      } else if (n["aspect"] === "C") {
+        pathway_data["go_c"]["list"].push(elem);
+      } else if (n["aspect"] === "F") {
+        pathway_data["go_f"]["list"].push(elem);
+      } else {
+        console.log("getPathwayData: ERROR: unknown GO aspect:", n["aspect"]);
+      }
+    });
+
+    return pathway_data;
+  }
+
+  // Update the accordion list to show a target's pathways
+  function renderPathwayList(pathway_data) {
+    let newPathwayHtml = "<h5>Pathway Info</h5>";
+    let first_card = " show";
+    for (p in pathway_data) {
+      let pw_card_id = "pathway-card-"+p;
+      let pw_card_title = pathway_data[p]["label"];
+
+      let pw_header_btn = '<button class="btn btn-link flex-grow-1 text-left" type="button" data-toggle="collapse" data-target="#'+pw_card_id+'-body">'+pw_card_title+'</button>';
+      let pw_header = '<div class="card-header d-flex mb-0 p-0">'+pw_header_btn+'</div>';
+      /*
+      let pw_list = '<ul>';
+      pathway_data[p]["list"].forEach((elem, idx) => {
+        let pw_item_title = elem+' ('+go_nodes_all[elem]["pref_name"]+')';
+        pw_list += '<li><a href="javascript:openColorTool(\''+elem+'\')">'+pw_item_title+'</a></li>';
+      });
+      pw_list += '</ul>';
+      */
+      let pw_table_help = '<p>Select the paint brush icon (<i class="fas fa-paint-brush"></i>) to use the Node Color Tool.<br>';
+      pw_table_help += 'A pathway with a custom color will have its icon replaced with a colored square (<i class="fas fa-square"></i>).<br>';
+      pw_table_help += 'The most recently modified pathway will be highlighted.</p>';
+      let pw_table = '<table style="border-collapse: collapse;">'
+      pw_table += '<thead><tr>';
+      pw_table += '<th class="pw-table-cell"></th>';
+      pw_table += '<th class="pw-table-cell">GO ID</th>';
+      pw_table += '<th class="pw-table-cell">Description</th>';
+      pw_table += '<th class="pw-table-cell">Parent GO ID</th>';
+      pw_table += '</tr></thead><tbody>';
+      pathway_data[p]["list"].forEach((elem, idx) => {
+        pw_table += '<tr class="pw-table-row" data-nodeid="'+elem+'">';
+        pw_table += '<td class="pw-table-cell"><a href="javascript:openColorTool(\''+elem+'\')"><i class="fas fa-paint-brush nct-icon" data-nodeid="'+elem+'"></i></a></td>';
+        let go_url = "http://amigo.geneontology.org/amigo/term/"+elem;
+        pw_table += '<td class="pw-table-cell"><a href="'+go_url+'" target="_blank">'+elem+'</a></td>';
+        pw_table += '<td class="pw-table-cell">'+go_nodes_all[elem]["pref_name"]+'</td>';
+        pw_table += '<td class="pw-table-cell">'+go_nodes_all[elem]["parent_go_id"]+'</td>';
+        pw_table += '</tr>';
+      });
+      pw_table += '</tbody></table>';
+
+      let pw_body = '<div id="'+pw_card_id+'-body" class="collapse'+first_card+'" data-parent="#pathway-accordion"><div class="card-body">'+pw_table_help+pw_table+'</div></div>';
+      first_card = "";
+      let pw_card = '<div id="'+pw_card_id+'" class="card">'+pw_header+pw_body+'</div>';
+      newPathwayHtml += pw_card;
+    }
+    $("#pathway-accordion").html(newPathwayHtml);
+
+    refreshNCTicons();
+    refreshMRPW();
+  }
+
+  function openColorTool(pathway_id) {
+    selectedGo = pathway_id;
+    $("#tsgcModal").modal();
+  }
+/*
+  function updateChartGo(event, elem, chart) {
+    console.log("updateChartGo:");
+    console.log("  event=", event);
+    console.log("  elem=", elem);
+    console.log("  chart=", chart);
+
+    if (elem["length"] === 0) {
+      console.log("updateChartGo: zero-length elem array. Ignoring.");
+      return;
+    }
+
+    // TODO: This will probably fail if an aspect is missing
+    if (elem[0]["index"] === 0) {
+      console.log("updateChartGo: selected Biological Process");
+      updateChartGoAspect("P");
+    } else if (elem[0]["index"] === 1) {
+      console.log("updateChartGo: selected Cellular Component");
+      updateChartGoAspect("C");
+    } else if (elem[0]["index"] === 2) {
+      console.log("updateChartGo: selected Molecular Function");
+      updateChartGoAspect("F");
+    } else {
+      console.log("updateChartGo: unknown select index:", elem[0]["index"]);
+    }
+  }
+
+  function updateChartGoAspect(aspect) {
+    //let go_edges = acc_go_edges_all[selectedAcc];
+    let go_edges = acc_go_lookup[selectedAcc];
+    let newLabels = new Array();
+    let newData = new Array();
+
+    go_edges.forEach((elem, idx) => {
+      if (go_nodes_all[elem]["aspect"] === aspect) {
+        newLabels.push(elem);
+        newData.push(1);
+      }
+    });
+
+    let rgb = "0,0,0";
+    let aspect_full = "OOPS";
+    if (aspect === "P") {
+      rgb = "123, 225, 65";
+      aspect_full = "Biological Process";
+    } else if (aspect === "C") {
+      rgb = "110, 110, 253";
+      aspect_full = "Cellular Component";
+    } else if (aspect === "F") {
+      rgb = "255, 168, 7";
+      aspect_full = "Molecular Function";
+    }
+    let newColors = new Array();
+    // Add 5 to avoid a totally transparent color
+    let opacityDec = 1 / (newData["length"] + 5);
+    for (let i = 0; i < newData["length"]; i++) {
+      newColors.push("rgba(" + rgb + ", " + (1 - i * opacityDec) + ")");
+    }
+
+    let newDatasets = [{
+      data: newData,
+      backgroundColor: newColors
+    }];
+
+    let newTooltip = {
+      enabled: true,
+      callbacks: {
+        title: function(ti) {
+          return ti["label"];
+        },
+        label: function(ti) {
+          return getGoDesc2(ti["label"]);
+        }
+      }
+    };
+
+    chart_obj.data.labels = newLabels;
+    chart_obj.data.datasets = newDatasets;
+    chart_obj.options.onClick = chartSelectGo;
+    chart_obj.options.plugins.tooltip = newTooltip;
+    chart_obj.options.plugins.datalabels.formatter = function(value, context) {
+      return context.chart.data.labels[context.dataIndex];
+    };
+    chart_obj.options.plugins.title.text = selectedAcc + " - " + aspect_full;
+    chart_obj.options.plugins.subtitle.display = true;
+    chart_obj.options.plugins.subtitle.text = "Select a GO term to apply its color to all matching targets.";
+    chart_obj.update();
+  }
+
+  function chartSelectGo(event, elem, chart) {
+    console.log("chartSelectGo:");
+    console.log("  event=", event);
+    console.log("  elem=", elem);
+    console.log("  chart=", chart);
+
+    if (elem["length"] === 0) {
+      console.log("chartSelectGo: zero-length elem array. Ignoring.");
+      return;
+    }
+    let selectedIndex = elem[0]["index"];
+    let selectedLabel = chart.data.labels[selectedIndex];
+
+    selectedGo = selectedLabel;
+    $("#tsgcModal").modal();
+  }*/
+
+  function showTsgcModal(event, elem, chart) {
+    console.log("showTsgcModal:");
+    console.log("  event=", event);
+    console.log("  elem=", elem);
+    console.log("  chart=", chart);
+
+    $("#tsgcModal").modal();
+  }
+
+  function applyFilters() {
+    //let exclude_set = new Set();
+
+    let filter_ct_low = parseInt($("#filter_ct_low").prop("value"));
+    let filter_ct_high = parseInt($("#filter_ct_high").prop("value"));
+    let filter_tc_low = parseInt($("#filter_tc_low").prop("value"));
+    let filter_tc_high = parseInt($("#filter_tc_high").prop("value"));
+
+    let exclude_cmp = new Set();
+    cmpNodes.forEach((elem, idx) => {
+      let e_rel = elem.get("Number of Target Relations");
+      if (e_rel < filter_ct_low || e_rel > filter_ct_high) {
+        exclude_cmp.add(idx);
+      }
+    });
+
+    let exclude_tgt = new Set();
+    tgtNodes.forEach((elem, idx) => {
+      let e_rel = elem.get("Number of Compound Relations");
+      if (e_rel < filter_tc_low || e_rel > filter_tc_high) {
+        exclude_tgt.add(idx);
+      }
+    });
+
+    let filter_count = 0;
+    anno_matches_filtered = new Array();
+    anno_matches_all.forEach((elem, idx) => {
+      if (!exclude_cmp.has(elem["annotation__chembl_id_lookup__chembl_id"]) &&
+          !exclude_tgt.has(elem["annotation__component_sequences__accession"]) )
+      {
+        anno_matches_filtered.push(elem);
+      } else {
+        filter_count++;
+      }
+    });
+
+    if (filter_count === 1) {
+      $("#filter_count").html("1 result has been filtered out.")
+    } else {
+      $("#filter_count").html(filter_count + " results have been filtered out.")
+    }
+
+    console.log("exclude_cmp:", exclude_cmp);
+    console.log("exclude_tgt:", exclude_tgt);
+    console.log("END applyFilters");
+    tbl.clear();
+    tbl.rows.add(anno_matches_filtered);
+    tbl.draw();
+    console.log("Redrew DataTables");
+  }
+
+  function dtSelectNode(node_id) {
+    network.setSelection({ nodes: [node_id] });
+    updateInfoPanel(node_id);
+    document.getElementById("graph-row").scrollIntoView({behavior: "smooth"});
+  }
+
+  function resetNodeColors() {
+    nodesDS.getIds().forEach((elem, idx) => {
+      nodesDS.updateOnly({id: elem, color: ""});
+    });
+
+    nctIconColors = new Object();
+    refreshNCTicons();
+
+    /*$(".pw-table-row").each(function() {
+      $(this).removeClass("pw-table-row-highlight");
+    });*/
+    mostRecentPathway = null;
+    refreshMRPW();
+  }
+
+  function refreshNCTicons() {
+    $(".nct-icon").each(function () {
+      let node_id = $(this).data("nodeid");
+      //let node_color = nodesDS.get(node_id)["color"];
+      //if (node_color === undefined || node_color === "") {
+      if (!(node_id in nctIconColors)) {
+        $(this).removeClass("fa-square");
+        $(this).addClass("fa-paint-brush");
+        $(this).css("color", "");
+      } else {
+        $(this).removeClass("fa-paint-brush");
+        $(this).addClass("fa-square");
+        $(this).css("color", nctIconColors[node_id]);
+      }
+    });
+  }
+
+  function refreshMRPW() {
+    $(".pw-table-row").each(function () {
+      if ($(this).data("nodeid") === mostRecentPathway) {
+        $(this).addClass("pw-table-row-highlight");
+      } else {
+        $(this).removeClass("pw-table-row-highlight");
+      }
+    });
+  }
+
+  // Change handler for filter input fields.
+  // Should update the corresponding slider, as well as min/max boundaries accordingly.
+  // Currently assumes a range-type filter. Hopefully we won't add any more...
+  function filterChange(filter, field) {
+    let elem = $("#filter_"+filter+"_"+field);
+    elem = elem[0];
+    console.log("filterChange elem:", elem);
+
+    if (elem.validity.valid === true) {
+      if (field === "low") {
+        // If updating a "low" field, set the min boundary for the high field
+        let high_field = $("#filter_"+filter+"_high")[0];
+        high_field.min = elem.value;
+        // Update the slider
+        sliders[filter].slider("values", 0, elem.value);
+      } else if (field === "high") {
+        // If updating a "high" field, set the max boundary for the low field
+        let low_field = $("#filter_"+filter+"_low")[0];
+        low_field.max = elem.value;
+        sliders[filter].slider("values", 1, elem.value);
+      } else {
+        console.error("filterChange: expected field of 'low' or 'high'");
+      }
+    } else {
+      console.error("filterChange: ignoring invalid value");
+    }
+  }
+
+  const dtColumnsBasic = [
+  {% for c in cols_basic %}
+    { name: '{{c}}', data: '{{c}}', title: table_info['{{c}}']['name']}{% if not forloop.last %},{% endif %}
+  {% endfor %}
+  ]
+
+  const dtColumnDefs = [
+  {
+    "targets": [0,3],
+    "render": function (d,t,r,m) { return '<a href="javascript:dtSelectNode(\''+d+'\')">'+d+'</a>'; }
+  }
+  ]
+
+  const dtColumnsAll = [
+  {% for c in cols %}
+    {% if forloop.last %}{ data: '{{c}}' }
+    {% else %}{ data: '{{c}}'},{% endif %}
+  {% endfor %}
+  ]
+
+  var cmpNodes = new Map(); // cmpNodes[CHEMBLID] = cmp_data_map...
+  var tgtNodes = new Map(); // tgtNodes[CHEMBLID] = tgt_data_map...
+
+  var nameToId = new Map(); // translate compound/target name to node ID
+  var idToName = new Map(); // reverse...
+
+  // TODO: This should be moved into Django
+  // TODO: Fill in min/max values in filters after move-to-Django
+  // TODO: Remove nodeId. Strings work just fine as node identification
+  // Document all graph nodes into cmpNodes/tgtNodes
+  var nodeId = 1;
+  anno_matches_all.forEach((elem, idx) => {
+    // Every node on the graph needs a unique ID
+    // Be sure to increment this immediately after assignment
+    //let nodeId = 1;
+    //nodeId = 1;
+
+    // Gather compound nodes by ChEMBL ID, skip duplicates
+    let chemblId = elem['annotation__chembl_id_lookup__chembl_id'];
+    if (cmpNodes.has(chemblId) === false) {
+      let cmp = new Map();
+      cmp.set('id', nodeId);
+      nameToId.set(chemblId, nodeId);
+      idToName.set(nodeId, chemblId);
+      //console.log("before:", nodeId);
+      nodeId++;
+      //console.log("after:", nodeId);
+      // Place additional useful info below
+      cmp.set('Entity Type', elem['annotation__chembl_id_lookup__entity_type']);
+      cmp.set('Preferred Name', elem['annotation__molecule_dictionary__pref_name']);
+      cmp.set('Mechanism of Action', elem['annotation__drug_mechanism__mechanism_of_action']);
+      cmp.set('Number of Target Relations', 1);
+      // Save to parent data structure
+      cmpNodes.set(chemblId, cmp);
+    } else {
+      let rel = cmpNodes.get(chemblId).get('Number of Target Relations');
+      cmpNodes.get(chemblId).set('Number of Target Relations', rel+1);
+    }
+
+    // Gather target nodes by accession ID, skip duplicates
+    let accId = elem['annotation__component_sequences__accession'];
+    if (tgtNodes.has(accId) === false) {
+      let tgt = new Map();
+      tgt.set('id', nodeId);
+      nameToId.set(accId, nodeId);
+      idToName.set(nodeId, accId);
+      nodeId++;
+      // Place additional useful info below
+      tgt.set('Description', elem['annotation__component_sequences__description']);
+      tgt.set('Organism', elem['annotation__component_sequences__organism']);
+      tgt.set('Number of Compound Relations', 1);
+      // Save to parent data structure
+      tgtNodes.set(accId, tgt);
+    } else {
+      let rel = tgtNodes.get(accId).get('Number of Compound Relations');
+      tgtNodes.get(accId).set('Number of Compound Relations', rel+1);
+    }
+  });
+
+  $(document).ready(function() {
+    //tbl = $('#dt').DataTable({});
+    tbl = $('#dt').DataTable({
+      data: anno_matches_filtered,
+      pageLength: 25,
+      columns: dtColumnsBasic,
+      columnDefs: dtColumnDefs
+    });
+
+    let a = $("#filter_ct_low")[0].value;
+    let b = $("#filter_ct_high")[0].value;
+    sliders["ct"] = $("#filter_ct_slider").slider({
+      range: true,
+      min: 1,
+      max: {{ct_max}},
+      values: [a, b],
+      slide: function(event, ui) {
+        console.log("filter_ct_slider ui:", ui);
+        $("#filter_ct_low")[0].value = ui.values[0];
+        $("#filter_ct_high")[0].value = ui.values[1];
+        $("#filter_ct_high")[0].min = ui.values[0];
+        $("#filter_ct_low")[0].max = ui.values[1];
+      }
+    });
+
+    a = $("#filter_tc_low")[0].value;
+    b = $("#filter_tc_high")[0].value;
+    sliders["tc"] = $("#filter_tc_slider").slider({
+      range: true,
+      min: 1,
+      max: {{tc_max}},
+      values: [a, b],
+      slide: function(event, ui) {
+        console.log("filter_tc_slider ui:", ui);
+        $("#filter_tc_low")[0].value = ui.values[0];
+        $("#filter_tc_high")[0].value = ui.values[1];
+        $("#filter_tc_high")[0].min = ui.values[0];
+        $("#filter_tc_low")[0].max = ui.values[1];
+      }
+    });
+
+    $("#filter_test_slider").slider({
+      range: true,
+      min: 1,
+      max: 10,
+      values: [1, 10]
+    });
+
+    //$(".filter-range").on("change", function(event) {
+      //console.log("filter-range this:", $(this));
+      //console.log("filter-range event:", event);
+    //});
+
+    $("[data-toggle=tooltip]").tooltip();
+
+    loadGraph();
+
+  });
+
+</script>
+{% endblock js_content %}

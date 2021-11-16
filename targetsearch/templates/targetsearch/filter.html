@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+{% load targetsearch_extras %}
+
+{% block base_content %}
+<div class="container-fluid">
+  <div class="row">
+    {% if message %}<span style="color: red">{{message}}</span>{% endif %}
+    <ul>
+    {% for tu in stdtype_tuples %}
+    {% dict_lookup stdval_low tu as low %}
+    {% dict_lookup stdval_high tu as high %}
+    <li>
+      <b>{{tu.0}}, {{tu.1}} :</b>
+      {% if tu in stdval_null %}
+      <input id="filter_{{forloop.counter}}_null" class="filter-null" data-stdtype="{{tu.0}}" data-stdunits="{{tu.1}}" type="checkbox" checked>
+      <label for="filter_{{forloop.counter}}_null">Include NULL values</label>
+      {% else %}
+      <label for="filter_{{forloop.counter}}_low">low:</label>
+      <input id="filter_{{forloop.counter}}_low" class="filter-low" data-stdtype="{{tu.0}}" data-stdunits="{{tu.1}}" type="number" value="{{low}}">
+      <label for="filter_{{forloop.counter}}_high">high:</label>
+      <input id="filter_{{forloop.counter}}_high" class="filter-high" data-stdtype="{{tu.0}}" data-stdunits="{{tu.1}}" type="number" value="{{high}}">
+      {% endif %}
+    </li>
+    {% endfor %}
+    <li><button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button></li>
+    </ul>
+
+    <table id="dt">
+      <thead>
+        <tr>
+        {% for c in cols_min %}<th>{{c}}</th>{% endfor %}
+        </tr>
+      </thead>
+
+    </table>
+  </div>
+</div>
+{% endblock base_content %}
+
+{% block js_content %}
+{% include "dataTables.html" %}
+
+{{ activity_matches | json_script:"activity_matches_json" }}
+
+<script>
+  var tbl;
+
+  //var activity_matches_filtered = JSON.parse(document.getElementById("activity_matches_json").text);
+  const activity_matches_all = JSON.parse(document.getElementById("activity_matches_json").text);
+  var activity_matches_filtered = Array.from(activity_matches_all);
+
+  function applyFilters() {
+    // TODO: convert to global constant
+    //var activity_matches_all = JSON.parse(document.getElementById("activity_matches_json").text);
+    var exclude_set = new Set();
+
+    // Handle the "Include NULL values" filters
+    $("input.filter-null").each(function() {
+      let stdtype = $(this).data("stdtype");
+      let stdunits = $(this).data("stdunits");
+      let isChecked = $(this).prop("checked");
+      //console.log("NULL", stdtype, stdunits, isChecked);
+      activity_matches_all.forEach((element, index) => {
+        let e_stdtype = element["activity__activities__standard_type"];
+        let e_stdunits = element["activity__activities__standard_units"];
+        if (e_stdunits === null) {
+          e_stdunits = "NULL";
+        }
+        let e_isNull;
+        if (element["activity__activities__standard_value"] === null) {
+          e_isNull = true;
+        } else {
+          e_isNull = false;
+        }
+        if (e_stdtype == stdtype && e_stdunits == stdunits && e_isNull !== isChecked) {
+          exclude_set.add(index);
+          console.log("EXCLUDE NULL", index, e_stdtype, e_stdunits, e_isNull);
+        }
+      });
+    });
+
+    // Handle low filters
+    $("input.filter-low").each(function(idx) {
+      let stdtype = $(this).data("stdtype");
+      let stdunits = $(this).data("stdunits");
+      let stdvalue = parseFloat($(this).prop("value"));
+      //console.log("LOW", stdtype, stdunits, stdvalue);
+      activity_matches_all.forEach((element, index) => {
+        let e_stdtype = element["activity__activities__standard_type"];
+        let e_stdunits = element["activity__activities__standard_units"];
+        if (e_stdunits === null) {
+          e_stdunits = "NULL"; //TODO: Find a better way to handle null units
+        }
+        let e_stdvalue = parseFloat(element["activity__activities__standard_value"]);
+        if (e_stdtype == stdtype && e_stdunits == stdunits && e_stdvalue < stdvalue) {
+          exclude_set.add(index);
+          console.log("EXCLUDE LOW", index, e_stdtype, e_stdunits, e_stdvalue);
+        }
+      });
+    });
+
+    // Handle high filters
+    $("input.filter-high").each(function(idx) {
+      let stdtype = $(this).data("stdtype");
+      let stdunits = $(this).data("stdunits");
+      let stdvalue = $(this).prop("value");
+      //console.log("HIGH", stdtype, stdunits, stdvalue);
+      activity_matches_all.forEach((element, index) => {
+        let e_stdtype = element["activity__activities__standard_type"];
+        let e_stdunits = element["activity__activities__standard_units"];
+        if (e_stdunits === null) {
+          e_stdunits = "NULL"; //TODO: Find a better way to handle null units
+        }
+        let e_stdvalue = parseFloat(element["activity__activities__standard_value"]);
+        if (e_stdtype == stdtype && e_stdunits == stdunits && e_stdvalue > stdvalue) {
+          exclude_set.add(index);
+          console.log("EXCLUDE HIGH", index, e_stdtype, e_stdunits, e_stdvalue);
+        }
+      });
+    });
+
+    activity_matches_filtered = new Array();
+    activity_matches_all.forEach((element, index) => {
+      if (!exclude_set.has(index)) {
+        activity_matches_filtered.push(element);
+      }
+    });
+    console.log("exclude_set:", exclude_set);
+    console.log("END applyFilters");
+    tbl.clear();
+    //console.log("Cleared DataTables");
+    tbl.rows.add(activity_matches_filtered);
+    //console.log("Added filtered data to DataTables");
+    tbl.draw();
+    console.log("Redrew DataTables");
+  }
+
+  const dtColumnsMinimal = [
+  {% for c in cols_min %}
+    { data: '{{c}}'}{% if not forloop.last %},{% endif %}
+  {% endfor %}
+  ]
+
+  const dtColumnsAll = [
+  {% for c in cols %}
+    {% if forloop.last %}{ data: '{{c}}' }
+    {% else %}{ data: '{{c}}'},{% endif %}
+  {% endfor %}
+  ]
+
+  $(document).ready(function() {
+    //tbl = $('#dt').DataTable({});
+    tbl = $('#dt').DataTable({
+      data: activity_matches_filtered,
+      pageLength: 25,
+      columns: dtColumnsMinimal
+    });
+  });
+
+</script>
+{% endblock js_content %}

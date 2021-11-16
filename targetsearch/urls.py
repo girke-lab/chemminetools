@@ -15,6 +15,8 @@ urlpatterns = [
         path('extannobychembl/<chembl_id>/', extAnnoByChembl, name='extAnnoByChembl'),
         path('extannobychembl/<chembl_id>/<db>/', extAnnoByChembl, name='extAnnoByChembl'),
         path('tsgraph/<id_type>/<table_name>/<ids>/', tsGraph, name='tsGraph'),
+        path('filter/', tsFilter, name='tsFilter'),
+        path('filter2/', tsFilter2, name='tsFilter2'),
 
         path('<initial_ids>',newTS), # this needs to be last
         ]

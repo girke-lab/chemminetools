@@ -485,3 +485,257 @@ def tsGraph(request, id_type, table_name, ids):
     }
 
     return render(request, 'targetsearch/ts_graph.html', context)
+
+def tsFilter_debug(ids):
+    myActivitySearch = ActivitySearch('compound', ids)
+    activity_info = myActivitySearch.table_info
+    activity_matches = myActivitySearch.get_results()
+
+    #for m in activity_matches:
+    #    m.pop('activity__component_sequences__sequence', None)
+
+    cols = list()
+    for k in activity_matches[0].keys():
+        cols.append(k)
+
+    #stdtypes_set = set()
+    #for m in activity_matches:
+    #    stdtypes_set.add(m['activity__activities__standard_type'])
+    #stdtypes = list(stdtypes_set)
+    #stdtypes.sort()
+
+    # Standard Types can have different units, so we must use a (type, unit)
+    # tuple to distinguish. Ugh.
+    #stdtype_tuples_set = set()
+    #for m in activity_matches:
+    #    t = m['activity__activities__standard_type']
+    #    u = m['activity__activities__standard_units']
+    #    stdtype_tuples_set.add( (t,u) )
+    #stdtype_tuples = list(stdtype_tuples_set)
+    #stdtype_tuples.sort()
+
+    # Standard Types can have different units, so we must use a (type, unit)
+    # tuple to distinguish. Ugh.
+    stdtype_tuples_set = set()
+    stdval_low = dict()     # Lowest std value for a given (type, unit) tuple
+    stdval_high = dict()    # Highest std value for a given (type, unit) tuple
+    stdval_null = dict()    # Presence of NULL for a given (type, unit) tuple
+
+    # Go thru every match to find all (t,u) tuples and lowest/highest values
+    for m in activity_matches:
+        t = m['activity__activities__standard_type']
+        u = m['activity__activities__standard_units'] or 'NULL'
+        v = m['activity__activities__standard_value']
+        tu = (t,u)
+
+        stdtype_tuples_set.add(tu)
+
+        if v is None:
+            stdval_null[tu] = True
+        else:
+            if tu not in stdval_low:
+                stdval_low[tu] = v
+            elif v < stdval_low[tu]:
+                stdval_low[tu] = v
+            if tu not in stdval_high:
+                stdval_high[tu] = v
+            elif v > stdval_high[tu]:
+                stdval_high[tu] = v
+
+    #stdtype_tuples = list()
+    #for tu in stdtype_tuples_set:
+    #    if tu in stdval_low and tu in stdval_high:
+    #        stdtype_tuples.append(tu)
+    #    else:
+    #        t, u = tu
+    #        stdtype_tuples.append( (t, 'YEET') )
+
+    stdtype_tuples = list(stdtype_tuples_set)
+    stdtype_tuples.sort()
+
+    cols_min = [
+        'activity__chembl_id_lookup__chembl_id',
+        'activity__chembl_id_lookup__entity_type',
+        'activity__activities__standard_type',
+        'activity__activities__standard_relation',
+        'activity__activities__standard_value',
+        'activity__activities__standard_units',
+        'activity__assays__assay_id',
+        'activity__assays__doc_id',
+        'activity__assays__description',
+        'activity__assays__chembl_id',
+        'activity__component_sequences__accession'
+        ]
+
+    context = {
+        'ids' : ids,
+        'activity_info' : activity_info,
+        'activity_matches' : activity_matches,
+        'cols' : cols,
+        'cols_min' : cols_min,
+        'stdtype_tuples' : stdtype_tuples,
+        'stdval_low' : stdval_low,
+        'stdval_high' : stdval_high,
+        'stdval_null' : stdval_null,
+    }
+
+    return context
+
+def tsFilter(request):
+    if 'ids' in request.GET:
+        ids = list(request.GET['ids'].split())
+    #else:
+    #    ids = None
+
+    context = tsFilter_debug(ids)
+
+    return render(request, 'targetsearch/filter.html', context)
+
+def tsFilter2_debug(ids):
+    # Get annotation data, just as before
+    myAnnoSearch = AnnotationWithDrugIndSearch('compound', ids)
+    anno_info = myAnnoSearch.table_info
+    anno_matches = myAnnoSearch.get_results()
+
+    # Remove show_extanno. We don't need it here, plus it can't be JSONed
+    for m in anno_matches:
+        m.pop('annotation__extanno__show_extanno')
+
+    cols = list()
+    for k in anno_matches[0].keys():
+        cols.append(k)
+
+    # Minimal set of columns for a compact table
+    cols_basic = [
+        'annotation__chembl_id_lookup__chembl_id',
+        'annotation__molecule_dictionary__pref_name',
+        'annotation__drug_mechanism__mechanism_of_action',
+        'annotation__component_sequences__accession',
+        'annotation__component_sequences__description',
+        'annotation__component_sequences__organism'
+    ]
+
+    acc_id_set = set()
+    for row in anno_matches:
+        acc_id_set.add(row['annotation__component_sequences__accession'])
+
+    acc_go_edges = getGoIdsByAcc(list(acc_id_set))
+
+    #go_id_set = set()
+    #for g in acc_go_edges.values():
+    #    go_id_set.update(g)
+    #go_nodes = getGoNodes(list(go_id_set))
+    go_nodes = getGoNodes(acc_go_edges['ALL'])
+
+    # A "flat" lookup dict, so the GO chart is complete
+    # (relying on edges data only gives direct edges)
+    acc_go_lookup = dict()
+    go_acc_lookup = dict()
+
+    for a in acc_id_set:
+        temp_set = set()
+        for g in acc_go_edges[a]:
+            temp_set.add(g) # add the GO term to the set
+            # add any parent nodes (except the root term)
+            g_parent = go_nodes[g]["parent_go_id"];
+            while g_parent is not None and go_nodes[g_parent]["class_level"] >= 1:
+                temp_set.add(g_parent)
+                g_parent = go_nodes[g_parent]["parent_go_id"]
+        acc_go_lookup[a] = list(temp_set)
+        acc_go_lookup[a].sort()
+
+    for a, glist in acc_go_lookup.items():
+        for g in glist:
+            if g not in go_acc_lookup:
+                go_acc_lookup[g] = list()
+            go_acc_lookup[g].append(a)
+
+    # More lookup tables to make life easier...
+    go_child_lookup = dict()
+    for g, go_data in go_nodes.items():
+        gp = go_data['parent_go_id']
+        if gp not in go_child_lookup:
+            go_child_lookup[gp] = list()
+        go_child_lookup[gp].append(g)
+
+    tgt_cmp_lookup = dict()
+    for row in anno_matches:
+        chembl_id = row["annotation__chembl_id_lookup__chembl_id"]
+        acc_id = row["annotation__component_sequences__accession"]
+        if acc_id not in tgt_cmp_lookup:
+            tgt_cmp_lookup[acc_id] = list()
+        tgt_cmp_lookup[acc_id].append(chembl_id)
+
+    # Reversed (inversed?) lookup of acc_go_edges
+    # TODO: deprecate. replace with go_acc_lookup
+    #go_acc_edges = dict()
+    #for a, glist in acc_go_edges.items():
+    #    if a == 'ALL':
+    #        continue
+    #    for g in glist:
+    #        if g not in go_acc_edges:
+    #            go_acc_edges[g] = list()
+    #        go_acc_edges[g].append(a)
+
+    # Count number of connections for compounds and targets for initial values
+    # of filters.
+    ct_max_dict = dict()
+    tc_max_dict = dict()
+    for m in anno_matches:
+        cid = m['annotation__chembl_id_lookup__chembl_id']
+        tid = m['annotation__component_sequences__accession']
+        if cid in ct_max_dict:
+            ct_max_dict[cid] = ct_max_dict[cid] + 1
+        else:
+            ct_max_dict[cid] = 1
+        if tid in tc_max_dict:
+            tc_max_dict[tid] = tc_max_dict[tid] + 1
+        else:
+            tc_max_dict[tid] = 1
+
+    # Get absolute max values
+    ct_max = 0
+    tc_max = 0
+    for v in ct_max_dict.values():
+        if v > ct_max:
+            ct_max = v
+    for v in tc_max_dict.values():
+        if v > tc_max:
+            tc_max = v
+
+    # Rearrange table info into dict form for easier access
+    table_info_dict = dict()
+    for i in myAnnoSearch.table_info:
+        table_info_dict[i['id']] = i
+
+    context = {
+        'ids': ids,
+        'anno_info': anno_info,
+        'anno_matches': anno_matches,
+        'cols': cols,
+        'cols_basic': cols_basic,
+        'acc_go_edges': acc_go_edges,
+        #'go_acc_edges': go_acc_edges,
+        'go_nodes': go_nodes,
+        'acc_go_lookup': acc_go_lookup,
+        'go_acc_lookup': go_acc_lookup,
+        'go_child_lookup': go_child_lookup,
+        'tgt_cmp_lookup': tgt_cmp_lookup,
+        'ct_max_dict': ct_max_dict,
+        'tc_max_dict': tc_max_dict,
+        'ct_max': ct_max,
+        'tc_max': tc_max,
+        'table_info_dict': table_info_dict
+    }
+
+    return context
+
+def tsFilter2(request):
+    if 'ids' in request.GET:
+        ids = list(request.GET['ids'].split())
+    #else:
+    #    ids = None
+
+    context = tsFilter2_debug(ids)
+
+    return render(request, 'targetsearch/filter2.html', context)

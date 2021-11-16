@@ -33,12 +33,24 @@
       .cmtools-display-none {
         display: none;
       }
+
+      .cmtools-sidebar {
+        width: 16em;
+        padding: 0.5em 0 0 0;
+        box-shadow: inset -1px 0 0 rgba(0, 0, 0, .2);
+        background-color: #f4f5f7 !important;
+      }
+
+      .cmtools-main {
+        padding: 0.5em 1em 0 0;
+      }
       {% block extra_styles %}{% endblock %}
     </style>
 
     {% render_block "css" %}
 
-    <script src="/static/admin/jquery-3.4.1.min.js"></script>
+    <!-- script src="/static/admin/jquery-3.4.1.min.js"></script -->
+    <script src="/static/admin/node_modules/jquery/dist/jquery.min.js"></script>
     {% block extra_headers %}{% endblock %}
 
   </head>
@@ -73,6 +85,7 @@
         <div class="col-md-3">
           <div class="card bg-light">
             <div class="card-body">
+        <!--div class="cmtools-sidebar"-->
               <ul class="nav flex-column">
                 <li class="cmtools-nav-header">Workbench</li>
                 <li class="nav-link"><a href="/myCompounds/">My Compounds</a></li>
@@ -93,8 +106,11 @@
           </div>
         </div>
 
+        <!--div class="cmtools-main"-->
         <div class="col-md-9">
-
+<!--div class="alert alert-warning" role="alert">
+<b>Maintenance Notice:</b> Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+</div-->
 {% bootstrap_messages %}
 
 <div style="float: right">
@@ -104,15 +120,16 @@
 {% block base_content %}{% endblock %}
 {% placeholder content %}
 {% block content %}{% endblock %}
+          <!--hr>
+          <footer>
+            <p>&copy; Tyler Backman, Yiqun Cao, and Thomas Girke</p>
+          </footer-->
         </div><!--/col-md-9-->
       </div><!--/row-->
-
       <hr>
-
       <footer>
-        <p>&copy; Tyler Backman, Yiqun Cao, and Thomas Girke</p>
+      <p>&copy; Tyler Backman, Yiqun Cao, and Thomas Girke</p>
       </footer>
-
     </div><!--/.fluid-container-->
 
     <!-- Le javascript

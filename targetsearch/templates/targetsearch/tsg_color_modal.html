@@ -1,0 +1,187 @@
+<!-- Target Search Graph Color Modal -->
+<div class="modal fade" id="tsgcModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tsgcmTitle">Node Color Tool</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>This tool allows you to define a color and apply it to a range of nodes to assist in
+        visualizing relationships.</p>
+        <ul id="colorToolTabs" class="nav nav-tabs">
+          <li class="nav-item"><a class="nav-link active" href="#quickPalette" data-toggle="tab">Quick Palette</a></li>
+          <li class="nav-item"><a class="nav-link" href="#colorWheel" data-toggle="tab">Color Wheel</a></li>
+        </ul>
+        <div class="tab-content">
+          <div id="quickPalette" class="tab-pane show active">
+            <!-- table style="border-collapse: separate; border-spacing: 5px;">
+              <tbody>
+              <tr>
+                <td style="background-color:#ffac9b" class="palette-box"></td>
+                <td style="background-color:#ffc59b" class="palette-box"></td>
+                <td style="background-color:#ffde9b" class="palette-box"></td>
+                <td style="background-color:#fff79b" class="palette-box"></td>
+                <td style="background-color:#eeff9b" class="palette-box"></td>
+                <td style="background-color:#d5ff9b" class="palette-box"></td>
+              </tr>
+              <tr>
+                <td style="background-color:#bcff9b" class="palette-box"></td>
+                <td style="background-color:#a3ff9b" class="palette-box"></td>
+                <td style="background-color:#9bffac" class="palette-box"></td>
+                <td style="background-color:#9bffc5" class="palette-box"></td>
+                <td style="background-color:#9bffde" class="palette-box"></td>
+                <td style="background-color:#9bfff7" class="palette-box"></td>
+              </tr>
+              <tr>
+                <td style="background-color:#9beeff" class="palette-box"></td>
+                <td style="background-color:#9bd5ff" class="palette-box"></td>
+                <td style="background-color:#9bbcff" class="palette-box"></td>
+                <td style="background-color:#9ba3ff" class="palette-box"></td>
+                <td style="background-color:#ac9bff" class="palette-box"></td>
+                <td style="background-color:#c59bff" class="palette-box"></td>
+              </tr>
+              <tr>
+                <td style="background-color:#de9bff" class="palette-box"></td>
+                <td style="background-color:#f79bff" class="palette-box"></td>
+                <td style="background-color:#ff9bee" class="palette-box"></td>
+                <td style="background-color:#ff9bd5" class="palette-box"></td>
+                <td style="background-color:#ff9bbc" class="palette-box"></td>
+                <td style="background-color:#ff9ba3" class="palette-box"></td>
+              </tr>
+              </tbody>
+            </table -->
+            <table style="border-collapse: separate; border-spacing: 5px;">
+              <tbody>
+              <tr>
+                <td style="background-color:#ffac9b" class="palette-box"></td>
+                <td style="background-color:#ffde9b" class="palette-box"></td>
+                <td style="background-color:#eeff9b" class="palette-box"></td>
+                <td style="background-color:#bcff9b" class="palette-box"></td>
+                <td style="background-color:#9bffac" class="palette-box"></td>
+                <td style="background-color:#9bffde" class="palette-box"></td>
+              </tr>
+              <tr>
+                <td style="background-color:#9beeff" class="palette-box"></td>
+                <td style="background-color:#9bbcff" class="palette-box"></td>
+                <td style="background-color:#ac9bff" class="palette-box"></td>
+                <td style="background-color:#de9bff" class="palette-box"></td>
+                <td style="background-color:#ff9bee" class="palette-box"></td>
+                <td style="background-color:#ff9bbc" class="palette-box"></td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="colorWheel" class="tab-pane">
+            <div id="tsgcmIro"></div>
+          </div>
+        </div>
+        <hr>
+        <p>Selected color: <span id="selectedColorSpan" style="background-color: #ffac9b; display: inline-block; height: 50px; width: 50px; border: 2px solid black"></span></p>
+        <p>Apply selected color to:
+          <ul>
+            <li>
+              <input id="tsgcmCbxGo" type="checkbox">
+              <label id="tsgcmCbxGoLbl" for="tsgcmCbxGo">Selected GO node</label>
+            </li>
+            <li>
+              <input id="tsgcmCbxIntGo" type="checkbox">
+              <label id="tsgcmCbxIntGoLbl" for="tsgcmCbxIntGo">Intermediate GO nodes</label>
+            </li>
+            <li>
+              <input id="tsgcmCbxTgt" type="checkbox" checked>
+              <label id="tsgcmCbxTgtLbl" for="tsgcmCbxTgt">Targets connected to the selected GO node</label>
+            </li>
+            <li>
+              <input id="tsgcmCbxCmp" type="checkbox">
+              <label id="tsgcmCbxCmpLbl" for="tsgcmCbxCmp">Compounds connected to connected targets</label>
+            </li>
+          </ul>
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="tsgcmApply()">Apply</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var tsgcmIro = new iro.ColorPicker("#tsgcmIro");
+
+  $("#tsgcModal").on("show.bs.modal", (e) => {
+    $("#tsgcmCbxGoLbl").html("<b>" + selectedGo + "</b>");
+    $("#tsgcmCbxTgtLbl").html("Targets connected to <b>" + selectedGo + "</b>");
+    $("#tsgcmCbxCmpLbl").html("Compounds connected to targets connected to <b>" + selectedGo + "</b>");
+  });
+
+  function tsgcmApply() {
+    //let selectedColor = tsgcmIro.color.hexString;
+    let selectedColor = $("#selectedColorSpan").css("background-color");
+    let currentNodes = nodesDS.getIds();
+    let nodesToChange = new Array();
+
+    if ($("#tsgcmCbxGo").prop("checked")) {
+      nodesToChange.push(selectedGo);
+    }
+
+    if ($("#tsgcmCbxIntGo").prop("checked")) {
+      if (selectedGo in go_child_lookup) {
+        go_child_lookup[selectedGo].forEach((elem, idx) => {
+          nodesToChange.push(elem);
+        });
+      }
+    }
+
+    if ($("#tsgcmCbxTgt").prop("checked")) {
+      go_acc_lookup[selectedGo].forEach((elem, idx) => {
+        nodesToChange.push(elem);
+      });
+    }
+
+    if ($("#tsgcmCbxCmp").prop("checked")) {
+      go_acc_lookup[selectedGo].forEach((elem, idx) => {
+        tgt_cmp_lookup[elem].forEach((e, i) => {
+          nodesToChange.push(e);
+        });
+      });
+    }
+
+    nodesToChange.forEach((elem, idx) => {
+      if (currentNodes.includes(elem)) {
+        nodesDS.updateOnly({id: elem, color: selectedColor});
+      }
+    });
+
+    // Add a record of the color selection and refresh the icon indicators
+    nctIconColors[selectedGo] = selectedColor;
+    refreshNCTicons();
+
+    // Highlight the pathway that was just modified
+    /*$(".pw-table-row").each(function () {
+      if ($(this).data("nodeid") === selectedGo) {
+        $(this).addClass("pw-table-row-highlight");
+      } else {
+        $(this).removeClass("pw-table-row-highlight");
+      }
+    });*/
+    mostRecentPathway = selectedGo;
+    refreshMRPW();
+
+    $("#tsgcModal").modal("hide");
+  }
+
+  $(".palette-box").click(function () {
+    let selectedColor = $(this).css("background-color");
+    console.log("selectedColor:", selectedColor);
+    $("#selectedColorSpan").css("background-color", selectedColor);
+  });
+
+  tsgcmIro.on("color:change", function(color) {
+    console.log("iro change:", color.hexString);
+    $("#selectedColorSpan").css("background-color", color.hexString);
+  });
+</script>

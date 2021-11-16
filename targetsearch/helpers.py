@@ -44,14 +44,31 @@ def groupBy(keyFn, row_data):
 
     return temp_dict
 
-def runQuery(query, values):
+def runQuery(query, values, cursor_factory=psycopg2.extras.NamedTupleCursor):
+    """Queries the local ChEMBL database.
+
+    Currently assumes a PostgreSQL database, so write queries according to psycopg2
+    formats. A lot of old code assumes results are returned with NamedTupleCursor
+    enabled, hence it's the default for CMT. New code should adopt DictCursor.
+
+    Arguments:
+    query -- PostgreSQL query. Please be cognizant of SQL injection attacks.
+    values -- Values to fill into the query.
+    cursor_factory -- psycopg2 cursor factory. Pass the cursor object directly
+        (psycopg2.extras.X). Alternatively, set to None for default psycopg2 behavior.
+
+    Returns a list of records. The record structure will depend on the cursor factory.
+    """
     dbhost = settings.CHEMBL_DB['DBHOST']
     dbname = settings.CHEMBL_DB['DBNAME']
     dbuser = settings.CHEMBL_DB['DBUSER']
     dbpass = settings.CHEMBL_DB['DBPASS']
 
     with psycopg2.connect(host=dbhost, dbname=dbname, user=dbuser, password=dbpass) as conn:
-        cur = conn.cursor(cursor_factory=psycopg2.extras.NamedTupleCursor)
+        if cursor_factory is None:
+            cur = conn.cursor()
+        else:
+            cur = conn.cursor(cursor_factory=cursor_factory)
         cur.execute(query, values)
         return cur.fetchall()
 
@@ -935,3 +952,164 @@ def getExtAnno2(id_type, cid):
         results = dict()
         results.update(anno_results)
         return results
+
+def getGoData(acc_id_list):
+    """Given a list of PubChem Accession IDs, query the ChEMBL database for
+    Gene Ontology classifications.
+
+    ['P23219', 'P35354'] => {   'P23219' : [r1,r2,...],
+                                'P35354' : [r1,r2,...]}
+    """
+    go_data_dict = dict()
+    for acc in acc_id_list:
+        data = runQuery(""" SELECT  component_sequences.accession,
+                                    component_sequences.component_id,
+                                    component_go.go_id,
+                                    go_classification.parent_go_id,
+                                    go_classification.pref_name,
+                                    go_classification.class_level,
+                                    go_classification.aspect,
+                                    go_classification.path
+                            FROM component_sequences
+                            JOIN component_go USING(component_id)
+                            JOIN go_classification USING(go_id)
+                            WHERE accession = %s
+                            """, (acc,), cursor_factory=psycopg2.extras.DictCursor)
+        go_data_dict[acc] = [dict(row) for row in data]
+    return go_data_dict
+
+def getGoIdsByAcc_OLD(acc_id_list):
+    """Given a list of PubChem Accession IDs, query the ChEMBL database for
+    associated Gene Ontology IDs.
+
+    For the Accession IDs, only the most specific GO IDs (leaf nodes) will be
+    connected. This is to make it easier to build a proper GO tree structure.
+
+    In addition, there is a special list under the "ALL" key, which contains
+    all GO IDs from the original query. This list should be fed into getGoNodes
+    to obtain further data.
+
+    Example:
+
+    ['P23219', 'P35354'] => {   'P23219' : [go_id,go_id,...],
+                                'P35354' : [go_id,go_id,...]}"""
+    acc_go_dict = dict()
+    all_go_ids = set()
+    for acc in acc_id_list:
+        data = runQuery(""" SELECT  component_sequences.accession,
+                                    component_go.go_id,
+                                    go_classification.parent_go_id
+                            FROM component_sequences
+                            JOIN component_go USING(component_id)
+                            JOIN go_classification USING(go_id)
+                            WHERE accession = %s
+                            """, (acc,), cursor_factory=psycopg2.extras.DictCursor)
+        # Determine which nodes are branches (internal) and which are leaves (external).
+        # Assuming it might be possible for a GO node to be both a branch or a leaf depending
+        # on specific drug-target context, we make this determination for each drug-target,
+        # rather than at the greater GO tree context.
+        bnodes = [row['parent_go_id'] for row in data if row['parent_go_id'] is not None]
+        #bnodes = [row['parent_go_id'] for row in data]
+        #acc_go_dict[acc] = [row['go_id'] for row in data if row['go_id'] not in bnodes]
+        go_id_list = list()
+        for row in data:
+            g = row['go_id']
+            all_go_ids.add(g)
+            # Do not trust the ChEMBL GO table to provide all necessary nodes for a
+            # proper graph. For example, ChEMBL 27 is missing a record linking
+            # P23219 to GO:0003824 (parent of GO:0016491, which is linked)
+            if row['parent_go_id'] is not None:
+                all_go_ids.add(row['parent_go_id'])
+            if g not in bnodes:
+                go_id_list.append(g)
+        acc_go_dict[acc] = go_id_list
+    acc_go_dict['ALL'] = list(all_go_ids)
+    return acc_go_dict
+
+def getGoIdsByAcc(acc_id_list):
+    """Given a list of PubChem Accession IDs, query the ChEMBL database for
+    associated Gene Ontology IDs.
+
+    For the Accession IDs, only the most specific GO IDs (leaf nodes) will be
+    connected. This is to make it easier to build a proper GO tree structure.
+
+    In addition, there is a special list under the "ALL" key, which contains
+    all GO IDs from the original query. This list should be fed into getGoNodes
+    to obtain further data.
+
+    Example:
+
+    ['P23219', 'P35354'] => {   'P23219' : [go_id,go_id,...],
+                                'P35354' : [go_id,go_id,...],
+                                'ALL' : [go_id,go_id,go_id,...]}"""
+    acc_go_dict = dict()
+    all_go_ids = set()
+    parent_dict = dict()
+
+    # Query the entire go_id -> parent_go_id relation table. It's not that
+    # large as of ChEMBL 27
+    data1 = runQuery("""SELECT go_id, parent_go_id FROM go_classification""",
+                     None, cursor_factory=psycopg2.extras.DictCursor)
+    for row in data1:
+        parent_dict[row['go_id']] = row['parent_go_id']
+
+    for acc in acc_id_list:
+        data2 = runQuery("""SELECT  component_sequences.accession,
+                                    component_go.go_id,
+                                    go_classification.parent_go_id
+                            FROM component_sequences
+                            JOIN component_go USING(component_id)
+                            JOIN go_classification USING(go_id)
+                            WHERE accession = %s""",
+                            (acc,), cursor_factory=psycopg2.extras.DictCursor)
+        # Determine which nodes are branches (internal) and which are leaves (external).
+        # Assuming it might be possible for a GO node to be both a branch or a leaf depending
+        # on specific drug-target context, we make this determination for each drug-target,
+        # rather than at the greater GO tree context.
+        bnodes = [row['parent_go_id'] for row in data2 if row['parent_go_id'] is not None]
+
+        leaf_list = list()
+        for row in data2:
+            gid = row['go_id']
+
+            if gid not in bnodes:
+                leaf_list.append(gid)
+        acc_go_dict[acc] = leaf_list
+
+        # Manually add parent nodes up to the root, since the component_go
+        # table in ChEMBL does not provide all the necessary links for a proper
+        # graph. For example, ChEMBL 27 is missing a record linking
+        # P23219 to GO:0003824 (parent of GO:0016491, which is linked)
+        for l in leaf_list:
+            all_go_ids.add(l)
+            p = parent_dict[l]
+            while p is not None:
+                all_go_ids.add(p)
+                p = parent_dict[p]
+    acc_go_dict['ALL'] = list(all_go_ids)
+    return acc_go_dict
+
+def getGoNodes(go_id_list):
+    """Given a list of Gene Ontology IDs, query the ChEMBL database for
+    GO node data. The expected use of this function is to give it the
+    ['ALL'] subset of the output of getGoIdsByAcc, but a manually created
+    list will be accepted just as well. Note that parent GO nodes are not
+    automatically determined by this function (but getGoIdsByAcc does).
+
+    Example:
+    GO:0006629 => lipid metabolic process
+    GO:0008152 => metabolic process
+    GO:0008150 => biological process
+
+    ['GO:0006629', 'GO:0008152', 'GO:0008150'] => { 'GO:0006629' : {data_dict},
+                                                    'GO:0008152' : {data_dict},
+                                                    'GO:0008150' : {data_dict}}
+    """
+    go_node_dict = dict()
+    data = runQuery(""" SELECT go_id, parent_go_id, pref_name, class_level, aspect, path
+                        FROM go_classification
+                        WHERE go_id IN %s
+                        """, (tuple(go_id_list),), cursor_factory=psycopg2.extras.DictCursor)
+    for row in data:
+        go_node_dict[row['go_id']] = dict(row)
+    return go_node_dict
