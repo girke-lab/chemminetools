@@ -954,7 +954,7 @@ def getExtAnno2(id_type, cid):
         return results
 
 def getGoData(acc_id_list):
-    """Given a list of PubChem Accession IDs, query the ChEMBL database for
+    """Given a list of UniProt Accession IDs, query the ChEMBL database for
     Gene Ontology classifications.
 
     ['P23219', 'P35354'] => {   'P23219' : [r1,r2,...],
@@ -979,7 +979,7 @@ def getGoData(acc_id_list):
     return go_data_dict
 
 def getGoIdsByAcc_OLD(acc_id_list):
-    """Given a list of PubChem Accession IDs, query the ChEMBL database for
+    """Given a list of UniProt Accession IDs, query the ChEMBL database for
     associated Gene Ontology IDs.
 
     For the Accession IDs, only the most specific GO IDs (leaf nodes) will be
@@ -1026,12 +1026,14 @@ def getGoIdsByAcc_OLD(acc_id_list):
     acc_go_dict['ALL'] = list(all_go_ids)
     return acc_go_dict
 
-def getGoIdsByAcc(acc_id_list):
-    """Given a list of PubChem Accession IDs, query the ChEMBL database for
+def getGoIdsByAcc(acc_id_list, flat = False):
+    """Given a list of UniProt Accession IDs, query the ChEMBL database for
     associated Gene Ontology IDs.
 
-    For the Accession IDs, only the most specific GO IDs (leaf nodes) will be
-    connected. This is to make it easier to build a proper GO tree structure.
+    If "flat" is False (default), only the most specific GO IDs (leaf nodes)
+    will be connected to the Accession ID, so a proper GO tree structure can be
+    built later. If True, all GO IDs will be connected directly to the
+    Accession ID.
 
     In addition, there is a special list under the "ALL" key, which contains
     all GO IDs from the original query. This list should be fed into getGoNodes
@@ -1066,15 +1068,16 @@ def getGoIdsByAcc(acc_id_list):
         # Assuming it might be possible for a GO node to be both a branch or a leaf depending
         # on specific drug-target context, we make this determination for each drug-target,
         # rather than at the greater GO tree context.
-        bnodes = [row['parent_go_id'] for row in data2 if row['parent_go_id'] is not None]
+        if not flat:
+            bnodes = [row['parent_go_id'] for row in data2 if row['parent_go_id'] is not None]
 
         leaf_list = list()
         for row in data2:
             gid = row['go_id']
 
-            if gid not in bnodes:
+            if flat or gid not in bnodes:
                 leaf_list.append(gid)
-        acc_go_dict[acc] = leaf_list
+        acc_go_dict[acc] = leaf_list.copy()
 
         # Manually add parent nodes up to the root, since the component_go
         # table in ChEMBL does not provide all the necessary links for a proper
@@ -1085,6 +1088,8 @@ def getGoIdsByAcc(acc_id_list):
             p = parent_dict[l]
             while p is not None:
                 all_go_ids.add(p)
+                if flat:
+                    acc_go_dict[acc].append(p)
                 p = parent_dict[p]
     acc_go_dict['ALL'] = list(all_go_ids)
     return acc_go_dict
@@ -1113,3 +1118,63 @@ def getGoNodes(go_id_list):
     for row in data:
         go_node_dict[row['go_id']] = dict(row)
     return go_node_dict
+
+def getReactomeDataByAcc(acc_id_list):
+    """Given a list of UniProt Accession IDs, query the Reactome database for
+    associated Reactome pathway IDs and info.
+
+    ['P23219', 'P35354'] => {   'P23219' : [{data_dict}, {data_dict}, ...],
+                                'P35354' : [{data_dict}, {data_dict}, ...]}
+    """
+    results = dict()
+
+    conn = sqlite3.connect(settings.REACTOME_DB)
+    conn.row_factory = sqlite3.Row
+    query = """SELECT * FROM uniprot WHERE uniprot_id = ?"""
+    for acc_id in acc_id_list:
+        l = list()
+        for row in conn.execute(query, (acc_id,)):
+            l.append(dict(row))
+        results[acc_id] = l
+
+    return results
+
+def getReactomeNodesFromResults(reactome_results):
+    """Given the output of getReactomeDataByAcc, extract data meant for the
+    graph display.
+
+    { 'P23219' : [dicts], 'P35354' : [dicts]} => {  'R-HSA-140180' : {data_dict},
+                                                    'R-HSA-2162123' : {data_dict},
+                                                    ...}
+    """
+    reactome_node_dict = dict()
+
+    for k1, v1 in reactome_results.items():
+        for row in v1:
+            if row['reactome_id'] not in reactome_node_dict:
+                r = dict()
+                for i in ['reactome_id', 'url', 'event_name', 'evidence_code', 'species']:
+                    r[i] = row[i]
+                reactome_node_dict[row['reactome_id']] = r
+
+    return reactome_node_dict
+
+def getReactomeIdsFromResults(reactome_results):
+    """Given the output of getReactomeDataByAcc, extract data meant for building
+    graph edges.
+
+    { 'P23219' : [dicts], 'P35354' : [dicts]} => {  'P23219' : [r_id,r_id,...],
+                                                    'P35354' : [r_id,r_id,...],
+                                                    'ALL'    : [...]}
+    """
+    acc_reactome_dict = dict()
+    all_reactome_ids = set()
+
+    for k1, v1 in reactome_results.items():
+        acc_reactome_dict[k1] = list()
+        for row in v1:
+            all_reactome_ids.add(row['reactome_id'])
+            acc_reactome_dict[k1].append(row['reactome_id'])
+
+    acc_reactome_dict['ALL'] = list(all_reactome_ids)
+    return acc_reactome_dict

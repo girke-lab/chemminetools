@@ -619,6 +619,8 @@ def tsFilter2_debug(ids):
     for row in anno_matches:
         acc_id_set.add(row['annotation__component_sequences__accession'])
 
+    # Gene Ontology stuff starts here
+
     acc_go_edges = getGoIdsByAcc(list(acc_id_set))
 
     #go_id_set = set()
@@ -657,6 +659,22 @@ def tsFilter2_debug(ids):
         if gp not in go_child_lookup:
             go_child_lookup[gp] = list()
         go_child_lookup[gp].append(g)
+
+    # Gene Ontology stuff ends here
+    # Reactome stuff begins here
+
+    acc_reactome_data = getReactomeDataByAcc(list(acc_id_set))
+    acc_reactome_edges = getReactomeIdsFromResults(acc_reactome_data)
+    reactome_nodes = getReactomeNodesFromResults(acc_reactome_data)
+
+    reactome_acc_lookup = dict()
+    for a, rlist in acc_reactome_edges.items():
+        for r in rlist:
+            if r not in reactome_acc_lookup:
+                reactome_acc_lookup[r] = list()
+            reactome_acc_lookup[r].append(a)
+
+    # Reactome stuff ends here
 
     tgt_cmp_lookup = dict()
     for row in anno_matches:
@@ -708,6 +726,10 @@ def tsFilter2_debug(ids):
     for i in myAnnoSearch.table_info:
         table_info_dict[i['id']] = i
 
+    org_set = set()
+    for a in anno_matches:
+        org_set.add(a['annotation__component_sequences__organism'])
+
     context = {
         'ids': ids,
         'anno_info': anno_info,
@@ -720,12 +742,16 @@ def tsFilter2_debug(ids):
         'acc_go_lookup': acc_go_lookup,
         'go_acc_lookup': go_acc_lookup,
         'go_child_lookup': go_child_lookup,
+        'acc_reactome_edges': acc_reactome_edges,
+        'reactome_nodes': reactome_nodes,
+        'reactome_acc_lookup': reactome_acc_lookup,
         'tgt_cmp_lookup': tgt_cmp_lookup,
         'ct_max_dict': ct_max_dict,
         'tc_max_dict': tc_max_dict,
         'ct_max': ct_max,
         'tc_max': tc_max,
-        'table_info_dict': table_info_dict
+        'table_info_dict': table_info_dict,
+        'org_list': list(org_set)
     }
 
     return context
@@ -739,3 +765,134 @@ def tsFilter2(request):
     context = tsFilter2_debug(ids)
 
     return render(request, 'targetsearch/filter2.html', context)
+
+def tsAnnoFilter1_debug(ids):
+    # Get annotation data, just as before
+    anno_search = AnnotationWithDrugIndSearch('compound', ids)
+    anno_info = anno_search.table_info
+    anno_matches = anno_search.get_results()
+
+    # Rearrange table info into dict form for easier access
+    table_info_dict = dict()
+    for i in anno_info:
+        table_info_dict[i['id']] = i
+
+    # Remove show_extanno. We don't need it here, plus it can't be JSONed
+    for m in anno_matches:
+        m.pop('annotation__extanno__show_extanno')
+
+    cols = [ k for k in anno_matches[0].keys() ]
+
+    # Minimal set of columns for a compact table
+    cols_basic = [
+        'annotation__chembl_id_lookup__chembl_id',
+        'annotation__molecule_dictionary__pref_name',
+        'annotation__drug_mechanism__mechanism_of_action',
+        'annotation__component_sequences__accession',
+        'annotation__component_sequences__description',
+        'annotation__component_sequences__organism'
+    ]
+
+    # Combined anno_matches loop
+    acc_id_set = set()
+    tgt_cmp_lookup = dict()
+    ct_max_dict = dict()
+    tc_max_dict = dict()
+    org_set = set()
+
+    for row in anno_matches:
+        acc_id_set.add(row['annotation__component_sequences__accession'])
+
+        chembl_id = row["annotation__chembl_id_lookup__chembl_id"]
+        acc_id = row["annotation__component_sequences__accession"]
+        if acc_id not in tgt_cmp_lookup:
+            tgt_cmp_lookup[acc_id] = list()
+        tgt_cmp_lookup[acc_id].append(chembl_id)
+
+        cid = row['annotation__chembl_id_lookup__chembl_id']
+        tid = row['annotation__component_sequences__accession']
+        if cid in ct_max_dict:
+            ct_max_dict[cid] = ct_max_dict[cid] + 1
+        else:
+            ct_max_dict[cid] = 1
+        if tid in tc_max_dict:
+            tc_max_dict[tid] = tc_max_dict[tid] + 1
+        else:
+            tc_max_dict[tid] = 1
+
+        org_set.add(row['annotation__component_sequences__organism'])
+
+    # Get absolute max values
+    ct_max = 0
+    tc_max = 0
+    for v in ct_max_dict.values():
+        if v > ct_max:
+            ct_max = v
+    for v in tc_max_dict.values():
+        if v > tc_max:
+            tc_max = v
+
+    # Rearrange table info into dict form for easier access
+    table_info_dict = dict()
+    for i in anno_search.table_info:
+        table_info_dict[i['id']] = i
+
+    # Gene Ontology stuff starts here
+
+    acc_go_edges = getGoIdsByAcc(list(acc_id_set), flat=True)
+    go_nodes = getGoNodes(acc_go_edges['ALL'])
+
+    go_acc_lookup = dict()
+    for a, glist in acc_go_edges.items():
+        for g in glist:
+            if g not in go_acc_lookup:
+                go_acc_lookup[g] = list()
+            go_acc_lookup[g].append(a)
+
+    # Gene Ontology stuff ends here
+
+    # Reactome stuff begins here
+
+    acc_reactome_data = getReactomeDataByAcc(list(acc_id_set))
+    acc_reactome_edges = getReactomeIdsFromResults(acc_reactome_data)
+    reactome_nodes = getReactomeNodesFromResults(acc_reactome_data)
+
+    reactome_acc_lookup = dict()
+    for a, rlist in acc_reactome_edges.items():
+        for r in rlist:
+            if r not in reactome_acc_lookup:
+                reactome_acc_lookup[r] = list()
+            reactome_acc_lookup[r].append(a)
+
+    # Reactome stuff ends here
+
+    context = {
+        'ids': ids,
+        'anno_info': anno_info,
+        'anno_matches': anno_matches,
+        'cols': cols,
+        'cols_basic': cols_basic,
+        'acc_go_edges': acc_go_edges,
+        'go_nodes': go_nodes,
+        'go_acc_lookup': go_acc_lookup,
+        'acc_reactome_edges': acc_reactome_edges,
+        'reactome_nodes': reactome_nodes,
+        'reactome_acc_lookup': reactome_acc_lookup,
+        'tgt_cmp_lookup': tgt_cmp_lookup,
+        #'ct_max_dict': ct_max_dict,
+        #'tc_max_dict': tc_max_dict,
+        'ct_max': ct_max,
+        'tc_max': tc_max,
+        'table_info_dict': table_info_dict,
+        'org_list': list(org_set)
+    }
+
+    return context
+
+def tsAnnoFilter1(request):
+    if 'ids' in request.GET:
+        ids = list(request.GET['ids'].split())
+
+    context = tsAnnoFilter1_debug(ids)
+
+    return render(request, 'targetsearch/annofilter1.html', context)

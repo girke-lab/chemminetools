@@ -1,0 +1,182 @@
+<!-- Target Search Graph Node Visibility Modal -->
+<div class="modal fade" id="tsgnModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 60%">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tsgnmTitle">Show/Hide Nodes</h5>
+        <button type="button" class="close" data-dismiss="modal">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="tsgnmBody">
+        Lorem ipsum.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="tsgnmApply()">Apply</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function tsgnmRefresh() {
+    var nodes_cmp = new Array();
+    var nodes_tgt = new Array();
+    var nodes_p = new Array();
+    var nodes_c = new Array();
+    var nodes_f = new Array();
+    var nodes_reactome = new Array();
+
+    var bodyHtml = "";
+    var cbxId = 0;
+
+    nodes.forEach((elem, idx) => {
+      if (elem["group"] === "compound") {
+        nodes_cmp.push(elem);
+      } else if (elem["group"] === "target") {
+        nodes_tgt.push(elem);
+      } else if (elem["group"] === "P") {
+        nodes_p.push(elem);
+      } else if (elem["group"] === "C") {
+        nodes_c.push(elem);
+      } else if (elem["group"] === "F") {
+        nodes_f.push(elem);
+      } else if (elem["group"] === "reactome") {
+        nodes_reactome.push(elem);
+      }
+    });
+    console.log("nodes_reactome: ", nodes_reactome);
+
+    if (nodes_cmp.length > 0) {
+      bodyHtml += '<div><h5 style="display: inline-block;">Compounds</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-cmp\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-cmp\', false)">None</a> ]</div>';
+      bodyHtml += '<div>';
+      nodes_cmp.forEach((elem, idx) => {
+        let checked = ""
+        if (elem["show"] === true) {
+          checked = " checked";
+        }
+        bodyHtml += '<span style="width: 10rem; display: inline-block;">'
+        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-cmp" data-nodeid="'+elem["id"]+'"'+checked+'/>';
+        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += '</span>';
+        cbxId++;
+      });
+      bodyHtml += '</div>';
+    }
+
+    if (nodes_tgt.length > 0) {
+      bodyHtml += '<div><h5 style="display: inline-block;">Targets</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-tgt\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-tgt\', false)">None</a> ]</div>';
+      bodyHtml += '<div>';
+      nodes_tgt.forEach((elem, idx) => {
+        let checked = ""
+        if (elem["show"] === true) {
+          checked = " checked";
+        }
+        bodyHtml += '<span style="width: 10rem; display: inline-block;">'
+        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-tgt" data-nodeid="'+elem["id"]+'"'+checked+'/>';
+        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += '</span>';
+        cbxId++;
+      });
+      bodyHtml += '</div>';
+    }
+
+    if (nodes_p.length > 0) {
+      bodyHtml += '<div><h5 style="display: inline-block;">Gene Ontology - Biological Process</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-gop\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-gop\', false)">None</a> ]</div>';
+      bodyHtml += '<div>';
+      nodes_p.forEach((elem, idx) => {
+        let checked = ""
+        if (elem["show"] === true) {
+          checked = " checked";
+        }
+        bodyHtml += '<span style="width: 10rem; display: inline-block;">'
+        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-gop" data-nodeid="'+elem["id"]+'"'+checked+'/>';
+        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += '</span>';
+        cbxId++;
+      });
+      bodyHtml += '</div>';
+    }
+
+    if (nodes_c.length > 0) {
+      bodyHtml += '<div><h5 style="display: inline-block;">Gene Ontology - Cellular Component</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-goc\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-goc\', false)">None</a> ]</div>';
+      bodyHtml += '<div>';
+      nodes_c.forEach((elem, idx) => {
+        let checked = ""
+        if (elem["show"] === true) {
+          checked = " checked";
+        }
+        bodyHtml += '<span style="width: 10rem; display: inline-block;">'
+        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-goc" data-nodeid="'+elem["id"]+'"'+checked+'/>';
+        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += '</span>';
+        cbxId++;
+      });
+      bodyHtml += '</div>';
+    }
+
+    if (nodes_f.length > 0) {
+      bodyHtml += '<div><h5 style="display: inline-block;">Gene Ontology - Molecular Function</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-gof\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-gof\', false)">None</a> ]</div>';
+      bodyHtml += '<div>';
+      nodes_f.forEach((elem, idx) => {
+        let checked = ""
+        if (elem["show"] === true) {
+          checked = " checked";
+        }
+        bodyHtml += '<span style="width: 10rem; display: inline-block;">'
+        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-gof" data-nodeid="'+elem["id"]+'"'+checked+'/>';
+        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += '</span>';
+        cbxId++;
+      });
+      bodyHtml += '</div>';
+    }
+
+    if (nodes_reactome.length > 0) {
+      bodyHtml += '<div><h5 style="display: inline-block;">Reactome</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-rctm\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-rctm\', false)">None</a> ]</div>';
+      bodyHtml += '<div>';
+      nodes_reactome.forEach((elem, idx) => {
+        let checked = ""
+        if (elem["show"] === true) {
+          checked = " checked";
+        }
+        bodyHtml += '<span style="width: 10rem; display: inline-block;">'
+        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-rctm" data-nodeid="'+elem["id"]+'"'+checked+'/>';
+        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += '</span>';
+        cbxId++;
+      });
+      bodyHtml += '</div>';
+    }
+
+    $("#tsgnmBody").html(bodyHtml);
+  }
+
+  function tsgnmApply() {
+    let new_node_data = new Object();
+
+    $(".node-cbx").each(function() {
+      let node_id = $(this).data("nodeid");
+      let node_checked = $(this).prop("checked");
+
+      new_node_data[node_id] = node_checked;
+    });
+
+    nodes.forEach((elem, idx) => {
+      let node_id = elem["id"];
+
+      nodes[idx]["show"] = new_node_data[node_id];
+    });
+
+    nodesView.refresh();
+
+    $("#tsgnModal").modal("hide");
+  }
+
+  function tsgnmSelect(cbx_class, chk_value) {
+    $(cbx_class).each(function () {
+      $(this).prop("checked", chk_value);
+    });
+  }
+</script>

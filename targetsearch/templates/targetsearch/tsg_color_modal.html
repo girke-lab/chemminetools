@@ -100,6 +100,10 @@
             </li>
           </ul>
         </p>
+        <p>
+          <input id="tsgcmCbxShowNode" type="checkbox">
+          <label for="tsgcmCbxShowNode">Show this pathway's node in the graph network</label>
+        </p>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" onclick="tsgcmApply()">Apply</button>
@@ -137,9 +141,17 @@
     }
 
     if ($("#tsgcmCbxTgt").prop("checked")) {
-      go_acc_lookup[selectedGo].forEach((elem, idx) => {
-        nodesToChange.push(elem);
-      });
+      if (selectedPwType == "go") {
+        go_acc_lookup[selectedGo].forEach((elem, idx) => {
+          nodesToChange.push(elem);
+        });
+      } else if (selectedPwType == "reactome") {
+        reactome_acc_lookup[selectedGo].forEach((elem, idx) => {
+          nodesToChange.push(elem);
+        });
+      } else {
+        console.error("tsgcmApply: unknown selectedPwType: ", selectedPwType);
+      }
     }
 
     if ($("#tsgcmCbxCmp").prop("checked")) {
@@ -170,6 +182,16 @@
     });*/
     mostRecentPathway = selectedGo;
     refreshMRPW();
+
+    // Show affected node(s) in network, if checkbox selected
+    if ($("#tsgcmCbxShowNode").prop("checked")) {
+      nodes.forEach((elem, idx) => {
+        if (elem["id"] === selectedGo) {
+          elem["show"] = true;
+        }
+      });
+      nodesView.refresh();
+    }
 
     $("#tsgcModal").modal("hide");
   }

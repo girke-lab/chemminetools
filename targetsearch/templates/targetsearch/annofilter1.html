@@ -26,13 +26,9 @@
 
 {% block extra_headers %}
 <link rel="stylesheet" href="/static/admin/jquery-ui-1.13.0/jquery-ui.min.css">
-<!--link rel="stylesheet" href="/static/admin/node_modules/evol-colorpicker/css/evol-colorpicker.min.css"-->
 <script type="text/javascript" src="/static/admin/jquery-ui-1.13.0/jquery-ui.min.js"></script>
 <script type="text/javascript" src="/static/admin/vis-network-9.0.0/standalone/umd/vis-network.min.js"></script>
-<!--script type="text/javascript" src="/static/admin/node_modules/chart.js/dist/chart.js"></script-->
-<!--script type="text/javascript" src="/static/admin/node_modules/chartjs-plugin-datalabels/dist/chartjs-plugin-datalabels.js"></script-->
 <script type="text/javascript" src="/static/admin/node_modules/@jaames/iro/dist/iro.min.js"></script>
-<!--script type="text/javascript" src="/static/admin/node_modules/evol-colorpicker/js/evol-colorpicker.min.js"></script-->
 {% endblock extra_headers %}
 
 {% block base_content %}
@@ -79,10 +75,10 @@
           <input id="filter_tc_high" class="form-control filter-high filter-range" type="number" step="1" value="{{tc_max}}" min="1" max="{{tc_max}}" required="true" autocomplete="off" onchange="filterChange('tc', 'high')">
         </div>
       </div>
-      <div class="form-row d-none">
+      <div class="form-row">
         <b title="Limit target results to the selected organisms." data-toggle="tooltip">Organisms <i class="far fa-question-circle"></i> :</b>
       </div>
-      <div class="form-row pl-3 d-none">
+      <div class="form-row pl-3">
         {% for o in org_list %}
         <input id="org_{{forloop.counter}}" type="checkbox" checked>
         <label for="org_{{forloop.counter}}"> {{o}}</label>
@@ -155,9 +151,6 @@
       </div>
       <div id="pathway-accordion" class="accordion"></div>
     </div>
-    <!--div class="display: none">
-      <canvas id="anno_chart"></canvas>
-    </div-->
   </div>
 </div>
 {% endblock base_content %}
@@ -169,39 +162,26 @@
 
 {# Django-to-JSON stuff goes here #}
 {{ anno_matches | json_script:"anno_matches_json" }}
-{# go_data | json_script:"go_data_json" #}
 {{ acc_go_edges | json_script:"acc_go_edges_json" }}
-{# go_acc_edges | json_script:"go_acc_edges_json" #}
 {{ go_nodes | json_script:"go_nodes_json" }}
-{{ acc_go_lookup | json_script:"acc_go_lookup_json" }}
 {{ go_acc_lookup | json_script:"go_acc_lookup_json" }}
-{{ go_child_lookup | json_script:"go_child_lookup_json" }}
 {{ acc_reactome_edges | json_script:"acc_reactome_edges_json" }}
 {{ reactome_nodes | json_script:"reactome_nodes_json" }}
 {{ reactome_acc_lookup | json_script:"reactome_acc_lookup_json" }}
 {{ tgt_cmp_lookup | json_script:"tgt_cmp_lookup_json" }}
-{# ct_max_dict | json_script:"ct_max_json" #}
-{# tc_max_dict | json_script:"tc_max_json" #}
 {{ table_info_dict | json_script:"table_info_json" }}
 
 <script>
   var tbl;
 
   const anno_matches_all = JSON.parse(document.getElementById("anno_matches_json").text);
-  //const go_data_all = JSON.parse(document.getElementById("go_data_json").text);
-  // Note: acc_go_edges_all only lists DIRECT edges between targets and GO terms
-  const acc_go_edges_all = JSON.parse(document.getElementById("acc_go_edges_json").text);
-  //const go_acc_edges_all = JSON.parse(document.getElementById("go_acc_edges_json").text);
-  const go_nodes_all = JSON.parse(document.getElementById("go_nodes_json").text);
-  const acc_go_lookup = JSON.parse(document.getElementById("acc_go_lookup_json").text);
+  const acc_go_edges = JSON.parse(document.getElementById("acc_go_edges_json").text);
+  const go_nodes = JSON.parse(document.getElementById("go_nodes_json").text);
   const go_acc_lookup = JSON.parse(document.getElementById("go_acc_lookup_json").text);
-  const go_child_lookup = JSON.parse(document.getElementById("go_child_lookup_json").text);
   const acc_reactome_edges = JSON.parse(document.getElementById("acc_reactome_edges_json").text);
   const reactome_nodes = JSON.parse(document.getElementById("reactome_nodes_json").text);
   const reactome_acc_lookup = JSON.parse(document.getElementById("reactome_acc_lookup_json").text);
   const tgt_cmp_lookup = JSON.parse(document.getElementById("tgt_cmp_lookup_json").text);
-  //const ct_max_dict = JSON.parse(document.getElementById("ct_max_json").text);
-  //const tc_max_dict = JSON.parse(document.getElementById("tc_max_json").text);
   const table_info = JSON.parse(document.getElementById("table_info_json").text);
 
   var anno_matches_filtered = Array.from(anno_matches_all);
@@ -222,63 +202,11 @@
     F: {shape: "box", color: "#FFA807"}//(255,168,7)
   };
 
-  //const chart_ctx = document.getElementById("anno_chart").getContext("2d");
-  /*const chart_obj = new Chart(chart_ctx, {
-    type: "doughnut",
-    data: {
-      labels: ["NULL"],
-      datasets: [{
-        label: "Dataset label",
-        data: [100],
-        backgroundColor: ["rgba(123, 225, 65, 1)"]
-      }]
-    },
-    options: {
-      responsive: true,
-      legend: {
-        position: "top"
-      },
-      plugins: {
-        title: {
-          display: true,
-          font: {
-            size: 16
-          },
-          text: "Select a target to render chart"
-        },
-        subtitle: {
-          display: true,
-          font: {
-            size: 14
-          },
-          text: "Lorem ipsum dolor sit amet, consectetuer adipiscing elit."
-        },
-        datalabels: {
-          formatter: function(value, context) {
-            return context.chart.data.labels[context.dataIndex];
-          },
-          labels: {
-            title: {
-              font: {
-                weight: "bold"
-              }
-            }
-          }
-        },
-        tooltip: {
-          enabled: false
-        }
-      }
-    },
-    plugins: [ChartDataLabels]
-  });*/
   var selectedAcc = null;
   var selectedGo = null;
   var selectedPwType = null;
   var mostRecentPathway = null;
   var nctIconColors = new Object(); // nctIconColors[pathway_id] -> color
-  //var ct_slider = null;
-  //var tc_slider = null;
   var sliders = new Object();
 
   function getCmpDesc(chembl_id) {
@@ -304,7 +232,8 @@
   }
 
   function getGoDesc(go_id) {
-    let go_obj = go_nodes_all[go_id];
+    console.log("getGoDesc called for go_id:", go_id);
+    let go_obj = go_nodes[go_id];
 
     let desc = go_id + "\n----------";
     desc += "\nGene Ontology name: " + go_obj["pref_name"];
@@ -329,7 +258,7 @@
   }
 
   function getGoDesc2(go_id) {
-    let go_obj = go_nodes_all[go_id];
+    let go_obj = go_nodes[go_id];
 
     let desc = new Array();
     desc.push("Gene Ontology name: " + go_obj["pref_name"]);
@@ -411,20 +340,6 @@
       c["show"] = true;
       nodes.push(c);
     });
-    /*
-    cmpNodes.forEach((elem, idx) => {
-      if (cmp_node_set.has(idx)) {
-        let c = new Object();
-        c["chembl_id"] = idx;
-        //c["id"] = elem.get("id");
-        c["id"] = idx;
-        c["label"] = idx;
-        //c["shape"] = "box";
-        //c["group"] = 1;
-        c["group"] = "compound";
-        nodes.push(c);
-      }
-    });*/
 
     // Add target nodes
     tgt_node_set.forEach((idx) => {
@@ -437,28 +352,15 @@
       t["show"] = true;
       nodes.push(t);
     });
-    /*
-    tgtNodes.forEach((elem, idx) => {
-      if (tgt_node_set.has(idx)) {
-        let t = new Object();
-        t["acc_id"] = idx;
-        //t["id"] = elem.get("id");
-        t["id"] = idx;
-        t["label"] = idx;
-        //t["shape"] = "ellipse";
-        //t["group"] = 2;
-        t["group"] = "target";
-        nodes.push(t);
-      }
-    });*/
 
     // Add initial target-GO edges
     // Note: we define edges FROM go nodes TO drug-targets to make the edge
     // take the color of the go node. This should improve graph readability.
+    /*
     tgt_node_set.forEach((tgt) => {
       //let from_id = tgt;
       let to_id = tgt;
-      acc_go_edges_all[tgt].forEach((gid) => {
+      acc_go_edges[tgt].forEach((gid) => {
         let aspect = go_nodes_all[gid]["aspect"];
         if (  ( (aspect === 'P') && $("#filter_go_p").prop("checked") ) ||
               ( (aspect === 'C') && $("#filter_go_c").prop("checked") ) ||
@@ -475,9 +377,10 @@
           //console.log("excluded GO node:", gid, aspect);
         }
       });
-    });
+    });*/
 
     // Iteratively add parent GO nodes
+    /*
     let child_go_nodes = new Set(go_node_set);
     while (child_go_nodes.size > 0) {
       //console.log("child_go_nodes size:", child_go_nodes.size);
@@ -491,8 +394,6 @@
           //console.log("skipping edge to root node")
         } else if (pgid !== null) {
           let e = new Object();
-          //e["from"] = gid;
-          //e["to"] = pgid;
           e["from"] = pgid;
           e["to"] = gid;
           edges.push(e);
@@ -505,9 +406,10 @@
       });
       child_go_nodes = new_cgn;
     }
-    console.log("Finished building GO tree edges");
+    console.log("Finished building GO tree edges");*/
 
     // Add GO nodes
+    /*
     go_node_set.forEach((elem) => {
       let g = new Object();
       g["id"] = elem;
@@ -517,19 +419,45 @@
       g["title"] = getGoDesc(elem);
       g["show"] = false;
       nodes.push(g);
-    });
+    });*/
+
+    // Add GO nodes (new)
+    for (i in go_nodes) {
+      let elem = go_nodes[i];
+      let o = new Object();
+      o["id"] = elem["go_id"];
+      o["go_id"] = elem["go_id"];
+      o["label"] = elem["go_id"];
+      o["group"] = elem["aspect"];
+      o["title"] = getGoDesc(elem["go_id"]);
+      o["show"] = false;
+      nodes.push(o);
+    }
+
+    // Add GO edges (new)
+    // Note: FROM=pathway node, TO=drug target
+    for (acc_id in acc_go_edges) {
+      if (acc_id != "ALL") {
+        acc_go_edges[acc_id].forEach((elem, idx) => {
+          let e = new Object();
+          e["from"] = elem;
+          e["to"] = acc_id;
+          edges.push(e);
+        });
+      }
+    }
 
     // Add Reactome nodes
-    for (r in reactome_nodes) {
-      let elem = reactome_nodes[r];
-      let g = new Object();
-      g["id"] = elem["reactome_id"];
-      g["reactome_id"] = elem["reactome_id"];
-      g["label"] = elem["reactome_id"];
-      g["group"] = "reactome";
-      g["title"] = elem["event_name"];
-      g["show"] = false;
-      nodes.push(g);
+    for (i in reactome_nodes) {
+      let elem = reactome_nodes[i];
+      let o = new Object();
+      o["id"] = elem["reactome_id"];
+      o["reactome_id"] = elem["reactome_id"];
+      o["label"] = elem["reactome_id"];
+      o["group"] = "reactome";
+      o["title"] = elem["event_name"];
+      o["show"] = false;
+      nodes.push(o);
     }
     //console.log("nodes: ", nodes);
 
@@ -537,10 +465,10 @@
     for (acc_id in acc_reactome_edges) {
       if (acc_id != "ALL") {
         acc_reactome_edges[acc_id].forEach((elem, idx) => {
-          let ed = new Object();
-          ed["from"] = acc_id;
-          ed["to"] = elem;
-          edges.push(ed);
+          let e = new Object();
+          e["from"] = elem;
+          e["to"] = acc_id;
+          edges.push(e);
         });
       }
     }
@@ -610,46 +538,6 @@
     $("#info-panel").html(header_html + info_html);
   }
 
-  // This function is called when a target node is selected in the network graph.
-  // It updates the pie chart thing that'll be deprecated shortly...
-  /*function updateChartAcc(acc_id) {
-    console.log("updateChartAcc: acc_id=", acc_id);
-    //let go_nodes = acc_go_edges_all[acc_id];
-    let go_nodes = acc_go_lookup[acc_id];
-    let go_aspect_cnt = new Object();
-    go_aspect_cnt['P'] = 0;
-    go_aspect_cnt['C'] = 0;
-    go_aspect_cnt['F'] = 0;
-    go_nodes.forEach((elem, idx) => {
-      let go_node = go_nodes_all[elem];
-      go_aspect_cnt[go_node["aspect"]] += 1;
-    });
-
-    console.log("updateChartAcc: go_aspect_cnt=", go_aspect_cnt);
-
-    let newLabels = ["Biological Process", "Cellular Component", "Molecular Function"];
-    let newDatasets = [{
-      data: [go_aspect_cnt['P'], go_aspect_cnt['C'], go_aspect_cnt['F']],
-      backgroundColor: [
-        "rgba(123, 225, 65, 1)",
-        "rgba(110, 110, 253, 1)",
-        "rgba(255, 168, 7, 1)"
-      ]
-    }];
-
-    chart_obj.data.labels = newLabels;
-    chart_obj.data.datasets = newDatasets;
-    chart_obj.options.onClick = updateChartGo;
-    chart_obj.options.plugins.tooltip = {enabled: false};
-    chart_obj.options.plugins.datalabels.formatter = function(value, context) {
-      return context.chart.data.labels[context.dataIndex] + " ("+value+")";
-    };
-    chart_obj.options.plugins.title.text = selectedAcc;
-    chart_obj.options.plugins.subtitle.display = true;
-    chart_obj.options.plugins.subtitle.text = "Select a Gene Ontology aspect.";
-    chart_obj.update();
-  }*/
-
   // Gather pathway data for a given target based on Accession ID
   // Usually called when a target node is selected in the network graph
   function getPathwayData(acc_id) {
@@ -660,16 +548,17 @@
     // list: list of pathway IDs only
     // datasrc: pointer to data object containing detailed info
     let pathway_data = new Object();
-    pathway_data["go_p"] = {label: "Gene Ontology - Biological Process", type: "go", list: new Array(), datasrc: go_nodes_all};
-    pathway_data["go_c"] = {label: "Gene Ontology - Cellular Component", type: "go", list: new Array(), datasrc: go_nodes_all};
-    pathway_data["go_f"] = {label: "Gene Ontology - Molecular Function", type: "go", list: new Array(), datasrc: go_nodes_all};
+    pathway_data["go_p"] = {label: "Gene Ontology - Biological Process", type: "go", list: new Array(), datasrc: go_nodes};
+    pathway_data["go_c"] = {label: "Gene Ontology - Cellular Component", type: "go", list: new Array(), datasrc: go_nodes};
+    pathway_data["go_f"] = {label: "Gene Ontology - Molecular Function", type: "go", list: new Array(), datasrc: go_nodes};
     pathway_data["reactome"] = {label: "Reactome", type:"reactome",  list: new Array(), datasrc: null};
     //pathway_data["kegg"] = {label: "KEGG (Placeholder)", list: new Array(), datasrc: null};
 
     // Populate GO info
-    let go_nodes = acc_go_lookup[acc_id];
-    go_nodes.forEach((elem, idx) => {
-      let n = go_nodes_all[elem];
+    //let go_nodes = acc_go_edges[acc_id];
+    //go_nodes.forEach((elem, idx) => {
+    acc_go_edges[acc_id].forEach((elem, idx) => {
+      let n = go_nodes[elem];
       if (n["aspect"] === "P") {
         pathway_data["go_p"]["list"].push(elem);
       } else if (n["aspect"] === "C") {
@@ -697,14 +586,7 @@
 
       let pw_header_btn = '<button class="btn btn-link flex-grow-1 text-left" type="button" data-toggle="collapse" data-target="#'+pw_card_id+'-body">'+pw_card_title+'</button>';
       let pw_header = '<div class="card-header d-flex mb-0 p-0">'+pw_header_btn+'</div>';
-      /*
-      let pw_list = '<ul>';
-      pathway_data[p]["list"].forEach((elem, idx) => {
-        let pw_item_title = elem+' ('+go_nodes_all[elem]["pref_name"]+')';
-        pw_list += '<li><a href="javascript:openColorTool(\''+elem+'\')">'+pw_item_title+'</a></li>';
-      });
-      pw_list += '</ul>';
-      */
+
       let pw_table_help = '<p>Select the paint brush icon (<i class="fas fa-paint-brush"></i>) to use the Node Color Tool.<br>';
       pw_table_help += 'A pathway with a custom color will have its icon replaced with a colored square (<i class="fas fa-square"></i>).<br>';
       pw_table_help += 'The most recently modified pathway will be highlighted.</p>';
@@ -723,8 +605,8 @@
           pw_table += '<td class="pw-table-cell"><a href="javascript:openColorTool(\''+elem+'\', \'go\')"><i class="fas fa-paint-brush nct-icon" data-nodeid="'+elem+'"></i></a></td>';
           let go_url = "http://amigo.geneontology.org/amigo/term/"+elem;
           pw_table += '<td class="pw-table-cell"><a href="'+go_url+'" target="_blank">'+elem+'</a></td>';
-          pw_table += '<td class="pw-table-cell">'+go_nodes_all[elem]["pref_name"]+'</td>';
-          pw_table += '<td class="pw-table-cell">'+go_nodes_all[elem]["parent_go_id"]+'</td>';
+          pw_table += '<td class="pw-table-cell">'+go_nodes[elem]["pref_name"]+'</td>';
+          pw_table += '<td class="pw-table-cell">'+go_nodes[elem]["parent_go_id"]+'</td>';
           pw_table += '</tr>';
         });
         pw_table += '</tbody></table>';
@@ -766,111 +648,6 @@
     tsgnmRefresh();
     $("#tsgnModal").modal();
   }
-/*
-  function updateChartGo(event, elem, chart) {
-    console.log("updateChartGo:");
-    console.log("  event=", event);
-    console.log("  elem=", elem);
-    console.log("  chart=", chart);
-
-    if (elem["length"] === 0) {
-      console.log("updateChartGo: zero-length elem array. Ignoring.");
-      return;
-    }
-
-    // TODO: This will probably fail if an aspect is missing
-    if (elem[0]["index"] === 0) {
-      console.log("updateChartGo: selected Biological Process");
-      updateChartGoAspect("P");
-    } else if (elem[0]["index"] === 1) {
-      console.log("updateChartGo: selected Cellular Component");
-      updateChartGoAspect("C");
-    } else if (elem[0]["index"] === 2) {
-      console.log("updateChartGo: selected Molecular Function");
-      updateChartGoAspect("F");
-    } else {
-      console.log("updateChartGo: unknown select index:", elem[0]["index"]);
-    }
-  }
-
-  function updateChartGoAspect(aspect) {
-    //let go_edges = acc_go_edges_all[selectedAcc];
-    let go_edges = acc_go_lookup[selectedAcc];
-    let newLabels = new Array();
-    let newData = new Array();
-
-    go_edges.forEach((elem, idx) => {
-      if (go_nodes_all[elem]["aspect"] === aspect) {
-        newLabels.push(elem);
-        newData.push(1);
-      }
-    });
-
-    let rgb = "0,0,0";
-    let aspect_full = "OOPS";
-    if (aspect === "P") {
-      rgb = "123, 225, 65";
-      aspect_full = "Biological Process";
-    } else if (aspect === "C") {
-      rgb = "110, 110, 253";
-      aspect_full = "Cellular Component";
-    } else if (aspect === "F") {
-      rgb = "255, 168, 7";
-      aspect_full = "Molecular Function";
-    }
-    let newColors = new Array();
-    // Add 5 to avoid a totally transparent color
-    let opacityDec = 1 / (newData["length"] + 5);
-    for (let i = 0; i < newData["length"]; i++) {
-      newColors.push("rgba(" + rgb + ", " + (1 - i * opacityDec) + ")");
-    }
-
-    let newDatasets = [{
-      data: newData,
-      backgroundColor: newColors
-    }];
-
-    let newTooltip = {
-      enabled: true,
-      callbacks: {
-        title: function(ti) {
-          return ti["label"];
-        },
-        label: function(ti) {
-          return getGoDesc2(ti["label"]);
-        }
-      }
-    };
-
-    chart_obj.data.labels = newLabels;
-    chart_obj.data.datasets = newDatasets;
-    chart_obj.options.onClick = chartSelectGo;
-    chart_obj.options.plugins.tooltip = newTooltip;
-    chart_obj.options.plugins.datalabels.formatter = function(value, context) {
-      return context.chart.data.labels[context.dataIndex];
-    };
-    chart_obj.options.plugins.title.text = selectedAcc + " - " + aspect_full;
-    chart_obj.options.plugins.subtitle.display = true;
-    chart_obj.options.plugins.subtitle.text = "Select a GO term to apply its color to all matching targets.";
-    chart_obj.update();
-  }
-
-  function chartSelectGo(event, elem, chart) {
-    console.log("chartSelectGo:");
-    console.log("  event=", event);
-    console.log("  elem=", elem);
-    console.log("  chart=", chart);
-
-    if (elem["length"] === 0) {
-      console.log("chartSelectGo: zero-length elem array. Ignoring.");
-      return;
-    }
-    let selectedIndex = elem[0]["index"];
-    let selectedLabel = chart.data.labels[selectedIndex];
-
-    selectedGo = selectedLabel;
-    $("#tsgcModal").modal();
-  }*/
 
   function showTsgcModal(event, elem, chart) {
     console.log("showTsgcModal:");
@@ -903,11 +680,11 @@
 
       let acc_id = elem["annotation__component_sequences__accession"];
       // Build the GO part and print the line
-      acc_go_lookup[acc_id].forEach((go_id) => {
+      acc_go_edges[acc_id].forEach((go_id) => {
         let go_part = new Array();
         go_part.push(go_id);
         go_part.push("Gene Ontology");
-        go_part.push(go_nodes_all[go_id]["pref_name"]);
+        go_part.push(go_nodes[go_id]["pref_name"]);
 
         csv_file += anno_part.join("\t") + "\t" + go_part.join("\t") + "\n";
       });
@@ -964,12 +741,12 @@
     // (use tgt_info to only include targets that pass the filter)
     for (acc_id in tgt_info) {
       // Load GO data
-      acc_go_lookup[acc_id].forEach((go_id) => {
+      acc_go_edges[acc_id].forEach((go_id) => {
         if ( !(go_id in pw_info) ) {
           let pi = new Object();
           pi["id"] = go_id;
           pi["type"] = "Gene Ontology";
-          pi["description"] = go_nodes_all[go_id]["pref_name"];
+          pi["description"] = go_nodes[go_id]["pref_name"];
 
           pw_info[go_id] = pi;
         }

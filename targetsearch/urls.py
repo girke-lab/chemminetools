@@ -17,6 +17,7 @@ urlpatterns = [
         path('tsgraph/<id_type>/<table_name>/<ids>/', tsGraph, name='tsGraph'),
         path('filter/', tsFilter, name='tsFilter'),
         path('filter2/', tsFilter2, name='tsFilter2'),
+        path('annofilter1/', tsAnnoFilter1, name='tsAnnoFilter1'),
 
         path('<initial_ids>',newTS), # this needs to be last
         ]
