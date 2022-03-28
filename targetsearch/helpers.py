@@ -1033,7 +1033,7 @@ def getGoIdsByAcc(acc_id_list, flat = False):
     If "flat" is False (default), only the most specific GO IDs (leaf nodes)
     will be connected to the Accession ID, so a proper GO tree structure can be
     built later. If True, all GO IDs will be connected directly to the
-    Accession ID.
+    Accession ID. NOTE: use getGoIdsByAccFlat() instead.
 
     In addition, there is a special list under the "ALL" key, which contains
     all GO IDs from the original query. This list should be fed into getGoNodes
@@ -1092,6 +1092,84 @@ def getGoIdsByAcc(acc_id_list, flat = False):
                     acc_go_dict[acc].append(p)
                 p = parent_dict[p]
     acc_go_dict['ALL'] = list(all_go_ids)
+    return acc_go_dict
+
+def getGoIdsByAccFlat(acc_id_list, remove_roots = True, add_missing_links = True):
+    """Given a list of UniProt Accession IDs, query the ChEMBL database for
+    associated Gene Ontology IDs.
+
+    Unlike getGoIdsByAcc(), this function connects all GO IDs directly to the
+    Accession ID (i.e. no tree structure).
+
+    If "remove_roots" is True (default), the root nodes for the three GO aspects
+    will not be included in the result set.
+
+    If "add_missing_links" is True (default), intermediate nodes will be added
+    to the result set by climbing up the parent nodes. Otherwise, the GO terms
+    from the ChEMBL database will be returned as is.
+
+    In addition, there is a special list under the "ALL" key, which contains
+    all GO IDs from the original query. This list should be fed into getGoNodes
+    to obtain further data.
+
+    Example:
+
+    ['P23219', 'P35354'] => {   'P23219' : [go_id,go_id,...],
+                                'P35354' : [go_id,go_id,...],
+                                'ALL' : [go_id,go_id,go_id,...]}"""
+    acc_go_dict = dict() # returned result set
+    all_go_ids = set()
+    parent_dict = dict() # d[go_id] => parent_go_id
+
+    # Query the entire go_id => parent_go_id relation table. It's not that
+    # large as of ChEMBL 27
+    data1 = runQuery("""SELECT go_id, parent_go_id FROM go_classification""",
+                     None, cursor_factory=psycopg2.extras.DictCursor)
+    # Build parent_dict lookup. For finding missing links
+    for row in data1:
+        parent_dict[row['go_id']] = row['parent_go_id']
+
+    for acc in set(acc_id_list):
+        #print("processing {}".format(acc))
+        data2 = runQuery("""SELECT  component_sequences.accession,
+                                    component_go.go_id,
+                                    go_classification.parent_go_id
+                            FROM component_sequences
+                            JOIN component_go USING(component_id)
+                            JOIN go_classification USING(go_id)
+                            WHERE accession = %s""",
+                            (acc,), cursor_factory=psycopg2.extras.DictCursor)
+
+        acc_go_dict[acc] = list()
+        for row in data2:
+            # Skip root nodes if requested
+            if row['parent_go_id'] is None and remove_roots is True:
+                pass
+            else:
+                acc_go_dict[acc].append(row['go_id'])
+
+        # Manually add parent nodes if requested, since the component_go
+        # table in ChEMBL does not provide all intermediate links
+        # For example, ChEMBL 27 is missing a record linking
+        # P23219 to GO:0003824 (parent of GO:0016491, which is linked)
+        if add_missing_links:
+            for g in acc_go_dict[acc]:
+                p = parent_dict[g]
+                if parent_dict[p] is None and remove_roots is True:
+                    #print("excluding {} -> {}".format(p, parent_dict[p]))
+                    pass
+                elif p in acc_go_dict[acc]:
+                    #print("skipping {}".format(p))
+                    pass
+                else:
+                    #print("appending {}".format(p))
+                    acc_go_dict[acc].append(p)
+
+    # Gather all_go_ids
+    for v in acc_go_dict.values():
+        all_go_ids.update(v)
+    acc_go_dict['ALL'] = list(all_go_ids)
+
     return acc_go_dict
 
 def getGoNodes(go_id_list):
@@ -1178,3 +1256,7 @@ def getReactomeIdsFromResults(reactome_results):
 
     acc_reactome_dict['ALL'] = list(all_reactome_ids)
     return acc_reactome_dict
+
+def getChemblVersion():
+    data = runQuery("SELECT comments FROM version", None, cursor_factory=psycopg2.extras.DictCursor)
+    return data[0]['comments']

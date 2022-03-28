@@ -78,12 +78,12 @@
       <div class="form-row">
         <b title="Limit target results to the selected organisms." data-toggle="tooltip">Organisms <i class="far fa-question-circle"></i> :</b>
       </div>
-      <div class="form-row pl-3">
-        {% for o in org_list %}
-        <input id="org_{{forloop.counter}}" type="checkbox" checked>
-        <label for="org_{{forloop.counter}}"> {{o}}</label>
-        {% endfor %}
+      {% for o in org_list %}
+      <div class="form-check pl-3">
+        <input id="org_{{forloop.counter}}" class="form-check-input filter-org" type="checkbox" data-value="{{o}}" checked>
+        <label for="org_{{forloop.counter}}" class="form-check-label">{{o}}</label>
       </div>
+      {% endfor %}
       <div class="form-row">
         <button type="button" class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
         <span id="filter_count" class="pl-2 pt-2">0 results have been filtered out.</span>
@@ -152,6 +152,7 @@
       <div id="pathway-accordion" class="accordion"></div>
     </div>
   </div>
+  <div>ChEMBL database version: {{chembl_version}}</div>
 </div>
 {% endblock base_content %}
 
@@ -555,8 +556,6 @@
     //pathway_data["kegg"] = {label: "KEGG (Placeholder)", list: new Array(), datasrc: null};
 
     // Populate GO info
-    //let go_nodes = acc_go_edges[acc_id];
-    //go_nodes.forEach((elem, idx) => {
     acc_go_edges[acc_id].forEach((elem, idx) => {
       let n = go_nodes[elem];
       if (n["aspect"] === "P") {
@@ -805,11 +804,19 @@
       }
     });
 
+    let exclude_org = new Set();
+    $("input.filter-org").each(function() {
+      if (! $(this).prop("checked")) {
+        exclude_org.add($(this).data("value"));
+      }
+    });
+
     let filter_count = 0;
     anno_matches_filtered = new Array();
     anno_matches_all.forEach((elem, idx) => {
       if (!exclude_cmp.has(elem["annotation__chembl_id_lookup__chembl_id"]) &&
-          !exclude_tgt.has(elem["annotation__component_sequences__accession"]) )
+          !exclude_tgt.has(elem["annotation__component_sequences__accession"]) &&
+          !exclude_org.has(elem["annotation__component_sequences__organism"]))
       {
         anno_matches_filtered.push(elem);
       } else {
@@ -825,6 +832,7 @@
 
     console.log("exclude_cmp:", exclude_cmp);
     console.log("exclude_tgt:", exclude_tgt);
+    console.log("exclude_org:", exclude_org);
     console.log("END applyFilters");
     tbl.clear();
     tbl.rows.add(anno_matches_filtered);

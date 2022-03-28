@@ -192,6 +192,7 @@
 			{% include "targetsearch/ts_table.html" with table_name="activity" table_info=activity_info table_data=activity_matches drugind_json=drugind_json grouping_col=groupingCol %}
 		{% endif %}
 	{% endif %}
+	<div>ChEMBL database version: {{chembl_version}}</div>
 </div><!-- end container-fluid -->
 
 {% include "compounddb/compound_img_modal.html" %}

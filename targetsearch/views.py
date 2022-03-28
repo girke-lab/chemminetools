@@ -300,6 +300,7 @@ def newTS(request,initial_ids=""):
         'homolog_type_value': homolog_type_value,
         'initial_ids': initial_ids,
         'ids_resubmit' : ids_resubmit,
+        'chembl_version': getChemblVersion(),
         }
 
     return render(request, 'targetsearch/new_ts.html', context)
@@ -772,6 +773,15 @@ def tsAnnoFilter1_debug(ids):
     anno_info = anno_search.table_info
     anno_matches = anno_search.get_results()
 
+    if len(anno_matches) == 0:
+        context = {
+            'ids': ids,
+            'anno_info': anno_info,
+            'anno_matches': anno_matches,
+            'message': 'Search returned no annotation data.'
+        }
+        return context
+
     # Rearrange table info into dict form for easier access
     table_info_dict = dict()
     for i in anno_info:
@@ -839,7 +849,8 @@ def tsAnnoFilter1_debug(ids):
 
     # Gene Ontology stuff starts here
 
-    acc_go_edges = getGoIdsByAcc(list(acc_id_set), flat=True)
+    #acc_go_edges = getGoIdsByAcc(list(acc_id_set), flat=True)
+    acc_go_edges = getGoIdsByAccFlat(list(acc_id_set), remove_roots=True, add_missing_links=True)
     go_nodes = getGoNodes(acc_go_edges['ALL'])
 
     go_acc_lookup = dict()
@@ -890,9 +901,16 @@ def tsAnnoFilter1_debug(ids):
     return context
 
 def tsAnnoFilter1(request):
-    if 'ids' in request.GET:
-        ids = list(request.GET['ids'].split())
+    context = {'chembl_version': getChemblVersion()}
 
-    context = tsAnnoFilter1_debug(ids)
+    if 'ids' not in request.GET:
+        return render(request, 'targetsearch/annofilter1_form.html', context)
+
+    ids = list(request.GET['ids'].split())
+
+    context.update(tsAnnoFilter1_debug(ids))
+
+    if len(context['anno_matches']) == 0:
+        return render(request, 'targetsearch/annofilter1_form.html', context)
 
     return render(request, 'targetsearch/annofilter1.html', context)

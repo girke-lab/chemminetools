@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% load cms_tags %}
+{% load targetsearch_extras %}
+
+{% block extra_styles %}
+#anno_graph {
+    height: 800px;
+    border: 1px solid lightgray;
+}
+
+.palette-box {
+    height: 50px;
+    width: 50px;
+    border: 2px solid black;
+    cursor: pointer;
+}
+
+.pw-table-cell {
+    padding: 0 0.25em;
+}
+
+.pw-table-row-highlight {
+    background-color: lightgray;
+}
+{% endblock extra_styles %}
+
+{% block extra_headers %}
+{% endblock extra_headers %}
+
+{% block base_content %}
+<div class="container-fluid">
+  {% if message %}<div class="row"><span style="color: red">{{message}}</span></div>{% endif %}
+  <form method="GET" autocomplete="off">
+    <div class="card text-white bg-secondary my-3 p-2">
+      <h6 class="card-title">Enter ChEMBL IDs</h6>
+      <textarea id="chembl_ids_ta" class="form-control" name="ids" rows="10" placeholder="Enter space-separated ID(s)"></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Search</button>
+    <button id="compound-sample-btn" class="btn btn-outline-primary" type="button" data-toggle="tooltip" data-html="true" title="<p>CHEMBL25 (Aspirin)</p><p>CHEMBL112 (Acetaminophen)</p><p>CHEMBL154 (Naproxen)</p><p>CHEMBL521 (Ibuprofen)</p><p>Note: This will replace whatever text is currently in the search box.</p>" onclick="$('#chembl_ids_ta').val('CHEMBL25 CHEMBL112 CHEMBL154 CHEMBL521');$('#compound-sample-btn').tooltip('hide')">Use Sample IDs <i class="far fa-question-circle"></i></button>
+  </form>
+  <div>ChEMBL database version: {{chembl_version}}</div>
+</div>
+{% endblock base_content %}
+
+{% block js_content %}
+<script>
+$(document).ready(function () {
+  $("[data-toggle=tooltip]").tooltip();
+});
+</script>
+{% endblock js_content %}

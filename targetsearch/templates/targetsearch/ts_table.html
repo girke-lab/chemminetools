@@ -17,7 +17,7 @@
 				<button id="show-extanno-{{table_name}}" type="button" class="btn btn-primary" onclick="toggleExtAnno()">Show Extended Annotation Links</button>
 			</div>
 			<div class="btn-group mr-1" role="group" data-toggle="tooltip" title="Display compound-target graph.">
-				<a class="btn btn-primary" role="button" href="{% url 'tsFilter2' %}?ids={{ids_resubmit}}" target="_blank">View Graph (Experimental)<i class="fas fa-external-link-alt"></i></a>
+				<a class="btn btn-primary" role="button" href="{% url 'tsAnnoFilter1' %}?ids={{ids_resubmit}}" target="_blank">View Graph (Experimental)<i class="fas fa-external-link-alt"></i></a>
 			</div>
 			{% endif %}
 			<div class="btn-group mr-1" role="group">
