@@ -111,6 +111,12 @@
     <p>This section displays compound-target connections as a network graph.
     Hover over or select a node to see further information.</p>
   </div>
+  {% if org_list|length > 1 %}
+  <div id="multi_org_alert" class="alert alert-primary" role="alert">
+    This dataset contains targets from multiple organisms. If this is not
+    desired, use the filter above to reduce the number of selected organisms.
+  </div>
+  {% endif %}
   <div id="graph-row" class="row">
     <div class="col-6">
       <div id="anno_graph">Graph not initialized</div>
@@ -353,74 +359,6 @@
       t["show"] = true;
       nodes.push(t);
     });
-
-    // Add initial target-GO edges
-    // Note: we define edges FROM go nodes TO drug-targets to make the edge
-    // take the color of the go node. This should improve graph readability.
-    /*
-    tgt_node_set.forEach((tgt) => {
-      //let from_id = tgt;
-      let to_id = tgt;
-      acc_go_edges[tgt].forEach((gid) => {
-        let aspect = go_nodes_all[gid]["aspect"];
-        if (  ( (aspect === 'P') && $("#filter_go_p").prop("checked") ) ||
-              ( (aspect === 'C') && $("#filter_go_c").prop("checked") ) ||
-              ( (aspect === 'F') && $("#filter_go_f").prop("checked") ) ) {
-          //let to_id = gid;
-          let from_id = gid;
-          let e = new Object();
-          e["from"] = from_id;
-          e["to"] = to_id;
-          edges.push(e);
-
-          go_node_set.add(gid);
-        } else {
-          //console.log("excluded GO node:", gid, aspect);
-        }
-      });
-    });*/
-
-    // Iteratively add parent GO nodes
-    /*
-    let child_go_nodes = new Set(go_node_set);
-    while (child_go_nodes.size > 0) {
-      //console.log("child_go_nodes size:", child_go_nodes.size);
-      let new_cgn = new Set();
-      child_go_nodes.forEach((gid) => {
-        //console.log("gid:", gid);
-        let pgid = go_nodes_all[gid]["parent_go_id"];
-        console.log("loadGraph: pgid=", pgid);
-        let pgid_next = go_nodes_all[pgid]["parent_go_id"];
-        if (pgid_next === null) {
-          //console.log("skipping edge to root node")
-        } else if (pgid !== null) {
-          let e = new Object();
-          e["from"] = pgid;
-          e["to"] = gid;
-          edges.push(e);
-          go_node_set.add(pgid);
-          new_cgn.add(pgid);
-          //console.log("new edge:", gid, pgid);
-        } else {
-          //console.log("root node:", gid);
-        }
-      });
-      child_go_nodes = new_cgn;
-    }
-    console.log("Finished building GO tree edges");*/
-
-    // Add GO nodes
-    /*
-    go_node_set.forEach((elem) => {
-      let g = new Object();
-      g["id"] = elem;
-      g["go_id"] = elem;
-      g["label"] = elem;
-      g["group"] = go_nodes_all[elem]["aspect"];
-      g["title"] = getGoDesc(elem);
-      g["show"] = false;
-      nodes.push(g);
-    });*/
 
     // Add GO nodes (new)
     for (i in go_nodes) {
