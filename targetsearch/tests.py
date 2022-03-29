@@ -21,7 +21,8 @@ class TsFilterTestCase(unittest.TestCase):
         correct_acc_go_edges = {'GO:0016787', 'GO:0071554', 'GO:0006508', 'GO:0016740', 'GO:0009636', 'GO:0046677', 'GO:0016020', 'GO:0009058', 'GO:0005515', 'GO:0043167', 'GO:0003824', 'GO:0005886', 'GO:0008233', 'GO:0008152', 'GO:0016757', 'GO:0016021'}
         test_acc_go_edges = helpers.getGoIdsByAccFlat(['P02918'], remove_roots=True, add_missing_links=True)
         for rn in root_nodes:
-            self.assertNotIn(rn, test_acc_go_edges['P02918'], f"root node in acc_go_edges: {rn}")
+            #self.assertNotIn(rn, test_acc_go_edges['P02918'], f"root node in acc_go_edges: {rn}")
+            self.assertNotIn(rn, test_acc_go_edges['P02918'], "root node in acc_go_edges: {}".format(rn))
         self.assertEqual(len(correct_acc_go_edges), len(test_acc_go_edges['P02918']), "acc_go_edges has incorrect number of items")
         test_acc_go_edges_set = set(test_acc_go_edges['P02918'])
         self.assertEqual(len(test_acc_go_edges['P02918']), len(test_acc_go_edges_set), "acc_go_edges contains duplicates")
