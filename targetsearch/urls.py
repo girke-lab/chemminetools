@@ -14,10 +14,10 @@ urlpatterns = [
         #path('extanno/<id_type>/<cid>/', extAnno, name='extAnno'),
         path('extannobychembl/<chembl_id>/', extAnnoByChembl, name='extAnnoByChembl'),
         path('extannobychembl/<chembl_id>/<db>/', extAnnoByChembl, name='extAnnoByChembl'),
-        path('tsgraph/<id_type>/<table_name>/<ids>/', tsGraph, name='tsGraph'),
         path('filter/', tsFilter, name='tsFilter'),
         path('filter2/', tsFilter2, name='tsFilter2'),
         path('annofilter1/', tsAnnoFilter1, name='tsAnnoFilter1'),
+        path('annofilter2/', tsAnnoFilter2, name='tsAnnoFilter2'),
 
         path('<initial_ids>',newTS), # this needs to be last
         ]

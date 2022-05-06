@@ -239,7 +239,7 @@
   }
 
   function getGoDesc(go_id) {
-    console.log("getGoDesc called for go_id:", go_id);
+    //console.log("getGoDesc called for go_id:", go_id);
     let go_obj = go_nodes[go_id];
 
     let desc = go_id + "\n----------";
@@ -369,7 +369,7 @@
       o["label"] = elem["go_id"];
       o["group"] = elem["aspect"];
       o["title"] = getGoDesc(elem["go_id"]);
-      o["show"] = false;
+      o["show"] = {% if search_type == "chembl" %}false{% else %}true{% endif %};
       nodes.push(o);
     }
 
@@ -395,7 +395,7 @@
       o["label"] = elem["reactome_id"];
       o["group"] = "reactome";
       o["title"] = elem["event_name"];
-      o["show"] = false;
+      o["show"] = {% if search_type == "chembl" %}false{% else %}true{% endif %};
       nodes.push(o);
     }
     //console.log("nodes: ", nodes);
@@ -480,7 +480,7 @@
   // Gather pathway data for a given target based on Accession ID
   // Usually called when a target node is selected in the network graph
   function getPathwayData(acc_id) {
-    console.log("getPathwayData: acc_id=", acc_id);
+    //console.log("getPathwayData: acc_id=", acc_id);
 
     // Structured list data for all the pathways we want to support
     // label: display text for the overall category
@@ -503,7 +503,7 @@
       } else if (n["aspect"] === "F") {
         pathway_data["go_f"]["list"].push(elem);
       } else {
-        console.log("getPathwayData: ERROR: unknown GO aspect:", n["aspect"]);
+        console.error("getPathwayData: ERROR: unknown GO aspect:", n["aspect"]);
       }
     });
 
@@ -519,10 +519,10 @@
     let first_card = " show";
     for (p in pathway_data) {
       let pw_card_id = "pathway-card-"+p;
-      let pw_card_title = pathway_data[p]["label"];
+      let pw_card_title = `${pathway_data[p]["label"]} (${pathway_data[p]["list"].length})`;
 
-      let pw_header_btn = '<button class="btn btn-link flex-grow-1 text-left" type="button" data-toggle="collapse" data-target="#'+pw_card_id+'-body">'+pw_card_title+'</button>';
-      let pw_header = '<div class="card-header d-flex mb-0 p-0">'+pw_header_btn+'</div>';
+      let pw_header_btn = `<button class="btn btn-link flex-grow-1 text-left" type="button" data-toggle="collapse" data-target="#${pw_card_id}-body">${pw_card_title}</button>`;
+      let pw_header = `<div class="card-header d-flex mb-0 p-0">${pw_header_btn}</div>`;
 
       let pw_table_help = '<p>Select the paint brush icon (<i class="fas fa-paint-brush"></i>) to use the Node Color Tool.<br>';
       pw_table_help += 'A pathway with a custom color will have its icon replaced with a colored square (<i class="fas fa-square"></i>).<br>';
@@ -530,7 +530,7 @@
 
       let pw_table = "";
       if (pathway_data[p]["type"] == "go") {
-        pw_table += '<table style="border-collapse: collapse;">'
+        pw_table += '<table style="border-collapse: collapse;">';
         pw_table += '<thead><tr>';
         pw_table += '<th class="pw-table-cell"></th>';
         pw_table += '<th class="pw-table-cell">GO ID</th>';
@@ -538,12 +538,12 @@
         pw_table += '<th class="pw-table-cell">Parent GO ID</th>';
         pw_table += '</tr></thead><tbody>';
         pathway_data[p]["list"].forEach((elem, idx) => {
-          pw_table += '<tr class="pw-table-row" data-nodeid="'+elem+'">';
-          pw_table += '<td class="pw-table-cell"><a href="javascript:openColorTool(\''+elem+'\', \'go\')"><i class="fas fa-paint-brush nct-icon" data-nodeid="'+elem+'"></i></a></td>';
-          let go_url = "http://amigo.geneontology.org/amigo/term/"+elem;
-          pw_table += '<td class="pw-table-cell"><a href="'+go_url+'" target="_blank">'+elem+'</a></td>';
-          pw_table += '<td class="pw-table-cell">'+go_nodes[elem]["pref_name"]+'</td>';
-          pw_table += '<td class="pw-table-cell">'+go_nodes[elem]["parent_go_id"]+'</td>';
+          pw_table += `<tr class="pw-table-row" data-nodeid="${elem}">`;
+          pw_table += `<td class="pw-table-cell"><a href="javascript:openColorTool('${elem}', 'go')"><i class="fas fa-paint-brush nct-icon" data-nodeid="${elem}"></i></a></td>`;
+          let go_url = `http://amigo.geneontology.org/amigo/term/${elem}`;
+          pw_table += `<td class="pw-table-cell"><a href="${go_url}" target="_blank">${elem}</a></td>`;
+          pw_table += `<td class="pw-table-cell">${go_nodes[elem]["pref_name"]}</td>`;
+          pw_table += `<td class="pw-table-cell">${go_nodes[elem]["parent_go_id"]}</td>`;
           pw_table += '</tr>';
         });
         pw_table += '</tbody></table>';
@@ -587,17 +587,17 @@
   }
 
   function showTsgcModal(event, elem, chart) {
-    console.log("showTsgcModal:");
+    /*console.log("showTsgcModal:");
     console.log("  event=", event);
     console.log("  elem=", elem);
-    console.log("  chart=", chart);
+    console.log("  chart=", chart);*/
 
     $("#tsgcModal").modal();
   }
 
   // Export the graph network data as CSV
   function saveAsCsv() {
-    console.log("saveAsCsv begin");
+    //console.log("saveAsCsv begin");
     let csv_file = "ChEMBL ID\tPreferred Name\tMechanism of Action\tAccession Id\tTarget Description\tOrganism\tPathway Id\tPathway Type\tPathway Description\n";
     let anno_field_output = ["annotation__chembl_id_lookup__chembl_id",
                         "annotation__molecule_dictionary__pref_name",
@@ -639,13 +639,13 @@
     //console.log("csv_file:", csv_file);
     $("#a_dl_csv").attr("href", "data:text/plain;base64,"+btoa(csv_file));
     document.getElementById("a_dl_csv").click();
-    console.log("saveAsCsv end");
+    //console.log("saveAsCsv end");
     //return csv_file;
   }
 
   // Export the graph network data as JSON
   function saveAsJson() {
-    console.log("saveAsJson begin");
+    //console.log("saveAsJson begin");
     let json_file = new Object();
     let cmp_info = new Object();
     let tgt_info = new Object();
@@ -714,7 +714,7 @@
 
     $("#a_dl_json").attr("href", "data:text/plain;base64,"+btoa(JSON.stringify(json_file)));
     document.getElementById("a_dl_json").click();
-    console.log("saveAsJson end");
+    //console.log("saveAsJson end");
     //return json_file;
   }
 

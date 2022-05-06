@@ -1,13 +1,12 @@
-from django.test import TestCase
+from django.test import TestCase, SimpleTestCase
 from django.urls import reverse
-import unittest # for test cases that do not need the Django test database
 
 import targetsearch.helpers as helpers
 import targetsearch.views as views
 
 # Create your tests here.
 
-class TsFilterTestCase(unittest.TestCase):
+class TsFilterTestCase(SimpleTestCase):
     def test_getGoIdsByAccFlat(self):
         root_nodes = {'GO:0008150', 'GO:0005575', 'GO:0003674'} # process, component, function
 

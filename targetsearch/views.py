@@ -1,3 +1,7 @@
+# views.py - Put anything that returns an HTTP response here
+# Non-trivial view functions should be split into a "debug" part that can be
+# easily evaluated/tested in a shell, and a rendering stub here.
+
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, JsonResponse, Http404
 from django.urls import reverse
@@ -5,30 +9,21 @@ from lockdown.decorators import lockdown
 from compounddb.models import Compound, Tag
 from tools.models import *
 from django.contrib import messages
-from collections import OrderedDict
-from django.template import Context, Engine
+#from collections import OrderedDict
+#from django.template import Context, Engine
 from guest.decorators import guest_allowed
 import sys
 import traceback
 
-from .helpers import *
-from . import ts_graph
+#from .helpers import *
+from .views_debug import *
 
-from django.conf import settings
+#from django.conf import settings
 from django.views.decorators.cache import cache_page
 
-import os
-import csv
-import json
-
-def readSources(type):
-    sources = {}
-    filename = os.path.join(settings.PROJECT_DIR,type+"_sources.txt")
-    with open(filename) as f:
-        for line in f:
-            (key, val) = line.split("\t")
-            sources[key.strip()] = val.strip()
-    return sources
+#import os
+#import csv
+#import json
 
 def detailPage(request,id):
     targetInfo=None
@@ -127,6 +122,7 @@ def newTS(request,initial_ids=""):
     defaultProteinDb = "ACC+ID"
     groupingCol = 0
     similarityJobs = [(job.id,str(job)) for job in Job.objects.filter(user=request.user,application__category_id=5)]
+    ids_resubmit_set = set()
 
     # Default GET request variables
     id_type = 'compound'
@@ -237,6 +233,10 @@ def newTS(request,initial_ids=""):
 
             drugind_json = drugIndicationData(myAnnotationSearch.drugind_objs);
 
+            for v in annotation_matches.values():
+                for row in v:
+                    ids_resubmit_set.add(row['annotation__chembl_id_lookup__chembl_id'])
+
             # Exclude ActivitySearch from search-by-target by default
             if id_type in ['target', 'homolog-target'] and not include_activity:
                 activity_info = None
@@ -279,8 +279,6 @@ def newTS(request,initial_ids=""):
         traceback.print_tb(sys.exc_info()[2])
         message = str(e)
 
-    ids_resubmit = '+'.join(ids)
-
     context = {
         'query_submit' : query_submit,
         'message' : message,
@@ -299,85 +297,11 @@ def newTS(request,initial_ids=""):
         'similarityJobs': similarityJobs,
         'homolog_type_value': homolog_type_value,
         'initial_ids': initial_ids,
-        'ids_resubmit' : ids_resubmit,
+        'ids_resubmit' : '+'.join(ids_resubmit_set),
         'chembl_version': getChemblVersion(),
         }
 
     return render(request, 'targetsearch/new_ts.html', context)
-
-def addMappedQueryColumn(mapping,columnDefinition,annotation_info, annotation_matches,activity_info,activity_matches):
-
-    def addQueryCol(matches):
-        for key, rowGroup in matches.items():
-            if key in mapping:
-                queryKey = mapping[key]
-                for i in range(len(rowGroup)):
-                    matches[key][i] = OrderedDict([(columnDefinition["id"],queryKey)] + [ item for item in rowGroup[i].items()] )
-
-
-    annotation_info.insert(0,columnDefinition)
-
-    addQueryCol(annotation_matches)
-    if activity_matches != None:
-        activity_info.insert(0,columnDefinition)
-        addQueryCol(activity_matches)
-
-
-def readSimilarityMappingData(user,job_id):
-    job = Job.objects.get(id=job_id, user=user)
-    mapping = {}
-
-    try:
-        f = open(job.output, 'r')
-        csvinput = csv.reader(f, delimiter=' ')
-        for line in csvinput:
-            #map from target back to query
-            # multiple queries may map to the same target
-            queries = mapping.setdefault(line[1],[]);
-            queries.append(line[0]);
-    finally:
-        f.close()
-
-    for key, value in mapping.items():
-        mapping[key] = ",".join(value)
-
-    return mapping
-
-
-## map1: x->y and map2: y -> z, return x->z
-def composeMaps(map1,map2):
-    composedMap = {}
-    for key1,value1 in map1.items():
-        if value1 in map2:
-            composedMap[key1] = map2[value1]
-    return composedMap
-
-def tableHtml(search_obj, header=True, footer=False, table_class=""):
-    """Takes a SearchBase object and returns an HTML table"""
-
-    error = None
-    table_info = None
-    table_data = None
-
-    engine = Engine.get_default()
-    template = engine.get_template('targetsearch/table.html')
-
-    try:
-        table_info = search_obj.table_info
-        table_data = search_obj.get_results()
-    except Exception as e:
-        error = str(e)
-
-    context = {
-        'error' : error,
-        'header' : header,
-        'footer' : footer,
-        'table_info' : table_info,
-        'table_data' : table_data,
-        'table_class' : table_class,
-    }
-
-    return template.render(Context(context))
 
 def drugIndTable(request):
     if 'molregno' in request.GET:
@@ -401,21 +325,6 @@ def targetNames(request, query):
     data = [ {'accession_id': n.accession,
               'name': (n.description+' ('+n.organism+')')} for n in names ]
     return JsonResponse(data, safe=False)
-
-def drugIndicationData(drugind_objs):
-    # Generate Drug Indication JSON data
-    drugind_json = dict()
-    for chembl_id, drugind_obj in drugind_objs.items():
-        colnames = [ {'title': c['name']} for c in drugind_obj.table_info ]
-
-        data = list()
-        for row in drugind_obj.get_results():
-            data.append(list(row.values()))
-
-        drugind_json[chembl_id] = dict()
-        drugind_json[chembl_id]['colnames'] = colnames
-        drugind_json[chembl_id]['data'] = data
-    return drugind_json
 
 @cache_page(60 * 120)
 def chemblPNG(request, chembl_id):
@@ -465,123 +374,6 @@ def extAnnoByChembl(request, chembl_id, db=None):
 
     return render(request, 'targetsearch/extannobychembl.html', context)
 
-def tsGraph(request, id_type, table_name, ids):
-    id_list = ids.split('+')
-
-    if table_name == 'annotation':
-        anno_data = ts_graph.get_anno_data(id_type, id_list)
-        (nodes_data, edges_data) = ts_graph.make_anno_graph(anno_data)
-    elif table_name == 'activity':
-        act_data = ts_graph.get_act_data(id_type, id_list)
-        (nodes_data, edges_data) = ts_graph.make_act_graph(act_data)
-
-    context = {
-        'id_type' : id_type,
-        'table_name' : table_name,
-        'ids' : ids,
-        'ids_type' : str(type(ids)),
-        'id_list' : id_list,
-        'nodes_data' : nodes_data,
-        'edges_data' : edges_data,
-    }
-
-    return render(request, 'targetsearch/ts_graph.html', context)
-
-def tsFilter_debug(ids):
-    myActivitySearch = ActivitySearch('compound', ids)
-    activity_info = myActivitySearch.table_info
-    activity_matches = myActivitySearch.get_results()
-
-    #for m in activity_matches:
-    #    m.pop('activity__component_sequences__sequence', None)
-
-    cols = list()
-    for k in activity_matches[0].keys():
-        cols.append(k)
-
-    #stdtypes_set = set()
-    #for m in activity_matches:
-    #    stdtypes_set.add(m['activity__activities__standard_type'])
-    #stdtypes = list(stdtypes_set)
-    #stdtypes.sort()
-
-    # Standard Types can have different units, so we must use a (type, unit)
-    # tuple to distinguish. Ugh.
-    #stdtype_tuples_set = set()
-    #for m in activity_matches:
-    #    t = m['activity__activities__standard_type']
-    #    u = m['activity__activities__standard_units']
-    #    stdtype_tuples_set.add( (t,u) )
-    #stdtype_tuples = list(stdtype_tuples_set)
-    #stdtype_tuples.sort()
-
-    # Standard Types can have different units, so we must use a (type, unit)
-    # tuple to distinguish. Ugh.
-    stdtype_tuples_set = set()
-    stdval_low = dict()     # Lowest std value for a given (type, unit) tuple
-    stdval_high = dict()    # Highest std value for a given (type, unit) tuple
-    stdval_null = dict()    # Presence of NULL for a given (type, unit) tuple
-
-    # Go thru every match to find all (t,u) tuples and lowest/highest values
-    for m in activity_matches:
-        t = m['activity__activities__standard_type']
-        u = m['activity__activities__standard_units'] or 'NULL'
-        v = m['activity__activities__standard_value']
-        tu = (t,u)
-
-        stdtype_tuples_set.add(tu)
-
-        if v is None:
-            stdval_null[tu] = True
-        else:
-            if tu not in stdval_low:
-                stdval_low[tu] = v
-            elif v < stdval_low[tu]:
-                stdval_low[tu] = v
-            if tu not in stdval_high:
-                stdval_high[tu] = v
-            elif v > stdval_high[tu]:
-                stdval_high[tu] = v
-
-    #stdtype_tuples = list()
-    #for tu in stdtype_tuples_set:
-    #    if tu in stdval_low and tu in stdval_high:
-    #        stdtype_tuples.append(tu)
-    #    else:
-    #        t, u = tu
-    #        stdtype_tuples.append( (t, 'YEET') )
-
-    stdtype_tuples = list(stdtype_tuples_set)
-    stdtype_tuples.sort()
-
-    cols_min = [
-        'activity__chembl_id_lookup__chembl_id',
-        'activity__chembl_id_lookup__entity_type',
-        'activity__activities__standard_type',
-        'activity__activities__standard_relation',
-        'activity__activities__standard_value',
-        'activity__activities__standard_units',
-        'activity__assays__assay_id',
-        'activity__assays__doc_id',
-        'activity__assays__description',
-        'activity__assays__chembl_id',
-        'activity__component_sequences__accession'
-        ]
-
-    context = {
-        'ids' : ids,
-        'activity_info' : activity_info,
-        'activity_matches' : activity_matches,
-        'cols' : cols,
-        'cols_min' : cols_min,
-        'stdtype_tuples' : stdtype_tuples,
-        'stdval_low' : stdval_low,
-        'stdval_high' : stdval_high,
-        'stdval_null' : stdval_null,
-    }
-
-    return context
-
 def tsFilter(request):
     if 'ids' in request.GET:
         ids = list(request.GET['ids'].split())
@@ -591,171 +383,6 @@ def tsFilter(request):
     context = tsFilter_debug(ids)
 
     return render(request, 'targetsearch/filter.html', context)
-
-def tsFilter2_debug(ids):
-    # Get annotation data, just as before
-    myAnnoSearch = AnnotationWithDrugIndSearch('compound', ids)
-    anno_info = myAnnoSearch.table_info
-    anno_matches = myAnnoSearch.get_results()
-
-    # Remove show_extanno. We don't need it here, plus it can't be JSONed
-    for m in anno_matches:
-        m.pop('annotation__extanno__show_extanno')
-
-    cols = list()
-    for k in anno_matches[0].keys():
-        cols.append(k)
-
-    # Minimal set of columns for a compact table
-    cols_basic = [
-        'annotation__chembl_id_lookup__chembl_id',
-        'annotation__molecule_dictionary__pref_name',
-        'annotation__drug_mechanism__mechanism_of_action',
-        'annotation__component_sequences__accession',
-        'annotation__component_sequences__description',
-        'annotation__component_sequences__organism'
-    ]
-
-    acc_id_set = set()
-    for row in anno_matches:
-        acc_id_set.add(row['annotation__component_sequences__accession'])
-
-    # Gene Ontology stuff starts here
-
-    acc_go_edges = getGoIdsByAcc(list(acc_id_set))
-
-    #go_id_set = set()
-    #for g in acc_go_edges.values():
-    #    go_id_set.update(g)
-    #go_nodes = getGoNodes(list(go_id_set))
-    go_nodes = getGoNodes(acc_go_edges['ALL'])
-
-    # A "flat" lookup dict, so the GO chart is complete
-    # (relying on edges data only gives direct edges)
-    acc_go_lookup = dict()
-    go_acc_lookup = dict()
-
-    for a in acc_id_set:
-        temp_set = set()
-        for g in acc_go_edges[a]:
-            temp_set.add(g) # add the GO term to the set
-            # add any parent nodes (except the root term)
-            g_parent = go_nodes[g]["parent_go_id"];
-            while g_parent is not None and go_nodes[g_parent]["class_level"] >= 1:
-                temp_set.add(g_parent)
-                g_parent = go_nodes[g_parent]["parent_go_id"]
-        acc_go_lookup[a] = list(temp_set)
-        acc_go_lookup[a].sort()
-
-    for a, glist in acc_go_lookup.items():
-        for g in glist:
-            if g not in go_acc_lookup:
-                go_acc_lookup[g] = list()
-            go_acc_lookup[g].append(a)
-
-    # More lookup tables to make life easier...
-    go_child_lookup = dict()
-    for g, go_data in go_nodes.items():
-        gp = go_data['parent_go_id']
-        if gp not in go_child_lookup:
-            go_child_lookup[gp] = list()
-        go_child_lookup[gp].append(g)
-
-    # Gene Ontology stuff ends here
-    # Reactome stuff begins here
-
-    acc_reactome_data = getReactomeDataByAcc(list(acc_id_set))
-    acc_reactome_edges = getReactomeIdsFromResults(acc_reactome_data)
-    reactome_nodes = getReactomeNodesFromResults(acc_reactome_data)
-
-    reactome_acc_lookup = dict()
-    for a, rlist in acc_reactome_edges.items():
-        for r in rlist:
-            if r not in reactome_acc_lookup:
-                reactome_acc_lookup[r] = list()
-            reactome_acc_lookup[r].append(a)
-
-    # Reactome stuff ends here
-
-    tgt_cmp_lookup = dict()
-    for row in anno_matches:
-        chembl_id = row["annotation__chembl_id_lookup__chembl_id"]
-        acc_id = row["annotation__component_sequences__accession"]
-        if acc_id not in tgt_cmp_lookup:
-            tgt_cmp_lookup[acc_id] = list()
-        tgt_cmp_lookup[acc_id].append(chembl_id)
-
-    # Reversed (inversed?) lookup of acc_go_edges
-    # TODO: deprecate. replace with go_acc_lookup
-    #go_acc_edges = dict()
-    #for a, glist in acc_go_edges.items():
-    #    if a == 'ALL':
-    #        continue
-    #    for g in glist:
-    #        if g not in go_acc_edges:
-    #            go_acc_edges[g] = list()
-    #        go_acc_edges[g].append(a)
-
-    # Count number of connections for compounds and targets for initial values
-    # of filters.
-    ct_max_dict = dict()
-    tc_max_dict = dict()
-    for m in anno_matches:
-        cid = m['annotation__chembl_id_lookup__chembl_id']
-        tid = m['annotation__component_sequences__accession']
-        if cid in ct_max_dict:
-            ct_max_dict[cid] = ct_max_dict[cid] + 1
-        else:
-            ct_max_dict[cid] = 1
-        if tid in tc_max_dict:
-            tc_max_dict[tid] = tc_max_dict[tid] + 1
-        else:
-            tc_max_dict[tid] = 1
-
-    # Get absolute max values
-    ct_max = 0
-    tc_max = 0
-    for v in ct_max_dict.values():
-        if v > ct_max:
-            ct_max = v
-    for v in tc_max_dict.values():
-        if v > tc_max:
-            tc_max = v
-
-    # Rearrange table info into dict form for easier access
-    table_info_dict = dict()
-    for i in myAnnoSearch.table_info:
-        table_info_dict[i['id']] = i
-
-    org_set = set()
-    for a in anno_matches:
-        org_set.add(a['annotation__component_sequences__organism'])
-
-    context = {
-        'ids': ids,
-        'anno_info': anno_info,
-        'anno_matches': anno_matches,
-        'cols': cols,
-        'cols_basic': cols_basic,
-        'acc_go_edges': acc_go_edges,
-        #'go_acc_edges': go_acc_edges,
-        'go_nodes': go_nodes,
-        'acc_go_lookup': acc_go_lookup,
-        'go_acc_lookup': go_acc_lookup,
-        'go_child_lookup': go_child_lookup,
-        'acc_reactome_edges': acc_reactome_edges,
-        'reactome_nodes': reactome_nodes,
-        'reactome_acc_lookup': reactome_acc_lookup,
-        'tgt_cmp_lookup': tgt_cmp_lookup,
-        'ct_max_dict': ct_max_dict,
-        'tc_max_dict': tc_max_dict,
-        'ct_max': ct_max,
-        'tc_max': tc_max,
-        'table_info_dict': table_info_dict,
-        'org_list': list(org_set)
-    }
-
-    return context
 
 def tsFilter2(request):
     if 'ids' in request.GET:
@@ -767,141 +394,11 @@ def tsFilter2(request):
 
     return render(request, 'targetsearch/filter2.html', context)
 
-def tsAnnoFilter1_debug(ids):
-    # Get annotation data, just as before
-    anno_search = AnnotationWithDrugIndSearch('compound', ids)
-    anno_info = anno_search.table_info
-    anno_matches = anno_search.get_results()
-
-    if len(anno_matches) == 0:
-        context = {
-            'ids': ids,
-            'anno_info': anno_info,
-            'anno_matches': anno_matches,
-            'message': 'Search returned no annotation data.'
-        }
-        return context
-
-    # Rearrange table info into dict form for easier access
-    table_info_dict = dict()
-    for i in anno_info:
-        table_info_dict[i['id']] = i
-
-    # Remove show_extanno. We don't need it here, plus it can't be JSONed
-    for m in anno_matches:
-        m.pop('annotation__extanno__show_extanno')
-
-    cols = [ k for k in anno_matches[0].keys() ]
-
-    # Minimal set of columns for a compact table
-    cols_basic = [
-        'annotation__chembl_id_lookup__chembl_id',
-        'annotation__molecule_dictionary__pref_name',
-        'annotation__drug_mechanism__mechanism_of_action',
-        'annotation__component_sequences__accession',
-        'annotation__component_sequences__description',
-        'annotation__component_sequences__organism'
-    ]
-
-    # Combined anno_matches loop
-    acc_id_set = set()
-    tgt_cmp_lookup = dict()
-    ct_max_dict = dict()
-    tc_max_dict = dict()
-    org_set = set()
-
-    for row in anno_matches:
-        acc_id_set.add(row['annotation__component_sequences__accession'])
-
-        chembl_id = row["annotation__chembl_id_lookup__chembl_id"]
-        acc_id = row["annotation__component_sequences__accession"]
-        if acc_id not in tgt_cmp_lookup:
-            tgt_cmp_lookup[acc_id] = list()
-        tgt_cmp_lookup[acc_id].append(chembl_id)
-
-        cid = row['annotation__chembl_id_lookup__chembl_id']
-        tid = row['annotation__component_sequences__accession']
-        if cid in ct_max_dict:
-            ct_max_dict[cid] = ct_max_dict[cid] + 1
-        else:
-            ct_max_dict[cid] = 1
-        if tid in tc_max_dict:
-            tc_max_dict[tid] = tc_max_dict[tid] + 1
-        else:
-            tc_max_dict[tid] = 1
-
-        org_set.add(row['annotation__component_sequences__organism'])
-
-    # Get absolute max values
-    ct_max = 0
-    tc_max = 0
-    for v in ct_max_dict.values():
-        if v > ct_max:
-            ct_max = v
-    for v in tc_max_dict.values():
-        if v > tc_max:
-            tc_max = v
-
-    # Rearrange table info into dict form for easier access
-    table_info_dict = dict()
-    for i in anno_search.table_info:
-        table_info_dict[i['id']] = i
-
-    # Gene Ontology stuff starts here
-
-    #acc_go_edges = getGoIdsByAcc(list(acc_id_set), flat=True)
-    acc_go_edges = getGoIdsByAccFlat(list(acc_id_set), remove_roots=True, add_missing_links=True)
-    go_nodes = getGoNodes(acc_go_edges['ALL'])
-
-    go_acc_lookup = dict()
-    for a, glist in acc_go_edges.items():
-        for g in glist:
-            if g not in go_acc_lookup:
-                go_acc_lookup[g] = list()
-            go_acc_lookup[g].append(a)
-
-    # Gene Ontology stuff ends here
-
-    # Reactome stuff begins here
-
-    acc_reactome_data = getReactomeDataByAcc(list(acc_id_set))
-    acc_reactome_edges = getReactomeIdsFromResults(acc_reactome_data)
-    reactome_nodes = getReactomeNodesFromResults(acc_reactome_data)
-
-    reactome_acc_lookup = dict()
-    for a, rlist in acc_reactome_edges.items():
-        for r in rlist:
-            if r not in reactome_acc_lookup:
-                reactome_acc_lookup[r] = list()
-            reactome_acc_lookup[r].append(a)
-
-    # Reactome stuff ends here
-
-    context = {
-        'ids': ids,
-        'anno_info': anno_info,
-        'anno_matches': anno_matches,
-        'cols': cols,
-        'cols_basic': cols_basic,
-        'acc_go_edges': acc_go_edges,
-        'go_nodes': go_nodes,
-        'go_acc_lookup': go_acc_lookup,
-        'acc_reactome_edges': acc_reactome_edges,
-        'reactome_nodes': reactome_nodes,
-        'reactome_acc_lookup': reactome_acc_lookup,
-        'tgt_cmp_lookup': tgt_cmp_lookup,
-        #'ct_max_dict': ct_max_dict,
-        #'tc_max_dict': tc_max_dict,
-        'ct_max': ct_max,
-        'tc_max': tc_max,
-        'table_info_dict': table_info_dict,
-        'org_list': list(org_set)
-    }
-
-    return context
-
 def tsAnnoFilter1(request):
-    context = {'chembl_version': getChemblVersion()}
+    context = {
+        'chembl_version': getChemblVersion(),
+        'search_type': 'chembl',
+    }
 
     if 'ids' not in request.GET:
         return render(request, 'targetsearch/annofilter1_form.html', context)
@@ -909,6 +406,24 @@ def tsAnnoFilter1(request):
     ids = list(request.GET['ids'].split())
 
     context.update(tsAnnoFilter1_debug(ids))
+
+    if len(context['anno_matches']) == 0:
+        return render(request, 'targetsearch/annofilter1_form.html', context)
+
+    return render(request, 'targetsearch/annofilter1.html', context)
+
+def tsAnnoFilter2(request):
+    context = {
+        'chembl_version': getChemblVersion(),
+        'search_type': 'go',
+    }
+
+    if 'ids' not in request.GET:
+        return render(request, 'targetsearch/annofilter1_form.html', context)
+
+    ids = list(request.GET['ids'].split())
+
+    context.update(tsAnnoFilter2_debug(ids))
 
     if len(context['anno_matches']) == 0:
         return render(request, 'targetsearch/annofilter1_form.html', context)

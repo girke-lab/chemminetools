@@ -46,10 +46,9 @@
         nodes_reactome.push(elem);
       }
     });
-    console.log("nodes_reactome: ", nodes_reactome);
 
     if (nodes_cmp.length > 0) {
-      bodyHtml += '<div><h5 style="display: inline-block;">Compounds</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-cmp\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-cmp\', false)">None</a> ]</div>';
+      bodyHtml += `<div><h5 style="display: inline-block;">Compounds</h5> [ <b>Select: </b><a href="javascript:tsgnmSelect('.node-cmp', true)">All</a> <a href="javascript:tsgnmSelect('.node-cmp', false)">None</a> ]</div>`;
       bodyHtml += '<div>';
       nodes_cmp.forEach((elem, idx) => {
         let checked = ""
@@ -57,8 +56,8 @@
           checked = " checked";
         }
         bodyHtml += '<span style="width: 10rem; display: inline-block;">'
-        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-cmp" data-nodeid="'+elem["id"]+'"'+checked+'/>';
-        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += `<input type="checkbox" id="node-cbx-${cbxId}" class="node-cbx node-cmp" data-nodeid="${elem['id']}"${checked}/>`;
+        bodyHtml += `<label for="node-cbx-${cbxId}" title="${elem['title']}">&nbsp;${elem['id']}</label>`;
         bodyHtml += '</span>';
         cbxId++;
       });
@@ -66,7 +65,7 @@
     }
 
     if (nodes_tgt.length > 0) {
-      bodyHtml += '<div><h5 style="display: inline-block;">Targets</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-tgt\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-tgt\', false)">None</a> ]</div>';
+      bodyHtml += `<div><h5 style="display: inline-block;">Targets</h5> [ <b>Select: </b><a href="javascript:tsgnmSelect('.node-tgt', true)">All</a> <a href="javascript:tsgnmSelect('.node-tgt', false)">None</a> ]</div>`;
       bodyHtml += '<div>';
       nodes_tgt.forEach((elem, idx) => {
         let checked = ""
@@ -74,8 +73,8 @@
           checked = " checked";
         }
         bodyHtml += '<span style="width: 10rem; display: inline-block;">'
-        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-tgt" data-nodeid="'+elem["id"]+'"'+checked+'/>';
-        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += `<input type="checkbox" id="node-cbx-${cbxId}" class="node-cbx node-tgt" data-nodeid="${elem['id']}"${checked}/>`;
+        bodyHtml += `<label for="node-cbx-${cbxId}" title="${elem['title']}">&nbsp;${elem['id']}</label>`;
         bodyHtml += '</span>';
         cbxId++;
       });
@@ -83,7 +82,7 @@
     }
 
     if (nodes_p.length > 0) {
-      bodyHtml += '<div><h5 style="display: inline-block;">Gene Ontology - Biological Process</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-gop\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-gop\', false)">None</a> ]</div>';
+      bodyHtml += `<div><h5 style="display: inline-block;">Gene Ontology - Biological Process</h5> [ <b>Select: </b><a href="javascript:tsgnmSelect('.node-gop', true)">All</a> <a href="javascript:tsgnmSelect('.node-gop', false)">None</a> ]</div>`;
       bodyHtml += '<div>';
       nodes_p.forEach((elem, idx) => {
         let checked = ""
@@ -91,8 +90,8 @@
           checked = " checked";
         }
         bodyHtml += '<span style="width: 10rem; display: inline-block;">'
-        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-gop" data-nodeid="'+elem["id"]+'"'+checked+'/>';
-        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += `<input type="checkbox" id="node-cbx-${cbxId}" class="node-cbx node-gop" data-nodeid="${elem['id']}"${checked}/>`;
+        bodyHtml += `<label for="node-cbx-${cbxId}" title="${elem['title']}">&nbsp;${elem['id']}</label>`;
         bodyHtml += '</span>';
         cbxId++;
       });
@@ -100,7 +99,7 @@
     }
 
     if (nodes_c.length > 0) {
-      bodyHtml += '<div><h5 style="display: inline-block;">Gene Ontology - Cellular Component</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-goc\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-goc\', false)">None</a> ]</div>';
+      bodyHtml += `<div><h5 style="display: inline-block;">Gene Ontology - Cellular Component</h5> [ <b>Select: </b><a href="javascript:tsgnmSelect('.node-goc', true)">All</a> <a href="javascript:tsgnmSelect('.node-goc', false)">None</a> ]</div>`;
       bodyHtml += '<div>';
       nodes_c.forEach((elem, idx) => {
         let checked = ""
@@ -108,8 +107,8 @@
           checked = " checked";
         }
         bodyHtml += '<span style="width: 10rem; display: inline-block;">'
-        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-goc" data-nodeid="'+elem["id"]+'"'+checked+'/>';
-        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += `<input type="checkbox" id="node-cbx-${cbxId}" class="node-cbx node-goc" data-nodeid="${elem['id']}"${checked}/>`;
+        bodyHtml += `<label for="node-cbx-${cbxId}" title="${elem['title']}">&nbsp;${elem['id']}</label>`;
         bodyHtml += '</span>';
         cbxId++;
       });
@@ -117,7 +116,7 @@
     }
 
     if (nodes_f.length > 0) {
-      bodyHtml += '<div><h5 style="display: inline-block;">Gene Ontology - Molecular Function</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-gof\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-gof\', false)">None</a> ]</div>';
+      bodyHtml += `<div><h5 style="display: inline-block;">Gene Ontology - Molecular Function</h5> [ <b>Select: </b><a href="javascript:tsgnmSelect('.node-gof', true)">All</a> <a href="javascript:tsgnmSelect('.node-gof', false)">None</a> ]</div>`;
       bodyHtml += '<div>';
       nodes_f.forEach((elem, idx) => {
         let checked = ""
@@ -125,8 +124,8 @@
           checked = " checked";
         }
         bodyHtml += '<span style="width: 10rem; display: inline-block;">'
-        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-gof" data-nodeid="'+elem["id"]+'"'+checked+'/>';
-        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += `<input type="checkbox" id="node-cbx-${cbxId}" class="node-cbx node-gof" data-nodeid="${elem['id']}"${checked}/>`;
+        bodyHtml += `<label for="node-cbx-${cbxId}" title="${elem['title']}">&nbsp;${elem['id']}</label>`;
         bodyHtml += '</span>';
         cbxId++;
       });
@@ -134,7 +133,7 @@
     }
 
     if (nodes_reactome.length > 0) {
-      bodyHtml += '<div><h5 style="display: inline-block;">Reactome</h5> [ <b>Select: </b><a href="#" onclick="tsgnmSelect(\'.node-rctm\', true)">All</a> <a href="#" onclick="tsgnmSelect(\'.node-rctm\', false)">None</a> ]</div>';
+      bodyHtml += `<div><h5 style="display: inline-block;">Reactome</h5> [ <b>Select: </b><a href="javascript:tsgnmSelect('.node-rctm', true)">All</a> <a href="javascript:tsgnmSelect('.node-rctm', false)">None</a> ]</div>`;
       bodyHtml += '<div>';
       nodes_reactome.forEach((elem, idx) => {
         let checked = ""
@@ -142,8 +141,8 @@
           checked = " checked";
         }
         bodyHtml += '<span style="width: 10rem; display: inline-block;">'
-        bodyHtml += '<input type="checkbox" id="node-cbx-'+cbxId+'" class="node-cbx node-rctm" data-nodeid="'+elem["id"]+'"'+checked+'/>';
-        bodyHtml += '<label for="node-cbx-'+cbxId+'"> '+elem["id"]+'</label>';
+        bodyHtml += `<input type="checkbox" id="node-cbx-${cbxId}" class="node-cbx node-rctm" data-nodeid="${elem['id']}"${checked}/>`;
+        bodyHtml += `<label for="node-cbx-${cbxId}" title="${elem['title']}">&nbsp;${elem['id']}</label>`;
         bodyHtml += '</span>';
         cbxId++;
       });
